@@ -8,6 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, FileCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const Transactions = () => {
@@ -61,7 +63,19 @@ const Transactions = () => {
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Transactions</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+          <div className="flex gap-4">
+            <Button>
+              <PlusCircle className="mr-2" />
+              Create new Transaction
+            </Button>
+            <Button variant="outline">
+              <FileCheck className="mr-2" />
+              Verify Document
+            </Button>
+          </div>
+        </div>
         <p className="text-gray-600 mb-8">
           View and manage your trade documentation transactions.
         </p>
