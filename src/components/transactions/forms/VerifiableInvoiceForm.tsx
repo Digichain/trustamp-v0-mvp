@@ -99,18 +99,25 @@ export const VerifiableInvoiceForm = () => {
     console.log("Submitting form data:", formData);
 
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No user found");
+      }
+
       const { data, error } = await supabase
         .from("transactions")
-        .insert([
-          {
-            transaction_hash: `0x${Math.random().toString(16).slice(2)}`, // Generate a random hash for demo
-            network: "ethereum",
-            amount: formData.total,
-            status: "pending",
-            document_subtype: "verifiable",
-            title: "INVOICE",
-          }
-        ])
+        .insert({
+          transaction_hash: `0x${Math.random().toString(16).slice(2)}`, // Generate a random hash for demo
+          network: "ethereum",
+          amount: formData.total,
+          status: "pending",
+          document_subtype: "verifiable",
+          title: "INVOICE",
+          transaction_type: "trade", // Add the required transaction_type
+          user_id: user.id // Add the required user_id
+        })
         .select();
 
       if (error) throw error;
