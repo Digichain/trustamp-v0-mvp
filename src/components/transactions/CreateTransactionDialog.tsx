@@ -21,17 +21,25 @@ export const CreateTransactionDialog = () => {
 
   useEffect(() => {
     checkWalletConnection();
-    // Add event listener for account changes
+    
     const { ethereum } = window as any;
     if (ethereum) {
-      ethereum.on('accountsChanged', checkWalletConnection);
+      ethereum.on('accountsChanged', handleAccountsChanged);
+      ethereum.on('disconnect', () => setIsWalletConnected(false));
     }
+
     return () => {
       if (ethereum) {
-        ethereum.removeListener('accountsChanged', checkWalletConnection);
+        ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        ethereum.removeListener('disconnect', () => setIsWalletConnected(false));
       }
     };
   }, []);
+
+  const handleAccountsChanged = async (accounts: string[]) => {
+    console.log('Accounts changed:', accounts);
+    setIsWalletConnected(accounts.length > 0);
+  };
 
   const checkWalletConnection = async () => {
     try {
@@ -45,7 +53,7 @@ export const CreateTransactionDialog = () => {
       const accounts = await ethereum.request({ method: 'eth_accounts' });
       const isConnected = accounts.length > 0;
       setIsWalletConnected(isConnected);
-      console.log('Wallet connection status:', isConnected);
+      console.log('CreateTransactionDialog - Wallet connection status:', isConnected);
     } catch (error) {
       console.error('Error checking wallet connection:', error);
       setIsWalletConnected(false);
