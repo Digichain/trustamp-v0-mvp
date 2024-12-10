@@ -53,7 +53,7 @@ const Transactions = () => {
               </>
             ) : (
               <>
-                <Button onClick={handleWalletRequired}>
+                <Button variant="default" onClick={handleWalletRequired}>
                   Create new Transaction
                 </Button>
                 <Button variant="outline" onClick={handleWalletRequired}>
