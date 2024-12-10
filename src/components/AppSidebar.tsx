@@ -127,9 +127,9 @@ export function AppSidebar() {
                   variant="ghost" 
                   size="icon" 
                   onClick={disconnectWallet}
-                  className="h-6 w-6"
+                  className="h-6 w-6 transition-colors hover:bg-transparent group"
                 >
-                  <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  <XCircle className="h-4 w-4 text-muted-foreground group-hover:text-destructive" />
                 </Button>
               </div>
               <div className="text-sm text-muted-foreground">
