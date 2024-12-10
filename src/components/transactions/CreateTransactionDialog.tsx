@@ -127,7 +127,6 @@ export const CreateTransactionDialog = () => {
       <Button 
         onClick={handleButtonClick}
         disabled={!isWalletConnected}
-        className={!isWalletConnected ? "opacity-50" : ""}
       >
         <PlusCircle className="mr-2" />
         Create new Transaction

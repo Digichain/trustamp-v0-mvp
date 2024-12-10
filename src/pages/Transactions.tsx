@@ -85,7 +85,6 @@ const Transactions = () => {
               variant="outline" 
               disabled={!isWalletConnected}
               onClick={handleWalletRequired}
-              className={!isWalletConnected ? "opacity-50" : ""}
             >
               <FileCheck className="mr-2" />
               Verify Document
