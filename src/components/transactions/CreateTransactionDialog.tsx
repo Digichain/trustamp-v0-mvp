@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -10,12 +10,47 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { DocumentTypeSelector } from "./DocumentTypeSelector";
+import { useToast } from "@/components/ui/use-toast";
 
 export const CreateTransactionDialog = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedSubType, setSelectedSubType] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
+
+  const checkWalletConnection = async () => {
+    try {
+      const { ethereum } = window as any;
+      if (!ethereum) {
+        console.log('MetaMask not detected');
+        return;
+      }
+
+      const accounts = await ethereum.request({ method: 'eth_accounts' });
+      setIsWalletConnected(accounts.length > 0);
+      console.log('Wallet connection status:', accounts.length > 0);
+    } catch (error) {
+      console.error('Error checking wallet connection:', error);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (!isWalletConnected) {
+      toast({
+        title: "Wallet Connection Required",
+        description: "Please connect your wallet to perform this action",
+        variant: "destructive",
+      });
+      return;
+    }
+    setOpen(true);
+  };
 
   const handleCreate = () => {
     console.log("Creating transaction:", { selectedType, selectedSubType });
@@ -42,12 +77,10 @@ export const CreateTransactionDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2" />
-          Create new Transaction
-        </Button>
-      </DialogTrigger>
+      <Button onClick={handleButtonClick}>
+        <PlusCircle className="mr-2" />
+        Create new Transaction
+      </Button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Select type of transaction</DialogTitle>
