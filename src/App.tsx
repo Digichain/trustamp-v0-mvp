@@ -1,33 +1,43 @@
-import { BrowserRouter } from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
-import Transactions from "./pages/Transactions";
-import Account from "./pages/Account";
+import { BrowserRouter as Router } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { Toaster } from "@/components/ui/toaster";
+import AppSidebar from "@/components/AppSidebar";
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "@/pages/Dashboard";
+import Transactions from "@/pages/Transactions";
+import CreateTransaction from "@/pages/CreateTransaction";
+import CreateTransferableTransaction from "@/pages/CreateTransferableTransaction";
+import Payments from "@/pages/Payments";
+import Account from "@/pages/Account";
+import Index from "@/pages/Index";
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
-        <BrowserRouter>
-          <SidebarProvider>
-            <div className="flex min-h-screen w-full">
-              <AppSidebar />
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Transactions />} />
-                  <Route path="/transactions" element={<Transactions />} />
-                  <Route path="/account" element={<Account />} />
-                </Routes>
-              </main>
-            </div>
-          </SidebarProvider>
-        </BrowserRouter>
+        <Router>
+          <div className="flex min-h-screen">
+            <AppSidebar />
+            <main className="flex-1 overflow-y-auto">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/transactions/create" element={<CreateTransaction />} />
+                <Route
+                  path="/transactions/create-transferable"
+                  element={<CreateTransferableTransaction />}
+                />
+                <Route path="/payments" element={<Payments />} />
+                <Route path="/account" element={<Account />} />
+              </Routes>
+            </main>
+          </div>
+          <Toaster />
+        </Router>
       </WalletProvider>
     </QueryClientProvider>
   );
