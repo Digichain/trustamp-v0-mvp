@@ -11,6 +11,7 @@ import Account from "./pages/Account";
 import Transactions from "./pages/Transactions";
 import Payments from "./pages/Payments";
 import CreateTransaction from "./pages/CreateTransaction";
+import CreateTransferableTransaction from "./pages/CreateTransferableTransaction";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/transactions/create" element={<CreateTransaction />} />
+            <Route path="/transactions/create-transferable" element={<CreateTransferableTransaction />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>

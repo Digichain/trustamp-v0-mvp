@@ -24,6 +24,8 @@ export const CreateTransactionDialog = () => {
     // Navigate to the appropriate form based on the selected subtype
     if (selectedSubType === "verifiable") {
       navigate("/transactions/create");
+    } else if (selectedSubType === "transferable") {
+      navigate("/transactions/create-transferable");
     }
     
     // Reset selections after closing
