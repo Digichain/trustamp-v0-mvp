@@ -43,25 +43,15 @@ const Transactions = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
           <div className="flex gap-4">
-            {isWalletConnected ? (
-              <>
-                <CreateTransactionDialog />
-                <Button variant="outline">
-                  <FileCheck className="mr-2" />
-                  Verify Document
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="default" onClick={handleWalletRequired}>
-                  Create new Transaction
-                </Button>
-                <Button variant="outline" onClick={handleWalletRequired}>
-                  <FileCheck className="mr-2" />
-                  Verify Document
-                </Button>
-              </>
-            )}
+            <CreateTransactionDialog />
+            <Button 
+              variant="outline" 
+              disabled={!isWalletConnected}
+              onClick={handleWalletRequired}
+            >
+              <FileCheck className="mr-2" />
+              Verify Document
+            </Button>
           </div>
         </div>
         <p className="text-gray-600 mb-8">
