@@ -11,6 +11,16 @@ const Transactions = () => {
 
   useEffect(() => {
     checkWalletConnection();
+    // Add event listener for account changes
+    const { ethereum } = window as any;
+    if (ethereum) {
+      ethereum.on('accountsChanged', checkWalletConnection);
+    }
+    return () => {
+      if (ethereum) {
+        ethereum.removeListener('accountsChanged', checkWalletConnection);
+      }
+    };
   }, []);
 
   const checkWalletConnection = async () => {
@@ -18,23 +28,28 @@ const Transactions = () => {
       const { ethereum } = window as any;
       if (!ethereum) {
         console.log('MetaMask not detected');
+        setIsWalletConnected(false);
         return;
       }
 
       const accounts = await ethereum.request({ method: 'eth_accounts' });
-      setIsWalletConnected(accounts.length > 0);
-      console.log('Wallet connection status:', accounts.length > 0);
+      const isConnected = accounts.length > 0;
+      setIsWalletConnected(isConnected);
+      console.log('Wallet connection status:', isConnected);
     } catch (error) {
       console.error('Error checking wallet connection:', error);
+      setIsWalletConnected(false);
     }
   };
 
   const handleWalletRequired = () => {
-    toast({
-      title: "Wallet Connection Required",
-      description: "Please connect your wallet to perform this action",
-      variant: "destructive",
-    });
+    if (!isWalletConnected) {
+      toast({
+        title: "Wallet Connection Required",
+        description: "Please connect your wallet to perform this action",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

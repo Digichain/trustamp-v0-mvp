@@ -21,6 +21,16 @@ export const CreateTransactionDialog = () => {
 
   useEffect(() => {
     checkWalletConnection();
+    // Add event listener for account changes
+    const { ethereum } = window as any;
+    if (ethereum) {
+      ethereum.on('accountsChanged', checkWalletConnection);
+    }
+    return () => {
+      if (ethereum) {
+        ethereum.removeListener('accountsChanged', checkWalletConnection);
+      }
+    };
   }, []);
 
   const checkWalletConnection = async () => {
@@ -28,14 +38,17 @@ export const CreateTransactionDialog = () => {
       const { ethereum } = window as any;
       if (!ethereum) {
         console.log('MetaMask not detected');
+        setIsWalletConnected(false);
         return;
       }
 
       const accounts = await ethereum.request({ method: 'eth_accounts' });
-      setIsWalletConnected(accounts.length > 0);
-      console.log('Wallet connection status:', accounts.length > 0);
+      const isConnected = accounts.length > 0;
+      setIsWalletConnected(isConnected);
+      console.log('Wallet connection status:', isConnected);
     } catch (error) {
       console.error('Error checking wallet connection:', error);
+      setIsWalletConnected(false);
     }
   };
 
@@ -55,28 +68,28 @@ export const CreateTransactionDialog = () => {
     console.log("Creating transaction:", { selectedType, selectedSubType });
     setOpen(false);
     
-    // Navigate to the appropriate form based on the selected subtype
     if (selectedSubType === "verifiable") {
       navigate("/transactions/create");
     } else if (selectedSubType === "transferable") {
       navigate("/transactions/create-transferable");
     }
     
-    // Reset selections after closing
     setSelectedType("");
     setSelectedSubType("");
   };
 
   const handleCancel = () => {
     setOpen(false);
-    // Reset selections after closing
     setSelectedType("");
     setSelectedSubType("");
   };
 
   return (
     <>
-      <Button onClick={handleButtonClick} disabled={!isWalletConnected}>
+      <Button 
+        onClick={handleButtonClick} 
+        disabled={!isWalletConnected}
+      >
         <PlusCircle className="mr-2" />
         Create new Transaction
       </Button>
