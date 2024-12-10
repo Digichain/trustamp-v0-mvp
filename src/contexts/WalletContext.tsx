@@ -17,7 +17,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [network, setNetwork] = useState<string>('');
   const { toast } = useToast();
 
+  console.log("WalletProvider - Initial render with state:", { isWalletConnected, walletAddress, network });
+
   useEffect(() => {
+    console.log("WalletProvider - Running initial wallet check");
     checkWalletConnection();
     
     const { ethereum } = window as any;
@@ -40,14 +43,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const { ethereum } = window as any;
       if (!ethereum) {
-        console.log('MetaMask not detected');
+        console.log('WalletProvider - MetaMask not detected');
         setIsWalletConnected(false);
         return;
       }
 
       const accounts = await ethereum.request({ method: 'eth_accounts' });
       const isConnected = accounts.length > 0;
-      console.log('Wallet connection check:', isConnected);
+      console.log('WalletProvider - Wallet connection check:', { isConnected, accounts });
+      
       setIsWalletConnected(isConnected);
       
       if (isConnected) {
@@ -56,20 +60,29 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         handleChainChanged(chainId);
       }
     } catch (error) {
-      console.error('Error checking wallet connection:', error);
+      console.error('WalletProvider - Error checking wallet connection:', error);
       setIsWalletConnected(false);
     }
   };
 
   const handleAccountsChanged = (accounts: string[]) => {
-    console.log('Accounts changed:', accounts);
+    console.log('WalletProvider - Accounts changed:', accounts);
     const isConnected = accounts.length > 0;
     setIsWalletConnected(isConnected);
     setWalletAddress(isConnected ? accounts[0] : null);
+    
+    if (!isConnected) {
+      setNetwork('');
+      toast({
+        title: "Wallet Disconnected",
+        description: "Your wallet has been disconnected",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChainChanged = (chainId: string) => {
-    console.log('Chain changed to:', chainId);
+    console.log('WalletProvider - Chain changed to:', chainId);
     const networks: { [key: string]: string } = {
       '0x1': 'Ethereum Mainnet',
       '0x5': 'Goerli Testnet',
@@ -77,11 +90,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       '0x89': 'Polygon Mainnet',
       '0x13881': 'Mumbai Testnet',
     };
-    setNetwork(networks[chainId] || `Unknown Network (${chainId})`);
+    const newNetwork = networks[chainId] || `Unknown Network (${chainId})`;
+    setNetwork(newNetwork);
+    
+    toast({
+      title: "Network Changed",
+      description: `Connected to ${newNetwork}`,
+    });
   };
 
   const handleDisconnect = () => {
-    console.log('Wallet disconnected');
+    console.log('WalletProvider - Wallet disconnected');
     setIsWalletConnected(false);
     setWalletAddress(null);
     setNetwork('');
@@ -89,6 +108,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connectWallet = async () => {
     try {
+      console.log('WalletProvider - Attempting to connect wallet');
       const { ethereum } = window as any;
       if (!ethereum) {
         toast({
@@ -100,7 +120,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
 
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-      console.log('Connected account:', accounts[0]);
+      console.log('WalletProvider - Connected account:', accounts[0]);
       setWalletAddress(accounts[0]);
       setIsWalletConnected(true);
       
@@ -112,7 +132,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         description: "Successfully connected to MetaMask",
       });
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('WalletProvider - Error connecting wallet:', error);
       toast({
         title: "Connection Failed",
         description: "Failed to connect to MetaMask",
@@ -122,6 +142,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const disconnectWallet = () => {
+    console.log('WalletProvider - Manually disconnecting wallet');
     handleDisconnect();
     toast({
       title: "Wallet Disconnected",
@@ -129,14 +150,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const value = {
+    isWalletConnected,
+    connectWallet,
+    disconnectWallet,
+    walletAddress,
+    network
+  };
+
+  console.log("WalletProvider - Rendering with context value:", value);
+
   return (
-    <WalletContext.Provider value={{
-      isWalletConnected,
-      connectWallet,
-      disconnectWallet,
-      walletAddress,
-      network
-    }}>
+    <WalletContext.Provider value={value}>
       {children}
     </WalletContext.Provider>
   );

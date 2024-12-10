@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -21,9 +21,22 @@ export const CreateTransactionDialog = () => {
   const { isWalletConnected } = useWallet();
   const { toast } = useToast();
 
-  console.log("CreateTransactionDialog - Wallet connected:", isWalletConnected); // Debug log
+  console.log("CreateTransactionDialog - Component rendered with wallet state:", isWalletConnected);
+
+  useEffect(() => {
+    console.log("CreateTransactionDialog - Wallet connection state changed:", isWalletConnected);
+    if (!isWalletConnected && open) {
+      setOpen(false);
+      toast({
+        title: "Wallet Disconnected",
+        description: "Please reconnect your wallet to continue",
+        variant: "destructive",
+      });
+    }
+  }, [isWalletConnected, open]);
 
   const handleButtonClick = () => {
+    console.log("CreateTransactionDialog - Create button clicked, wallet state:", isWalletConnected);
     if (!isWalletConnected) {
       toast({
         title: "Wallet Connection Required",
@@ -36,8 +49,14 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleCreate = () => {
+    console.log("CreateTransactionDialog - Handling create with wallet state:", isWalletConnected);
     if (!isWalletConnected) {
       setOpen(false);
+      toast({
+        title: "Wallet Connection Required",
+        description: "Please connect your wallet to create a transaction",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -74,6 +93,7 @@ export const CreateTransactionDialog = () => {
       <Dialog 
         open={open} 
         onOpenChange={(newOpen) => {
+          console.log("CreateTransactionDialog - Dialog state changing:", { newOpen, isWalletConnected });
           if (!isWalletConnected) {
             setOpen(false);
             return;
@@ -102,7 +122,7 @@ export const CreateTransactionDialog = () => {
               </Button>
               <Button
                 onClick={handleCreate}
-                disabled={!selectedType || !selectedSubType}
+                disabled={!selectedType || !selectedSubType || !isWalletConnected}
               >
                 Create
               </Button>

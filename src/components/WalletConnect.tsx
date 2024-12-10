@@ -10,14 +10,20 @@ const WalletConnect = () => {
   const { toast } = useToast();
   const { isWalletConnected, connectWallet, disconnectWallet, walletAddress } = useWallet();
 
-  console.log("WalletConnect - Connection state:", isWalletConnected); // Debug log
-  console.log("WalletConnect - Wallet address:", walletAddress); // Debug log
+  console.log("WalletConnect - Initial render with connection state:", isWalletConnected);
+  console.log("WalletConnect - Current wallet address:", walletAddress);
+
+  useEffect(() => {
+    console.log("WalletConnect - Connection state changed:", isWalletConnected);
+  }, [isWalletConnected]);
 
   const handleConnect = async () => {
     try {
+      console.log("WalletConnect - Attempting to connect wallet");
       await connectWallet();
+      console.log("WalletConnect - Wallet connected successfully");
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('WalletConnect - Error connecting wallet:', error);
       toast({
         title: "Connection Failed",
         description: "Failed to connect to MetaMask",
@@ -27,6 +33,7 @@ const WalletConnect = () => {
   };
 
   const handleDisconnect = () => {
+    console.log("WalletConnect - Disconnecting wallet");
     disconnectWallet();
     toast({
       title: "Wallet Disconnected",
