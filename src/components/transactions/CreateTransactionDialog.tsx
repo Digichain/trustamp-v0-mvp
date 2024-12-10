@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ const getSubTypeOptions = (type: string): SubTypeOption[] => {
 };
 
 export const CreateTransactionDialog = () => {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedSubType, setSelectedSubType] = useState<string>("");
   const [open, setOpen] = useState(false);
@@ -60,6 +62,12 @@ export const CreateTransactionDialog = () => {
   const handleCreate = () => {
     console.log("Creating transaction:", { selectedType, selectedSubType });
     setOpen(false);
+    
+    // Navigate to the appropriate form based on the selected subtype
+    if (selectedSubType === "verifiable") {
+      navigate("/transactions/create");
+    }
+    
     // Reset selections after closing
     setSelectedType("");
     setSelectedSubType("");

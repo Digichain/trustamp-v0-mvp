@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Account from "./pages/Account";
 import Transactions from "./pages/Transactions";
 import Payments from "./pages/Payments";
+import CreateTransaction from "./pages/CreateTransaction";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/account" element={<Account />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/transactions/create" element={<CreateTransaction />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>
