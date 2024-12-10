@@ -15,7 +15,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { WalletStatus } from "./sidebar/WalletStatus";
 import { Navigation } from "./sidebar/Navigation";
 
-const AppSidebar = () => {
+export const AppSidebar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { disconnectWallet } = useWallet();
@@ -64,5 +64,3 @@ const AppSidebar = () => {
     </Sidebar>
   );
 };
-
-export default AppSidebar;
