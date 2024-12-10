@@ -27,17 +27,22 @@ export const CreateTransactionDialog = () => {
     if (ethereum) {
       ethereum.on('accountsChanged', handleAccountsChanged);
       ethereum.on('disconnect', handleDisconnect);
-      ethereum.on('chainChanged', () => checkWalletConnection());
+      ethereum.on('chainChanged', handleChainChanged);
     }
 
     return () => {
       if (ethereum) {
         ethereum.removeListener('accountsChanged', handleAccountsChanged);
         ethereum.removeListener('disconnect', handleDisconnect);
-        ethereum.removeListener('chainChanged', () => checkWalletConnection());
+        ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
   }, []);
+
+  const handleChainChanged = () => {
+    console.log('Chain changed, checking wallet connection');
+    checkWalletConnection();
+  };
 
   const handleDisconnect = () => {
     console.log('Wallet disconnected');
@@ -60,6 +65,7 @@ export const CreateTransactionDialog = () => {
       if (!ethereum) {
         console.log('MetaMask not detected');
         setIsWalletConnected(false);
+        setOpen(false);
         return;
       }
 
@@ -91,7 +97,10 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleCreate = () => {
-    if (!isWalletConnected) return;
+    if (!isWalletConnected) {
+      setOpen(false);
+      return;
+    }
     
     console.log("Creating transaction:", { selectedType, selectedSubType });
     setOpen(false);
@@ -114,53 +123,58 @@ export const CreateTransactionDialog = () => {
 
   return (
     <>
-      <Button 
-        onClick={handleButtonClick}
-        disabled={!isWalletConnected}
-        className="cursor-not-allowed:opacity-50"
-      >
-        <PlusCircle className="mr-2" />
-        Create new Transaction
-      </Button>
-      <Dialog 
-        open={open && isWalletConnected} 
-        onOpenChange={(newOpen) => {
-          if (!isWalletConnected) {
-            setOpen(false);
-            return;
-          }
-          setOpen(newOpen);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select type of transaction</DialogTitle>
-            <DialogDescription>
-              Choose the type of transaction you want to create
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <DocumentTypeSelector
-              selectedType={selectedType}
-              selectedSubType={selectedSubType}
-              onTypeChange={setSelectedType}
-              onSubTypeChange={setSelectedSubType}
-            />
+      <div className="relative inline-block">
+        <Button 
+          onClick={handleButtonClick}
+          disabled={!isWalletConnected}
+          className={`${!isWalletConnected ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+        >
+          <PlusCircle className="mr-2" />
+          Create new Transaction
+        </Button>
+      </div>
+      
+      {isWalletConnected && (
+        <Dialog 
+          open={open} 
+          onOpenChange={(newOpen) => {
+            if (!isWalletConnected) {
+              setOpen(false);
+              return;
+            }
+            setOpen(newOpen);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select type of transaction</DialogTitle>
+              <DialogDescription>
+                Choose the type of transaction you want to create
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <DocumentTypeSelector
+                selectedType={selectedType}
+                selectedSubType={selectedSubType}
+                onTypeChange={setSelectedType}
+                onSubTypeChange={setSelectedSubType}
+              />
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreate}
-                disabled={!selectedType || !selectedSubType}
-              >
-                Create
-              </Button>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreate}
+                  disabled={!selectedType || !selectedSubType}
+                >
+                  Create
+                </Button>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
