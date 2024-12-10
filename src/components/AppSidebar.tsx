@@ -84,10 +84,15 @@ export function AppSidebar() {
     const networks: { [key: string]: string } = {
       '0x1': 'Ethereum Mainnet',
       '0x5': 'Goerli Testnet',
+      '0xaa36a7': 'Sepolia Testnet',
       '0x89': 'Polygon Mainnet',
-      '0x13881': 'Mumbai Testnet'
+      '0x13881': 'Mumbai Testnet',
+      '0xa': 'Optimism Mainnet',
+      '0x1a4': 'Optimism Goerli',
+      '0xa4b1': 'Arbitrum One',
+      '0x66eed': 'Arbitrum Goerli'
     };
-    setNetwork(networks[chainId] || `Chain ID: ${chainId}`);
+    setNetwork(networks[chainId] || `Unknown Network (${chainId})`);
   };
 
   const connectWallet = async () => {
