@@ -9,6 +9,8 @@ const Transactions = () => {
   const { isWalletConnected } = useWallet();
   const { toast } = useToast();
 
+  console.log("Wallet connection state:", isWalletConnected); // Debug log
+
   const handleWalletRequired = () => {
     if (!isWalletConnected) {
       toast({

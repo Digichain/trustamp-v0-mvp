@@ -3,53 +3,19 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
 import { Wallet, LogOut } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { useWallet } from "@/contexts/WalletContext";
 
 const WalletConnect = () => {
-  const [account, setAccount] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isWalletConnected, connectWallet, disconnectWallet, walletAddress } = useWallet();
 
-  useEffect(() => {
-    checkIfWalletIsConnected();
-  }, []);
+  console.log("WalletConnect - Connection state:", isWalletConnected); // Debug log
+  console.log("WalletConnect - Wallet address:", walletAddress); // Debug log
 
-  const checkIfWalletIsConnected = async () => {
+  const handleConnect = async () => {
     try {
-      const { ethereum } = window as any;
-      if (!ethereum) {
-        console.log('MetaMask not detected');
-        return;
-      }
-
-      const accounts = await ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length !== 0) {
-        console.log('Found authorized account:', accounts[0]);
-        setAccount(accounts[0]);
-      }
-    } catch (error) {
-      console.error('Error checking wallet connection:', error);
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      const { ethereum } = window as any;
-      if (!ethereum) {
-        toast({
-          title: "MetaMask not found",
-          description: "Please install MetaMask browser extension",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-      console.log('Connected account:', accounts[0]);
-      setAccount(accounts[0]);
-      toast({
-        title: "Wallet Connected",
-        description: "Successfully connected to MetaMask",
-      });
+      await connectWallet();
     } catch (error) {
       console.error('Error connecting wallet:', error);
       toast({
@@ -60,8 +26,8 @@ const WalletConnect = () => {
     }
   };
 
-  const disconnectWallet = () => {
-    setAccount(null);
+  const handleDisconnect = () => {
+    disconnectWallet();
     toast({
       title: "Wallet Disconnected",
       description: "Successfully disconnected from MetaMask",
@@ -72,9 +38,9 @@ const WalletConnect = () => {
     navigate('/dashboard');
   };
 
-  if (!account) {
+  if (!isWalletConnected) {
     return (
-      <Button onClick={connectWallet} className="gap-2">
+      <Button onClick={handleConnect} className="gap-2">
         <Wallet className="h-5 w-5" />
         Connect Wallet
       </Button>
@@ -83,7 +49,7 @@ const WalletConnect = () => {
 
   return (
     <div className="flex gap-4">
-      <Button variant="outline" onClick={disconnectWallet} className="gap-2">
+      <Button variant="outline" onClick={handleDisconnect} className="gap-2">
         <LogOut className="h-5 w-5" />
         Disconnect
       </Button>

@@ -21,6 +21,8 @@ export const CreateTransactionDialog = () => {
   const { isWalletConnected } = useWallet();
   const { toast } = useToast();
 
+  console.log("CreateTransactionDialog - Wallet connected:", isWalletConnected); // Debug log
+
   const handleButtonClick = () => {
     if (!isWalletConnected) {
       toast({
@@ -69,47 +71,45 @@ export const CreateTransactionDialog = () => {
         Create new Transaction
       </Button>
       
-      {isWalletConnected && (
-        <Dialog 
-          open={open} 
-          onOpenChange={(newOpen) => {
-            if (!isWalletConnected) {
-              setOpen(false);
-              return;
-            }
-            setOpen(newOpen);
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Select type of transaction</DialogTitle>
-              <DialogDescription>
-                Choose the type of transaction you want to create
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4 space-y-4">
-              <DocumentTypeSelector
-                selectedType={selectedType}
-                selectedSubType={selectedSubType}
-                onTypeChange={setSelectedType}
-                onSubTypeChange={setSelectedSubType}
-              />
+      <Dialog 
+        open={open} 
+        onOpenChange={(newOpen) => {
+          if (!isWalletConnected) {
+            setOpen(false);
+            return;
+          }
+          setOpen(newOpen);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select type of transaction</DialogTitle>
+            <DialogDescription>
+              Choose the type of transaction you want to create
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <DocumentTypeSelector
+              selectedType={selectedType}
+              selectedSubType={selectedSubType}
+              onTypeChange={setSelectedType}
+              onSubTypeChange={setSelectedSubType}
+            />
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleCreate}
-                  disabled={!selectedType || !selectedSubType}
-                >
-                  Create
-                </Button>
-              </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreate}
+                disabled={!selectedType || !selectedSubType}
+              >
+                Create
+              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
