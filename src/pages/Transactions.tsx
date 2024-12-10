@@ -15,28 +15,34 @@ const Transactions = () => {
     const { ethereum } = window as any;
     if (ethereum) {
       ethereum.on('accountsChanged', handleAccountsChanged);
-      ethereum.on('disconnect', () => {
-        console.log('Wallet disconnected in Transactions page');
-        setIsWalletConnected(false);
-      });
-      ethereum.on('chainChanged', () => {
-        console.log('Chain changed in Transactions page');
-        checkWalletConnection();
-      });
+      ethereum.on('disconnect', handleDisconnect);
+      ethereum.on('chainChanged', handleChainChanged);
     }
 
     return () => {
       if (ethereum) {
         ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        ethereum.removeListener('disconnect', () => setIsWalletConnected(false));
-        ethereum.removeListener('chainChanged', () => checkWalletConnection());
+        ethereum.removeListener('disconnect', handleDisconnect);
+        ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
   }, []);
 
+  const handleChainChanged = () => {
+    console.log('Chain changed in Transactions page');
+    checkWalletConnection();
+  };
+
+  const handleDisconnect = () => {
+    console.log('Wallet disconnected in Transactions page');
+    setIsWalletConnected(false);
+  };
+
   const handleAccountsChanged = async (accounts: string[]) => {
     console.log('Accounts changed in Transactions page:', accounts);
-    setIsWalletConnected(accounts.length > 0);
+    const isConnected = accounts.length > 0;
+    console.log('Wallet connected status:', isConnected);
+    setIsWalletConnected(isConnected);
   };
 
   const checkWalletConnection = async () => {
@@ -50,8 +56,8 @@ const Transactions = () => {
 
       const accounts = await ethereum.request({ method: 'eth_accounts' });
       const isConnected = accounts.length > 0;
+      console.log('Transactions page - Wallet connection check:', isConnected);
       setIsWalletConnected(isConnected);
-      console.log('Transactions page - Wallet connection status:', isConnected);
     } catch (error) {
       console.error('Error checking wallet connection:', error);
       setIsWalletConnected(false);
@@ -79,7 +85,7 @@ const Transactions = () => {
               variant="outline" 
               disabled={!isWalletConnected}
               onClick={handleWalletRequired}
-              className="pointer-events-none opacity-50 disabled:opacity-50"
+              className={!isWalletConnected ? "opacity-50" : ""}
             >
               <FileCheck className="mr-2" />
               Verify Document

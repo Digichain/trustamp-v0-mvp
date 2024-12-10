@@ -45,14 +45,15 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleDisconnect = () => {
-    console.log('Wallet disconnected');
+    console.log('Wallet disconnected in CreateTransactionDialog');
     setIsWalletConnected(false);
     setOpen(false);
   };
 
   const handleAccountsChanged = async (accounts: string[]) => {
-    console.log('Accounts changed:', accounts);
+    console.log('Accounts changed in CreateTransactionDialog:', accounts);
     const isConnected = accounts.length > 0;
+    console.log('Wallet connected status:', isConnected);
     setIsWalletConnected(isConnected);
     if (!isConnected) {
       setOpen(false);
@@ -63,7 +64,7 @@ export const CreateTransactionDialog = () => {
     try {
       const { ethereum } = window as any;
       if (!ethereum) {
-        console.log('MetaMask not detected');
+        console.log('MetaMask not detected in CreateTransactionDialog');
         setIsWalletConnected(false);
         setOpen(false);
         return;
@@ -71,8 +72,8 @@ export const CreateTransactionDialog = () => {
 
       const accounts = await ethereum.request({ method: 'eth_accounts' });
       const isConnected = accounts.length > 0;
+      console.log('CreateTransactionDialog - Wallet connection check:', isConnected);
       setIsWalletConnected(isConnected);
-      console.log('CreateTransactionDialog - Wallet connection status:', isConnected);
       
       if (!isConnected) {
         setOpen(false);
@@ -126,7 +127,7 @@ export const CreateTransactionDialog = () => {
       <Button 
         onClick={handleButtonClick}
         disabled={!isWalletConnected}
-        className="pointer-events-none opacity-50 disabled:opacity-50"
+        className={!isWalletConnected ? "opacity-50" : ""}
       >
         <PlusCircle className="mr-2" />
         Create new Transaction
