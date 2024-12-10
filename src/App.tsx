@@ -1,60 +1,22 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import Account from "./pages/Account";
+import { BrowserRouter } from "react-router-dom";
+import { WalletProvider } from "./contexts/WalletContext";
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Transactions from "./pages/Transactions";
-import Payments from "./pages/Payments";
-import CreateTransaction from "./pages/CreateTransaction";
-import CreateTransferableTransaction from "./pages/CreateTransferableTransaction";
+import Account from "./pages/Account";
 
-const queryClient = new QueryClient();
-
-const AppLayout = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
-  
-  // Don't show sidebar on index page
-  if (location.pathname === '/') {
-    return <>{children}</>;
-  }
-
+function App() {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
-  );
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+    <WalletProvider>
       <BrowserRouter>
-        <AppLayout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/transactions/create" element={<CreateTransaction />} />
-            <Route path="/transactions/create-transferable" element={<CreateTransferableTransaction />} />
-          </Routes>
-        </AppLayout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/account" element={<Account />} />
+        </Routes>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </WalletProvider>
+  );
+}
 
 export default App;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -11,79 +11,15 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { DocumentTypeSelector } from "./DocumentTypeSelector";
 import { useToast } from "@/components/ui/use-toast";
+import { useWallet } from "@/contexts/WalletContext";
 
 export const CreateTransactionDialog = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedSubType, setSelectedSubType] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { isWalletConnected } = useWallet();
   const { toast } = useToast();
-
-  useEffect(() => {
-    checkWalletConnection();
-    
-    const { ethereum } = window as any;
-    if (ethereum) {
-      ethereum.on('accountsChanged', handleAccountsChanged);
-      ethereum.on('disconnect', handleDisconnect);
-      ethereum.on('chainChanged', handleChainChanged);
-    }
-
-    return () => {
-      if (ethereum) {
-        ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        ethereum.removeListener('disconnect', handleDisconnect);
-        ethereum.removeListener('chainChanged', handleChainChanged);
-      }
-    };
-  }, []);
-
-  const handleChainChanged = () => {
-    console.log('Chain changed, checking wallet connection');
-    checkWalletConnection();
-  };
-
-  const handleDisconnect = () => {
-    console.log('Wallet disconnected in CreateTransactionDialog');
-    setIsWalletConnected(false);
-    setOpen(false);
-  };
-
-  const handleAccountsChanged = async (accounts: string[]) => {
-    console.log('Accounts changed in CreateTransactionDialog:', accounts);
-    const isConnected = accounts.length > 0;
-    console.log('Wallet connected status:', isConnected);
-    setIsWalletConnected(isConnected);
-    if (!isConnected) {
-      setOpen(false);
-    }
-  };
-
-  const checkWalletConnection = async () => {
-    try {
-      const { ethereum } = window as any;
-      if (!ethereum) {
-        console.log('MetaMask not detected in CreateTransactionDialog');
-        setIsWalletConnected(false);
-        setOpen(false);
-        return;
-      }
-
-      const accounts = await ethereum.request({ method: 'eth_accounts' });
-      const isConnected = accounts.length > 0;
-      console.log('CreateTransactionDialog - Wallet connection check:', isConnected);
-      setIsWalletConnected(isConnected);
-      
-      if (!isConnected) {
-        setOpen(false);
-      }
-    } catch (error) {
-      console.error('Error checking wallet connection:', error);
-      setIsWalletConnected(false);
-      setOpen(false);
-    }
-  };
 
   const handleButtonClick = () => {
     if (!isWalletConnected) {
@@ -127,7 +63,7 @@ export const CreateTransactionDialog = () => {
       <Button 
         onClick={handleButtonClick}
         disabled={!isWalletConnected}
-        className={`${!isWalletConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+        className="disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusCircle className="mr-2" />
         Create new Transaction
