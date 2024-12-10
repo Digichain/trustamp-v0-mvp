@@ -30,6 +30,38 @@ import { useState } from "react";
 const Transactions = () => {
   console.log("Transactions page rendered");
   const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedSubType, setSelectedSubType] = useState<string>("");
+
+  const getSubTypeOptions = (type: string) => {
+    switch (type) {
+      case "trade":
+        return [
+          { value: "verifiable", label: "Verifiable Document" },
+          { value: "transferable", label: "Transferable Document" },
+        ];
+      case "authentication":
+        return [
+          { value: "achievement", label: "Certificate of Achievement" },
+          { value: "halal", label: "Halal Certificate" },
+          { value: "medical", label: "Medical Certificate" },
+          { value: "membership", label: "Membership Certificate" },
+        ];
+      case "government":
+        return [
+          { value: "driver", label: "Driver's License" },
+          { value: "birth", label: "Birth Certificate" },
+          { value: "citizenship", label: "Citizenship Certificate" },
+        ];
+      case "environmental":
+        return [
+          { value: "type1", label: "Type 1" },
+          { value: "type2", label: "Type 2" },
+          { value: "type3", label: "Type 3" },
+        ];
+      default:
+        return [];
+    }
+  };
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -93,8 +125,14 @@ const Transactions = () => {
                 <DialogHeader>
                   <DialogTitle>Select type of transaction</DialogTitle>
                 </DialogHeader>
-                <div className="py-4">
-                  <Select onValueChange={setSelectedType} value={selectedType}>
+                <div className="py-4 space-y-4">
+                  <Select 
+                    onValueChange={(value) => {
+                      setSelectedType(value);
+                      setSelectedSubType(""); // Reset sub-type when main type changes
+                    }} 
+                    value={selectedType}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a document type" />
                     </SelectTrigger>
@@ -105,6 +143,21 @@ const Transactions = () => {
                       <SelectItem value="environmental">Environmental Product Declaration</SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {selectedType && (
+                    <Select onValueChange={setSelectedSubType} value={selectedSubType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select document sub-type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getSubTypeOptions(selectedType).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
