@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -76,36 +75,38 @@ export const CreateTransactionDialog = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
       <Button onClick={handleButtonClick}>
         <PlusCircle className="mr-2" />
         Create new Transaction
       </Button>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Select type of transaction</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 space-y-4">
-          <DocumentTypeSelector
-            selectedType={selectedType}
-            selectedSubType={selectedSubType}
-            onTypeChange={setSelectedType}
-            onSubTypeChange={setSelectedSubType}
-          />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select type of transaction</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <DocumentTypeSelector
+              selectedType={selectedType}
+              selectedSubType={selectedSubType}
+              onTypeChange={setSelectedType}
+              onSubTypeChange={setSelectedSubType}
+            />
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={!selectedType || !selectedSubType}
-            >
-              Create
-            </Button>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreate}
+                disabled={!selectedType || !selectedSubType}
+              >
+                Create
+              </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
