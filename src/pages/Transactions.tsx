@@ -11,9 +11,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle, FileCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 const Transactions = () => {
   console.log("Transactions page rendered");
+  const [selectedType, setSelectedType] = useState<string>("");
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -66,10 +82,32 @@ const Transactions = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
           <div className="flex gap-4">
-            <Button>
-              <PlusCircle className="mr-2" />
-              Create new Transaction
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2" />
+                  Create new Transaction
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Select type of transaction</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <Select onValueChange={setSelectedType} value={selectedType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a document type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="trade">Trade Document</SelectItem>
+                      <SelectItem value="authentication">Certificate of Authentication</SelectItem>
+                      <SelectItem value="government">Government Issued Document</SelectItem>
+                      <SelectItem value="environmental">Environmental Product Declaration</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline">
               <FileCheck className="mr-2" />
               Verify Document
