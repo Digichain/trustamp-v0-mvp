@@ -5,6 +5,7 @@ import Account from "./pages/Account";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { WalletProvider } from "@/contexts/WalletContext";
 
 // Create a client
 const queryClient = new QueryClient();
