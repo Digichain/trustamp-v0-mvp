@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { transferableBillOfLadingSchema } from "@/schemas/transferable-bill-of-lading";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
+import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
 
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export const TransferableBillOfLadingForm = () => {
     field8: "",
     field9: "",
   });
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -37,7 +40,6 @@ export const TransferableBillOfLadingForm = () => {
     console.log("Submitting form data:", formData);
 
     try {
-      // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -47,9 +49,9 @@ export const TransferableBillOfLadingForm = () => {
       const { data, error } = await supabase
         .from("transactions")
         .insert({
-          transaction_hash: `0x${Math.random().toString(16).slice(2)}`, // Generate a random hash for demo
+          transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
-          amount: 0, // Since this is a Bill of Lading, we don't have an amount
+          amount: 0,
           status: "pending",
           document_subtype: "transferable",
           title: "BILL_OF_LADING",
@@ -118,8 +120,18 @@ export const TransferableBillOfLadingForm = () => {
         <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
           Cancel
         </Button>
+        <PreviewButton onClick={() => setShowPreview(true)} />
         <Button type="submit">Create Bill of Lading</Button>
       </div>
+
+      <PreviewDialog
+        title="Bill of Lading Preview"
+        isOpen={showPreview}
+        onOpenChange={setShowPreview}
+        onConfirm={handleSubmit}
+      >
+        <BillOfLadingPreview data={formData} />
+      </PreviewDialog>
     </form>
   );
 };
