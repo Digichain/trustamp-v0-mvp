@@ -40,15 +40,15 @@ export function AppSidebar() {
 
   useEffect(() => {
     checkWalletConnection();
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
+    if ((window as any).ethereum) {
+      (window as any).ethereum.on('accountsChanged', handleAccountsChanged);
+      (window as any).ethereum.on('chainChanged', handleChainChanged);
     }
 
     return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
+      if ((window as any).ethereum) {
+        (window as any).ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        (window as any).ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
   }, []);
@@ -102,6 +102,12 @@ export function AppSidebar() {
     }
   };
 
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    setIsConnected(false);
+    setNetwork('');
+  };
+
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
@@ -112,9 +118,19 @@ export function AppSidebar() {
         <div className="p-4">
           {isConnected && walletAddress ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-green-500 font-medium">Connected</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-green-500 font-medium">Connected</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={disconnectWallet}
+                  className="h-6 w-6"
+                >
+                  <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                </Button>
               </div>
               <div className="text-sm text-muted-foreground">
                 {truncateAddress(walletAddress)}
