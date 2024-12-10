@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -25,20 +26,32 @@ export const CreateTransactionDialog = () => {
     const { ethereum } = window as any;
     if (ethereum) {
       ethereum.on('accountsChanged', handleAccountsChanged);
-      ethereum.on('disconnect', () => setIsWalletConnected(false));
+      ethereum.on('disconnect', handleDisconnect);
+      ethereum.on('chainChanged', () => checkWalletConnection());
     }
 
     return () => {
       if (ethereum) {
         ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        ethereum.removeListener('disconnect', () => setIsWalletConnected(false));
+        ethereum.removeListener('disconnect', handleDisconnect);
+        ethereum.removeListener('chainChanged', () => checkWalletConnection());
       }
     };
   }, []);
 
+  const handleDisconnect = () => {
+    console.log('Wallet disconnected');
+    setIsWalletConnected(false);
+    setOpen(false);
+  };
+
   const handleAccountsChanged = async (accounts: string[]) => {
     console.log('Accounts changed:', accounts);
-    setIsWalletConnected(accounts.length > 0);
+    const isConnected = accounts.length > 0;
+    setIsWalletConnected(isConnected);
+    if (!isConnected) {
+      setOpen(false);
+    }
   };
 
   const checkWalletConnection = async () => {
@@ -54,9 +67,14 @@ export const CreateTransactionDialog = () => {
       const isConnected = accounts.length > 0;
       setIsWalletConnected(isConnected);
       console.log('CreateTransactionDialog - Wallet connection status:', isConnected);
+      
+      if (!isConnected) {
+        setOpen(false);
+      }
     } catch (error) {
       console.error('Error checking wallet connection:', error);
       setIsWalletConnected(false);
+      setOpen(false);
     }
   };
 
@@ -73,6 +91,8 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleCreate = () => {
+    if (!isWalletConnected) return;
+    
     console.log("Creating transaction:", { selectedType, selectedSubType });
     setOpen(false);
     
@@ -95,16 +115,29 @@ export const CreateTransactionDialog = () => {
   return (
     <>
       <Button 
-        onClick={handleButtonClick} 
+        onClick={handleButtonClick}
         disabled={!isWalletConnected}
+        className="cursor-not-allowed:opacity-50"
       >
         <PlusCircle className="mr-2" />
         Create new Transaction
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog 
+        open={open && isWalletConnected} 
+        onOpenChange={(newOpen) => {
+          if (!isWalletConnected) {
+            setOpen(false);
+            return;
+          }
+          setOpen(newOpen);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Select type of transaction</DialogTitle>
+            <DialogDescription>
+              Choose the type of transaction you want to create
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
             <DocumentTypeSelector
