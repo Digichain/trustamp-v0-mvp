@@ -34,7 +34,7 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar() {
+const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -224,4 +224,6 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
+
+export default AppSidebar;
