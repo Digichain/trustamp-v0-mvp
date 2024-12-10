@@ -11,7 +11,19 @@ import { useToast } from "@/components/ui/use-toast";
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [formData, setFormData] = useState(transferableBillOfLadingSchema);
+  const [formData, setFormData] = useState({
+    blNumber: "",
+    companyName: "",
+    field1: "",
+    field2: "",
+    field3: "",
+    field4: "",
+    field5: "",
+    field6: "",
+    field7: "",
+    field8: "",
+    field9: "",
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({

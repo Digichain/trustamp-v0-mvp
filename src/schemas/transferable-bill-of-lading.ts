@@ -1,7 +1,4 @@
 export const transferableBillOfLadingSchema = {
-  $template: {
-    name: "BILL_OF_LADING_GENERIC",
-  },
   blNumber: "",
   companyName: "",
   field1: "",
