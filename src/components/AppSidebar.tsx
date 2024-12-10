@@ -65,6 +65,7 @@ export function AppSidebar() {
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
           setIsConnected(true);
+          // Get and set the current network when checking connection
           const chainId = await ethereum.request({ method: 'eth_chainId' });
           handleChainChanged(chainId);
         }
@@ -81,10 +82,12 @@ export function AppSidebar() {
     } else {
       setWalletAddress(null);
       setIsConnected(false);
+      setNetwork(''); // Clear network when disconnected
     }
   };
 
   const handleChainChanged = (chainId: string) => {
+    console.log('Chain changed to:', chainId);
     const networks: { [key: string]: string } = {
       '0x1': 'Ethereum Mainnet',
       '0x5': 'Goerli Testnet',
@@ -105,6 +108,9 @@ export function AppSidebar() {
       if (ethereum) {
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         handleAccountsChanged(accounts);
+        // Get and set the current network when connecting
+        const chainId = await ethereum.request({ method: 'eth_chainId' });
+        handleChainChanged(chainId);
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
