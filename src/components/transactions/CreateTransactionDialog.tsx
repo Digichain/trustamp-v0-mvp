@@ -123,16 +123,14 @@ export const CreateTransactionDialog = () => {
 
   return (
     <>
-      <div className="relative inline-block">
-        <Button 
-          onClick={handleButtonClick}
-          disabled={!isWalletConnected}
-          className={`${!isWalletConnected ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
-        >
-          <PlusCircle className="mr-2" />
-          Create new Transaction
-        </Button>
-      </div>
+      <Button 
+        onClick={handleButtonClick}
+        disabled={!isWalletConnected}
+        className="pointer-events-none opacity-50 disabled:opacity-50"
+      >
+        <PlusCircle className="mr-2" />
+        Create new Transaction
+      </Button>
       
       {isWalletConnected && (
         <Dialog 

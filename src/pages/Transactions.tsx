@@ -15,19 +15,27 @@ const Transactions = () => {
     const { ethereum } = window as any;
     if (ethereum) {
       ethereum.on('accountsChanged', handleAccountsChanged);
-      ethereum.on('disconnect', () => setIsWalletConnected(false));
+      ethereum.on('disconnect', () => {
+        console.log('Wallet disconnected in Transactions page');
+        setIsWalletConnected(false);
+      });
+      ethereum.on('chainChanged', () => {
+        console.log('Chain changed in Transactions page');
+        checkWalletConnection();
+      });
     }
 
     return () => {
       if (ethereum) {
         ethereum.removeListener('accountsChanged', handleAccountsChanged);
         ethereum.removeListener('disconnect', () => setIsWalletConnected(false));
+        ethereum.removeListener('chainChanged', () => checkWalletConnection());
       }
     };
   }, []);
 
   const handleAccountsChanged = async (accounts: string[]) => {
-    console.log('Accounts changed:', accounts);
+    console.log('Accounts changed in Transactions page:', accounts);
     setIsWalletConnected(accounts.length > 0);
   };
 
@@ -35,7 +43,7 @@ const Transactions = () => {
     try {
       const { ethereum } = window as any;
       if (!ethereum) {
-        console.log('MetaMask not detected');
+        console.log('MetaMask not detected in Transactions page');
         setIsWalletConnected(false);
         return;
       }
@@ -71,6 +79,7 @@ const Transactions = () => {
               variant="outline" 
               disabled={!isWalletConnected}
               onClick={handleWalletRequired}
+              className="pointer-events-none opacity-50 disabled:opacity-50"
             >
               <FileCheck className="mr-2" />
               Verify Document
