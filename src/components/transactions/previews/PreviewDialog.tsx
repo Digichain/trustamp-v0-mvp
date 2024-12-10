@@ -11,7 +11,7 @@ interface PreviewDialogProps {
   title: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: (e?: React.FormEvent) => void;
   children: React.ReactNode;
 }
 
@@ -36,7 +36,7 @@ export const PreviewDialog = ({
             <X className="mr-2" />
             Cancel Preview
           </Button>
-          <Button onClick={onConfirm}>
+          <Button onClick={() => onConfirm()}>
             <Check className="mr-2" />
             Create Document
           </Button>

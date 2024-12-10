@@ -34,20 +34,30 @@ export const VerifiableInvoiceForm = () => {
 
   const handleNestedInputChange = (
     section: string,
-    nestedSection: string,
     field: string,
     value: string
   ) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [nestedSection]: {
-          ...prev[section][nestedSection],
+    const [nestedField, subField] = field.split('.');
+    if (subField) {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [nestedField]: {
+            ...prev[section][nestedField],
+            [subField]: value
+          }
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
           [field]: value
         }
-      }
-    }));
+      }));
+    }
   };
 
   const handleBillableItemChange = (index: number, field: string, value: string | number) => {
