@@ -8,10 +8,24 @@ import { transferableBillOfLadingSchema } from "@/schemas/transferable-bill-of-l
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
+interface FormData {
+  blNumber: string;
+  companyName: string;
+  field1: string;
+  field2: string;
+  field3: string;
+  field4: string;
+  field5: string;
+  field6: string;
+  field7: string;
+  field8: string;
+  field9: string;
+}
+
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     blNumber: "",
     companyName: "",
     field1: "",
@@ -25,7 +39,7 @@ export const TransferableBillOfLadingForm = () => {
     field9: "",
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -77,17 +91,17 @@ export const TransferableBillOfLadingForm = () => {
   };
 
   const fields = [
-    { name: "blNumber", label: "BL Number" },
-    { name: "companyName", label: "Company Name" },
-    { name: "field1", label: "Field 1" },
-    { name: "field2", label: "Field 2" },
-    { name: "field3", label: "Field 3" },
-    { name: "field4", label: "Field 4" },
-    { name: "field5", label: "Field 5" },
-    { name: "field6", label: "Field 6" },
-    { name: "field7", label: "Field 7" },
-    { name: "field8", label: "Field 8" },
-    { name: "field9", label: "Field 9" },
+    { name: "blNumber" as keyof FormData, label: "BL Number" },
+    { name: "companyName" as keyof FormData, label: "Company Name" },
+    { name: "field1" as keyof FormData, label: "Field 1" },
+    { name: "field2" as keyof FormData, label: "Field 2" },
+    { name: "field3" as keyof FormData, label: "Field 3" },
+    { name: "field4" as keyof FormData, label: "Field 4" },
+    { name: "field5" as keyof FormData, label: "Field 5" },
+    { name: "field6" as keyof FormData, label: "Field 6" },
+    { name: "field7" as keyof FormData, label: "Field 7" },
+    { name: "field8" as keyof FormData, label: "Field 8" },
+    { name: "field9" as keyof FormData, label: "Field 9" },
   ];
 
   return (
@@ -104,7 +118,7 @@ export const TransferableBillOfLadingForm = () => {
                   {field.label}
                 </Label>
                 <Input
-                  value={formData[field.name as keyof typeof formData]}
+                  value={formData[field.name]}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
                   placeholder={`Enter ${field.label}`}
                 />
