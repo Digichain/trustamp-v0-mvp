@@ -1,5 +1,5 @@
-import { useLocation, Link } from "react-router-dom";
-import { User, ListCheck, CreditCard, CheckCircle, XCircle } from "lucide-react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { User, ListCheck, CreditCard, CheckCircle, XCircle, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,9 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from 'react';
+import { useToast } from "@/components/ui/use-toast";
 
 const menuItems = [
   {
@@ -34,6 +36,8 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -117,6 +121,24 @@ export function AppSidebar() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  const handleLogout = async () => {
+    try {
+      await disconnectWallet();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out and disconnected from your wallet",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast({
+        title: "Error logging out",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-border">
@@ -184,6 +206,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-border p-4">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          Logout
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
