@@ -58,6 +58,8 @@ export const TransactionsTable = () => {
           <TableRow>
             <TableHead>Transaction Hash</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Subtype</TableHead>
+            <TableHead>Title</TableHead>
             <TableHead>Network</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
@@ -72,6 +74,8 @@ export const TransactionsTable = () => {
                 {tx.transaction_hash.slice(-8)}
               </TableCell>
               <TableCell className="capitalize">{tx.transaction_type}</TableCell>
+              <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
+              <TableCell>{tx.title || '-'}</TableCell>
               <TableCell>{tx.network}</TableCell>
               <TableCell>{tx.amount}</TableCell>
               <TableCell>
@@ -87,7 +91,7 @@ export const TransactionsTable = () => {
           {(!transactions || transactions.length === 0) && (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={8}
                 className="text-center py-8 text-gray-500"
               >
                 No transactions found
