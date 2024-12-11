@@ -1,8 +1,7 @@
-import { signOA } from '@trustvc/trustvc';
-import { ethers } from 'ethers';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
+import { ethers } from "ethers";
 
-export enum SUPPORTED_SIGNING_ALGORITHM {
+enum KeyType {
   Secp256k1VerificationKey2018 = 'Secp256k1VerificationKey2018'
 }
 
@@ -25,32 +24,29 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     const signer = await provider.getSigner();
     
     console.log("Got signer from wallet:", await signer.getAddress());
+
+    // Create signature using the document's merkle root
+    const messageToSign = wrappedDocument.signature.merkleRoot;
+    const signature = await signer.signMessage(messageToSign);
     
-    // Create a compatible signer object
-    const compatibleSigner = {
-      _isSigner: true,
-      getAddress: async () => signer.address,
-      signMessage: async (message: string) => signer.signMessage(message),
-      getBalance: async () => signer.getBalance(),
-      getChainId: async () => signer.getChainId(),
-      getGasPrice: async () => signer.getGasPrice(),
-      getTransactionCount: async () => signer.getTransactionCount(),
-      estimateGas: async (tx: any) => signer.estimateGas(tx),
-      call: async (tx: any) => signer.call(tx),
-      resolveName: async (name: string) => signer.resolveName(name)
+    console.log("Document signed with signature:", signature);
+
+    // Create signed document
+    const signedDocument = {
+      ...wrappedDocument,
+      proof: {
+        type: KeyType.Secp256k1VerificationKey2018,
+        created: new Date().toISOString(),
+        proofPurpose: "assertionMethod",
+        verificationMethod: walletAddress,
+        signature: signature
+      }
     };
-    
-    // Sign the document using the connected wallet
-    console.log("Signing document with wallet:", walletAddress);
-    const signedDocument = await signOA(wrappedDocument, compatibleSigner);
-    
-    console.log("Document signed successfully");
 
-    // Create filename for signed document
+    // Store signed document
     const fileName = `${wrappedDocument.transactionId}_signed.json`;
-    console.log("Creating signed document with filename:", fileName);
+    console.log("Storing signed document with filename:", fileName);
 
-    // Upload signed document to storage
     const { error: uploadError } = await supabase.storage
       .from('signed-documents')
       .upload(fileName, JSON.stringify(signedDocument, null, 2), {
@@ -63,14 +59,18 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       throw uploadError;
     }
 
-    // Get public URL for the signed document
     const { data: { publicUrl } } = supabase.storage
       .from('signed-documents')
       .getPublicUrl(fileName);
 
     console.log("Document signed and stored successfully at:", publicUrl);
-    return { signedDocument, publicUrl };
-  } catch (error) {
+
+    return {
+      signedDocument,
+      publicUrl
+    };
+
+  } catch (error: any) {
     console.error("Error in signAndStoreDocument:", error);
     throw error;
   }
