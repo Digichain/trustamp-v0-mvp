@@ -5,10 +5,6 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
     throw new Error("DID document is required to create a verifiable document");
   }
 
-  if (!didDocument.dnsLocation) {
-    throw new Error("DNS location is required for document verification");
-  }
-
   console.log("Formatting document with DID:", didDocument);
 
   // The base DID without #controller
@@ -25,7 +21,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
       name: invoiceData.billFrom.name,
       identityProof: {
         type: "DNS-DID",
-        location: didDocument.dnsLocation,
+        location: "tempdns.trustamp.in",
         key: `${baseId}#controller`
       }
     }],

@@ -24,6 +24,22 @@ export const useInvoiceSubmission = () => {
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
       console.log("Formatted OpenAttestation document:", openAttestationDocument);
 
+      // Save raw document to storage first
+      const fileName = `${crypto.randomUUID()}.json`;
+      console.log("Saving raw document to storage with filename:", fileName);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('raw-documents')
+        .upload(fileName, JSON.stringify(openAttestationDocument, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Error uploading raw document:", uploadError);
+        throw new Error("Failed to save raw document to storage");
+      }
+
       // Ensure numeric values are properly formatted
       const total = typeof formData.total === 'object' ? 
         parseFloat(formData.total[""] || 0) : 
