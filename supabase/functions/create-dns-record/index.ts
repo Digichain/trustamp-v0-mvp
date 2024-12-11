@@ -27,13 +27,14 @@ serve(async (req) => {
     console.log('Formatted TXT record:', txtRecord);
 
     // Create the DNS record using the OpenAttestation sandbox API
-    const apiUrl = `https://sandbox.openattestation.com/dns-txt`;
+    const apiUrl = `https://dns-proof-sandbox.openattestation.com/api/records`;
     console.log(`Making API request to: ${apiUrl}`);
     
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer sandbox'
       },
       body: JSON.stringify({
         record: txtRecord
