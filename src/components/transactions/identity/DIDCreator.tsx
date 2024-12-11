@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useWallet } from "@/contexts/WalletContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,7 +12,11 @@ export interface DIDDocument {
   ethereumAddress: string;
 }
 
-export const DIDCreator = () => {
+interface DIDCreatorProps {
+  onDIDCreated: (doc: DIDDocument) => void;
+}
+
+export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const { walletAddress } = useWallet();
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
@@ -40,7 +44,6 @@ export const DIDCreator = () => {
       };
 
       // Simulating DNS record creation at sandbox.openattestation.com
-      // In a real implementation, this would make an API call
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulating API call
       
       const domainName = `${generateRandomSubdomain()}.sandbox.openattestation.com`;
@@ -49,6 +52,8 @@ export const DIDCreator = () => {
 
       setDidDocument(newDidDocument);
       setDnsRecord(`Record created at ${domainName} and will stay valid until ${expiryDate.toLocaleString()}`);
+      
+      onDIDCreated(newDidDocument);
       
       toast({
         title: "DID Created Successfully",
