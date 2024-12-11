@@ -61,6 +61,17 @@ export const TransactionActions = ({
         throw uploadError;
       }
 
+      // Update transaction status to document_wrapped
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update({ status: 'document_wrapped' })
+        .eq('id', transaction.id);
+
+      if (updateError) {
+        console.error("Error updating transaction status:", updateError);
+        throw updateError;
+      }
+
       // Get public URL for the wrapped document
       const { data: { publicUrl } } = supabase.storage
         .from('wrapped-documents')
