@@ -6,64 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
-  const [dnsVerified, setDnsVerified] = useState(false);
-
-  const verifyDNSRecord = async () => {
-    if (!didDocument?.dnsLocation) {
-      console.error('No DNS location to verify');
-      return;
-    }
-
-    setIsVerifying(true);
-    try {
-      console.log('Verifying DNS record for location:', didDocument.dnsLocation);
-      
-      // Use OpenAttestation's verification API
-      const response = await fetch(`https://api.openattestation.com/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'DNS-DID',
-          location: didDocument.dnsLocation,
-          network: 'mainnet'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to verify DNS record');
-      }
-
-      const verificationResult = await response.json();
-      console.log('DNS verification result:', verificationResult);
-
-      if (verificationResult.status === 'VALID') {
-        setDnsVerified(true);
-        toast({
-          title: "DNS Record Verified",
-          description: "The DNS record has been successfully verified.",
-        });
-      } else {
-        toast({
-          title: "DNS Not Yet Verified",
-          description: "The DNS record exists but hasn't propagated yet. Please try again in a few moments.",
-          variant: "default",
-        });
-      }
-    } catch (error) {
-      console.error('Error verifying DNS record:', error);
-      toast({
-        title: "Verification Failed",
-        description: "Failed to verify DNS record. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsVerifying(false);
-    }
-  };
 
   const createDID = async (walletAddress: string) => {
     setIsCreating(true);
@@ -104,11 +47,8 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
       
       toast({
         title: "DID Created",
-        description: "Your DID has been created successfully. Verification may take a few moments.",
+        description: "Your DID has been created successfully. Please set up your DNS record.",
       });
-
-      // Wait a few seconds before first verification attempt
-      setTimeout(verifyDNSRecord, 5000);
 
     } catch (error) {
       console.error('Error creating DID:', error);
@@ -125,10 +65,7 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
 
   return {
     isCreating,
-    isVerifying,
     didDocument,
-    dnsVerified,
-    createDID,
-    verifyDNSRecord
+    createDID
   };
 };

@@ -7,104 +7,52 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
+const generateDNSName = () => {
+  const adjectives = ['happy', 'clever', 'brave', 'wise', 'gentle'];
+  const colors = ['red', 'blue', 'green', 'purple', 'gold'];
+  const animals = ['lion', 'tiger', 'eagle', 'wolf', 'bear'];
+  
+  const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+  
+  return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}.sandbox.openattestation.com`;
+};
+
 serve(async (req) => {
   try {
-    console.log("Received request:", {
-      method: req.method,
-      url: req.url,
-      headers: Object.fromEntries(req.headers.entries())
-    });
-
-    // Handle CORS preflight requests
     if (req.method === 'OPTIONS') {
-      console.log("Handling CORS preflight request");
-      return new Response(null, { 
-        headers: corsHeaders 
-      });
+      return new Response(null, { headers: corsHeaders });
     }
 
     const requestData = await req.json();
     console.log("Request data:", requestData);
 
-    const { did, action } = requestData;
-    console.log(`Processing request with DID: ${did}, action: ${action}`);
-
+    const { did } = requestData;
     if (!did) {
       throw new Error('DID is required');
     }
 
-    // Extract Ethereum address from DID
     const addressMatch = did.match(/did:ethr:(0x[a-fA-F0-9]{40})/);
     if (!addressMatch) {
       throw new Error('Invalid DID format');
     }
 
-    const address = addressMatch[1].toLowerCase();
-    console.log("Extracted address:", address);
+    const dnsLocation = generateDNSName();
+    console.log("Generated DNS location:", dnsLocation);
 
-    // Create DNS record using OpenAttestation API
-    const apiUrl = 'https://api.openattestation.com/dns-txt';
-    const requestBody = {
-      address: address,
-      network: 'sepolia',
-      type: "openatts"
-    };
-
-    console.log("Sending request to OpenAttestation API:", {
-      url: apiUrl,
-      body: requestBody
-    });
-
-    try {
-      const apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      const responseText = await apiResponse.text();
-      console.log("Raw API response:", responseText);
-
-      if (!apiResponse.ok) {
-        console.error("Error from OpenAttestation API:", {
-          status: apiResponse.status,
-          statusText: apiResponse.statusText,
-          response: responseText
-        });
-        throw new Error(`Failed to create DNS record: ${responseText}`);
-      }
-
-      const apiData = responseText ? JSON.parse(responseText) : null;
-      console.log("Parsed OpenAttestation API response:", apiData);
-
-      // Format the response
-      const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
-
-      return new Response(
-        JSON.stringify({
-          data: {
-            dnsLocation: dnsName,
-            apiResponse: apiData
-          }
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+    return new Response(
+      JSON.stringify({
+        data: {
+          dnsLocation,
+          status: 'simulated'
         }
-      );
-    } catch (fetchError) {
-      console.error("Error making request to OpenAttestation API:", {
-        error: fetchError.message,
-        stack: fetchError.stack,
-        type: fetchError.constructor.name
-      });
-      throw fetchError;
-    }
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
   } catch (error) {
     console.error("Error in oa-dns-records:", {
