@@ -9,6 +9,8 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
     throw new Error("DNS location is required for document verification");
   }
 
+  console.log("Formatting document with DID:", didDocument);
+
   return {
     $template: {
       name: "INVOICE",
@@ -21,7 +23,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
       identityProof: {
         type: "DNS-DID",
         location: didDocument.dnsLocation,
-        key: didDocument.id
+        key: didDocument.id // Using the DID document's id as the key
       }
     }],
     network: {
