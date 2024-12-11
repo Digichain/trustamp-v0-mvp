@@ -7,16 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
-const generateDNSName = () => {
-  const adjectives = ['happy', 'clever', 'brave', 'wise', 'gentle'];
-  const colors = ['red', 'blue', 'green', 'purple', 'gold'];
-  const animals = ['lion', 'tiger', 'eagle', 'wolf', 'bear'];
-  
-  const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-  
-  return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}.sandbox.openattestation.com`;
-};
-
 serve(async (req) => {
   try {
     if (req.method === 'OPTIONS') {
@@ -36,13 +26,10 @@ serve(async (req) => {
       throw new Error('Invalid DID format');
     }
 
-    const dnsLocation = generateDNSName();
-    console.log("Generated DNS location:", dnsLocation);
-
     return new Response(
       JSON.stringify({
         data: {
-          dnsLocation,
+          dnsLocation: 'tempdns.trustamp.in',
           status: 'simulated'
         }
       }),
