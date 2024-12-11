@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { OpenAttestationDNSTextRecordT, EthereumNetworks } from "../../src/utils/dns-record-types.ts";
 
 interface CreateDNSRecordRequest {
   did: string;
@@ -11,7 +12,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -19,14 +19,32 @@ serve(async (req) => {
   try {
     const { did, subdomain } = await req.json() as CreateDNSRecordRequest;
     
-    // DNS Provider specific configuration would go here
     const DNS_PROVIDER_API_KEY = Deno.env.get('DNS_PROVIDER_API_KEY');
     if (!DNS_PROVIDER_API_KEY) {
       throw new Error('DNS provider API key not configured');
     }
 
-    // Example TXT record value format following TradeTrust specification
-    const txtRecordValue = `openatts net=ethereum netId=11155111 addr=${did}`;
+    // Extract Ethereum address from DID
+    const address = did.split(':')[2].split('#')[0];
+
+    // Create and validate DNS record
+    const dnsRecord = {
+      type: "openatts",
+      net: "ethereum",
+      netId: EthereumNetworks.sepolia,
+      addr: address
+    };
+
+    // Validate the record format
+    try {
+      OpenAttestationDNSTextRecordT.check(dnsRecord);
+    } catch (error) {
+      console.error('Invalid DNS record format:', error);
+      throw new Error('Invalid DNS record format');
+    }
+
+    // Format record for DNS TXT
+    const txtRecordValue = `type=${dnsRecord.type} net=${dnsRecord.net} netId=${dnsRecord.netId} addr=${dnsRecord.addr}`;
 
     console.log(`Creating TXT record for ${subdomain} with value: ${txtRecordValue}`);
 
@@ -52,14 +70,14 @@ serve(async (req) => {
     }
     */
 
-    // For now, we'll simulate a successful response
     return new Response(
       JSON.stringify({
         success: true,
         message: 'DNS TXT record created successfully',
         data: {
           subdomain: subdomain,
-          txtRecord: txtRecordValue
+          txtRecord: txtRecordValue,
+          dnsRecord
         }
       }),
       {
