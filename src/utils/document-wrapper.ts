@@ -14,7 +14,8 @@ interface WrappedDocument {
 const generateHash = (data: any): string => {
   const jsonString = JSON.stringify(data);
   const wordArray = CryptoJS.SHA3(jsonString, { outputLength: 256 });
-  return '0x' + wordArray.toString(CryptoJS.enc.Hex);
+  // Remove the '0x' prefix to ensure correct byte length
+  return wordArray.toString(CryptoJS.enc.Hex);
 };
 
 const generateSalt = (): string => {
