@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -8,14 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Eye, WrapText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { PreviewDialog } from "./previews/PreviewDialog";
 import { InvoicePreview } from "./previews/InvoicePreview";
 import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { TransactionActions } from "./actions/TransactionActions";
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -35,6 +34,7 @@ export const TransactionsTable = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [documentData, setDocumentData] = useState<any>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -67,7 +67,6 @@ export const TransactionsTable = () => {
         return null;
       }
 
-      // Return the first document if found, otherwise null
       return data && data.length > 0 ? data[0] : null;
 
     } else if (transaction.document_subtype === "transferable") {
@@ -81,7 +80,6 @@ export const TransactionsTable = () => {
         return null;
       }
 
-      // Return the first document if found, otherwise null
       return data && data.length > 0 ? data[0] : null;
     }
 
@@ -107,6 +105,55 @@ export const TransactionsTable = () => {
       toast({
         title: "Error",
         description: "Failed to load document preview",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (transaction: any) => {
+    try {
+      // Delete from the appropriate document table
+      const documentTable = transaction.document_subtype === "verifiable" 
+        ? "invoice_documents" 
+        : "bill_of_lading_documents";
+      
+      const { error: documentError } = await supabase
+        .from(documentTable)
+        .delete()
+        .eq("transaction_id", transaction.id);
+
+      if (documentError) throw documentError;
+
+      // Delete from transactions table
+      const { error: transactionError } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", transaction.id);
+
+      if (transactionError) throw transactionError;
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('raw-documents')
+        .remove([`${transaction.id}.json`]);
+
+      if (storageError) {
+        console.error("Error deleting from storage:", storageError);
+        // Don't throw here as the file might not exist
+      }
+
+      // Refresh the transactions list
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
         variant: "destructive",
       });
     }
@@ -166,17 +213,12 @@ export const TransactionsTable = () => {
                     addSuffix: true,
                   })}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handlePreviewClick(tx)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <WrapText className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                  <TransactionActions
+                    transaction={tx}
+                    onPreviewClick={() => handlePreviewClick(tx)}
+                    onDelete={() => handleDelete(tx)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
