@@ -6,19 +6,43 @@ export enum SUPPORTED_SIGNING_ALGORITHM {
   Secp256k1VerificationKey2018 = 'Secp256k1VerificationKey2018'
 }
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string) => {
   try {
     console.log("Starting document signing process");
     
+    if (!window.ethereum) {
+      throw new Error("No ethereum wallet found");
+    }
+
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     
     console.log("Got signer from wallet:", await signer.getAddress());
     
+    // Create a compatible signer object
+    const compatibleSigner = {
+      _isSigner: true,
+      getAddress: async () => signer.address,
+      signMessage: async (message: string) => signer.signMessage(message),
+      getBalance: async () => signer.getBalance(),
+      getChainId: async () => signer.getChainId(),
+      getGasPrice: async () => signer.getGasPrice(),
+      getTransactionCount: async () => signer.getTransactionCount(),
+      estimateGas: async (tx: any) => signer.estimateGas(tx),
+      call: async (tx: any) => signer.call(tx),
+      resolveName: async (name: string) => signer.resolveName(name)
+    };
+    
     // Sign the document using the connected wallet
     console.log("Signing document with wallet:", walletAddress);
-    const signedDocument = await signOA(wrappedDocument, signer);
+    const signedDocument = await signOA(wrappedDocument, compatibleSigner);
     
     console.log("Document signed successfully");
 
