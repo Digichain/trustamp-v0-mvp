@@ -10,7 +10,7 @@ export interface DIDDocument {
   type: string;
   controller: string;
   ethereumAddress: string;
-  dnsLocation?: string; // Added dnsLocation to the interface
+  dnsLocation?: string;
 }
 
 interface DIDCreatorProps {
@@ -25,12 +25,9 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const [dnsRecord, setDnsRecord] = useState<string>('');
 
   const generateRandomSubdomain = () => {
-    const adjectives = ['intermediate', 'dynamic', 'swift', 'bright'];
-    const colors = ['sapphire', 'emerald', 'ruby', 'amber'];
-    const animals = ['catfish', 'dolphin', 'penguin', 'tiger'];
-    
-    const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-    return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}`;
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(7);
+    return `did-${timestamp}-${random}`;
   };
 
   const createDID = async () => {
@@ -43,21 +40,29 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       return;
     }
 
+    console.log("Starting DID creation process with wallet:", walletAddress);
     setIsCreating(true);
+    
     try {
       const did = `did:ethr:${walletAddress}`;
-      const dnsLocation = `${generateRandomSubdomain()}.sandbox.openattestation.com`;
+      // Using a more reliable test domain
+      const dnsLocation = `${generateRandomSubdomain()}.test.dev`;
       
+      console.log("Generated DID:", did);
+      console.log("DNS Location:", dnsLocation);
+
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
         type: "Secp256k1VerificationKey2018",
         controller: did,
         ethereumAddress: walletAddress.toLowerCase(),
-        dnsLocation: dnsLocation // Store the DNS location in the document
+        dnsLocation
       };
 
-      // Simulating DNS record creation at sandbox.openattestation.com
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulating API call
+      console.log("Created DID Document:", newDidDocument);
+
+      // Simulating DNS record creation
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
@@ -66,6 +71,8 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       setDnsRecord(`Record created at ${dnsLocation} and will stay valid until ${expiryDate.toLocaleString()}`);
       
       onDIDCreated(newDidDocument);
+      
+      console.log("DID creation completed successfully");
       
       toast({
         title: "DID Created Successfully",
