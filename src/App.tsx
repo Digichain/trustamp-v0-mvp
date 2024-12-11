@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { WalletProvider } from "@/contexts/WalletContext";
 import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import Transactions from '@/pages/Transactions';
@@ -43,57 +44,59 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transactions"
-              element={
-                <ProtectedRoute>
-                  <Transactions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transactions/create"
-              element={
-                <ProtectedRoute>
-                  <CreateTransaction />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transactions/create-transferable"
-              element={
-                <ProtectedRoute>
-                  <CreateTransferableTransaction />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/account"
-              element={
-                <ProtectedRoute>
-                  <Account />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <Toaster />
-        </Router>
-      </div>
-    </SidebarProvider>
+    <WalletProvider>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <Router>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateTransaction />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions/create-transferable"
+                element={
+                  <ProtectedRoute>
+                    <CreateTransferableTransaction />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account"
+                element={
+                  <ProtectedRoute>
+                    <Account />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+            <Toaster />
+          </Router>
+        </div>
+      </SidebarProvider>
+    </WalletProvider>
   );
 }
 
