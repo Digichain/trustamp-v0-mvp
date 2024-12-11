@@ -28,11 +28,7 @@ serve(async (req) => {
     console.log('Formatted TXT record:', txtRecord);
 
     // Create the DNS record using the OpenAttestation sandbox API
-    const apiUrl = 'https://dns-proof-sandbox.openattestation.com/api/records';
-    console.log('Making request to:', apiUrl);
-    console.log('Request payload:', JSON.stringify({ record: txtRecord }));
-
-    const response = await fetch(apiUrl, {
+    const response = await fetch('https://dns-proof-sandbox.openattestation.com/api/records', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,16 +40,16 @@ serve(async (req) => {
     });
 
     console.log('API Response status:', response.status);
-    const responseText = await response.text();
-    console.log('API Response text:', responseText);
+    const responseData = await response.text();
+    console.log('API Response:', responseData);
 
     if (!response.ok) {
-      throw new Error(`API Error: ${responseText}`);
+      throw new Error(`API Error: ${responseData}`);
     }
 
     let apiResponse;
     try {
-      apiResponse = JSON.parse(responseText);
+      apiResponse = JSON.parse(responseData);
     } catch (e) {
       console.error('Error parsing API response:', e);
       throw new Error('Invalid response format from DNS API');
