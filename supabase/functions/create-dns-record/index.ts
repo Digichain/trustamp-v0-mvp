@@ -19,11 +19,6 @@ serve(async (req) => {
   try {
     const { did, subdomain } = await req.json() as CreateDNSRecordRequest;
     
-    const DNS_PROVIDER_API_KEY = Deno.env.get('DNS_PROVIDER_API_KEY');
-    if (!DNS_PROVIDER_API_KEY) {
-      throw new Error('DNS provider API key not configured');
-    }
-
     // Extract Ethereum address from DID
     const address = did.split(':')[2].split('#')[0];
     console.log('Extracted address:', address);
@@ -32,29 +27,29 @@ serve(async (req) => {
     const txtRecordValue = formatDNSTxtRecord(address);
     console.log('Formatted TXT record:', txtRecordValue);
 
-    console.log(`Creating TXT record for ${subdomain} with value: ${txtRecordValue}`);
-
-    // Here you would implement the actual API call to your DNS provider
-    // Example with a hypothetical DNS provider API:
-    /*
-    const response = await fetch('https://api.dnsprovider.com/v1/txt-records', {
+    // Create the DNS record using the OpenAttestation sandbox API
+    const apiUrl = `https://sandbox.openattestation.com/dns-txt`;
+    console.log(`Making API request to: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DNS_PROVIDER_API_KEY}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        domain: 'sandbox.openattestation.com',
         subdomain: subdomain,
-        type: 'TXT',
-        value: txtRecordValue
+        record: txtRecordValue
       })
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create DNS record');
+      const errorData = await response.text();
+      console.error('API Error:', errorData);
+      throw new Error(`Failed to create DNS record: ${errorData}`);
     }
-    */
+
+    const apiResponse = await response.json();
+    console.log('API Response:', apiResponse);
 
     return new Response(
       JSON.stringify({
@@ -62,7 +57,8 @@ serve(async (req) => {
         message: 'DNS TXT record created successfully',
         data: {
           subdomain: subdomain,
-          txtRecord: txtRecordValue
+          txtRecord: txtRecordValue,
+          apiResponse
         }
       }),
       {
