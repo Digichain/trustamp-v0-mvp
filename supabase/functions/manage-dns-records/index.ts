@@ -4,6 +4,7 @@ import { SignatureV4 } from "https://deno.land/x/aws_sign_v4@1.0.2/mod.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
 const AWS_REGION = Deno.env.get('AWS_REGION') || 'us-east-1';
