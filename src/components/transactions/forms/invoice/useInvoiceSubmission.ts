@@ -24,13 +24,20 @@ export const useInvoiceSubmission = () => {
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
       console.log("Formatted OpenAttestation document:", openAttestationDocument);
 
+      // Ensure numeric values are properly formatted
+      const total = typeof formData.total === 'object' ? 
+        parseFloat(formData.total[""] || 0) : 
+        parseFloat(formData.total || 0);
+
+      console.log("Parsed total value:", total);
+
       // Create transaction record
       const { data: transactionData, error: transactionError } = await supabase
         .from("transactions")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
-          amount: formData.total,
+          amount: total,
           status: "document_created",
           document_subtype: "verifiable",
           title: "INVOICE",
@@ -48,6 +55,15 @@ export const useInvoiceSubmission = () => {
 
       console.log("Created transaction:", transactionData);
 
+      // Ensure numeric values are properly formatted for invoice document
+      const subtotal = parseFloat(formData.subtotal || 0);
+      const tax = typeof formData.tax === 'object' ? 
+        parseFloat(formData.tax[""] || 0) : 
+        parseFloat(formData.tax || 0);
+      const taxTotal = typeof formData.taxTotal === 'object' ? 
+        parseFloat(formData.taxTotal[""] || 0) : 
+        parseFloat(formData.taxTotal || 0);
+
       // Create invoice document record
       const { error: invoiceError } = await supabase
         .from("invoice_documents")
@@ -58,10 +74,10 @@ export const useInvoiceSubmission = () => {
           bill_from: formData.billFrom,
           bill_to: formData.billTo,
           billable_items: formData.billableItems,
-          subtotal: formData.subtotal,
-          tax: formData.tax,
-          tax_total: formData.taxTotal,
-          total: formData.total
+          subtotal: subtotal,
+          tax: tax,
+          tax_total: taxTotal,
+          total: total
         });
 
       if (invoiceError) {
