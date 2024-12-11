@@ -4,7 +4,11 @@ import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
 export const useInvoiceForm = () => {
   const [formData, setFormData] = useState({
     ...verifiableInvoiceSchema,
-    billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }]
+    billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }],
+    subtotal: 0,
+    tax: 0,
+    taxTotal: 0,
+    total: 0
   });
 
   const handleInputChange = (section: string, field: string, value: string) => {
@@ -54,25 +58,25 @@ export const useInvoiceForm = () => {
       [field]: value
     };
 
+    // Ensure quantity and unitPrice are numbers
     if (field === 'quantity' || field === 'unitPrice') {
-      newBillableItems[index].amount = 
-        Number(newBillableItems[index].quantity) * Number(newBillableItems[index].unitPrice);
+      const quantity = Number(newBillableItems[index].quantity) || 0;
+      const unitPrice = Number(newBillableItems[index].unitPrice) || 0;
+      newBillableItems[index].amount = quantity * unitPrice;
     }
 
-    setFormData(prev => ({
-      ...prev,
-      billableItems: newBillableItems
-    }));
-
-    const subtotal = newBillableItems.reduce((sum, item) => sum + Number(item.amount), 0);
-    const taxTotal = subtotal * (Number(formData.tax) / 100);
+    // Calculate totals
+    const subtotal = newBillableItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const taxRate = Number(formData.tax) || 0;
+    const taxTotal = subtotal * (taxRate / 100);
+    const total = subtotal + taxTotal;
     
     setFormData(prev => ({
       ...prev,
       billableItems: newBillableItems,
       subtotal: subtotal,
       taxTotal: taxTotal,
-      total: subtotal + taxTotal
+      total: total
     }));
   };
 
