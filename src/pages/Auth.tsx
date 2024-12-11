@@ -3,9 +3,11 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -20,13 +22,47 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event);
+      
       if (event === 'SIGNED_IN' && session) {
         navigate('/dashboard');
       }
+      
+      // Handle specific error cases
+      if (event === 'USER_UPDATED') {
+        toast({
+          title: "Account updated",
+          description: "Your account has been successfully updated.",
+        });
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Error handling for auth operations
+    const handleAuthError = (error: Error) => {
+      console.error('Auth error:', error);
+      
+      if (error.message.includes('user_already_exists')) {
+        toast({
+          variant: "destructive",
+          title: "Account already exists",
+          description: "Please sign in instead of creating a new account.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Authentication error",
+          description: error.message,
+        });
+      }
+    };
+
+    // Add error listener
+    supabase.auth.onError(handleAuthError);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -39,9 +75,39 @@ const Auth = () => {
         </div>
         <SupabaseAuth 
           supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
+          appearance={{ 
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#2563eb',
+                  brandAccent: '#1d4ed8',
+                }
+              }
+            }
+          }}
           providers={[]}
           theme="light"
+          localization={{
+            variables: {
+              sign_up: {
+                email_label: 'Email',
+                password_label: 'Create Password',
+                button_label: 'Create Account',
+                loading_button_label: 'Creating Account...',
+                social_provider_text: 'Sign up with {{provider}}',
+                link_text: "Don't have an account? Sign up",
+              },
+              sign_in: {
+                email_label: 'Email',
+                password_label: 'Your Password',
+                button_label: 'Sign In',
+                loading_button_label: 'Signing In...',
+                social_provider_text: 'Sign in with {{provider}}',
+                link_text: 'Already have an account? Sign in',
+              },
+            },
+          }}
         />
       </div>
     </div>
