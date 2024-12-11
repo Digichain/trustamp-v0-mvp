@@ -41,6 +41,18 @@ export const useDocumentData = () => {
     try {
       console.log("Starting deletion process for transaction:", transaction.id);
       
+      // First check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error("No authenticated session found");
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to delete documents",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       // First delete from the appropriate document table
       const documentTable = transaction.document_subtype === "verifiable" 
         ? "invoice_documents" 
@@ -50,24 +62,34 @@ export const useDocumentData = () => {
       const { error: documentError } = await supabase
         .from(documentTable)
         .delete()
-        .eq("transaction_id", transaction.id);
+        .eq("transaction_id", transaction.id)
+        .single();
 
       if (documentError) {
         console.error(`Error deleting from ${documentTable}:`, documentError);
         throw documentError;
       }
 
-      // Then delete from storage
+      // Then delete from storage if it exists
       const fileName = `${transaction.id}.json`;
       console.log("Deleting storage file:", fileName);
       
-      const { error: storageError } = await supabase.storage
+      const { data: fileExists } = await supabase.storage
         .from('raw-documents')
-        .remove([fileName]);
+        .list('', {
+          search: fileName
+        });
 
-      if (storageError) {
-        console.error("Error deleting from storage:", storageError);
-        // Don't throw here as the file might not exist
+      if (fileExists && fileExists.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from('raw-documents')
+          .remove([fileName]);
+
+        if (storageError) {
+          console.error("Error deleting from storage:", storageError);
+        }
+      } else {
+        console.log("File not found in storage:", fileName);
       }
 
       // Finally delete from transactions table
@@ -75,7 +97,9 @@ export const useDocumentData = () => {
       const { error: transactionError } = await supabase
         .from("transactions")
         .delete()
-        .eq("id", transaction.id);
+        .eq("id", transaction.id)
+        .eq("user_id", session.user.id) // Ensure user owns the transaction
+        .single();
 
       if (transactionError) {
         console.error("Error deleting from transactions:", transactionError);

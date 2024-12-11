@@ -10,9 +10,17 @@ export const useTransactions = () => {
     queryKey: ["transactions"],
     queryFn: async () => {
       console.log("Fetching transactions...");
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error("No authenticated session found");
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
 
       if (error) {
