@@ -15,12 +15,30 @@ const AWS_SECRET_ACCESS_KEY = Deno.env.get('AWS_SECRET_ACCESS_KEY');
 console.log("Loading manage-dns-records function...");
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   try {
+    console.log("Received request:", {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries())
+    });
+
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+      console.log("Handling CORS preflight request");
+      return new Response(null, { 
+        headers: {
+          ...corsHeaders,
+          'Access-Control-Max-Age': '86400',
+        } 
+      });
+    }
+
+    // Check required environment variables
+    if (!HOSTED_ZONE_ID || !AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
+      console.error("Missing required AWS credentials");
+      throw new Error('Missing required AWS configuration');
+    }
+
     const { did, action } = await req.json();
     console.log(`Received request with DID: ${did}, action: ${action}`);
 
@@ -40,6 +58,12 @@ serve(async (req) => {
     // Format DNS record value according to OpenAttestation requirements
     const recordValue = `"type=openatts net=ethereum netId=1 addr=${address}"`;
     const dnsName = `${address.slice(2).toLowerCase()}.sandbox.openattestation.com`; // Using sandbox domain
+
+    console.log("Creating DNS record with:", {
+      dnsName,
+      recordValue,
+      action
+    });
 
     // Create AWS Route 53 request
     const signer = new SignatureV4({
@@ -69,6 +93,8 @@ serve(async (req) => {
 
     const endpoint = `https://route53.amazonaws.com/2013-04-01/hostedzone/${HOSTED_ZONE_ID}/rrset`;
     
+    console.log("Preparing AWS Route 53 request to:", endpoint);
+
     const signedRequest = await signer.sign({
       method: 'POST',
       url: endpoint,
