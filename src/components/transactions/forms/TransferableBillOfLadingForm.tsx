@@ -35,8 +35,11 @@ export const TransferableBillOfLadingForm = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
     console.log("Submitting form data:", formData);
 
     try {
@@ -128,7 +131,7 @@ export const TransferableBillOfLadingForm = () => {
         title="Bill of Lading Preview"
         isOpen={showPreview}
         onOpenChange={setShowPreview}
-        onConfirm={handleSubmit}
+        onConfirm={() => handleSubmit()}
       >
         <BillOfLadingPreview data={formData} />
       </PreviewDialog>
