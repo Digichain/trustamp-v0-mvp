@@ -1,1 +1,4 @@
 project_id = "odzjfelpvhkhqgvogscr"
+
+[functions.oa-dns-records]
+verify_jwt = false
