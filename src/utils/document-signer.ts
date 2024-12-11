@@ -15,11 +15,7 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     
     // Sign the document
     console.log("Signing document with wallet:", walletAddress);
-    const signedDocument = await signOA(
-      wrappedDocument,
-      SUPPORTED_SIGNING_ALGORITHM.Secp256k1VerificationKey2018,
-      wallet
-    );
+    const signedDocument = await signOA(wrappedDocument, wallet);
     
     console.log("Document signed successfully");
 
