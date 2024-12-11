@@ -18,15 +18,12 @@ serve(async (req) => {
     if (req.method === 'OPTIONS') {
       console.log("Handling CORS preflight request");
       return new Response(null, { 
-        headers: {
-          ...corsHeaders,
-          'Access-Control-Max-Age': '86400',
-        } 
+        headers: corsHeaders 
       });
     }
 
     const { did, action } = await req.json();
-    console.log(`Received request with DID: ${did}, action: ${action}`);
+    console.log(`Processing request with DID: ${did}, action: ${action}`);
 
     if (!did) {
       throw new Error('DID is required');
@@ -41,34 +38,36 @@ serve(async (req) => {
     const address = addressMatch[1].toLowerCase();
     console.log("Extracted address:", address);
 
-    // Install OpenAttestation CLI using npm
-    const installCommand = new Deno.Command("npm", {
-      args: ["install", "-g", "@govtechsg/open-attestation-cli"],
-    });
-    
-    const installResult = await installCommand.output();
-    console.log("CLI installation result:", new TextDecoder().decode(installResult.stdout));
-
-    // Use OpenAttestation CLI to manage DNS records
-    const cliCommand = action === 'delete' 
-      ? ["dns", "txt-record", "remove", address]
-      : ["dns", "txt-record", "create", address];
-
-    const oaCommand = new Deno.Command("open-attestation", {
-      args: cliCommand,
+    // Create DNS record using OpenAttestation sandbox API
+    const sandboxResponse = await fetch('https://dns-proof-sandbox.openattestation.com/api/records', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        address: address,
+        networkId: 11155111, // Sepolia testnet
+        type: "openatts"
+      })
     });
 
-    const result = await oaCommand.output();
-    const output = new TextDecoder().decode(result.stdout);
-    console.log("CLI output:", output);
+    if (!sandboxResponse.ok) {
+      const errorData = await sandboxResponse.text();
+      console.error("Error from sandbox API:", errorData);
+      throw new Error(`Failed to create DNS record: ${errorData}`);
+    }
 
+    const sandboxData = await sandboxResponse.json();
+    console.log("Sandbox API response:", sandboxData);
+
+    // Format the response
     const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
 
     return new Response(
       JSON.stringify({
         data: {
           dnsLocation: dnsName,
-          cliOutput: output
+          sandboxResponse: sandboxData
         }
       }),
       {
