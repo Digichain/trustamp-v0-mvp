@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, ListCheck, CreditCard } from "lucide-react";
+import { User, ListCheck, CreditCard, LayoutDashboard } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -7,6 +7,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
   {
     title: "Account",
     url: "/account",
