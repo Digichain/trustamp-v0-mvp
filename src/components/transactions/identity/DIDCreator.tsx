@@ -46,7 +46,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       
       if (data.Status === 0 && data.Answer) {
         const txtRecords = data.Answer.map((record: any) => record.data);
-        const didRecord = txtRecords.find((record: string) => record.includes(did));
+        const didRecord = txtRecords.find((record: string) => record.includes(did.split(':')[2].split('#')[0]));
         
         if (didRecord) {
           setDnsStatus({ message: "DNS record found and verified" });
@@ -56,7 +56,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       
       if (retryCount < 5) {
         setDnsStatus({ message: `DNS record not found, retrying in 10 seconds... (attempt ${retryCount + 1}/5)` });
-        await delay(10000); // Wait 10 seconds before retrying
+        await delay(10000);
         return verifyDNSRecord(dnsLocation, did, retryCount + 1);
       }
 
@@ -103,13 +103,13 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       const { data: createResponse, error: createError } = await supabase.functions.invoke('create-dns-record', {
         body: {
           did: newDidDocument.id,
-          subdomain: dnsLocation.split('.')[0] // Extract subdomain part
+          subdomain: dnsLocation.split('.')[0]
         }
       });
 
-      if (createError) {
-        console.error("Error creating DNS record:", createError);
-        throw new Error(`Failed to create DNS record: ${createError.message}`);
+      if (createError || !createResponse?.success) {
+        console.error("Error creating DNS record:", createError || createResponse);
+        throw new Error(createError?.message || createResponse?.message || "Failed to create DNS record");
       }
 
       console.log("DNS record creation response:", createResponse);

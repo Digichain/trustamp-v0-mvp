@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { formatDNSTxtRecord } from "./dns-record-types.ts";
 
 interface CreateDNSRecordRequest {
   did: string;
@@ -18,14 +17,15 @@ serve(async (req) => {
 
   try {
     const { did, subdomain } = await req.json() as CreateDNSRecordRequest;
-    
+    console.log('Creating DNS record for:', { did, subdomain });
+
     // Extract Ethereum address from DID
     const address = did.split(':')[2].split('#')[0];
     console.log('Extracted address:', address);
 
-    // Format and validate the DNS TXT record
-    const txtRecordValue = formatDNSTxtRecord(address);
-    console.log('Formatted TXT record:', txtRecordValue);
+    // Format the DNS TXT record
+    const txtRecord = `openatts net=ethereum netId=11155111 addr=${address}`;
+    console.log('Formatted TXT record:', txtRecord);
 
     // Create the DNS record using the OpenAttestation sandbox API
     const apiUrl = `https://sandbox.openattestation.com/dns-txt`;
@@ -38,18 +38,16 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         subdomain: subdomain,
-        record: txtRecordValue
+        record: txtRecord
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('API Error:', errorData);
-      throw new Error(`Failed to create DNS record: ${errorData}`);
-    }
+    const responseText = await response.text();
+    console.log('API Response text:', responseText);
 
-    const apiResponse = await response.json();
-    console.log('API Response:', apiResponse);
+    if (!response.ok) {
+      throw new Error(`API Error: ${responseText}`);
+    }
 
     return new Response(
       JSON.stringify({
@@ -57,8 +55,8 @@ serve(async (req) => {
         message: 'DNS TXT record created successfully',
         data: {
           subdomain: subdomain,
-          txtRecord: txtRecordValue,
-          apiResponse
+          txtRecord: txtRecord,
+          apiResponse: responseText
         }
       }),
       {
@@ -71,7 +69,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        message: error.message
+        message: `Failed to create DNS record: ${error.message}`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
