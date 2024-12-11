@@ -65,7 +65,7 @@ export const VerifiableInvoiceForm = () => {
                   <label className="block text-sm font-medium mb-1">Invoice ID</label>
                   <Input
                     value={formData.id}
-                    onChange={(e) => handleInputChange("id", "", e.target.value)}
+                    onChange={(e) => handleInputChange("", "id", e.target.value)}
                     placeholder="Invoice ID"
                     required
                   />
@@ -75,7 +75,7 @@ export const VerifiableInvoiceForm = () => {
                   <Input
                     type="date"
                     value={formData.date}
-                    onChange={(e) => handleInputChange("date", "", e.target.value)}
+                    onChange={(e) => handleInputChange("", "date", e.target.value)}
                     required
                   />
                 </div>
@@ -88,7 +88,7 @@ export const VerifiableInvoiceForm = () => {
 
               <BillToSection
                 billTo={formData.billTo}
-                onInputChange={handleInputChange}
+                onInputChange={handleNestedInputChange}
               />
 
               <BillableItemsSection

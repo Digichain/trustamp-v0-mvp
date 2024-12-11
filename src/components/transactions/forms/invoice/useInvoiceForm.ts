@@ -7,32 +7,31 @@ export const useInvoiceForm = () => {
     ...verifiableInvoiceSchema,
     billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }]
   });
-  const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
 
   const handleInputChange = (section: string, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
+    console.log("handleInputChange called with:", { section, field, value });
+    
+    if (section === "") {
+      // Handle top-level fields
+      setFormData(prev => ({
+        ...prev,
         [field]: value
-      }
-    }));
-  };
-
-  const handleNestedInputChange = (section: string, field: string, value: string) => {
-    const [nestedField, subField] = field.split('.');
-    if (subField) {
+      }));
+    } else if (field.includes('.')) {
+      // Handle nested fields (e.g., billTo.company.name)
+      const [parentField, childField] = field.split('.');
       setFormData(prev => ({
         ...prev,
         [section]: {
           ...prev[section],
-          [nestedField]: {
-            ...prev[section][nestedField],
-            [subField]: value
+          [parentField]: {
+            ...prev[section][parentField],
+            [childField]: value
           }
         }
       }));
     } else {
+      // Handle first-level nested fields
       setFormData(prev => ({
         ...prev,
         [section]: {
@@ -43,7 +42,13 @@ export const useInvoiceForm = () => {
     }
   };
 
+  const handleNestedInputChange = (section: string, field: string, value: string) => {
+    console.log("handleNestedInputChange called with:", { section, field, value });
+    handleInputChange(section, field, value);
+  };
+
   const handleBillableItemChange = (index: number, field: string, value: string | number) => {
+    console.log("handleBillableItemChange called with:", { index, field, value });
     const newBillableItems = [...formData.billableItems];
     newBillableItems[index] = {
       ...newBillableItems[index],
@@ -75,8 +80,6 @@ export const useInvoiceForm = () => {
   return {
     formData,
     setFormData,
-    didDocument,
-    setDidDocument,
     handleInputChange,
     handleNestedInputChange,
     handleBillableItemChange
