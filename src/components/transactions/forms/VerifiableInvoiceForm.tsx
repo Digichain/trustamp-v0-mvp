@@ -1,29 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { BillFromSection } from "./invoice/BillFromSection";
 import { BillToSection } from "./invoice/BillToSection";
 import { BillableItemsSection } from "./invoice/BillableItemsSection";
 import { TotalsSection } from "./invoice/TotalsSection";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { InvoicePreview } from "../previews/InvoicePreview";
-import { DIDCreator, DIDDocument } from "../identity/DIDCreator";
-import { formatInvoiceToOpenAttestation } from "@/utils/document-formatters";
+import { DIDDocument } from "../identity/DIDCreator";
+import { InvoiceFormHeader } from "./invoice/InvoiceFormHeader";
+import { useInvoiceSubmission } from "./invoice/useInvoiceSubmission";
 
 export const VerifiableInvoiceForm = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     ...verifiableInvoiceSchema,
     billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }]
   });
   const [showPreview, setShowPreview] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
+  const { handleSubmit, isSubmitting } = useInvoiceSubmission();
 
   const handleDIDCreated = (doc: DIDDocument) => {
     console.log("DID Document created:", doc);
@@ -97,74 +96,15 @@ export const VerifiableInvoiceForm = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting form data:", formData);
-
-    if (!didDocument) {
-      toast({
-        title: "Error",
-        description: "Please create a DID document first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error("No user found");
-      }
-
-      // Format the document in OpenAttestation schema
-      const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
-      console.log("OpenAttestation document:", openAttestationDocument);
-
-      // Save the transaction and the document
-      const { data, error } = await supabase
-        .from("transactions")
-        .insert({
-          transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
-          network: "ethereum",
-          amount: formData.total,
-          status: "pending",
-          document_subtype: "verifiable",
-          title: "INVOICE",
-          transaction_type: "trade",
-          user_id: user.id,
-          raw_document: openAttestationDocument // Store the complete document
-        })
-        .select();
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Invoice created successfully",
-      });
-
-      navigate("/transactions");
-    } catch (error) {
-      console.error("Error creating transaction:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create invoice",
-        variant: "destructive",
-      });
-    }
+    if (!didDocument) return;
+    await handleSubmit(formData, didDocument);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Document Identity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DIDCreator onDIDCreated={handleDIDCreated} />
-        </CardContent>
-      </Card>
+    <form onSubmit={onSubmit} className="space-y-8">
+      <InvoiceFormHeader onDIDCreated={handleDIDCreated} />
 
       <Card>
         <CardHeader>
@@ -197,7 +137,7 @@ export const VerifiableInvoiceForm = () => {
 
           <BillToSection
             billTo={formData.billTo}
-            onInputChange={handleNestedInputChange}
+            onInputChange={handleInputChange}
           />
 
           <BillableItemsSection
@@ -241,14 +181,16 @@ export const VerifiableInvoiceForm = () => {
           Cancel
         </Button>
         <PreviewButton onClick={() => setShowPreview(true)} />
-        <Button type="submit" disabled={!didDocument}>Create Invoice</Button>
+        <Button type="submit" disabled={!didDocument || isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Invoice"}
+        </Button>
       </div>
 
       <PreviewDialog
         title="Invoice Preview"
         isOpen={showPreview}
         onOpenChange={setShowPreview}
-        onConfirm={handleSubmit}
+        onConfirm={onSubmit}
       >
         <InvoicePreview data={formData} />
       </PreviewDialog>
