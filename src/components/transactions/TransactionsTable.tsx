@@ -11,6 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, WrapText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { PreviewDialog } from "./previews/PreviewDialog";
+import { InvoicePreview } from "./previews/InvoicePreview";
+import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
+import { useState } from "react";
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -26,6 +30,9 @@ const getStatusColor = (status: string) => {
 };
 
 export const TransactionsTable = () => {
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
     queryFn: async () => {
@@ -43,6 +50,24 @@ export const TransactionsTable = () => {
     },
   });
 
+  const handlePreviewClick = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setShowPreview(true);
+  };
+
+  const renderPreview = () => {
+    if (!selectedTransaction) return null;
+
+    switch (selectedTransaction.document_subtype?.toLowerCase()) {
+      case "verifiable":
+        return <InvoicePreview data={selectedTransaction.raw_document || {}} />;
+      case "transferable":
+        return <BillOfLadingPreview data={selectedTransaction.raw_document || {}} />;
+      default:
+        return <div>Unsupported document type</div>;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="animate-pulse">
@@ -54,57 +79,72 @@ export const TransactionsTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Transaction Hash</TableHead>
-            <TableHead>Subtype</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions?.map((tx) => (
-            <TableRow key={tx.id}>
-              <TableCell className="font-mono">
-                {tx.transaction_hash.slice(0, 10)}...
-                {tx.transaction_hash.slice(-8)}
-              </TableCell>
-              <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
-              <TableCell>{tx.title || '-'}</TableCell>
-              <TableCell>
-                <span className={getStatusColor(tx.status)}>{tx.status}</span>
-              </TableCell>
-              <TableCell>
-                {formatDistanceToNow(new Date(tx.created_at || ""), {
-                  addSuffix: true,
-                })}
-              </TableCell>
-              <TableCell className="text-right space-x-2">
-                <Button variant="ghost" size="icon">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <WrapText className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-          {(!transactions || transactions.length === 0) && (
+    <>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-center py-8 text-gray-500"
-              >
-                No transactions found
-              </TableCell>
+              <TableHead>Transaction Hash</TableHead>
+              <TableHead>Subtype</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Time</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {transactions?.map((tx) => (
+              <TableRow key={tx.id}>
+                <TableCell className="font-mono">
+                  {tx.transaction_hash.slice(0, 10)}...
+                  {tx.transaction_hash.slice(-8)}
+                </TableCell>
+                <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
+                <TableCell>{tx.title || '-'}</TableCell>
+                <TableCell>
+                  <span className={getStatusColor(tx.status)}>{tx.status}</span>
+                </TableCell>
+                <TableCell>
+                  {formatDistanceToNow(new Date(tx.created_at || ""), {
+                    addSuffix: true,
+                  })}
+                </TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handlePreviewClick(tx)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <WrapText className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {(!transactions || transactions.length === 0) && (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-gray-500"
+                >
+                  No transactions found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <PreviewDialog
+        title={`${selectedTransaction?.title || 'Document'} Preview`}
+        isOpen={showPreview}
+        onOpenChange={setShowPreview}
+        onConfirm={() => setShowPreview(false)}
+      >
+        {renderPreview()}
+      </PreviewDialog>
+    </>
   );
 };
