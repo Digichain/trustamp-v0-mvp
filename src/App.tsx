@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from '@/pages/Dashboard';
 import Transactions from '@/pages/Transactions';
 import CreateTransaction from '@/pages/CreateTransaction';
@@ -38,7 +39,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/auth" />;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen w-full">
+      <AppSidebar />
+      <div className="flex-1">
+        {children}
+      </div>
+    </div>
+  );
 };
 
 function App() {
