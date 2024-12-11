@@ -8,6 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Eye, WrapText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const getStatusColor = (status: string) => {
@@ -59,10 +61,9 @@ export const TransactionsTable = () => {
             <TableHead>Transaction Hash</TableHead>
             <TableHead>Subtype</TableHead>
             <TableHead>Title</TableHead>
-            <TableHead>Network</TableHead>
-            <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,8 +75,6 @@ export const TransactionsTable = () => {
               </TableCell>
               <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
               <TableCell>{tx.title || '-'}</TableCell>
-              <TableCell>{tx.network}</TableCell>
-              <TableCell>{tx.amount}</TableCell>
               <TableCell>
                 <span className={getStatusColor(tx.status)}>{tx.status}</span>
               </TableCell>
@@ -84,12 +83,20 @@ export const TransactionsTable = () => {
                   addSuffix: true,
                 })}
               </TableCell>
+              <TableCell className="text-right space-x-2">
+                <Button variant="ghost" size="icon">
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <WrapText className="h-4 w-4" />
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
           {(!transactions || transactions.length === 0) && (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={6}
                 className="text-center py-8 text-gray-500"
               >
                 No transactions found
