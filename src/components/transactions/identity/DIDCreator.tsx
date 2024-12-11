@@ -24,7 +24,6 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
 
   const generateUniqueDNSLocation = () => {
-    // Generate a random string for the subdomain
     const randomString = Math.random().toString(36).substring(2, 8);
     return `example-${randomString}.sandbox.openattestation.com`;
   };
@@ -42,8 +41,6 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     setIsCreating(true);
     try {
       const did = `did:ethr:${walletAddress}`;
-      
-      // Generate a unique sandbox DNS location
       const dnsLocation = generateUniqueDNSLocation();
       console.log("Generated DNS Location:", dnsLocation);
       
@@ -62,7 +59,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       
       toast({
         title: "DID Created",
-        description: "Your DID has been created successfully",
+        description: "Your DID has been created successfully. You can now fill out the form.",
       });
 
     } catch (error) {
@@ -83,7 +80,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       <CardHeader>
         <CardTitle>Create Document Identity</CardTitle>
         <CardDescription>
-          Create a DID for document verification using the OpenAttestation sandbox
+          First, create a DID for document verification using the OpenAttestation sandbox
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

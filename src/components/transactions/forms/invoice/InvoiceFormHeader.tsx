@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { DIDCreator, DIDDocument } from "../../identity/DIDCreator";
 
 interface InvoiceFormHeaderProps {
@@ -10,6 +10,9 @@ export const InvoiceFormHeader = ({ onDIDCreated }: InvoiceFormHeaderProps) => {
     <Card>
       <CardHeader>
         <CardTitle>Document Identity</CardTitle>
+        <CardDescription>
+          Create a DID before filling out the invoice details
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <DIDCreator onDIDCreated={onDIDCreated} />

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
 import { BillFromSection } from "./invoice/BillFromSection";
 import { BillToSection } from "./invoice/BillToSection";
 import { BillableItemsSection } from "./invoice/BillableItemsSection";
@@ -13,87 +12,24 @@ import { InvoicePreview } from "../previews/InvoicePreview";
 import { DIDDocument } from "../identity/DIDCreator";
 import { InvoiceFormHeader } from "./invoice/InvoiceFormHeader";
 import { useInvoiceSubmission } from "./invoice/useInvoiceSubmission";
+import { useInvoiceForm } from "./invoice/useInvoiceForm";
 
 export const VerifiableInvoiceForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    ...verifiableInvoiceSchema,
-    billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }]
-  });
   const [showPreview, setShowPreview] = useState(false);
-  const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
   const { handleSubmit, isSubmitting } = useInvoiceSubmission();
+  const {
+    formData,
+    didDocument,
+    setDidDocument,
+    handleInputChange,
+    handleNestedInputChange,
+    handleBillableItemChange
+  } = useInvoiceForm();
 
   const handleDIDCreated = (doc: DIDDocument) => {
     console.log("DID Document created:", doc);
     setDidDocument(doc);
-  };
-
-  const handleInputChange = (section: string, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
-  };
-
-  const handleNestedInputChange = (
-    section: string,
-    field: string,
-    value: string
-  ) => {
-    const [nestedField, subField] = field.split('.');
-    if (subField) {
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [nestedField]: {
-            ...prev[section][nestedField],
-            [subField]: value
-          }
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value
-        }
-      }));
-    }
-  };
-
-  const handleBillableItemChange = (index: number, field: string, value: string | number) => {
-    const newBillableItems = [...formData.billableItems];
-    newBillableItems[index] = {
-      ...newBillableItems[index],
-      [field]: value
-    };
-
-    if (field === 'quantity' || field === 'unitPrice') {
-      newBillableItems[index].amount = 
-        Number(newBillableItems[index].quantity) * Number(newBillableItems[index].unitPrice);
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      billableItems: newBillableItems
-    }));
-
-    const subtotal = newBillableItems.reduce((sum, item) => sum + Number(item.amount), 0);
-    const taxTotal = subtotal * (Number(formData.tax) / 100);
-    
-    setFormData(prev => ({
-      ...prev,
-      billableItems: newBillableItems,
-      subtotal: subtotal,
-      taxTotal: taxTotal,
-      total: subtotal + taxTotal
-    }));
   };
 
   const onSubmit = async (e?: React.FormEvent) => {
@@ -118,7 +54,7 @@ export const VerifiableInvoiceForm = () => {
               <label className="block text-sm font-medium mb-1">Invoice ID</label>
               <Input
                 value={formData.id}
-                onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
+                onChange={(e) => handleInputChange("id", "", e.target.value)}
                 placeholder="Invoice ID"
               />
             </div>
@@ -127,7 +63,7 @@ export const VerifiableInvoiceForm = () => {
               <Input
                 type="date"
                 value={formData.date}
-                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                onChange={(e) => handleInputChange("date", "", e.target.value)}
               />
             </div>
           </div>
@@ -145,17 +81,15 @@ export const VerifiableInvoiceForm = () => {
           <BillableItemsSection
             items={formData.billableItems}
             onItemChange={handleBillableItemChange}
-            onAddItem={() => setFormData(prev => ({
-              ...prev,
-              billableItems: [...prev.billableItems, { description: "", quantity: 0, unitPrice: 0, amount: 0 }]
-            }))}
+            onAddItem={() => handleInputChange("billableItems", "", JSON.stringify([
+              ...formData.billableItems,
+              { description: "", quantity: 0, unitPrice: 0, amount: 0 }
+            ]))}
             onRemoveItem={(index) => {
               if (formData.billableItems.length > 1) {
-                const newItems = formData.billableItems.filter((_, i) => i !== index);
-                setFormData(prev => ({
-                  ...prev,
-                  billableItems: newItems
-                }));
+                handleInputChange("billableItems", "", JSON.stringify(
+                  formData.billableItems.filter((_, i) => i !== index)
+                ));
               }
             }}
           />
@@ -167,12 +101,9 @@ export const VerifiableInvoiceForm = () => {
             total={formData.total}
             onTaxChange={(taxRate) => {
               const taxTotal = formData.subtotal * (taxRate / 100);
-              setFormData(prev => ({
-                ...prev,
-                tax: taxRate,
-                taxTotal: taxTotal,
-                total: prev.subtotal + taxTotal
-              }));
+              handleInputChange("tax", "", taxRate.toString());
+              handleInputChange("taxTotal", "", taxTotal.toString());
+              handleInputChange("total", "", (formData.subtotal + taxTotal).toString());
             }}
           />
         </CardContent>
