@@ -46,8 +46,13 @@ export const PreviewDialog = ({
   );
 };
 
-export const PreviewButton = ({ onClick }: { onClick: () => void }) => (
-  <Button variant="outline" onClick={onClick}>
+interface PreviewButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+export const PreviewButton = ({ onClick, disabled }: PreviewButtonProps) => (
+  <Button variant="outline" onClick={onClick} disabled={disabled}>
     <Eye className="mr-2" />
     Preview
   </Button>

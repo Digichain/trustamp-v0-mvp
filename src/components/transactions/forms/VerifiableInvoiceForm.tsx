@@ -180,7 +180,7 @@ export const VerifiableInvoiceForm = () => {
         <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
           Cancel
         </Button>
-        <PreviewButton onClick={() => setShowPreview(true)} />
+        <PreviewButton onClick={() => setShowPreview(true)} disabled={!didDocument} />
         <Button type="submit" disabled={!didDocument || isSubmitting}>
           {isSubmitting ? "Creating..." : "Create Invoice"}
         </Button>
