@@ -17,6 +17,13 @@ export const TotalsSection = ({
 }: TotalsSectionProps) => {
   console.log("TotalsSection - Rendering with values:", { subtotal, tax, taxTotal, total });
   
+  const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+    if (!isNaN(value) && value >= 0) {
+      onTaxChange(value);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -32,8 +39,8 @@ export const TotalsSection = ({
               min="0"
               max="100"
               step="0.01"
-              value={tax}
-              onChange={(e) => onTaxChange(Number(e.target.value))}
+              value={tax || 0}
+              onChange={handleTaxChange}
               className="w-20"
             />
           </div>
