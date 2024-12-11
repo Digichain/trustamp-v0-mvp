@@ -12,7 +12,7 @@ export const useDocumentData = () => {
         .from("invoice_documents")
         .select("*")
         .eq("transaction_id", transaction.id)
-        .maybeSingle(); // Changed to maybeSingle()
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching invoice document:", error);
@@ -26,7 +26,7 @@ export const useDocumentData = () => {
         .from("bill_of_lading_documents")
         .select("*")
         .eq("transaction_id", transaction.id)
-        .maybeSingle(); // Changed to maybeSingle()
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching bill of lading document:", error);
@@ -50,6 +50,24 @@ export const useDocumentData = () => {
         toast({
           title: "Authentication Error",
           description: "You must be logged in to delete documents",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Verify user owns the transaction before proceeding
+      const { data: transactionData, error: verifyError } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("id", transaction.id)
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (verifyError || !transactionData) {
+        console.error("Error verifying transaction ownership:", verifyError);
+        toast({
+          title: "Error",
+          description: "You don't have permission to delete this document",
           variant: "destructive",
         });
         return false;
@@ -88,6 +106,7 @@ export const useDocumentData = () => {
 
         if (storageError) {
           console.error("Error deleting from storage:", storageError);
+          throw storageError;
         }
       } else {
         console.log("File not found in storage:", fileName);
@@ -99,7 +118,7 @@ export const useDocumentData = () => {
         .from("transactions")
         .delete()
         .eq("id", transaction.id)
-        .eq("user_id", session.user.id); // Ensure user owns the transaction
+        .eq("user_id", session.user.id);
 
       if (transactionError) {
         console.error("Error deleting from transactions:", transactionError);
