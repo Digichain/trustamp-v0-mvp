@@ -65,14 +65,15 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
       });
 
       if (error) {
+        console.error('Error from Edge Function:', error);
         throw error;
       }
 
-      console.log('DNS Record creation response:', data);
-
-      if (!data.data.dnsLocation) {
+      if (!data?.data?.dnsLocation) {
         throw new Error('DNS location not returned from API');
       }
+
+      console.log('DNS Record creation response:', data);
 
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
