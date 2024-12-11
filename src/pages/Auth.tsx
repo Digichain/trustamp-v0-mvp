@@ -40,11 +40,11 @@ const Auth = () => {
       }
 
       // Handle specific error events
-      if (event === 'USER_DELETED') {
+      if (event === 'SIGNED_OUT') {
         toast({
           variant: "destructive",
-          title: "Account deleted",
-          description: "Your account has been deleted.",
+          title: "Signed out",
+          description: "You have been signed out of your account.",
         });
       }
     });
