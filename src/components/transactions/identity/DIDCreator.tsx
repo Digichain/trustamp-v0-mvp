@@ -3,7 +3,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 
 export interface DIDDocument {
   id: string;
@@ -21,11 +21,53 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const { walletAddress } = useWallet();
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
+  const [dnsVerified, setDnsVerified] = useState(false);
 
-  const generateUniqueDNSLocation = () => {
-    const randomString = Math.random().toString(36).substring(2, 8);
-    return `example-${randomString}.sandbox.openattestation.com`;
+  const verifyDNSRecord = async () => {
+    if (!didDocument?.dnsLocation) {
+      console.error('No DNS location to verify');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      console.log('Verifying DNS record for location:', didDocument.dnsLocation);
+      
+      // Call the OpenAttestation verification endpoint
+      const response = await fetch(`https://dns-proof-sandbox.openattestation.com/api/verify?location=${didDocument.dnsLocation}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify DNS record');
+      }
+
+      const verificationResult = await response.json();
+      console.log('DNS verification result:', verificationResult);
+
+      if (verificationResult.status === 'verified') {
+        setDnsVerified(true);
+        toast({
+          title: "DNS Record Verified",
+          description: "The DNS record has been successfully verified.",
+        });
+      } else {
+        toast({
+          title: "DNS Not Yet Verified",
+          description: "The DNS record exists but hasn't propagated yet. Please try again in a few moments.",
+          variant: "warning",
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying DNS record:', error);
+      toast({
+        title: "Verification Failed",
+        description: "Failed to verify DNS record. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const createDID = async () => {
@@ -41,25 +83,47 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     setIsCreating(true);
     try {
       const did = `did:ethr:${walletAddress}`;
-      const dnsLocation = generateUniqueDNSLocation();
-      console.log("Generated DNS Location:", dnsLocation);
       
+      // Create DNS record via Edge Function
+      const response = await fetch('/functions/v1/create-dns-record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ did }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create DNS record');
+      }
+
+      const { data } = await response.json();
+      console.log('DNS Record creation response:', data);
+
+      if (!data.dnsLocation) {
+        throw new Error('DNS location not returned from API');
+      }
+
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
         type: "Secp256k1VerificationKey2018",
         controller: did,
         ethereumAddress: walletAddress.toLowerCase(),
-        dnsLocation: dnsLocation
+        dnsLocation: data.dnsLocation
       };
 
-      console.log("Created DID Document:", newDidDocument);
+      console.log('Created DID Document:', newDidDocument);
       
       setDidDocument(newDidDocument);
       onDIDCreated(newDidDocument);
       
+      // Automatically attempt first verification
+      await verifyDNSRecord();
+      
       toast({
         title: "DID Created",
-        description: "Your DID has been created successfully. You can now fill out the form.",
+        description: "Your DID has been created successfully. Verification may take a few moments.",
       });
 
     } catch (error) {
@@ -112,9 +176,35 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
               </pre>
             </div>
             
-            <div className="flex items-start gap-2 text-sm text-muted-foreground">
-              <CheckCircle2 className="h-4 w-4 text-green-500 mt-1" />
-              <p>DID created with sandbox DNS location: {didDocument.dnsLocation}</p>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-1" />
+                <p>DID created with sandbox DNS location: {didDocument.dnsLocation}</p>
+              </div>
+
+              <Button
+                onClick={verifyDNSRecord}
+                disabled={isVerifying}
+                variant={dnsVerified ? "outline" : "secondary"}
+                className="w-full"
+              >
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying DNS...
+                  </>
+                ) : dnsVerified ? (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                    DNS Record Verified
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Verify DNS Record
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         )}

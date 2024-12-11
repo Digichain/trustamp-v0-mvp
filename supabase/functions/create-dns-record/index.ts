@@ -23,8 +23,8 @@ serve(async (req) => {
     const address = did.split(':')[2].split('#')[0];
     console.log('Extracted address:', address);
 
-    // Format the DNS TXT record
-    const txtRecord = `openatts net=ethereum netId=11155111 addr=${address}`;
+    // Format the DNS TXT record according to OpenAttestation specs
+    const txtRecord = `openatts net=ethereum netId=11155111 addr=${address.toLowerCase()}`;
     console.log('Formatted TXT record:', txtRecord);
 
     // Create the DNS record using the OpenAttestation sandbox API
@@ -35,26 +35,23 @@ serve(async (req) => {
         'Authorization': 'Bearer sandbox'
       },
       body: JSON.stringify({
-        record: txtRecord
+        record: txtRecord,
+        type: 'TXT'  // Explicitly specify TXT record type
       })
     });
 
-    console.log('API Response status:', response.status);
-    const responseText = await response.text();
-    console.log('Raw API Response:', responseText);
-
     if (!response.ok) {
-      console.error('API Error Response:', responseText);
-      throw new Error(`API Error: ${responseText}`);
+      const errorText = await response.text();
+      console.error('DNS API Error Response:', errorText);
+      throw new Error(`DNS API Error: ${errorText}`);
     }
 
-    let apiResponse;
-    try {
-      apiResponse = JSON.parse(responseText);
-      console.log('Parsed API Response:', apiResponse);
-    } catch (e) {
-      console.error('Error parsing API response:', e);
-      throw new Error('Invalid response format from DNS API');
+    const apiResponse = await response.json();
+    console.log('DNS API Response:', apiResponse);
+
+    // Verify the DNS record was created
+    if (!apiResponse.location) {
+      throw new Error('DNS location not returned from API');
     }
 
     return new Response(
