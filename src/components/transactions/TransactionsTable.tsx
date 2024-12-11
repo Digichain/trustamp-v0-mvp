@@ -1,5 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -12,9 +11,10 @@ import { formatDistanceToNow } from "date-fns";
 import { PreviewDialog } from "./previews/PreviewDialog";
 import { InvoicePreview } from "./previews/InvoicePreview";
 import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { TransactionActions } from "./actions/TransactionActions";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useDocumentData } from "@/hooks/useDocumentData";
+import { useToast } from "@/components/ui/use-toast";
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -34,57 +34,9 @@ export const TransactionsTable = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [documentData, setDocumentData] = useState<any>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: transactions, isLoading } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching transactions:", error);
-        throw error;
-      }
-
-      return data;
-    },
-  });
-
-  const fetchDocumentData = async (transaction: any) => {
-    console.log("Fetching document data for transaction:", transaction);
-    
-    if (transaction.document_subtype === "verifiable") {
-      const { data, error } = await supabase
-        .from("invoice_documents")
-        .select("*")
-        .eq("transaction_id", transaction.id);
-
-      if (error) {
-        console.error("Error fetching invoice document:", error);
-        return null;
-      }
-
-      return data && data.length > 0 ? data[0] : null;
-
-    } else if (transaction.document_subtype === "transferable") {
-      const { data, error } = await supabase
-        .from("bill_of_lading_documents")
-        .select("*")
-        .eq("transaction_id", transaction.id);
-
-      if (error) {
-        console.error("Error fetching bill of lading document:", error);
-        return null;
-      }
-
-      return data && data.length > 0 ? data[0] : null;
-    }
-
-    return null;
-  };
+  
+  const { transactions, isLoading, invalidateTransactions } = useTransactions();
+  const { fetchDocumentData, handleDelete } = useDocumentData();
 
   const handlePreviewClick = async (transaction: any) => {
     try {
@@ -110,52 +62,10 @@ export const TransactionsTable = () => {
     }
   };
 
-  const handleDelete = async (transaction: any) => {
-    try {
-      // Delete from the appropriate document table
-      const documentTable = transaction.document_subtype === "verifiable" 
-        ? "invoice_documents" 
-        : "bill_of_lading_documents";
-      
-      const { error: documentError } = await supabase
-        .from(documentTable)
-        .delete()
-        .eq("transaction_id", transaction.id);
-
-      if (documentError) throw documentError;
-
-      // Delete from transactions table
-      const { error: transactionError } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", transaction.id);
-
-      if (transactionError) throw transactionError;
-
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('raw-documents')
-        .remove([`${transaction.id}.json`]);
-
-      if (storageError) {
-        console.error("Error deleting from storage:", storageError);
-        // Don't throw here as the file might not exist
-      }
-
-      // Refresh the transactions list
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-
-      toast({
-        title: "Success",
-        description: "Document deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error deleting document:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete document",
-        variant: "destructive",
-      });
+  const onDelete = async (transaction: any) => {
+    const success = await handleDelete(transaction);
+    if (success) {
+      invalidateTransactions();
     }
   };
 
@@ -217,7 +127,7 @@ export const TransactionsTable = () => {
                   <TransactionActions
                     transaction={tx}
                     onPreviewClick={() => handlePreviewClick(tx)}
-                    onDelete={() => handleDelete(tx)}
+                    onDelete={() => onDelete(tx)}
                   />
                 </TableCell>
               </TableRow>
