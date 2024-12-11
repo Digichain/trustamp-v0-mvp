@@ -13,19 +13,24 @@ import Payments from '@/pages/Payments';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 
+console.log("App component initializing...");
+
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
+    console.log("ProtectedRoute - Checking authentication...");
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("ProtectedRoute - Auth check result:", !!session);
       setIsAuthenticated(!!session);
     };
     
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("ProtectedRoute - Auth state changed:", event, !!session);
       setIsAuthenticated(!!session);
     });
 
@@ -33,13 +38,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   if (isAuthenticated === null) {
+    console.log("ProtectedRoute - Loading state");
     return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
+    console.log("ProtectedRoute - Not authenticated, redirecting to auth");
     return <Navigate to="/auth" />;
   }
 
+  console.log("ProtectedRoute - Authenticated, rendering protected content");
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
@@ -51,6 +59,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  console.log("App component rendering...");
   return (
     <Router>
       <WalletProvider>
