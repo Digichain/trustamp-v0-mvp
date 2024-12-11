@@ -30,11 +30,19 @@ export const useInvoiceSubmission = () => {
     console.log("Submitting form data:", formData);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // First check if we have an authenticated session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (!user) {
-        throw new Error("No user found");
+      if (sessionError) {
+        throw new Error("Authentication error: " + sessionError.message);
       }
+
+      if (!sessionData.session?.user) {
+        throw new Error("Please sign in to create an invoice");
+      }
+
+      const user = sessionData.session.user;
+      console.log("Authenticated user:", user.id);
 
       // Format the document in OpenAttestation schema
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
@@ -45,9 +53,10 @@ export const useInvoiceSubmission = () => {
       
       // Save document to storage
       const documentPath = await saveDocumentToStorage(openAttestationDocument, fileName);
+      console.log("Document saved at path:", documentPath);
 
       // Save the transaction and document reference
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from("transactions")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
@@ -62,7 +71,10 @@ export const useInvoiceSubmission = () => {
         })
         .select();
 
-      if (error) throw error;
+      if (insertError) {
+        console.error("Error inserting transaction:", insertError);
+        throw new Error("Failed to save transaction: " + insertError.message);
+      }
 
       toast({
         title: "Success",
@@ -70,11 +82,11 @@ export const useInvoiceSubmission = () => {
       });
 
       navigate("/transactions");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating transaction:", error);
       toast({
         title: "Error",
-        description: "Failed to create invoice",
+        description: error.message || "Failed to create invoice",
         variant: "destructive",
       });
     } finally {
