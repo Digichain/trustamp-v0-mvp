@@ -11,27 +11,29 @@ export const useDocumentData = () => {
       const { data, error } = await supabase
         .from("invoice_documents")
         .select("*")
-        .eq("transaction_id", transaction.id);
+        .eq("transaction_id", transaction.id)
+        .maybeSingle(); // Changed to maybeSingle()
 
       if (error) {
         console.error("Error fetching invoice document:", error);
         return null;
       }
 
-      return data && data.length > 0 ? data[0] : null;
+      return data;
 
     } else if (transaction.document_subtype === "transferable") {
       const { data, error } = await supabase
         .from("bill_of_lading_documents")
         .select("*")
-        .eq("transaction_id", transaction.id);
+        .eq("transaction_id", transaction.id)
+        .maybeSingle(); // Changed to maybeSingle()
 
       if (error) {
         console.error("Error fetching bill of lading document:", error);
         return null;
       }
 
-      return data && data.length > 0 ? data[0] : null;
+      return data;
     }
 
     return null;
@@ -62,8 +64,7 @@ export const useDocumentData = () => {
       const { error: documentError } = await supabase
         .from(documentTable)
         .delete()
-        .eq("transaction_id", transaction.id)
-        .single();
+        .eq("transaction_id", transaction.id);
 
       if (documentError) {
         console.error(`Error deleting from ${documentTable}:`, documentError);
@@ -98,8 +99,7 @@ export const useDocumentData = () => {
         .from("transactions")
         .delete()
         .eq("id", transaction.id)
-        .eq("user_id", session.user.id) // Ensure user owns the transaction
-        .single();
+        .eq("user_id", session.user.id); // Ensure user owns the transaction
 
       if (transactionError) {
         console.error("Error deleting from transactions:", transactionError);
