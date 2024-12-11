@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { wrapDocument } from "@/utils/document-wrapper";
+import { useTransactions } from "@/hooks/useTransactions";
 
 interface TransactionActionsProps {
   transaction: any;
@@ -28,6 +29,7 @@ export const TransactionActions = ({
   onDelete,
 }: TransactionActionsProps) => {
   const { toast } = useToast();
+  const { invalidateTransactions } = useTransactions();
 
   const handleWrapDocument = async () => {
     try {
@@ -80,6 +82,9 @@ export const TransactionActions = ({
 
       console.log("Document wrapped and stored successfully at:", publicUrl);
       console.log("Document merkle root:", merkleRoot);
+
+      // Invalidate transactions cache to refresh the UI
+      await invalidateTransactions();
 
       toast({
         title: "Success",
