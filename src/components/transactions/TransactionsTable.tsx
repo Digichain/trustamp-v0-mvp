@@ -15,6 +15,7 @@ import { PreviewDialog } from "./previews/PreviewDialog";
 import { InvoicePreview } from "./previews/InvoicePreview";
 import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -33,6 +34,7 @@ export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [documentData, setDocumentData] = useState<any>(null);
+  const { toast } = useToast();
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -52,42 +54,62 @@ export const TransactionsTable = () => {
   });
 
   const fetchDocumentData = async (transaction: any) => {
+    console.log("Fetching document data for transaction:", transaction);
+    
     if (transaction.document_subtype === "verifiable") {
       const { data, error } = await supabase
         .from("invoice_documents")
         .select("*")
-        .eq("transaction_id", transaction.id)
-        .single();
+        .eq("transaction_id", transaction.id);
 
       if (error) {
         console.error("Error fetching invoice document:", error);
         return null;
       }
 
-      return data;
+      // Return the first document if found, otherwise null
+      return data && data.length > 0 ? data[0] : null;
+
     } else if (transaction.document_subtype === "transferable") {
       const { data, error } = await supabase
         .from("bill_of_lading_documents")
         .select("*")
-        .eq("transaction_id", transaction.id)
-        .single();
+        .eq("transaction_id", transaction.id);
 
       if (error) {
         console.error("Error fetching bill of lading document:", error);
         return null;
       }
 
-      return data;
+      // Return the first document if found, otherwise null
+      return data && data.length > 0 ? data[0] : null;
     }
 
     return null;
   };
 
   const handlePreviewClick = async (transaction: any) => {
-    const docData = await fetchDocumentData(transaction);
-    setSelectedTransaction(transaction);
-    setDocumentData(docData);
-    setShowPreview(true);
+    try {
+      const docData = await fetchDocumentData(transaction);
+      if (!docData) {
+        toast({
+          title: "Document Not Found",
+          description: "The document data could not be retrieved.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedTransaction(transaction);
+      setDocumentData(docData);
+      setShowPreview(true);
+    } catch (error) {
+      console.error("Error in handlePreviewClick:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load document preview",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderPreview = () => {
