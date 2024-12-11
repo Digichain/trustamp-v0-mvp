@@ -2,6 +2,7 @@ import {
   MoreVertical,
   Package,
   Trash2,
+  Eye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ export const TransactionActions = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onPreviewClick}>
+          <Eye className="mr-2 h-4 w-4" />
           Preview Document
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleWrapDocument}>
