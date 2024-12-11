@@ -30,11 +30,13 @@ serve(async (req) => {
     const address = addressMatch[1].toLowerCase();
     console.log("Extracted address:", address);
 
-    // Format data for DNS record creation
+    // Format data for DNS record creation according to OpenAttestation requirements
     const data = {
       address,
-      networkId: 11155111, // Sepolia testnet
-      type: "openatts"
+      network: "sepolia",
+      networkId: "11155111",
+      type: "openatts",
+      identifier: `did:ethr:${address}`
     };
 
     console.log("Making request to OpenAttestation sandbox API with data:", data);
