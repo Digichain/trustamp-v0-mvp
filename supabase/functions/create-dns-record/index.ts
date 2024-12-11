@@ -40,16 +40,18 @@ serve(async (req) => {
     });
 
     console.log('API Response status:', response.status);
-    const responseData = await response.text();
-    console.log('API Response:', responseData);
+    const responseText = await response.text();
+    console.log('Raw API Response:', responseText);
 
     if (!response.ok) {
-      throw new Error(`API Error: ${responseData}`);
+      console.error('API Error Response:', responseText);
+      throw new Error(`API Error: ${responseText}`);
     }
 
     let apiResponse;
     try {
-      apiResponse = JSON.parse(responseData);
+      apiResponse = JSON.parse(responseText);
+      console.log('Parsed API Response:', apiResponse);
     } catch (e) {
       console.error('Error parsing API response:', e);
       throw new Error('Invalid response format from DNS API');
@@ -66,19 +68,27 @@ serve(async (req) => {
         }
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 200,
       },
     )
   } catch (error) {
-    console.error('Error creating DNS record:', error);
+    console.error('Error in create-dns-record function:', error);
+    
     return new Response(
       JSON.stringify({
         success: false,
-        message: `Failed to create DNS record: ${error.message}`
+        message: `Failed to create DNS record: ${error.message}`,
+        error: error.stack
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 400,
       },
     )
