@@ -1,3 +1,4 @@
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -54,47 +55,56 @@ serve(async (req) => {
       body: requestBody
     });
 
-    const apiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    const responseText = await apiResponse.text();
-    console.log("Raw API response:", responseText);
-
-    if (!apiResponse.ok) {
-      console.error("Error from OpenAttestation API:", {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        response: responseText
-      });
-      throw new Error(`Failed to create DNS record: ${responseText}`);
-    }
-
-    const apiData = responseText ? JSON.parse(responseText) : null;
-    console.log("Parsed OpenAttestation API response:", apiData);
-
-    // Format the response
-    const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
-
-    return new Response(
-      JSON.stringify({
-        data: {
-          dnsLocation: dnsName,
-          apiResponse: apiData
-        }
-      }),
-      {
+    try {
+      const apiResponse = await fetch(apiUrl, {
+        method: 'POST',
         headers: {
-          ...corsHeaders,
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        body: JSON.stringify(requestBody)
+      });
+
+      const responseText = await apiResponse.text();
+      console.log("Raw API response:", responseText);
+
+      if (!apiResponse.ok) {
+        console.error("Error from OpenAttestation API:", {
+          status: apiResponse.status,
+          statusText: apiResponse.statusText,
+          response: responseText
+        });
+        throw new Error(`Failed to create DNS record: ${responseText}`);
       }
-    );
+
+      const apiData = responseText ? JSON.parse(responseText) : null;
+      console.log("Parsed OpenAttestation API response:", apiData);
+
+      // Format the response
+      const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
+
+      return new Response(
+        JSON.stringify({
+          data: {
+            dnsLocation: dnsName,
+            apiResponse: apiData
+          }
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    } catch (fetchError) {
+      console.error("Error making request to OpenAttestation API:", {
+        error: fetchError.message,
+        stack: fetchError.stack,
+        type: fetchError.constructor.name
+      });
+      throw fetchError;
+    }
 
   } catch (error) {
     console.error("Error in oa-dns-records:", {
