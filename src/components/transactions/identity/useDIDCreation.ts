@@ -71,7 +71,7 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
       const did = `did:ethr:${walletAddress}`;
       console.log('Creating DID:', did);
       
-      const { data, error } = await supabase.functions.invoke('manage-dns-records', {
+      const { data, error } = await supabase.functions.invoke('oa-dns-records', {
         body: { 
           did,
           action: 'create'
