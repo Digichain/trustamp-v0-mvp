@@ -22,16 +22,23 @@ serve(async (req) => {
     }
 
     // Extract Ethereum address from DID
-    const address = did.split(':')[2];
+    const addressMatch = did.match(/did:ethr:(0x[a-fA-F0-9]{40})/);
+    if (!addressMatch) {
+      throw new Error('Invalid DID format');
+    }
+
+    const address = addressMatch[1].toLowerCase();
     console.log("Extracted address:", address);
 
     // Format data for DNS record creation
     const data = {
-      address: address.toLowerCase(),
+      address,
       networkId: 11155111, // Sepolia testnet
+      type: "openatts"
     };
 
-    console.log("Making request to OpenAttestation sandbox API...");
+    console.log("Making request to OpenAttestation sandbox API with data:", data);
+    
     const response = await fetch('https://dns-proof-sandbox.openattestation.com/api/records', {
       method: 'POST',
       headers: {
@@ -40,14 +47,27 @@ serve(async (req) => {
       body: JSON.stringify(data),
     });
 
+    const responseText = await response.text();
+    console.log("Raw API Response:", responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("API Error:", errorText);
-      throw new Error(`API error: ${response.status} ${errorText}`);
+      console.error("API Error Status:", response.status);
+      throw new Error(`API error: ${response.status} ${responseText}`);
     }
 
-    const result = await response.json();
-    console.log("API Response:", result);
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Failed to parse API response:", e);
+      throw new Error("Invalid response from DNS API");
+    }
+
+    console.log("Parsed API Response:", result);
+
+    if (!result.location) {
+      throw new Error("DNS location not returned from API");
+    }
 
     return new Response(
       JSON.stringify({
