@@ -3,7 +3,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 
 export interface DIDDocument {
   id: string;
@@ -21,11 +21,45 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const { walletAddress } = useWallet();
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
+  const [dnsVerified, setDnsVerified] = useState(false);
 
   const generateUniqueDNSLocation = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
     return `example-${randomString}.sandbox.openattestation.com`;
+  };
+
+  const verifyDNSRecord = async (dnsLocation: string) => {
+    setIsVerifying(true);
+    try {
+      console.log("Verifying DNS record for:", dnsLocation);
+      
+      // Call the OpenAttestation sandbox API to verify the DNS record
+      const response = await fetch(`https://dns-proof-sandbox.openattestation.com/api/verify?location=${dnsLocation}`);
+      const data = await response.json();
+      
+      console.log("DNS verification response:", data);
+      
+      if (data.status === "VALID") {
+        setDnsVerified(true);
+        toast({
+          title: "DNS Record Verified",
+          description: "The DNS record was successfully created and verified.",
+        });
+      } else {
+        throw new Error("DNS record not found or invalid");
+      }
+    } catch (error) {
+      console.error('Error verifying DNS record:', error);
+      toast({
+        title: "DNS Verification Failed",
+        description: "Could not verify the DNS record. It may take a few minutes to propagate.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const createDID = async () => {
@@ -59,8 +93,11 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       
       toast({
         title: "DID Created",
-        description: "Your DID has been created successfully. You can now fill out the form.",
+        description: "Your DID has been created successfully. Verifying DNS record...",
       });
+
+      // Verify the DNS record after creation
+      await verifyDNSRecord(dnsLocation);
 
     } catch (error) {
       console.error('Error creating DID:', error);
@@ -112,9 +149,37 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
               </pre>
             </div>
             
-            <div className="flex items-start gap-2 text-sm text-muted-foreground">
-              <CheckCircle2 className="h-4 w-4 text-green-500 mt-1" />
-              <p>DID created with sandbox DNS location: {didDocument.dnsLocation}</p>
+            <div className="flex items-start gap-2 text-sm">
+              {isVerifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mt-1" />
+                  <p className="text-muted-foreground">Verifying DNS record...</p>
+                </>
+              ) : dnsVerified ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-1" />
+                  <p className="text-muted-foreground">
+                    DNS record verified at: {didDocument.dnsLocation}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-4 w-4 text-yellow-500 mt-1" />
+                  <div className="flex flex-col">
+                    <p className="text-muted-foreground">
+                      DNS record created at: {didDocument.dnsLocation}
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => didDocument.dnsLocation && verifyDNSRecord(didDocument.dnsLocation)}
+                      className="mt-2"
+                    >
+                      Verify DNS Record
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
