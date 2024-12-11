@@ -11,18 +11,15 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useWallet } from "@/contexts/WalletContext";
 import { WalletStatus } from "./sidebar/WalletStatus";
 import { Navigation } from "./sidebar/Navigation";
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { disconnectWallet } = useWallet();
 
   const handleLogout = async () => {
     try {
-      await disconnectWallet();
       toast({
         title: "Logged out successfully",
         description: "You have been logged out and disconnected from your wallet",
