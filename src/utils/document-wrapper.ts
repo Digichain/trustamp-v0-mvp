@@ -18,9 +18,7 @@ const generateHash = (data: any): string => {
 };
 
 const generateSalt = (): string => {
-  const array = new Uint32Array(1);
-  crypto.getRandomValues(array);
-  return array[0].toString(36);
+  return crypto.randomUUID();
 };
 
 const saltData = (data: any): any => {
@@ -33,16 +31,13 @@ const saltData = (data: any): any => {
     for (const key in data) {
       if (data[key] === null || data[key] === undefined) {
         salted[key] = data[key];
-      } else if (typeof data[key] === 'string') {
-        salted[key] = `${generateSalt()}:string:${data[key]}`;
-      } else if (typeof data[key] === 'number') {
-        salted[key] = `${generateSalt()}:number:${data[key]}`;
-      } else if (typeof data[key] === 'boolean') {
-        salted[key] = `${generateSalt()}:boolean:${data[key]}`;
       } else if (typeof data[key] === 'object') {
         salted[key] = saltData(data[key]);
       } else {
-        salted[key] = data[key];
+        // Generate a UUID as salt
+        const salt = generateSalt();
+        // Create the salted value in the format: "salt:type:value"
+        salted[key] = `${salt}:${typeof data[key]}:${data[key]}`;
       }
     }
     return salted;
@@ -52,6 +47,8 @@ const saltData = (data: any): any => {
 };
 
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
+  console.log("Starting document wrapping process with raw document:", rawDocument);
+
   // Ensure the document has the required OpenAttestation structure
   const documentWithTemplate = {
     ...rawDocument,
@@ -64,9 +61,11 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
 
   // Salt the data according to OpenAttestation format
   const saltedData = saltData(documentWithTemplate);
+  console.log("Document salted with UUIDs:", saltedData);
   
   // Generate the target hash using SHA3
   const targetHash = generateHash(saltedData);
+  console.log("Generated target hash:", targetHash);
   
   // Create the wrapped document with merkle root
   const wrappedDoc: WrappedDocument = {
@@ -80,7 +79,6 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
     }
   };
 
-  console.log("Wrapped document:", wrappedDoc);
-  console.log("Merkle root:", wrappedDoc.signature.merkleRoot);
+  console.log("Final wrapped document structure:", wrappedDoc);
   return wrappedDoc;
 };
