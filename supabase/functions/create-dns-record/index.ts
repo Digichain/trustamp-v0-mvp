@@ -10,6 +10,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -41,6 +42,7 @@ serve(async (req) => {
       })
     });
 
+    console.log('API Response status:', response.status);
     const responseText = await response.text();
     console.log('API Response text:', responseText);
 
@@ -48,16 +50,20 @@ serve(async (req) => {
       throw new Error(`API Error: ${responseText}`);
     }
 
-    // Parse the response to get the assigned DNS location
-    const apiResponse = JSON.parse(responseText);
-    const dnsLocation = apiResponse.location;
+    let apiResponse;
+    try {
+      apiResponse = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Error parsing API response:', e);
+      throw new Error('Invalid response format from DNS API');
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
         message: 'DNS TXT record created successfully',
         data: {
-          dnsLocation,
+          dnsLocation: apiResponse.location,
           txtRecord,
           apiResponse
         }
