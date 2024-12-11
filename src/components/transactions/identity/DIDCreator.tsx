@@ -33,10 +33,11 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}`;
   };
 
-  const verifyDNSRecord = async (dnsLocation: string, did: string) => {
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const verifyDNSRecord = async (dnsLocation: string, did: string, retryCount = 0): Promise<boolean> => {
     try {
-      // In a real implementation, this would make an API call to verify the DNS TXT record
-      // For now, we'll simulate the verification process
+      console.log(`Attempting DNS verification (attempt ${retryCount + 1})...`);
       const response = await fetch(`https://dns.google/resolve?name=${dnsLocation}&type=TXT`);
       const data = await response.json();
       
@@ -47,14 +48,29 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
         const didRecord = txtRecords.find((record: string) => record.includes(did));
         
         if (didRecord) {
-          return { verified: true, message: "DNS record found and verified" };
+          setDnsStatus({ message: "DNS record found and verified" });
+          return true;
         }
       }
       
-      return { verified: false, message: "DNS record not found or not propagated yet" };
+      if (retryCount < 5) {
+        setDnsStatus({ message: `DNS record not found, retrying in 10 seconds... (attempt ${retryCount + 1}/5)` });
+        await delay(10000); // Wait 10 seconds before retrying
+        return verifyDNSRecord(dnsLocation, did, retryCount + 1);
+      }
+
+      setDnsStatus({ 
+        message: "DNS record could not be verified after multiple attempts",
+        isError: true 
+      });
+      return false;
     } catch (error) {
       console.error("DNS verification error:", error);
-      return { verified: false, message: "Error verifying DNS record" };
+      setDnsStatus({ 
+        message: "Error verifying DNS record",
+        isError: true 
+      });
+      return false;
     }
   };
 
@@ -81,17 +97,30 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
         dnsLocation: dnsLocation
       };
 
-      // Simulate DNS record creation
+      // Create DNS record
       setDnsStatus({ message: "Creating DNS record..." });
+      const createResponse = await fetch('https://odzjfelpvhkhqgvogscr.supabase.co/functions/v1/create-dns-record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          did: newDidDocument.id,
+          subdomain: dnsLocation.split('.')[0] // Extract subdomain part
+        })
+      });
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.text();
+        throw new Error(`Failed to create DNS record: ${errorData}`);
+      }
+
+      setDnsStatus({ message: "DNS record created, waiting for propagation..." });
       
-      // In a real implementation, this would make an API call to create the DNS record
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Verify DNS record with retries
+      const isVerified = await verifyDNSRecord(dnsLocation, did);
       
-      // Verify DNS record
-      const verificationResult = await verifyDNSRecord(dnsLocation, did);
-      
-      if (verificationResult.verified) {
-        setDnsStatus({ message: verificationResult.message });
+      if (isVerified) {
         setDidDocument(newDidDocument);
         onDIDCreated(newDidDocument);
         
@@ -100,27 +129,18 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
           description: "Your DID has been created and verified on DNS",
         });
       } else {
-        setDnsStatus({ 
-          message: verificationResult.message,
-          isError: true 
-        });
-        
-        toast({
-          title: "DNS Verification Failed",
-          description: verificationResult.message,
-          variant: "destructive",
-        });
+        throw new Error("DNS record verification failed after multiple attempts");
       }
     } catch (error) {
       console.error('Error creating DID:', error);
       setDnsStatus({ 
-        message: "Failed to create DID and DNS record",
+        message: error instanceof Error ? error.message : "Failed to create DID and DNS record",
         isError: true 
       });
       
       toast({
         title: "Error Creating DID",
-        description: "Failed to create DID and DNS record",
+        description: error instanceof Error ? error.message : "Failed to create DID and DNS record",
         variant: "destructive",
       });
     } finally {
