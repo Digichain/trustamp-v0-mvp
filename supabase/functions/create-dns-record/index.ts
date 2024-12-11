@@ -28,9 +28,10 @@ serve(async (req) => {
     console.log('Formatted TXT record:', txtRecord);
 
     // Create the DNS record using the OpenAttestation sandbox API
-    const apiUrl = `https://dns-proof-sandbox.openattestation.com/api/records`;
-    console.log(`Making API request to: ${apiUrl}`);
-    
+    const apiUrl = 'https://dns-proof-sandbox.openattestation.com/api/records';
+    console.log('Making request to:', apiUrl);
+    console.log('Request payload:', JSON.stringify({ record: txtRecord }));
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
