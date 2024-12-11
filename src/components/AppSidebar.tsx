@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "@/contexts/WalletContext";
 import { WalletStatus } from "./sidebar/WalletStatus";
 import { Navigation } from "./sidebar/Navigation";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
@@ -22,12 +23,19 @@ export const AppSidebar = () => {
 
   const handleLogout = async () => {
     try {
+      // First disconnect the wallet
       await disconnectWallet();
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       toast({
         title: "Logged out successfully",
         description: "You have been logged out and disconnected from your wallet",
       });
-      navigate('/auth'); // Updated to redirect to auth page instead of landing page
+      
+      navigate('/auth');
     } catch (error) {
       console.error('Error during logout:', error);
       toast({
