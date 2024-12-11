@@ -45,8 +45,9 @@ export const TransactionActions = ({
       const merkleRoot = wrappedDoc.signature.merkleRoot;
       console.log("Generated merkle root:", merkleRoot);
 
-      // Create file name for wrapped document
-      const fileName = `wrapped_${transaction.id}.json`;
+      // Create file name for wrapped document based on transaction ID
+      const fileName = `${transaction.id}_wrapped.json`;
+      console.log("Creating wrapped document with filename:", fileName);
 
       // Upload wrapped document to storage
       const { error: uploadError } = await supabase.storage
