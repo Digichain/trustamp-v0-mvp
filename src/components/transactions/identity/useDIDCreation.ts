@@ -20,7 +20,18 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
     try {
       console.log('Verifying DNS record for location:', didDocument.dnsLocation);
       
-      const response = await fetch(`https://dns-proof-sandbox.openattestation.com/api/verify?location=${didDocument.dnsLocation}`);
+      // Use OpenAttestation's verification API
+      const response = await fetch(`https://api.openattestation.com/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'DNS-DID',
+          location: didDocument.dnsLocation,
+          network: 'mainnet'
+        })
+      });
       
       if (!response.ok) {
         throw new Error('Failed to verify DNS record');
@@ -29,7 +40,7 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
       const verificationResult = await response.json();
       console.log('DNS verification result:', verificationResult);
 
-      if (verificationResult.status === 'verified') {
+      if (verificationResult.status === 'VALID') {
         setDnsVerified(true);
         toast({
           title: "DNS Record Verified",
@@ -60,8 +71,11 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
       const did = `did:ethr:${walletAddress}`;
       console.log('Creating DID:', did);
       
-      const { data, error } = await supabase.functions.invoke('create-dns-record', {
-        body: { did }
+      const { data, error } = await supabase.functions.invoke('manage-dns-records', {
+        body: { 
+          did,
+          action: 'create'
+        }
       });
 
       if (error) {
@@ -93,8 +107,8 @@ export const useDIDCreation = (onDIDCreated: (doc: DIDDocument) => void) => {
         description: "Your DID has been created successfully. Verification may take a few moments.",
       });
 
-      // Automatically attempt first verification
-      await verifyDNSRecord();
+      // Wait a few seconds before first verification attempt
+      setTimeout(verifyDNSRecord, 5000);
 
     } catch (error) {
       console.error('Error creating DID:', error);
