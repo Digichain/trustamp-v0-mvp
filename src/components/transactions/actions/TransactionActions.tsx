@@ -3,6 +3,7 @@ import {
   Package,
   Trash2,
   Eye,
+  FileSignature,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -82,6 +83,11 @@ export const TransactionActions = ({
     }
   };
 
+  const handleSignDocument = () => {
+    // Placeholder for sign document functionality
+    console.log("Sign document clicked for transaction:", transaction.id);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -97,6 +103,10 @@ export const TransactionActions = ({
         <DropdownMenuItem onClick={handleWrapDocument}>
           <Package className="mr-2 h-4 w-4" />
           Wrap Document
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSignDocument}>
+          <FileSignature className="mr-2 h-4 w-4" />
+          Sign Document
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={onDelete}
