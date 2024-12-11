@@ -22,7 +22,10 @@ serve(async (req) => {
       });
     }
 
-    const { did, action } = await req.json();
+    const requestData = await req.json();
+    console.log("Request data:", requestData);
+
+    const { did, action } = requestData;
     console.log(`Processing request with DID: ${did}, action: ${action}`);
 
     if (!did) {
@@ -51,14 +54,20 @@ serve(async (req) => {
       })
     });
 
+    const responseText = await apiResponse.text();
+    console.log("Raw API response:", responseText);
+
     if (!apiResponse.ok) {
-      const errorData = await apiResponse.text();
-      console.error("Error from OpenAttestation API:", errorData);
-      throw new Error(`Failed to create DNS record: ${errorData}`);
+      console.error("Error from OpenAttestation API:", {
+        status: apiResponse.status,
+        statusText: apiResponse.statusText,
+        response: responseText
+      });
+      throw new Error(`Failed to create DNS record: ${responseText}`);
     }
 
-    const apiData = await apiResponse.json();
-    console.log("OpenAttestation API response:", apiData);
+    const apiData = responseText ? JSON.parse(responseText) : null;
+    console.log("Parsed OpenAttestation API response:", apiData);
 
     // Format the response
     const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
@@ -79,10 +88,15 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Error in oa-dns-records:", error);
+    console.error("Error in oa-dns-records:", {
+      error: error.message,
+      stack: error.stack
+    });
+    
     return new Response(
       JSON.stringify({
-        error: error.message
+        error: error.message,
+        details: error.stack
       }),
       {
         status: 400,
