@@ -38,7 +38,7 @@ serve(async (req) => {
 
     // Format DNS record value according to OpenAttestation requirements
     const recordValue = `"type=openatts net=ethereum netId=1 addr=${address}"`;
-    const dnsName = `${address.slice(2).toLowerCase()}.example.com`; // Replace with your actual domain
+    const dnsName = `${address.slice(2).toLowerCase()}.sandbox.openattestation.com`; // Using sandbox domain
 
     // Create AWS Route 53 request
     const signer = new SignatureV4({
