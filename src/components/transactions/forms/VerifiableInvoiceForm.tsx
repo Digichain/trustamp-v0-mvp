@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,9 @@ import { BillableItemsSection } from "./invoice/BillableItemsSection";
 import { TotalsSection } from "./invoice/TotalsSection";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { InvoicePreview } from "../previews/InvoicePreview";
+import { DIDCreator } from "../identity/DIDCreator";
+import { formatInvoiceToOpenAttestation } from "@/utils/document-formatters";
+import { DIDDocument } from "../identity/DIDCreator";
 
 export const VerifiableInvoiceForm = () => {
   const navigate = useNavigate();
@@ -21,6 +23,12 @@ export const VerifiableInvoiceForm = () => {
     billableItems: [{ description: "", quantity: 0, unitPrice: 0, amount: 0 }]
   });
   const [showPreview, setShowPreview] = useState(false);
+  const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
+
+  const handleDIDCreated = (doc: DIDDocument) => {
+    console.log("DID Document created:", doc);
+    setDidDocument(doc);
+  };
 
   const handleInputChange = (section: string, field: string, value: string) => {
     setFormData(prev => ({
@@ -93,6 +101,15 @@ export const VerifiableInvoiceForm = () => {
     e.preventDefault();
     console.log("Submitting form data:", formData);
 
+    if (!didDocument) {
+      toast({
+        title: "Error",
+        description: "Please create a DID document first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -100,6 +117,11 @@ export const VerifiableInvoiceForm = () => {
         throw new Error("No user found");
       }
 
+      // Format the document in OpenAttestation schema
+      const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
+      console.log("OpenAttestation document:", openAttestationDocument);
+
+      // Save the transaction and the document
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -110,7 +132,8 @@ export const VerifiableInvoiceForm = () => {
           document_subtype: "verifiable",
           title: "INVOICE",
           transaction_type: "trade",
-          user_id: user.id
+          user_id: user.id,
+          raw_document: openAttestationDocument // Store the complete document
         })
         .select();
 
@@ -134,6 +157,15 @@ export const VerifiableInvoiceForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Document Identity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DIDCreator onDIDCreated={handleDIDCreated} />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Invoice Details</CardTitle>
@@ -209,7 +241,7 @@ export const VerifiableInvoiceForm = () => {
           Cancel
         </Button>
         <PreviewButton onClick={() => setShowPreview(true)} />
-        <Button type="submit">Create Invoice</Button>
+        <Button type="submit" disabled={!didDocument}>Create Invoice</Button>
       </div>
 
       <PreviewDialog
