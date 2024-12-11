@@ -5,31 +5,37 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
+  // Add null checks with default empty object
+  const billFrom = data?.billFrom || {};
+  const billTo = data?.billTo || {};
+  const company = billTo?.company || {};
+  const billableItems = data?.billableItems || [];
+
   return (
     <Card className="p-6 space-y-6 bg-white">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{data.id}</h2>
-        <p className="text-gray-600">{data.date}</p>
+        <h2 className="text-2xl font-bold">Invoice #{data?.id || 'N/A'}</h2>
+        <p className="text-gray-600">{data?.date || 'N/A'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
         <div>
           <h3 className="font-semibold mb-2">Bill From</h3>
           <div className="space-y-1">
-            <p>{data.billFrom.name}</p>
-            <p>{data.billFrom.streetAddress}</p>
-            <p>{data.billFrom.city}</p>
-            <p>{data.billFrom.postalCode}</p>
+            <p>{billFrom.name || 'N/A'}</p>
+            <p>{billFrom.streetAddress || 'N/A'}</p>
+            <p>{billFrom.city || 'N/A'}</p>
+            <p>{billFrom.postalCode || 'N/A'}</p>
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Bill To</h3>
           <div className="space-y-1">
-            <p>{data.billTo.company.name}</p>
-            <p>{data.billTo.company.streetAddress}</p>
-            <p>{data.billTo.name}</p>
-            <p>{data.billTo.email}</p>
+            <p>{company.name || 'N/A'}</p>
+            <p>{company.streetAddress || 'N/A'}</p>
+            <p>{billTo.name || 'N/A'}</p>
+            <p>{billTo.email || 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -46,14 +52,21 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
             </tr>
           </thead>
           <tbody>
-            {data.billableItems.map((item: any, index: number) => (
+            {billableItems.map((item: any, index: number) => (
               <tr key={index} className="border-b">
-                <td className="py-2">{item.description}</td>
-                <td className="text-right py-2">{item.quantity}</td>
-                <td className="text-right py-2">${item.unitPrice}</td>
-                <td className="text-right py-2">${item.amount}</td>
+                <td className="py-2">{item.description || 'N/A'}</td>
+                <td className="text-right py-2">{item.quantity || 0}</td>
+                <td className="text-right py-2">${item.unitPrice || 0}</td>
+                <td className="text-right py-2">${item.amount || 0}</td>
               </tr>
             ))}
+            {billableItems.length === 0 && (
+              <tr>
+                <td colSpan={4} className="text-center py-4 text-gray-500">
+                  No items found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -62,15 +75,15 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${data.subtotal.toFixed(2)}</span>
+            <span>${(data?.subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({data.tax}%):</span>
-            <span>${data.taxTotal.toFixed(2)}</span>
+            <span>Tax ({data?.tax || 0}%):</span>
+            <span>${(data?.taxTotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${data.total.toFixed(2)}</span>
+            <span>${(data?.total || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
