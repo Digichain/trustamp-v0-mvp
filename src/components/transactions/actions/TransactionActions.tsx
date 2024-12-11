@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { wrapDocument } from "@/utils/document-wrapper";
 
 interface TransactionActionsProps {
   transaction: any;
@@ -28,10 +29,52 @@ export const TransactionActions = ({
   const { toast } = useToast();
 
   const handleWrapDocument = async () => {
-    toast({
-      title: "Coming Soon",
-      description: "Document wrapping functionality will be available soon.",
-    });
+    try {
+      console.log("Starting document wrapping process for transaction:", transaction.id);
+      
+      if (!transaction.raw_document) {
+        throw new Error("No raw document found");
+      }
+
+      // Wrap the document
+      const wrappedDoc = wrapDocument(transaction.raw_document);
+      console.log("Document wrapped successfully:", wrappedDoc);
+
+      // Create file name for wrapped document
+      const fileName = `wrapped_${transaction.id}.json`;
+
+      // Upload wrapped document to storage
+      const { error: uploadError } = await supabase.storage
+        .from('wrapped-documents')
+        .upload(fileName, JSON.stringify(wrappedDoc), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Error uploading wrapped document:", uploadError);
+        throw uploadError;
+      }
+
+      // Get public URL for the wrapped document
+      const { data: { publicUrl } } = supabase.storage
+        .from('wrapped-documents')
+        .getPublicUrl(fileName);
+
+      console.log("Document wrapped and stored successfully at:", publicUrl);
+
+      toast({
+        title: "Success",
+        description: "Document wrapped successfully",
+      });
+    } catch (error: any) {
+      console.error("Error wrapping document:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to wrap document",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
