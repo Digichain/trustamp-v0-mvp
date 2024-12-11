@@ -10,6 +10,7 @@ export interface DIDDocument {
   type: string;
   controller: string;
   ethereumAddress: string;
+  dnsLocation?: string; // Added dnsLocation to the interface
 }
 
 interface DIDCreatorProps {
@@ -22,6 +23,15 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
   const [dnsRecord, setDnsRecord] = useState<string>('');
+
+  const generateRandomSubdomain = () => {
+    const adjectives = ['intermediate', 'dynamic', 'swift', 'bright'];
+    const colors = ['sapphire', 'emerald', 'ruby', 'amber'];
+    const animals = ['catfish', 'dolphin', 'penguin', 'tiger'];
+    
+    const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+    return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}`;
+  };
 
   const createDID = async () => {
     if (!walletAddress) {
@@ -36,22 +46,24 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     setIsCreating(true);
     try {
       const did = `did:ethr:${walletAddress}`;
+      const dnsLocation = `${generateRandomSubdomain()}.sandbox.openattestation.com`;
+      
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
         type: "Secp256k1VerificationKey2018",
         controller: did,
-        ethereumAddress: walletAddress.toLowerCase()
+        ethereumAddress: walletAddress.toLowerCase(),
+        dnsLocation: dnsLocation // Store the DNS location in the document
       };
 
       // Simulating DNS record creation at sandbox.openattestation.com
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulating API call
       
-      const domainName = `${generateRandomSubdomain()}.sandbox.openattestation.com`;
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
 
       setDidDocument(newDidDocument);
-      setDnsRecord(`Record created at ${domainName} and will stay valid until ${expiryDate.toLocaleString()}`);
+      setDnsRecord(`Record created at ${dnsLocation} and will stay valid until ${expiryDate.toLocaleString()}`);
       
       onDIDCreated(newDidDocument);
       
@@ -69,15 +81,6 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     } finally {
       setIsCreating(false);
     }
-  };
-
-  const generateRandomSubdomain = () => {
-    const adjectives = ['intermediate', 'dynamic', 'swift', 'bright'];
-    const colors = ['sapphire', 'emerald', 'ruby', 'amber'];
-    const animals = ['catfish', 'dolphin', 'penguin', 'tiger'];
-    
-    const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-    return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}`;
   };
 
   return (
