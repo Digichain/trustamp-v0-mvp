@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 interface CreateDNSRecordRequest {
   did: string;
-  subdomain: string;
 }
 
 const corsHeaders = {
@@ -16,8 +15,8 @@ serve(async (req) => {
   }
 
   try {
-    const { did, subdomain } = await req.json() as CreateDNSRecordRequest;
-    console.log('Creating DNS record for:', { did, subdomain });
+    const { did } = await req.json() as CreateDNSRecordRequest;
+    console.log('Creating DNS record for DID:', did);
 
     // Extract Ethereum address from DID
     const address = did.split(':')[2].split('#')[0];
@@ -37,7 +36,6 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        subdomain: subdomain,
         record: txtRecord
       })
     });
@@ -49,14 +47,18 @@ serve(async (req) => {
       throw new Error(`API Error: ${responseText}`);
     }
 
+    // Parse the response to get the assigned DNS location
+    const apiResponse = JSON.parse(responseText);
+    const dnsLocation = apiResponse.location;
+
     return new Response(
       JSON.stringify({
         success: true,
         message: 'DNS TXT record created successfully',
         data: {
-          subdomain: subdomain,
-          txtRecord: txtRecord,
-          apiResponse: responseText
+          dnsLocation,
+          txtRecord,
+          apiResponse
         }
       }),
       {

@@ -25,15 +25,6 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
   const [dnsStatus, setDnsStatus] = useState<{ message: string; isError?: boolean } | null>(null);
 
-  const generateRandomSubdomain = () => {
-    const adjectives = ['intermediate', 'dynamic', 'swift', 'bright'];
-    const colors = ['sapphire', 'emerald', 'ruby', 'amber'];
-    const animals = ['catfish', 'dolphin', 'penguin', 'tiger'];
-    
-    const randomElement = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-    return `${randomElement(adjectives)}-${randomElement(colors)}-${randomElement(animals)}`;
-  };
-
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const verifyDNSRecord = async (dnsLocation: string, did: string, retryCount = 0): Promise<boolean> => {
@@ -88,22 +79,19 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     setIsCreating(true);
     try {
       const did = `did:ethr:${walletAddress}`;
-      const dnsLocation = `${generateRandomSubdomain()}.sandbox.openattestation.com`;
       
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
         type: "Secp256k1VerificationKey2018",
         controller: did,
-        ethereumAddress: walletAddress.toLowerCase(),
-        dnsLocation: dnsLocation
+        ethereumAddress: walletAddress.toLowerCase()
       };
 
       // Create DNS record using Supabase Edge Function
       setDnsStatus({ message: "Creating DNS record..." });
       const { data: createResponse, error: createError } = await supabase.functions.invoke('create-dns-record', {
         body: {
-          did: newDidDocument.id,
-          subdomain: dnsLocation.split('.')[0]
+          did: newDidDocument.id
         }
       });
 
@@ -113,6 +101,9 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       }
 
       console.log("DNS record creation response:", createResponse);
+      const dnsLocation = createResponse.data.dnsLocation;
+      newDidDocument.dnsLocation = dnsLocation;
+      
       setDnsStatus({ message: "DNS record created, waiting for propagation..." });
       
       // Verify DNS record with retries
