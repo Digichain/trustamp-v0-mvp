@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { exec } from "https://deno.land/x/exec/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,14 +41,25 @@ serve(async (req) => {
     const address = addressMatch[1].toLowerCase();
     console.log("Extracted address:", address);
 
-    // Use OpenAttestation CLI to manage DNS records
-    const command = action === 'delete' 
-      ? `open-attestation dns txt-record remove ${address}`
-      : `open-attestation dns txt-record create ${address}`;
-
-    console.log("Executing command:", command);
+    // Install OpenAttestation CLI using npm
+    const installCommand = new Deno.Command("npm", {
+      args: ["install", "-g", "@govtechsg/open-attestation-cli"],
+    });
     
-    const { output } = await exec(command);
+    const installResult = await installCommand.output();
+    console.log("CLI installation result:", new TextDecoder().decode(installResult.stdout));
+
+    // Use OpenAttestation CLI to manage DNS records
+    const cliCommand = action === 'delete' 
+      ? ["dns", "txt-record", "remove", address]
+      : ["dns", "txt-record", "create", address];
+
+    const oaCommand = new Deno.Command("open-attestation", {
+      args: cliCommand,
+    });
+
+    const result = await oaCommand.output();
+    const output = new TextDecoder().decode(result.stdout);
     console.log("CLI output:", output);
 
     const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
