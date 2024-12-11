@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface DIDDocument {
   id: string;
@@ -97,24 +98,21 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
         dnsLocation: dnsLocation
       };
 
-      // Create DNS record
+      // Create DNS record using Supabase Edge Function
       setDnsStatus({ message: "Creating DNS record..." });
-      const createResponse = await fetch('https://odzjfelpvhkhqgvogscr.supabase.co/functions/v1/create-dns-record', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data: createResponse, error: createError } = await supabase.functions.invoke('create-dns-record', {
+        body: {
           did: newDidDocument.id,
           subdomain: dnsLocation.split('.')[0] // Extract subdomain part
-        })
+        }
       });
 
-      if (!createResponse.ok) {
-        const errorData = await createResponse.text();
-        throw new Error(`Failed to create DNS record: ${errorData}`);
+      if (createError) {
+        console.error("Error creating DNS record:", createError);
+        throw new Error(`Failed to create DNS record: ${createError.message}`);
       }
 
+      console.log("DNS record creation response:", createResponse);
       setDnsStatus({ message: "DNS record created, waiting for propagation..." });
       
       // Verify DNS record with retries
@@ -125,7 +123,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
         onDIDCreated(newDidDocument);
         
         toast({
-          title: "DID Created Successfully",
+          title: "DID Created",
           description: "Your DID has been created and verified on DNS",
         });
       } else {
