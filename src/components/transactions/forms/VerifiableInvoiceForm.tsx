@@ -35,8 +35,18 @@ export const VerifiableInvoiceForm = () => {
     if (e) {
       e.preventDefault();
     }
-    if (!didDocument) return;
-    await handleSubmit(formData, didDocument);
+    if (!didDocument) {
+      console.log("Cannot submit form - DID document not created yet");
+      return;
+    }
+    
+    // Only submit if we have form data
+    if (formData.id && formData.date) {
+      console.log("Submitting form with data:", formData);
+      await handleSubmit(formData, didDocument);
+    } else {
+      console.log("Form data incomplete - not submitting");
+    }
   };
 
   return (
@@ -57,6 +67,7 @@ export const VerifiableInvoiceForm = () => {
                     value={formData.id}
                     onChange={(e) => handleInputChange("id", "", e.target.value)}
                     placeholder="Invoice ID"
+                    required
                   />
                 </div>
                 <div>
@@ -65,6 +76,7 @@ export const VerifiableInvoiceForm = () => {
                     type="date"
                     value={formData.date}
                     onChange={(e) => handleInputChange("date", "", e.target.value)}
+                    required
                   />
                 </div>
               </div>

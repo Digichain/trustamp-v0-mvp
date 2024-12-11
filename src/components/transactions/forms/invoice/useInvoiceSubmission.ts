@@ -10,49 +10,19 @@ export const useInvoiceSubmission = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const saveDocumentToStorage = async (document: any, fileName: string) => {
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('raw-documents')
-      .upload(`${fileName}.json`, new Blob([JSON.stringify(document)], {
-        type: 'application/json'
-      }));
-
-    if (uploadError) {
-      console.error("Error uploading document:", uploadError);
-      throw new Error("Failed to upload document");
-    }
-
-    return uploadData.path;
-  };
-
   const handleSubmit = async (formData: any, didDocument: DIDDocument) => {
+    console.log("Starting invoice submission with data:", { formData, didDocument });
     setIsSubmitting(true);
-    console.log("Submitting form data:", formData);
 
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw new Error("Authentication error: " + sessionError.message);
-      }
-
+      const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session?.user) {
-        throw new Error("Please sign in to create an invoice");
+        throw new Error("No authenticated session found");
       }
 
-      const user = sessionData.session.user;
-      console.log("Authenticated user:", user.id);
-
-      // Format the document in OpenAttestation schema
+      // Format the document according to OpenAttestation schema
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
-      console.log("OpenAttestation document:", openAttestationDocument);
-
-      // Generate a unique filename using timestamp and random string
-      const fileName = `invoice_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      
-      // Save document to storage
-      const documentPath = await saveDocumentToStorage(openAttestationDocument, fileName);
-      console.log("Document saved at path:", documentPath);
+      console.log("Formatted OpenAttestation document:", openAttestationDocument);
 
       // Create transaction record
       const { data: transactionData, error: transactionError } = await supabase
@@ -65,18 +35,20 @@ export const useInvoiceSubmission = () => {
           document_subtype: "verifiable",
           title: "INVOICE",
           transaction_type: "trade",
-          user_id: user.id,
+          user_id: sessionData.session.user.id,
           raw_document: openAttestationDocument
         })
         .select()
         .single();
 
       if (transactionError) {
-        console.error("Error inserting transaction:", transactionError);
-        throw new Error("Failed to save transaction: " + transactionError.message);
+        console.error("Error creating transaction:", transactionError);
+        throw new Error("Failed to create transaction");
       }
 
-      // Save invoice document data
+      console.log("Created transaction:", transactionData);
+
+      // Create invoice document record
       const { error: invoiceError } = await supabase
         .from("invoice_documents")
         .insert({
@@ -93,18 +65,18 @@ export const useInvoiceSubmission = () => {
         });
 
       if (invoiceError) {
-        console.error("Error inserting invoice document:", invoiceError);
-        throw new Error("Failed to save invoice document: " + invoiceError.message);
+        console.error("Error creating invoice document:", invoiceError);
+        throw new Error("Failed to create invoice document");
       }
 
       toast({
         title: "Success",
-        description: "Invoice created and stored successfully",
+        description: "Invoice created successfully",
       });
 
       navigate("/transactions");
     } catch (error: any) {
-      console.error("Error creating transaction:", error);
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to create invoice",

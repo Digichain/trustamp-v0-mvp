@@ -86,13 +86,18 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
       <CardContent className="space-y-4">
         <Button 
           onClick={createDID} 
-          disabled={isCreating || !walletAddress}
+          disabled={isCreating || !walletAddress || didDocument !== null}
           className="w-full"
         >
           {isCreating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Creating DID...
+            </>
+          ) : didDocument ? (
+            <>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              DID Created
             </>
           ) : (
             'Create DID'
