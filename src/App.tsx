@@ -10,6 +10,7 @@ import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction
 import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
+import VerifyDocument from '@/pages/VerifyDocument';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 
@@ -97,6 +98,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateTransferableTransaction />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verify"
+                element={
+                  <ProtectedRoute>
+                    <VerifyDocument />
                   </ProtectedRoute>
                 }
               />
