@@ -5,19 +5,22 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
-  console.log("Preview data received:", data); // Debug log
+  console.log("Preview data received:", data);
+  
+  // Handle both direct data and nested data structures
+  const invoiceDetails = data?.invoiceDetails || data;
   
   // Add null checks with default empty objects
-  const billFrom = data?.billFrom || {};
-  const billTo = data?.billTo || {};
+  const billFrom = invoiceDetails?.billFrom || {};
+  const billTo = invoiceDetails?.billTo || {};
   const company = billTo?.company || {};
-  const billableItems = data?.billableItems || [];
+  const billableItems = invoiceDetails?.billableItems || [];
 
   return (
     <Card className="p-6 space-y-6 bg-white">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{data?.id || 'N/A'}</h2>
-        <p className="text-gray-600">{data?.date || 'N/A'}</p>
+        <h2 className="text-2xl font-bold">Invoice #{invoiceDetails?.invoiceNumber || data?.id || 'N/A'}</h2>
+        <p className="text-gray-600">{invoiceDetails?.date || 'N/A'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -84,15 +87,15 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${(data?.subtotal || 0).toFixed(2)}</span>
+            <span>${(invoiceDetails?.subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({data?.tax || 0}%):</span>
-            <span>${(data?.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({invoiceDetails?.tax || 0}%):</span>
+            <span>${(invoiceDetails?.taxTotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${(data?.total || 0).toFixed(2)}</span>
+            <span>${(invoiceDetails?.total || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
