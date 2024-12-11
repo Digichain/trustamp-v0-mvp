@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { OpenAttestationDNSTextRecordT, EthereumNetworks } from "../../src/utils/dns-record-types.ts";
+import { formatDNSTxtRecord } from "./dns-record-types.ts";
 
 interface CreateDNSRecordRequest {
   did: string;
@@ -26,25 +26,11 @@ serve(async (req) => {
 
     // Extract Ethereum address from DID
     const address = did.split(':')[2].split('#')[0];
+    console.log('Extracted address:', address);
 
-    // Create and validate DNS record
-    const dnsRecord = {
-      type: "openatts",
-      net: "ethereum",
-      netId: EthereumNetworks.sepolia,
-      addr: address
-    };
-
-    // Validate the record format
-    try {
-      OpenAttestationDNSTextRecordT.check(dnsRecord);
-    } catch (error) {
-      console.error('Invalid DNS record format:', error);
-      throw new Error('Invalid DNS record format');
-    }
-
-    // Format record for DNS TXT
-    const txtRecordValue = `type=${dnsRecord.type} net=${dnsRecord.net} netId=${dnsRecord.netId} addr=${dnsRecord.addr}`;
+    // Format and validate the DNS TXT record
+    const txtRecordValue = formatDNSTxtRecord(address);
+    console.log('Formatted TXT record:', txtRecordValue);
 
     console.log(`Creating TXT record for ${subdomain} with value: ${txtRecordValue}`);
 
@@ -76,8 +62,7 @@ serve(async (req) => {
         message: 'DNS TXT record created successfully',
         data: {
           subdomain: subdomain,
-          txtRecord: txtRecordValue,
-          dnsRecord
+          txtRecord: txtRecordValue
         }
       }),
       {
