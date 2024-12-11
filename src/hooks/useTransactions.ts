@@ -30,9 +30,10 @@ export const useTransactions = () => {
     },
   });
 
-  const invalidateTransactions = () => {
+  const invalidateTransactions = async () => {
     console.log("Invalidating transactions cache...");
-    queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    console.log("Transactions cache invalidated");
   };
 
   return {

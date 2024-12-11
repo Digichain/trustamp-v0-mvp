@@ -39,23 +39,27 @@ export const useDocumentData = () => {
 
   const handleDelete = async (transaction: any) => {
     try {
-      console.log("Deleting document:", transaction);
+      console.log("Starting deletion process for transaction:", transaction.id);
       
-      // Delete from the appropriate document table
+      // First delete from the appropriate document table
       const documentTable = transaction.document_subtype === "verifiable" 
         ? "invoice_documents" 
         : "bill_of_lading_documents";
       
+      console.log(`Deleting from ${documentTable}...`);
       const { error: documentError } = await supabase
         .from(documentTable)
         .delete()
         .eq("transaction_id", transaction.id);
 
-      if (documentError) throw documentError;
+      if (documentError) {
+        console.error(`Error deleting from ${documentTable}:`, documentError);
+        throw documentError;
+      }
 
-      // Delete the raw document from storage
+      // Then delete from storage
       const fileName = `${transaction.id}.json`;
-      console.log("Attempting to delete storage file:", fileName);
+      console.log("Deleting storage file:", fileName);
       
       const { error: storageError } = await supabase.storage
         .from('raw-documents')
@@ -63,16 +67,22 @@ export const useDocumentData = () => {
 
       if (storageError) {
         console.error("Error deleting from storage:", storageError);
+        // Don't throw here as the file might not exist
       }
 
-      // Delete from transactions table last
+      // Finally delete from transactions table
+      console.log("Deleting from transactions table...");
       const { error: transactionError } = await supabase
         .from("transactions")
         .delete()
         .eq("id", transaction.id);
 
-      if (transactionError) throw transactionError;
+      if (transactionError) {
+        console.error("Error deleting from transactions:", transactionError);
+        throw transactionError;
+      }
 
+      console.log("Deletion process completed successfully");
       toast({
         title: "Success",
         description: "Document deleted successfully",
@@ -80,7 +90,7 @@ export const useDocumentData = () => {
 
       return true;
     } catch (error) {
-      console.error("Error deleting document:", error);
+      console.error("Error in deletion process:", error);
       toast({
         title: "Error",
         description: "Failed to delete document",

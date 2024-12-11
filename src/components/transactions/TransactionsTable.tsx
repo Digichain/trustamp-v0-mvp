@@ -68,6 +68,7 @@ export const TransactionsTable = () => {
     if (success) {
       console.log("Delete successful, invalidating transactions cache");
       await invalidateTransactions();
+      console.log("Cache invalidated, UI should update");
     }
   };
 
