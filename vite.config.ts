@@ -28,18 +28,30 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env': {},
-    global: {},
+    global: 'globalThis',
+    'global.Buffer': ['buffer', 'Buffer'],
   },
   build: {
     rollupOptions: {
       external: ['dotenv/config'],
     },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    }
   },
   optimizeDeps: {
     esbuildOptions: {
       define: {
         global: 'globalThis'
       }
-    }
+    },
+    include: [
+      'buffer',
+      'crypto-browserify',
+      'events',
+      'stream-browserify',
+      'path-browserify',
+      'util'
+    ]
   },
 }));
