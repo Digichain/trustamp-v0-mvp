@@ -53,23 +53,25 @@ export const useDocumentData = () => {
 
       if (documentError) throw documentError;
 
-      // Delete from transactions table
+      // Delete the raw document from storage
+      const fileName = `${transaction.id}.json`;
+      console.log("Attempting to delete storage file:", fileName);
+      
+      const { error: storageError } = await supabase.storage
+        .from('raw-documents')
+        .remove([fileName]);
+
+      if (storageError) {
+        console.error("Error deleting from storage:", storageError);
+      }
+
+      // Delete from transactions table last
       const { error: transactionError } = await supabase
         .from("transactions")
         .delete()
         .eq("id", transaction.id);
 
       if (transactionError) throw transactionError;
-
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('raw-documents')
-        .remove([`${transaction.id}.json`]);
-
-      if (storageError) {
-        console.error("Error deleting from storage:", storageError);
-        // Don't throw here as the file might not exist
-      }
 
       toast({
         title: "Success",

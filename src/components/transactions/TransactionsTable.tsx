@@ -63,9 +63,11 @@ export const TransactionsTable = () => {
   };
 
   const onDelete = async (transaction: any) => {
+    console.log("Starting delete process for transaction:", transaction.id);
     const success = await handleDelete(transaction);
     if (success) {
-      invalidateTransactions();
+      console.log("Delete successful, invalidating transactions cache");
+      await invalidateTransactions();
     }
   };
 
