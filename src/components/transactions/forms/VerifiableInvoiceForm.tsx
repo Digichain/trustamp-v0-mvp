@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +12,8 @@ import { BillableItemsSection } from "./invoice/BillableItemsSection";
 import { TotalsSection } from "./invoice/TotalsSection";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { InvoicePreview } from "../previews/InvoicePreview";
-import { DIDCreator } from "../identity/DIDCreator";
+import { DIDCreator, DIDDocument } from "../identity/DIDCreator";
 import { formatInvoiceToOpenAttestation } from "@/utils/document-formatters";
-import { DIDDocument } from "../identity/DIDCreator";
 
 export const VerifiableInvoiceForm = () => {
   const navigate = useNavigate();

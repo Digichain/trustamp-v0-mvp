@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
-interface DIDDocument {
+export interface DIDDocument {
   id: string;
   type: string;
   controller: string;

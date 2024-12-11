@@ -16,6 +16,7 @@ export type Database = {
           document_subtype: string | null
           id: string
           network: string
+          raw_document: Json | null
           status: string
           title: string | null
           transaction_hash: string
@@ -29,6 +30,7 @@ export type Database = {
           document_subtype?: string | null
           id?: string
           network: string
+          raw_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash: string
@@ -42,6 +44,7 @@ export type Database = {
           document_subtype?: string | null
           id?: string
           network?: string
+          raw_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash?: string
