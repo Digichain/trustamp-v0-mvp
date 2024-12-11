@@ -26,38 +26,28 @@ const Auth = () => {
       
       if (event === 'SIGNED_IN' && session) {
         navigate('/dashboard');
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
       }
-      
-      // Handle specific error cases
+
       if (event === 'USER_UPDATED') {
         toast({
           title: "Account updated",
           description: "Your account has been successfully updated.",
         });
       }
-    });
 
-    // Error handling for auth operations
-    const handleAuthError = (error: Error) => {
-      console.error('Auth error:', error);
-      
-      if (error.message.includes('user_already_exists')) {
+      // Handle specific error events
+      if (event === 'USER_DELETED') {
         toast({
           variant: "destructive",
-          title: "Account already exists",
-          description: "Please sign in instead of creating a new account.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Authentication error",
-          description: error.message,
+          title: "Account deleted",
+          description: "Your account has been deleted.",
         });
       }
-    };
-
-    // Add error listener
-    supabase.auth.onError(handleAuthError);
+    });
 
     return () => {
       subscription.unsubscribe();
