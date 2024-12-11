@@ -38,27 +38,27 @@ serve(async (req) => {
     const address = addressMatch[1].toLowerCase();
     console.log("Extracted address:", address);
 
-    // Create DNS record using OpenAttestation sandbox API
-    const sandboxResponse = await fetch('https://dns-proof-sandbox.openattestation.com/api/records', {
+    // Create DNS record using OpenAttestation API
+    const apiResponse = await fetch('https://api.openattestation.com/dns-txt', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         address: address,
-        networkId: 11155111, // Sepolia testnet
+        network: 'sepolia',
         type: "openatts"
       })
     });
 
-    if (!sandboxResponse.ok) {
-      const errorData = await sandboxResponse.text();
-      console.error("Error from sandbox API:", errorData);
+    if (!apiResponse.ok) {
+      const errorData = await apiResponse.text();
+      console.error("Error from OpenAttestation API:", errorData);
       throw new Error(`Failed to create DNS record: ${errorData}`);
     }
 
-    const sandboxData = await sandboxResponse.json();
-    console.log("Sandbox API response:", sandboxData);
+    const apiData = await apiResponse.json();
+    console.log("OpenAttestation API response:", apiData);
 
     // Format the response
     const dnsName = `${address.slice(2).toLowerCase()}.openattestation.com`;
@@ -67,7 +67,7 @@ serve(async (req) => {
       JSON.stringify({
         data: {
           dnsLocation: dnsName,
-          sandboxResponse: sandboxData
+          apiResponse: apiData
         }
       }),
       {
