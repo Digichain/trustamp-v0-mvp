@@ -40,6 +40,10 @@ export const TransactionActions = ({
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("Document wrapped successfully:", wrappedDoc);
 
+      // Extract merkle root for verification
+      const merkleRoot = wrappedDoc.signature.merkleRoot;
+      console.log("Generated merkle root:", merkleRoot);
+
       // Create file name for wrapped document
       const fileName = `wrapped_${transaction.id}.json`;
 
@@ -62,6 +66,7 @@ export const TransactionActions = ({
         .getPublicUrl(fileName);
 
       console.log("Document wrapped and stored successfully at:", publicUrl);
+      console.log("Document merkle root:", merkleRoot);
 
       toast({
         title: "Success",

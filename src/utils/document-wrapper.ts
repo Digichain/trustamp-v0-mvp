@@ -66,7 +66,7 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   // Generate the target hash using SHA3
   const targetHash = generateHash(saltedData);
   
-  // Create the wrapped document
+  // Create the wrapped document with merkle root
   const wrappedDoc: WrappedDocument = {
     version: "https://schema.openattestation.com/2.0/schema.json",
     data: saltedData,
@@ -74,10 +74,11 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
       type: "SHA3MerkleProof",
       targetHash,
       proof: [],
-      merkleRoot: targetHash
+      merkleRoot: targetHash // For single documents, merkleRoot is the same as targetHash
     }
   };
 
   console.log("Wrapped document:", wrappedDoc);
+  console.log("Merkle root:", wrappedDoc.signature.merkleRoot);
   return wrappedDoc;
 };
