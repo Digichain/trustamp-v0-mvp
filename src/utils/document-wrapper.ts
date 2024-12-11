@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import CryptoJS from 'crypto-js';
 
 interface WrappedDocument {
   version: string;
@@ -12,14 +12,16 @@ interface WrappedDocument {
 }
 
 const generateHash = (data: any): string => {
-  const hash = createHash('sha256');
-  hash.update(JSON.stringify(data));
-  return '0x' + hash.digest('hex');
+  const jsonString = JSON.stringify(data);
+  const wordArray = CryptoJS.SHA3(jsonString, { outputLength: 256 });
+  return '0x' + wordArray.toString(CryptoJS.enc.Hex);
+};
+
+const generateSalt = (): string => {
+  return crypto.randomUUID();
 };
 
 const saltData = (data: any): any => {
-  const salt = () => crypto.randomUUID();
-  
   if (Array.isArray(data)) {
     return data.map(item => saltData(item));
   }
@@ -27,10 +29,18 @@ const saltData = (data: any): any => {
   if (typeof data === 'object' && data !== null) {
     const salted: any = {};
     for (const key in data) {
-      if (typeof data[key] === 'string') {
-        salted[key] = `${salt()}:string:${data[key]}`;
-      } else {
+      if (data[key] === null || data[key] === undefined) {
+        salted[key] = data[key];
+      } else if (typeof data[key] === 'string') {
+        salted[key] = `${generateSalt()}:string:${data[key]}`;
+      } else if (typeof data[key] === 'number') {
+        salted[key] = `${generateSalt()}:number:${data[key]}`;
+      } else if (typeof data[key] === 'boolean') {
+        salted[key] = `${generateSalt()}:boolean:${data[key]}`;
+      } else if (typeof data[key] === 'object') {
         salted[key] = saltData(data[key]);
+      } else {
+        salted[key] = data[key];
       }
     }
     return salted;
@@ -40,10 +50,24 @@ const saltData = (data: any): any => {
 };
 
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
-  const saltedData = saltData(rawDocument);
+  // Ensure the document has the required OpenAttestation structure
+  const documentWithTemplate = {
+    ...rawDocument,
+    $template: {
+      name: "INVOICE",
+      type: "EMBEDDED_RENDERER",
+      url: "https://generic-templates.openattestation.com"
+    }
+  };
+
+  // Salt the data according to OpenAttestation format
+  const saltedData = saltData(documentWithTemplate);
+  
+  // Generate the target hash using SHA3
   const targetHash = generateHash(saltedData);
   
-  return {
+  // Create the wrapped document
+  const wrappedDoc: WrappedDocument = {
     version: "https://schema.openattestation.com/2.0/schema.json",
     data: saltedData,
     signature: {
@@ -53,4 +77,7 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
       merkleRoot: targetHash
     }
   };
+
+  console.log("Wrapped document:", wrappedDoc);
+  return wrappedDoc;
 };

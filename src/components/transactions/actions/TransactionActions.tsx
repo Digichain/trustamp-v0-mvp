@@ -46,7 +46,7 @@ export const TransactionActions = ({
       // Upload wrapped document to storage
       const { error: uploadError } = await supabase.storage
         .from('wrapped-documents')
-        .upload(fileName, JSON.stringify(wrappedDoc), {
+        .upload(fileName, JSON.stringify(wrappedDoc, null, 2), {
           contentType: 'application/json',
           upsert: true
         });
