@@ -55,11 +55,11 @@ const Auth = () => {
   }, [navigate, toast]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-card p-8 shadow-lg">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome to Trustamp</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="text-3xl font-bold text-card-foreground">Welcome to Trustamp</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             Please sign in to continue
           </p>
         </div>
@@ -70,8 +70,8 @@ const Auth = () => {
             variables: {
               default: {
                 colors: {
-                  brand: '#2563eb',
-                  brandAccent: '#1d4ed8',
+                  brand: 'hsl(var(--primary))',
+                  brandAccent: 'hsl(var(--primary))',
                 }
               }
             }
