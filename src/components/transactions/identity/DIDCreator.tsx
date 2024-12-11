@@ -55,7 +55,7 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
         toast({
           title: "DNS Not Yet Verified",
           description: "The DNS record exists but hasn't propagated yet. Please try again in a few moments.",
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default"
         });
       }
     } catch (error) {
