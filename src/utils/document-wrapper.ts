@@ -18,7 +18,9 @@ const generateHash = (data: any): string => {
 };
 
 const generateSalt = (): string => {
-  return crypto.randomUUID();
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return array[0].toString(36);
 };
 
 const saltData = (data: any): any => {

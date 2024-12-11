@@ -17,11 +17,29 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Add polyfills for Node.js built-in modules
+      crypto: 'crypto-browserify',
+      stream: 'stream-browserify',
+      events: 'events',
+      path: 'path-browserify',
+      util: 'util',
+      buffer: 'buffer',
     },
+  },
+  define: {
+    'process.env': {},
+    global: {},
   },
   build: {
     rollupOptions: {
-      external: ['dotenv/config', 'util'],
+      external: ['dotenv/config'],
     },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    }
   },
 }));
