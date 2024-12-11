@@ -23,6 +23,12 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
 
+  const generateUniqueDNSLocation = () => {
+    // Generate a random string for the subdomain
+    const randomString = Math.random().toString(36).substring(2, 8);
+    return `example-${randomString}.sandbox.openattestation.com`;
+  };
+
   const createDID = async () => {
     if (!walletAddress) {
       toast({
@@ -37,8 +43,9 @@ export const DIDCreator = ({ onDIDCreated }: DIDCreatorProps) => {
     try {
       const did = `did:ethr:${walletAddress}`;
       
-      // Use the OpenAttestation sandbox DNS
-      const dnsLocation = "example.openattestation.com";
+      // Generate a unique sandbox DNS location
+      const dnsLocation = generateUniqueDNSLocation();
+      console.log("Generated DNS Location:", dnsLocation);
       
       const newDidDocument: DIDDocument = {
         id: `${did}#controller`,
