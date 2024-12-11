@@ -19,6 +19,18 @@ export const useInvoiceForm = () => {
         ...prev,
         [field]: value
       }));
+    } else if (section === "billableItems") {
+      try {
+        const parsedItems = JSON.parse(value);
+        if (Array.isArray(parsedItems)) {
+          setFormData(prev => ({
+            ...prev,
+            billableItems: parsedItems
+          }));
+        }
+      } catch (error) {
+        console.error("Error parsing billable items:", error);
+      }
     } else if (field.includes('.')) {
       const [parentField, childField] = field.split('.');
       setFormData(prev => ({
