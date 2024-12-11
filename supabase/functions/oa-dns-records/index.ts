@@ -42,17 +42,25 @@ serve(async (req) => {
     console.log("Extracted address:", address);
 
     // Create DNS record using OpenAttestation API
-    const apiResponse = await fetch('https://api.openattestation.com/dns-txt', {
+    const apiUrl = 'https://api.openattestation.com/dns-txt';
+    const requestBody = {
+      address: address,
+      network: 'sepolia',
+      type: "openatts"
+    };
+
+    console.log("Sending request to OpenAttestation API:", {
+      url: apiUrl,
+      body: requestBody
+    });
+
+    const apiResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        address: address,
-        network: 'sepolia',
-        type: "openatts"
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const responseText = await apiResponse.text();
@@ -91,7 +99,8 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in oa-dns-records:", {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
+      type: error.constructor.name
     });
     
     return new Response(
