@@ -3,9 +3,10 @@ import { DIDCreator, DIDDocument } from "../../identity/DIDCreator";
 
 interface InvoiceFormHeaderProps {
   onDIDCreated: (doc: DIDDocument) => void;
+  didDocument: DIDDocument | null;
 }
 
-export const InvoiceFormHeader = ({ onDIDCreated }: InvoiceFormHeaderProps) => {
+export const InvoiceFormHeader = ({ onDIDCreated, didDocument }: InvoiceFormHeaderProps) => {
   return (
     <Card>
       <CardHeader>

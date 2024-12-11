@@ -17,18 +17,17 @@ import { useInvoiceForm } from "./invoice/useInvoiceForm";
 export const VerifiableInvoiceForm = () => {
   const navigate = useNavigate();
   const [showPreview, setShowPreview] = useState(false);
+  const [didDocument, setDidDocument] = useState<DIDDocument | null>(null);
   const { handleSubmit, isSubmitting } = useInvoiceSubmission();
   const {
     formData,
-    didDocument,
-    setDidDocument,
     handleInputChange,
     handleNestedInputChange,
     handleBillableItemChange
   } = useInvoiceForm();
 
   const handleDIDCreated = (doc: DIDDocument) => {
-    console.log("DID Document created:", doc);
+    console.log("VerifiableInvoiceForm - DID Document created:", doc);
     setDidDocument(doc);
   };
 
@@ -42,91 +41,95 @@ export const VerifiableInvoiceForm = () => {
 
   return (
     <form onSubmit={onSubmit} className="space-y-8">
-      <InvoiceFormHeader onDIDCreated={handleDIDCreated} />
+      <InvoiceFormHeader onDIDCreated={handleDIDCreated} didDocument={didDocument} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Invoice Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Invoice ID</label>
-              <Input
-                value={formData.id}
-                onChange={(e) => handleInputChange("id", "", e.target.value)}
-                placeholder="Invoice ID"
+      {didDocument && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Invoice Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Invoice ID</label>
+                  <Input
+                    value={formData.id}
+                    onChange={(e) => handleInputChange("id", "", e.target.value)}
+                    placeholder="Invoice ID"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Date</label>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange("date", "", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <BillFromSection
+                billFrom={formData.billFrom}
+                onInputChange={(field, value) => handleInputChange("billFrom", field, value)}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", "", e.target.value)}
+
+              <BillToSection
+                billTo={formData.billTo}
+                onInputChange={handleInputChange}
               />
-            </div>
+
+              <BillableItemsSection
+                items={formData.billableItems}
+                onItemChange={handleBillableItemChange}
+                onAddItem={() => handleInputChange("billableItems", "", JSON.stringify([
+                  ...formData.billableItems,
+                  { description: "", quantity: 0, unitPrice: 0, amount: 0 }
+                ]))}
+                onRemoveItem={(index) => {
+                  if (formData.billableItems.length > 1) {
+                    handleInputChange("billableItems", "", JSON.stringify(
+                      formData.billableItems.filter((_, i) => i !== index)
+                    ));
+                  }
+                }}
+              />
+
+              <TotalsSection
+                subtotal={formData.subtotal}
+                tax={formData.tax}
+                taxTotal={formData.taxTotal}
+                total={formData.total}
+                onTaxChange={(taxRate) => {
+                  const taxTotal = formData.subtotal * (taxRate / 100);
+                  handleInputChange("tax", "", taxRate.toString());
+                  handleInputChange("taxTotal", "", taxTotal.toString());
+                  handleInputChange("total", "", (formData.subtotal + taxTotal).toString());
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
+              Cancel
+            </Button>
+            <PreviewButton onClick={() => setShowPreview(true)} />
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Invoice"}
+            </Button>
           </div>
 
-          <BillFromSection
-            billFrom={formData.billFrom}
-            onInputChange={(field, value) => handleInputChange("billFrom", field, value)}
-          />
-
-          <BillToSection
-            billTo={formData.billTo}
-            onInputChange={handleInputChange}
-          />
-
-          <BillableItemsSection
-            items={formData.billableItems}
-            onItemChange={handleBillableItemChange}
-            onAddItem={() => handleInputChange("billableItems", "", JSON.stringify([
-              ...formData.billableItems,
-              { description: "", quantity: 0, unitPrice: 0, amount: 0 }
-            ]))}
-            onRemoveItem={(index) => {
-              if (formData.billableItems.length > 1) {
-                handleInputChange("billableItems", "", JSON.stringify(
-                  formData.billableItems.filter((_, i) => i !== index)
-                ));
-              }
-            }}
-          />
-
-          <TotalsSection
-            subtotal={formData.subtotal}
-            tax={formData.tax}
-            taxTotal={formData.taxTotal}
-            total={formData.total}
-            onTaxChange={(taxRate) => {
-              const taxTotal = formData.subtotal * (taxRate / 100);
-              handleInputChange("tax", "", taxRate.toString());
-              handleInputChange("taxTotal", "", taxTotal.toString());
-              handleInputChange("total", "", (formData.subtotal + taxTotal).toString());
-            }}
-          />
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
-          Cancel
-        </Button>
-        <PreviewButton onClick={() => setShowPreview(true)} disabled={!didDocument} />
-        <Button type="submit" disabled={!didDocument || isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Invoice"}
-        </Button>
-      </div>
-
-      <PreviewDialog
-        title="Invoice Preview"
-        isOpen={showPreview}
-        onOpenChange={setShowPreview}
-        onConfirm={() => onSubmit()}
-      >
-        <InvoicePreview data={formData} />
-      </PreviewDialog>
+          <PreviewDialog
+            title="Invoice Preview"
+            isOpen={showPreview}
+            onOpenChange={setShowPreview}
+            onConfirm={() => onSubmit()}
+          >
+            <InvoicePreview data={formData} />
+          </PreviewDialog>
+        </>
+      )}
     </form>
   );
 };
