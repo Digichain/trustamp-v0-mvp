@@ -9,6 +9,7 @@ import CreateTransaction from '@/pages/CreateTransaction';
 import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction';
 import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
+import Payments from '@/pages/Payments';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 
@@ -95,6 +96,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Account />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments"
+                element={
+                  <ProtectedRoute>
+                    <Payments />
                   </ProtectedRoute>
                 }
               />
