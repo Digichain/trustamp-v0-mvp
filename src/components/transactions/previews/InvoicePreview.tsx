@@ -5,7 +5,9 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
-  // Add null checks with default empty object
+  console.log("Preview data received:", data); // Debug log
+  
+  // Add null checks with default empty objects
   const billFrom = data?.billFrom || {};
   const billTo = data?.billTo || {};
   const company = billTo?.company || {};
@@ -22,20 +24,27 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
         <div>
           <h3 className="font-semibold mb-2">Bill From</h3>
           <div className="space-y-1">
-            <p>{billFrom.name || 'N/A'}</p>
+            <p className="font-medium">{billFrom.name || 'N/A'}</p>
             <p>{billFrom.streetAddress || 'N/A'}</p>
             <p>{billFrom.city || 'N/A'}</p>
             <p>{billFrom.postalCode || 'N/A'}</p>
+            <p>{billFrom.phoneNumber || 'N/A'}</p>
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Bill To</h3>
           <div className="space-y-1">
-            <p>{company.name || 'N/A'}</p>
+            <p className="font-medium">{company.name || 'N/A'}</p>
             <p>{company.streetAddress || 'N/A'}</p>
-            <p>{billTo.name || 'N/A'}</p>
-            <p>{billTo.email || 'N/A'}</p>
+            <p>{company.city || 'N/A'}</p>
+            <p>{company.postalCode || 'N/A'}</p>
+            <p>{company.phoneNumber || 'N/A'}</p>
+            <div className="mt-4">
+              <p className="font-medium">Contact Person</p>
+              <p>{billTo.name || 'N/A'}</p>
+              <p>{billTo.email || 'N/A'}</p>
+            </div>
           </div>
         </div>
       </div>
