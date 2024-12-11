@@ -65,9 +65,13 @@ export const TransactionActions = ({
       }
 
       // Update transaction status to document_wrapped
+      console.log("Updating transaction status to document_wrapped");
       const { error: updateError } = await supabase
         .from('transactions')
-        .update({ status: 'document_wrapped' })
+        .update({ 
+          status: 'document_wrapped',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', transaction.id);
 
       if (updateError) {
@@ -84,7 +88,9 @@ export const TransactionActions = ({
       console.log("Document merkle root:", merkleRoot);
 
       // Invalidate transactions cache to refresh the UI
+      console.log("Invalidating transactions cache");
       await invalidateTransactions();
+      console.log("Cache invalidated, UI should update");
 
       toast({
         title: "Success",
