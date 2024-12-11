@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ethers } from "ethers";
 
-enum KeyType {
-  Secp256k1VerificationKey2018 = 'Secp256k1VerificationKey2018'
+enum ProofType {
+  OpenAttestationSignature2018 = 'OpenAttestationSignature2018'
 }
 
 declare global {
@@ -31,16 +31,16 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     
     console.log("Document signed with signature:", signature);
 
-    // Create signed document
+    // Create signed document with proper proof structure
     const signedDocument = {
       ...wrappedDocument,
-      proof: {
-        type: KeyType.Secp256k1VerificationKey2018,
+      proof: [{
+        type: ProofType.OpenAttestationSignature2018,
         created: new Date().toISOString(),
         proofPurpose: "assertionMethod",
         verificationMethod: walletAddress,
         signature: signature
-      }
+      }]
     };
 
     // Store signed document
