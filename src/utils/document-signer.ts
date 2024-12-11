@@ -1,5 +1,5 @@
 import { signOA } from '@trustvc/trustvc';
-import { Wallet } from 'ethers';
+import { ethers } from 'ethers';
 import { supabase } from '@/integrations/supabase/client';
 
 export enum SUPPORTED_SIGNING_ALGORITHM {
@@ -10,12 +10,15 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
   try {
     console.log("Starting document signing process");
     
-    // Create a wallet instance from the connected wallet
-    const wallet = new Wallet(walletAddress);
+    // Request wallet signature using ethers provider
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
     
-    // Sign the document
+    console.log("Got signer from wallet:", await signer.getAddress());
+    
+    // Sign the document using the connected wallet
     console.log("Signing document with wallet:", walletAddress);
-    const signedDocument = await signOA(wrappedDocument, wallet);
+    const signedDocument = await signOA(wrappedDocument, signer);
     
     console.log("Document signed successfully");
 
