@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { verifiableInvoiceSchema } from "@/schemas/verifiable-invoice";
-import { DIDDocument } from "../../identity/DIDCreator";
 
 export const useInvoiceForm = () => {
   const [formData, setFormData] = useState({
