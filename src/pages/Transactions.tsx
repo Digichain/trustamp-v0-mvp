@@ -4,12 +4,14 @@ import { CreateTransactionDialog } from "@/components/transactions/CreateTransac
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "@/contexts/WalletContext";
+import { useNavigate } from "react-router-dom";
 
 const Transactions = () => {
   const { isWalletConnected } = useWallet();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  console.log("Wallet connection state:", isWalletConnected); // Debug log
+  console.log("Wallet connection state:", isWalletConnected);
 
   const handleWalletRequired = () => {
     if (!isWalletConnected) {
@@ -18,7 +20,9 @@ const Transactions = () => {
         description: "Please connect your wallet to perform this action",
         variant: "destructive",
       });
+      return;
     }
+    navigate("/verify");
   };
 
   return (
