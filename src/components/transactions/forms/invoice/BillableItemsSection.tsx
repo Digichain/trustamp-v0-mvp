@@ -21,6 +21,8 @@ export const BillableItemsSection = ({
   onAddItem,
   onRemoveItem,
 }: BillableItemsSectionProps) => {
+  console.log("BillableItemsSection - Rendering with items:", items);
+  
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -43,6 +45,8 @@ export const BillableItemsSection = ({
             <label className="block text-sm font-medium mb-1">Quantity</label>
             <Input
               type="number"
+              min="0"
+              step="1"
               value={item.quantity}
               onChange={(e) => onItemChange(index, "quantity", Number(e.target.value))}
               placeholder="Quantity"
@@ -52,6 +56,8 @@ export const BillableItemsSection = ({
             <label className="block text-sm font-medium mb-1">Unit Price</label>
             <Input
               type="number"
+              min="0"
+              step="0.01"
               value={item.unitPrice}
               onChange={(e) => onItemChange(index, "unitPrice", Number(e.target.value))}
               placeholder="Unit price"
@@ -62,7 +68,7 @@ export const BillableItemsSection = ({
               <label className="block text-sm font-medium mb-1">Amount</label>
               <Input
                 type="number"
-                value={item.amount}
+                value={Number(item.amount).toFixed(2)}
                 readOnly
                 className="bg-gray-50"
               />

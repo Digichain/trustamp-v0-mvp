@@ -15,13 +15,11 @@ export const useInvoiceForm = () => {
     console.log("handleInputChange called with:", { section, field, value });
     
     if (section === "") {
-      // Handle top-level fields
       setFormData(prev => ({
         ...prev,
         [field]: value
       }));
     } else if (field.includes('.')) {
-      // Handle nested fields (e.g., billTo.company.name)
       const [parentField, childField] = field.split('.');
       setFormData(prev => ({
         ...prev,
@@ -34,7 +32,6 @@ export const useInvoiceForm = () => {
         }
       }));
     } else {
-      // Handle first-level nested fields
       setFormData(prev => ({
         ...prev,
         [section]: {
@@ -58,25 +55,25 @@ export const useInvoiceForm = () => {
       [field]: value
     };
 
-    // Ensure quantity and unitPrice are numbers
+    // Calculate amount for the current item
     if (field === 'quantity' || field === 'unitPrice') {
       const quantity = Number(newBillableItems[index].quantity) || 0;
       const unitPrice = Number(newBillableItems[index].unitPrice) || 0;
-      newBillableItems[index].amount = quantity * unitPrice;
+      newBillableItems[index].amount = Number((quantity * unitPrice).toFixed(2));
     }
 
     // Calculate totals
-    const subtotal = newBillableItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const subtotal = Number(newBillableItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0).toFixed(2));
     const taxRate = Number(formData.tax) || 0;
-    const taxTotal = subtotal * (taxRate / 100);
-    const total = subtotal + taxTotal;
+    const taxTotal = Number((subtotal * (taxRate / 100)).toFixed(2));
+    const total = Number((subtotal + taxTotal).toFixed(2));
     
     setFormData(prev => ({
       ...prev,
       billableItems: newBillableItems,
-      subtotal: subtotal,
-      taxTotal: taxTotal,
-      total: total
+      subtotal,
+      taxTotal,
+      total
     }));
   };
 
