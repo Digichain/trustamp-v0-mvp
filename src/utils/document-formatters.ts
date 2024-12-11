@@ -5,6 +5,10 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
     throw new Error("DID document is required to create a verifiable document");
   }
 
+  // Extract the DNS record from the DID document
+  // This would typically come from the DID creation process
+  const dnsLocation = `${didDocument.id.split('#')[0].replace('did:ethr:', '')}.sandbox.openattestation.com`;
+
   return {
     $template: {
       name: "INVOICE",
@@ -12,11 +16,12 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
       url: "https://generic-templates.openattestation.com"
     },
     issuers: [{
-      id: didDocument.id,
+      id: didDocument.id, // This will include the #controller suffix
       name: invoiceData.billFrom.name,
       identityProof: {
-        type: "DNS-TXT",
-        location: "sandbox.openattestation.com"
+        type: "DNS-DID",
+        location: dnsLocation,
+        key: didDocument.id
       }
     }],
     network: {
