@@ -11,6 +11,9 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
 
   console.log("Formatting document with DID:", didDocument);
 
+  // The base DID without #controller
+  const baseId = `did:ethr:${didDocument.ethereumAddress}`;
+  
   return {
     $template: {
       name: "INVOICE",
@@ -18,12 +21,12 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
       url: "https://generic-templates.openattestation.com"
     },
     issuers: [{
-      id: didDocument.id,
+      id: baseId,
       name: invoiceData.billFrom.name,
       identityProof: {
         type: "DNS-DID",
         location: didDocument.dnsLocation,
-        key: didDocument.id // Using the DID document's id as the key
+        key: `${baseId}#controller`
       }
     }],
     network: {
