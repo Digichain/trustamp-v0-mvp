@@ -16,6 +16,12 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
   const company = billTo?.company || {};
   const billableItems = invoiceDetails?.billableItems || [];
 
+  // Ensure numeric values are properly converted
+  const subtotal = Number(invoiceDetails?.subtotal) || 0;
+  const tax = Number(invoiceDetails?.tax?.[""] || invoiceDetails?.tax) || 0;
+  const taxTotal = Number(invoiceDetails?.taxTotal?.[""] || invoiceDetails?.taxTotal) || 0;
+  const total = Number(invoiceDetails?.total?.[""] || invoiceDetails?.total) || 0;
+
   return (
     <Card className="p-6 space-y-6 bg-white">
       <div className="border-b pb-4">
@@ -68,8 +74,8 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
               <tr key={index} className="border-b">
                 <td className="py-2">{item.description || 'N/A'}</td>
                 <td className="text-right py-2">{item.quantity || 0}</td>
-                <td className="text-right py-2">${item.unitPrice || 0}</td>
-                <td className="text-right py-2">${item.amount || 0}</td>
+                <td className="text-right py-2">${Number(item.unitPrice || 0).toFixed(2)}</td>
+                <td className="text-right py-2">${Number(item.amount || 0).toFixed(2)}</td>
               </tr>
             ))}
             {billableItems.length === 0 && (
@@ -87,15 +93,15 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${(invoiceDetails?.subtotal || 0).toFixed(2)}</span>
+            <span>${subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({invoiceDetails?.tax || 0}%):</span>
-            <span>${(invoiceDetails?.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({tax}%):</span>
+            <span>${taxTotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${(invoiceDetails?.total || 0).toFixed(2)}</span>
+            <span>${total.toFixed(2)}</span>
           </div>
         </div>
       </div>
