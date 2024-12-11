@@ -96,8 +96,10 @@ export const VerifiableInvoiceForm = () => {
     }));
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     if (!didDocument) return;
     await handleSubmit(formData, didDocument);
   };
@@ -190,7 +192,7 @@ export const VerifiableInvoiceForm = () => {
         title="Invoice Preview"
         isOpen={showPreview}
         onOpenChange={setShowPreview}
-        onConfirm={onSubmit}
+        onConfirm={() => onSubmit()}
       >
         <InvoicePreview data={formData} />
       </PreviewDialog>

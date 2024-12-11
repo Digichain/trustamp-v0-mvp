@@ -11,7 +11,7 @@ interface PreviewDialogProps {
   title: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (e?: React.FormEvent) => void;
+  onConfirm: () => void;
   children: React.ReactNode;
 }
 
