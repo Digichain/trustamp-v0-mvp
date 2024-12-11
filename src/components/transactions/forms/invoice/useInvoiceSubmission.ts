@@ -30,7 +30,6 @@ export const useInvoiceSubmission = () => {
     console.log("Submitting form data:", formData);
 
     try {
-      // First check if we have an authenticated session
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -55,8 +54,8 @@ export const useInvoiceSubmission = () => {
       const documentPath = await saveDocumentToStorage(openAttestationDocument, fileName);
       console.log("Document saved at path:", documentPath);
 
-      // Save the transaction and document reference
-      const { data, error: insertError } = await supabase
+      // Create transaction record
+      const { data: transactionData, error: transactionError } = await supabase
         .from("transactions")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
@@ -69,11 +68,33 @@ export const useInvoiceSubmission = () => {
           user_id: user.id,
           raw_document: openAttestationDocument
         })
-        .select();
+        .select()
+        .single();
 
-      if (insertError) {
-        console.error("Error inserting transaction:", insertError);
-        throw new Error("Failed to save transaction: " + insertError.message);
+      if (transactionError) {
+        console.error("Error inserting transaction:", transactionError);
+        throw new Error("Failed to save transaction: " + transactionError.message);
+      }
+
+      // Save invoice document data
+      const { error: invoiceError } = await supabase
+        .from("invoice_documents")
+        .insert({
+          transaction_id: transactionData.id,
+          invoice_number: formData.id,
+          date: formData.date,
+          bill_from: formData.billFrom,
+          bill_to: formData.billTo,
+          billable_items: formData.billableItems,
+          subtotal: formData.subtotal,
+          tax: formData.tax,
+          tax_total: formData.taxTotal,
+          total: formData.total
+        });
+
+      if (invoiceError) {
+        console.error("Error inserting invoice document:", invoiceError);
+        throw new Error("Failed to save invoice document: " + invoiceError.message);
       }
 
       toast({

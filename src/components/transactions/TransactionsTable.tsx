@@ -32,6 +32,7 @@ const getStatusColor = (status: string) => {
 export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [documentData, setDocumentData] = useState<any>(null);
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -50,19 +51,53 @@ export const TransactionsTable = () => {
     },
   });
 
-  const handlePreviewClick = (transaction: any) => {
+  const fetchDocumentData = async (transaction: any) => {
+    if (transaction.document_subtype === "verifiable") {
+      const { data, error } = await supabase
+        .from("invoice_documents")
+        .select("*")
+        .eq("transaction_id", transaction.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching invoice document:", error);
+        return null;
+      }
+
+      return data;
+    } else if (transaction.document_subtype === "transferable") {
+      const { data, error } = await supabase
+        .from("bill_of_lading_documents")
+        .select("*")
+        .eq("transaction_id", transaction.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching bill of lading document:", error);
+        return null;
+      }
+
+      return data;
+    }
+
+    return null;
+  };
+
+  const handlePreviewClick = async (transaction: any) => {
+    const docData = await fetchDocumentData(transaction);
     setSelectedTransaction(transaction);
+    setDocumentData(docData);
     setShowPreview(true);
   };
 
   const renderPreview = () => {
-    if (!selectedTransaction) return null;
+    if (!selectedTransaction || !documentData) return null;
 
     switch (selectedTransaction.document_subtype?.toLowerCase()) {
       case "verifiable":
-        return <InvoicePreview data={selectedTransaction.raw_document || {}} />;
+        return <InvoicePreview data={documentData} />;
       case "transferable":
-        return <BillOfLadingPreview data={selectedTransaction.raw_document || {}} />;
+        return <BillOfLadingPreview data={documentData} />;
       default:
         return <div>Unsupported document type</div>;
     }
@@ -141,7 +176,6 @@ export const TransactionsTable = () => {
         title={`${selectedTransaction?.title || 'Document'} Preview`}
         isOpen={showPreview}
         onOpenChange={setShowPreview}
-        onConfirm={() => setShowPreview(false)}
       >
         {renderPreview()}
       </PreviewDialog>

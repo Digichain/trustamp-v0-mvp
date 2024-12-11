@@ -9,6 +9,124 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bill_of_lading_documents: {
+        Row: {
+          bl_number: string | null
+          company_name: string | null
+          created_at: string | null
+          field1: string | null
+          field2: string | null
+          field3: string | null
+          field4: string | null
+          field5: string | null
+          field6: string | null
+          field7: string | null
+          field8: string | null
+          field9: string | null
+          id: string
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          bl_number?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          field1?: string | null
+          field2?: string | null
+          field3?: string | null
+          field4?: string | null
+          field5?: string | null
+          field6?: string | null
+          field7?: string | null
+          field8?: string | null
+          field9?: string | null
+          id?: string
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          bl_number?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          field1?: string | null
+          field2?: string | null
+          field3?: string | null
+          field4?: string | null
+          field5?: string | null
+          field6?: string | null
+          field7?: string | null
+          field8?: string | null
+          field9?: string | null
+          id?: string
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_of_lading_documents_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_documents: {
+        Row: {
+          bill_from: Json | null
+          bill_to: Json | null
+          billable_items: Json | null
+          created_at: string | null
+          date: string | null
+          id: string
+          invoice_number: string | null
+          subtotal: number | null
+          tax: number | null
+          tax_total: number | null
+          total: number | null
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          bill_from?: Json | null
+          bill_to?: Json | null
+          billable_items?: Json | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          invoice_number?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          tax_total?: number | null
+          total?: number | null
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          bill_from?: Json | null
+          bill_to?: Json | null
+          billable_items?: Json | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          invoice_number?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          tax_total?: number | null
+          total?: number | null
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_documents_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
