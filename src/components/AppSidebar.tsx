@@ -27,7 +27,7 @@ export const AppSidebar = () => {
         title: "Logged out successfully",
         description: "You have been logged out and disconnected from your wallet",
       });
-      navigate('/');
+      navigate('/auth'); // Updated to redirect to auth page instead of landing page
     } catch (error) {
       console.error('Error during logout:', error);
       toast({
