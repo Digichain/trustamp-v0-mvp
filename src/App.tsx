@@ -44,10 +44,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <WalletProvider>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <Router>
+    <Router>
+      <WalletProvider>
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -93,10 +93,10 @@ function App() {
               />
             </Routes>
             <Toaster />
-          </Router>
-        </div>
-      </SidebarProvider>
-    </WalletProvider>
+          </div>
+        </SidebarProvider>
+      </WalletProvider>
+    </Router>
   );
 }
 
