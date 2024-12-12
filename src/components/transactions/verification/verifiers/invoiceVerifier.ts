@@ -25,7 +25,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
         const results = await Promise.all(promises);
         const customResult = await invoiceCustomVerifier.verify(document, {
-          network: "sepolia"
+          provider: { network: "sepolia" }
         });
         return [...results, customResult];
       });
