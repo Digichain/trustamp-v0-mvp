@@ -24,7 +24,7 @@ export const useDocumentHandlers = () => {
       const merkleRoot = wrappedDoc.signature.merkleRoot;
       console.log("Generated merkle root:", merkleRoot);
 
-      // Generate a separate UUID for storage
+      // Generate a proper UUID for storage
       const storageId = crypto.randomUUID();
       console.log("Generated storage ID:", storageId);
 
@@ -49,7 +49,7 @@ export const useDocumentHandlers = () => {
         .update({ 
           status: 'document_wrapped',
           updated_at: new Date().toISOString(),
-          transaction_hash: storageId // Store the storage ID
+          transaction_hash: storageId
         })
         .eq('id', transaction.id);
 
