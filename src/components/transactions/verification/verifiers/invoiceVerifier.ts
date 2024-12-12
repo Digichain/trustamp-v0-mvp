@@ -26,8 +26,11 @@ export class InvoiceVerifier implements DocumentVerifier {
         const results = await Promise.all(promises);
         const customResult = await invoiceCustomVerifier.verify(document, {
           provider: {
-            network: "sepolia",
             url: "https://eth-sepolia.g.alchemy.com/v2/demo"
+          },
+          resolver: {
+            url: "https://api.example.com/resolver",
+            apiKey: "demo"
           }
         });
         return [...results, customResult];
