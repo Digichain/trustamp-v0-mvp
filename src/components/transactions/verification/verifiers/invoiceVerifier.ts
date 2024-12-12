@@ -24,7 +24,12 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Perform OpenAttestation verification
       const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
         const results = await Promise.all(promises);
-        const customResult = await invoiceCustomVerifier.verify(document, {});
+        const customResult = await invoiceCustomVerifier.verify(document, {
+          provider: {
+            network: "sepolia",
+            url: "https://eth-sepolia.g.alchemy.com/v2/demo"
+          }
+        });
         return [...results, customResult];
       });
       
