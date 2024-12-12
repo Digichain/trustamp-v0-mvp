@@ -12,10 +12,16 @@ interface WrappedDocument {
 }
 
 const generateHash = (data: any): string => {
-  const jsonString = JSON.stringify(data);
+  // Convert the data to a canonical form
+  const jsonString = JSON.stringify(data, Object.keys(data).sort());
+  console.log("Generating hash for data:", jsonString);
+  
+  // Use SHA3-256 for hashing
   const wordArray = CryptoJS.SHA3(jsonString, { outputLength: 256 });
-  // Remove the '0x' prefix to ensure correct byte length
-  return wordArray.toString(CryptoJS.enc.Hex);
+  const hash = wordArray.toString(CryptoJS.enc.Hex);
+  console.log("Generated hash:", hash);
+  
+  return hash;
 };
 
 const generateSalt = (): string => {
@@ -29,15 +35,13 @@ const saltData = (data: any): any => {
   
   if (typeof data === 'object' && data !== null) {
     const salted: any = {};
-    for (const key in data) {
+    for (const key of Object.keys(data).sort()) { // Sort keys for consistent ordering
       if (data[key] === null || data[key] === undefined) {
         salted[key] = data[key];
       } else if (typeof data[key] === 'object') {
         salted[key] = saltData(data[key]);
       } else {
-        // Generate a UUID as salt
         const salt = generateSalt();
-        // Create the salted value in the format: "salt:type:value"
         salted[key] = `${salt}:${typeof data[key]}:${data[key]}`;
       }
     }
@@ -50,7 +54,7 @@ const saltData = (data: any): any => {
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
-  // Ensure the document has the required OpenAttestation structure
+  // Ensure consistent document structure
   const documentWithTemplate = {
     ...rawDocument,
     $template: {
@@ -60,15 +64,23 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
     }
   };
 
-  // Salt the data according to OpenAttestation format
-  const saltedData = saltData(documentWithTemplate);
+  // Sort all object keys for consistent ordering
+  const sortedDocument = JSON.parse(JSON.stringify(documentWithTemplate, Object.keys(documentWithTemplate).sort()));
+  console.log("Document with sorted keys:", sortedDocument);
+
+  // Salt the data
+  const saltedData = saltData(sortedDocument);
   console.log("Document salted with UUIDs:", saltedData);
   
-  // Generate the target hash using SHA3
+  // Generate the target hash
   const targetHash = generateHash(saltedData);
   console.log("Generated target hash:", targetHash);
   
-  // Create the wrapped document with merkle root
+  // For single documents, merkle root is the same as target hash
+  // but we ensure it's properly formatted
+  const merkleRoot = targetHash;
+  console.log("Using merkle root:", merkleRoot);
+
   const wrappedDoc: WrappedDocument = {
     version: "https://schema.openattestation.com/2.0/schema.json",
     data: saltedData,
@@ -76,7 +88,7 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
       type: "SHA3MerkleProof",
       targetHash,
       proof: [],
-      merkleRoot: targetHash // For single documents, merkleRoot is the same as targetHash
+      merkleRoot
     }
   };
 
