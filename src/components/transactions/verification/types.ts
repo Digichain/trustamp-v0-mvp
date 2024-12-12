@@ -13,7 +13,6 @@ export interface DocumentVerifier {
 export const DOCUMENT_TEMPLATES = {
   INVOICE: 'INVOICE',
   BILL_OF_LADING: 'BILL_OF_LADING',
-  // Add more templates as needed
 } as const;
 
 export type DocumentTemplate = typeof DOCUMENT_TEMPLATES[keyof typeof DOCUMENT_TEMPLATES];

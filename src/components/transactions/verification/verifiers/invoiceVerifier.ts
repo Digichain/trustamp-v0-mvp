@@ -1,14 +1,17 @@
 import { verify } from "@govtechsg/oa-verify";
-import { VerificationResult, VerificationDetails } from "../types/verificationTypes";
-import { OpenAttestationDocument } from "../types/verificationTypes";
+import { DocumentVerifier, VerificationResult } from "../types";
+import { DOCUMENT_TEMPLATES } from "../types";
 
-export class InvoiceVerifier {
-  async verify(document: OpenAttestationDocument): Promise<VerificationResult> {
+export class InvoiceVerifier implements DocumentVerifier {
+  async verify(document: any): Promise<VerificationResult> {
     try {
-      console.log("Starting document verification");
+      console.log("Starting document verification for v2.0");
       
-      // Perform OpenAttestation verification
-      const fragments = await verify(document);
+      // Verify using v2.0 specific fragments
+      const fragments = await verify(document, {
+        version: "https://schema.openattestation.com/2.0/schema.json"
+      });
+      
       console.log("Raw verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
@@ -19,7 +22,6 @@ export class InvoiceVerifier {
 
       return {
         isValid,
-        document,
         details: verificationDetails
       };
     } catch (error) {
@@ -28,7 +30,11 @@ export class InvoiceVerifier {
     }
   }
 
-  private processVerificationFragments(fragments: any[]): VerificationDetails {
+  getTemplate(): string {
+    return DOCUMENT_TEMPLATES.INVOICE;
+  }
+
+  private processVerificationFragments(fragments: any[]): any {
     // Document Integrity Check
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
     console.log("Integrity fragment:", integrityFragment);
@@ -41,7 +47,7 @@ export class InvoiceVerifier {
       )
     };
 
-    // Issuance Status Check
+    // Issuance Status Check (v2.0 specific)
     const statusFragment = fragments.find(f => f.name === "OpenAttestationEthereumTokenRegistryStatus") 
       || fragments.find(f => f.name === "OpenAttestationEthereumDocumentStoreStatus");
     console.log("Status fragment:", statusFragment);
@@ -88,15 +94,14 @@ export class InvoiceVerifier {
     return failureMessage;
   }
 
-  private isVerificationValid(details: VerificationDetails): boolean {
-    // For DNS-DID verification, we primarily care about document integrity
+  private isVerificationValid(details: any): boolean {
+    // For v2.0 documents, we primarily check document integrity
     return details.documentIntegrity.valid;
   }
 
   private createErrorResponse(message: string): VerificationResult {
     return {
       isValid: false,
-      document: null,
       details: {
         issuanceStatus: {
           valid: false,
