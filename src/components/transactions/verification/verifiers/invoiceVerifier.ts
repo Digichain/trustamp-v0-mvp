@@ -1,7 +1,6 @@
-import { verify, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
-import { createInvoiceCustomVerifier } from "../utils/customVerifier";
 import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
@@ -9,23 +8,20 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting verification with document:", document);
 
-      // Create custom verifier
-      const customVerifier = createInvoiceCustomVerifier();
-      
-      console.log("Starting document verification with custom verifier");
-      const fragments = await verify(document, customVerifier) as ExtendedVerificationFragment[];
-      
+      // Use the built-in verify function
+      const fragments = await verify(document) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
+      
+      // Check if the document is valid using the built-in isValid helper
+      const documentIsValid = isValid(fragments);
+      console.log("Document validity check:", documentIsValid);
 
-      // Process fragments
+      // Process fragments for detailed status
       const verificationDetails = this.processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
-      
-      const isValid = this.isVerificationValid(verificationDetails);
-      console.log("Final verification result:", isValid);
 
       return {
-        isValid,
+        isValid: documentIsValid,
         details: verificationDetails
       };
     } catch (error) {
@@ -43,8 +39,6 @@ export class InvoiceVerifier implements DocumentVerifier {
 
     // Document Integrity Check
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
-    console.log("Integrity fragment:", integrityFragment);
-    
     const documentIntegrity = {
       valid: integrityFragment?.status === "VALID",
       message: this.getFragmentMessage(integrityFragment, 
@@ -53,13 +47,11 @@ export class InvoiceVerifier implements DocumentVerifier {
       )
     };
 
-    // Issuance Status Check (v2.0 specific)
+    // Issuance Status Check
     const statusFragment = fragments.find(f => 
       f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
       f.name === "OpenAttestationEthereumDocumentStoreStatus"
     );
-    console.log("Status fragment:", statusFragment);
-
     const issuanceStatus = {
       valid: statusFragment?.status === "VALID",
       message: this.getFragmentMessage(statusFragment,
@@ -68,13 +60,11 @@ export class InvoiceVerifier implements DocumentVerifier {
       )
     };
 
-    // Issuer Identity Check (DNS-DID)
+    // Issuer Identity Check
     const identityFragment = fragments.find(f => 
       f.name === "OpenAttestationDnsTxt" || 
       f.name === "DnsDidVerifier"
     );
-    console.log("Identity fragment:", identityFragment);
-    
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
       message: this.getFragmentMessage(identityFragment,
@@ -105,12 +95,6 @@ export class InvoiceVerifier implements DocumentVerifier {
       return fragment.reason.message || failureMessage;
     }
     return failureMessage;
-  }
-
-  private isVerificationValid(details: any): boolean {
-    return details.documentIntegrity.valid && 
-           details.issuanceStatus.valid && 
-           details.issuerIdentity.valid;
   }
 
   private createErrorResponse(message: string): VerificationResult {
