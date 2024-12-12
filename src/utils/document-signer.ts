@@ -13,10 +13,15 @@ declare global {
 
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string) => {
   try {
-    console.log("Starting document signing process");
+    console.log("Starting document signing process with wrapped document:", wrappedDocument);
     
     if (!window.ethereum) {
       throw new Error("No ethereum wallet found");
+    }
+
+    if (!wrappedDocument.data?.id) {
+      console.error("Document data or ID is missing:", wrappedDocument);
+      throw new Error("Document ID is required for signing");
     }
 
     // Request wallet signature using ethers provider

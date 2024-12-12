@@ -23,10 +23,13 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
 
   console.log("Clean invoice data:", cleanInvoiceData);
   
+  const documentId = crypto.randomUUID();
+  console.log("Generated document ID:", documentId);
+  
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
     data: {
-      id: crypto.randomUUID(), // Add unique ID as first field under data
+      id: documentId,
       $template: {
         name: "INVOICE",
         type: "EMBEDDED_RENDERER",
