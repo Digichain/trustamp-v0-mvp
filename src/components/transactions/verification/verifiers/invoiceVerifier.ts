@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, isValid, utils } from "@govtechsg/oa-verify";
+import { verify, VerificationFragment } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
@@ -23,9 +23,8 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       // Perform OpenAttestation verification
       const fragments = await verify(document, {
-        networks: ["sepolia"],
         verifiers: [invoiceCustomVerifier]
-      });
+      }) as VerificationFragment[];
       
       console.log("Verification fragments:", fragments);
 
@@ -43,7 +42,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     }
   }
 
-  private processVerificationFragments(fragments: any[]): VerificationDetails {
+  private processVerificationFragments(fragments: VerificationFragment[]): VerificationDetails {
     // Document Integrity Check
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
     const documentIntegrity = {
