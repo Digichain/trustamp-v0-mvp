@@ -28,7 +28,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
 
       // Configure verification options for v2.0 document on Sepolia
-      const verificationOptions: VerificationOptions = {
+      const verificationOptions = {
         network: "sepolia",
         provider: { network: "sepolia" },
         resolver: { network: "sepolia" },
@@ -37,7 +37,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
 
       console.log("Starting verification with options:", verificationOptions);
-      const fragments = await verify(document, verificationOptions);
+      const fragments = await verify(document, verificationOptions as any);
       console.log("Verification fragments received:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
@@ -155,4 +155,5 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
     };
   }
+
 }
