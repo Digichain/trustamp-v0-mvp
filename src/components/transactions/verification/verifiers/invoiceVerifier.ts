@@ -28,15 +28,16 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
 
       // Configure verification options for v2.0 document on Sepolia
-      const verificationOptions: VerificationOptions = {
+      const verificationOptions = {
         network: "sepolia",
         provider: { network: "sepolia" },
         resolver: { network: "sepolia" },
+        verificationMethod: "did",
         verifiers: [createInvoiceCustomVerifier()]
       };
 
       console.log("Starting verification with options:", verificationOptions);
-      const fragments = await verify(document, verificationOptions as any);
+      const fragments = await verify(document, verificationOptions);
       console.log("Verification fragments received:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
@@ -60,6 +61,8 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   private processVerificationFragments(fragments: VerificationFragment[]): any {
+    console.log("Processing verification fragments:", fragments);
+
     // Document Integrity Check
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash") as ExtendedVerificationFragment;
     console.log("Integrity fragment:", integrityFragment);
@@ -73,8 +76,10 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
 
     // Issuance Status Check (v2.0 specific)
-    const statusFragment = (fragments.find(f => f.name === "OpenAttestationEthereumTokenRegistryStatus") 
-      || fragments.find(f => f.name === "OpenAttestationEthereumDocumentStoreStatus")) as ExtendedVerificationFragment;
+    const statusFragment = fragments.find(f => 
+      f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
+      f.name === "OpenAttestationEthereumDocumentStoreStatus"
+    ) as ExtendedVerificationFragment;
     console.log("Status fragment:", statusFragment);
 
     const issuanceStatus = {
@@ -86,7 +91,10 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
 
     // Issuer Identity Check (DNS-DID)
-    const identityFragment = fragments.find(f => f.name === "OpenAttestationDnsTxt") as ExtendedVerificationFragment;
+    const identityFragment = fragments.find(f => 
+      f.name === "OpenAttestationDnsTxt" || 
+      f.name === "DnsDidVerifier"
+    ) as ExtendedVerificationFragment;
     console.log("Identity fragment:", identityFragment);
     
     const issuerIdentity = {
@@ -122,8 +130,10 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   private isVerificationValid(details: any): boolean {
-    // For v2.0 documents, we primarily check document integrity
-    return details.documentIntegrity.valid;
+    // For v2.0 documents, we check all aspects
+    return details.documentIntegrity.valid && 
+           details.issuanceStatus.valid && 
+           details.issuerIdentity.valid;
   }
 
   private createErrorResponse(message: string): VerificationResult {
