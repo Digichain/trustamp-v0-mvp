@@ -38,7 +38,7 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
         type: ProofType.OpenAttestationSignature2018,
         created: new Date().toISOString(),
         proofPurpose: "assertionMethod",
-        verificationMethod: walletAddress,
+        verificationMethod: `did:ethr:${walletAddress}#controller`,
         signature: signature
       }]
     };
