@@ -26,7 +26,7 @@ export const useDocumentHandlers = () => {
 
       // Generate a proper UUID for storage
       const storageId = crypto.randomUUID();
-      console.log("Generated storage ID:", storageId);
+      console.log("Generated storage ID for wrapped document:", storageId);
 
       const fileName = `${storageId}_wrapped.json`;
       console.log("Creating wrapped document with filename:", fileName);
@@ -43,7 +43,7 @@ export const useDocumentHandlers = () => {
         throw uploadError;
       }
 
-      console.log("Updating transaction status to document_wrapped");
+      console.log("Updating transaction with storage ID:", storageId);
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
@@ -57,13 +57,6 @@ export const useDocumentHandlers = () => {
         console.error("Error updating transaction status:", updateError);
         throw updateError;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('wrapped-documents')
-        .getPublicUrl(fileName);
-
-      console.log("Document wrapped and stored successfully at:", publicUrl);
-      console.log("Document merkle root:", merkleRoot);
 
       await invalidateTransactions();
       console.log("Cache invalidated, UI should update");
@@ -100,6 +93,7 @@ export const useDocumentHandlers = () => {
       console.log("Using storage ID for file operations:", storageId);
       const wrappedFileName = `${storageId}_wrapped.json`;
       
+      console.log("Attempting to fetch wrapped document:", wrappedFileName);
       const { data: wrappedDocData, error: fetchError } = await supabase.storage
         .from('wrapped-documents')
         .download(wrappedFileName);
