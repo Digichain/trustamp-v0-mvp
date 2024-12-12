@@ -21,8 +21,8 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Create custom verifier
       const invoiceCustomVerifier = createInvoiceCustomVerifier();
 
-      // Perform OpenAttestation verification
-      const fragments = await verify(document, invoiceCustomVerifier);
+      // Perform OpenAttestation verification with verifier array
+      const fragments = await verify(document, [invoiceCustomVerifier]);
       
       console.log("Verification fragments:", fragments);
 
