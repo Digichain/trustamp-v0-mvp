@@ -7,9 +7,15 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting document verification for v2.0");
       
-      // Verify using v2.0 specific fragments
+      // Use the correct options format for v2.0 verification
       const fragments = await verify(document, {
-        version: "https://schema.openattestation.com/2.0/schema.json"
+        network: "sepolia",
+        provider: {
+          network: "sepolia"
+        },
+        resolver: {
+          network: "sepolia"
+        }
       });
       
       console.log("Raw verification fragments:", fragments);
