@@ -1,24 +1,50 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, utils, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, utils, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
+import { getData } from "@govtechsg/open-attestation";
 
-interface InvoiceVerificationDetails {
-  issuanceStatus: {
-    valid: boolean;
-    message: string;
-  };
-  issuerIdentity: {
-    valid: boolean;
-    message: string;
-    details?: {
-      name?: string;
-      domain?: string;
+const invoiceCustomVerifier: Verifier<any> = {
+  skip: async () => {
+    return {
+      status: "SKIPPED",
+      type: "DOCUMENT_INTEGRITY",
+      name: "InvoiceVerifier",
+      reason: {
+        code: 0,
+        codeString: "SKIPPED",
+        message: "Document format verification skipped",
+      },
     };
-  };
-  documentIntegrity: {
-    valid: boolean;
-    message: string;
-  };
-}
+  },
+  test: (document: any) => {
+    return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
+           document.$template?.name === DOCUMENT_TEMPLATES.INVOICE;
+  },
+  verify: async (document: any) => {
+    const documentData = getData(document);
+    
+    // Check if it's an invoice template
+    if (documentData.$template?.name !== DOCUMENT_TEMPLATES.INVOICE) {
+      return {
+        type: "DOCUMENT_INTEGRITY",
+        name: "InvoiceVerifier",
+        data: documentData.$template?.name,
+        reason: {
+          code: 1,
+          codeString: "INVALID_TEMPLATE",
+          message: `Document template is not an invoice: ${documentData.$template?.name}`,
+        },
+        status: "INVALID",
+      };
+    }
+
+    return {
+      type: "DOCUMENT_INTEGRITY",
+      name: "InvoiceVerifier",
+      data: documentData.$template?.name,
+      status: "VALID",
+    };
+  },
+};
 
 export class InvoiceVerifier implements DocumentVerifier {
   getTemplate(): string {
@@ -37,16 +63,10 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Check if it's an invoice template
-      if (!document.$template || document.$template.name !== DOCUMENT_TEMPLATES.INVOICE) {
-        return {
-          isValid: false,
-          errors: ['Document is not an invoice']
-        };
-      }
-
-      // Perform OpenAttestation verification
-      const fragments = await verify(document);
+      // Perform OpenAttestation verification with custom verifier
+      const fragments = await verify(document, {
+        customVerifier: invoiceCustomVerifier
+      });
       console.log("Verification fragments:", fragments);
 
       // Document Integrity Check
@@ -83,7 +103,11 @@ export class InvoiceVerifier implements DocumentVerifier {
         } : undefined
       };
 
-      const verificationDetails: InvoiceVerificationDetails = {
+      // Custom verification check
+      const customFragment = fragments.find(f => f.name === "InvoiceVerifier");
+      const customVerificationValid = customFragment && customFragment.status === "VALID";
+
+      const verificationDetails = {
         issuanceStatus,
         issuerIdentity,
         documentIntegrity
@@ -92,7 +116,8 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Document is valid only if all verifications pass
       const isValid = verificationDetails.issuanceStatus.valid && 
                      verificationDetails.issuerIdentity.valid && 
-                     verificationDetails.documentIntegrity.valid;
+                     verificationDetails.documentIntegrity.valid &&
+                     customVerificationValid;
 
       return {
         isValid,
