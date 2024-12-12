@@ -23,15 +23,13 @@ export class VerifierFactory {
     console.log("Starting document verification process", document);
     
     try {
-      // Ignore Firebase Firestore BloomFilter error as it's not relevant for our verification
-      window.addEventListener('unhandledrejection', function(event) {
-        if (event.reason?.name === 'BloomFilterError') {
-          event.preventDefault(); // Prevent the error from being logged
-          console.log("Ignored BloomFilter error - not affecting verification");
-        }
-      });
+      // Check if document has the required OpenAttestation structure
+      if (!document.data || !document.signature) {
+        console.warn("Document missing required OpenAttestation structure");
+        return null;
+      }
 
-      const templateName = document.$template?.name;
+      const templateName = document.data.$template?.name;
       console.log("Document template name:", templateName);
       
       if (!templateName) {

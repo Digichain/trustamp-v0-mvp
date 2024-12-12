@@ -32,15 +32,6 @@ const VerifyDocument = () => {
         });
         return;
       }
-
-      // Add sample template if not present (for testing)
-      if (!document.$template) {
-        document.$template = {
-          name: "INVOICE",
-          type: "EMBEDDED_RENDERER",
-          url: "https://generic-templates.openattestation.com"
-        };
-      }
       
       console.log("Getting verifier for document template:", document.$template?.name);
       const verifier = await VerifierFactory.verifyDocument(document);
