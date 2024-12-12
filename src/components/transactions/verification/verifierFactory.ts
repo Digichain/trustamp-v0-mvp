@@ -21,7 +21,7 @@ export class VerifierFactory {
   }
 
   static async verifyDocument(document: any): Promise<DocumentVerifier | null> {
-    console.log("Starting document verification process", document);
+    console.log("Starting document verification process with original document:", document);
     
     try {
       // First, check if it's a valid OpenAttestation document
