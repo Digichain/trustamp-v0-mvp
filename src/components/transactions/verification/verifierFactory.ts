@@ -34,35 +34,30 @@ export class VerifierFactory {
 
       console.log("Diagnostic results:", diagnosticResults);
 
-      // For OpenAttestation v2.0 documents, we need to check the data field
-      const documentData = document.data || document;
-      console.log("Document data being checked:", documentData);
+      // For our JSON format, we expect a wrapped document with data and signature
+      if (!document.data || !document.signature) {
+        console.warn("Document missing required OpenAttestation structure");
+        return null;
+      }
 
-      // Get template name from either wrapped or unwrapped document
-      const templateName = documentData.$template?.name || 
-                          document.$template?.name || 
-                          (typeof documentData.name === 'string' ? documentData.name : null);
-      
-      console.log("Extracted template name:", templateName);
+      // Get template name - for our format it should be directly in data.$template.name
+      const templateName = document.data.$template?.name;
+      console.log("Document template name:", templateName);
       
       if (!templateName) {
         console.warn("No template name found in document");
         return null;
       }
 
-      // Clean up template name - sometimes it comes with additional data
-      const cleanTemplateName = templateName.split(':').pop() || templateName;
-      console.log("Cleaned template name:", cleanTemplateName);
-
       // For our format, we expect INVOICE as template name
-      if (cleanTemplateName !== DOCUMENT_TEMPLATES.INVOICE) {
-        console.warn("Unsupported template name:", cleanTemplateName);
+      if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
+        console.warn("Unsupported template name:", templateName);
         return null;
       }
 
-      const verifier = this.getVerifier(cleanTemplateName);
+      const verifier = this.getVerifier(templateName);
       if (!verifier) {
-        console.error("No verifier available for template:", cleanTemplateName);
+        console.error("No verifier available for template:", templateName);
         return null;
       }
 
