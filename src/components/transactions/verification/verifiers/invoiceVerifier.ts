@@ -9,25 +9,25 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Starting document verification for v2.0");
       
       // First, run diagnostics to ensure it's a valid v2.0 document
-      const diagnostics = utils.diagnose({ 
+      const diagnosticResults = utils.diagnose({ 
         version: "2.0", 
         kind: "signed", 
         document: document, 
         mode: "strict" 
       });
-      console.log("Document diagnostics:", diagnostics);
+      console.log("Document diagnostics:", diagnosticResults);
 
-      if (!diagnostics.isValid) {
-        console.error("Document diagnostics failed:", diagnostics.errors);
+      // Handle diagnostic results based on the returned array
+      if (diagnosticResults.length > 0) {
+        console.error("Document diagnostics failed:", diagnosticResults);
         return this.createErrorResponse(
-          diagnostics.errors.map(error => error.message).join(", ")
+          diagnosticResults.map(error => error.message).join(", ")
         );
       }
 
       // Proceed with verification using v2.0 specific options
-      const fragments = await verify(document, {
-        network: "sepolia"
-      });
+      const verifier = verify(document);
+      const fragments = await verifier;
       console.log("Raw verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
