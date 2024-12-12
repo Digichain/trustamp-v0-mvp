@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Upload, FileUp, ArrowLeft } from "lucide-react";
+import { Upload, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
 import { PreviewDialog } from '@/components/transactions/previews/PreviewDialog';
+import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
 
 const VerifyDocument = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any } | null>(null);
+  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
@@ -51,7 +52,8 @@ const VerifyDocument = () => {
 
       setVerificationResult({
         isValid: result.isValid,
-        document: document
+        document: document,
+        details: result.details
       });
 
       if (result.isValid) {
@@ -159,19 +161,11 @@ const VerifyDocument = () => {
           </div>
         )}
 
-        {verificationResult && !verificationResult.isValid && (
-          <div className="text-center p-8 border rounded-lg bg-destructive/5">
-            <h2 className="text-xl font-semibold text-destructive mb-4">
-              Document Verification Failed
-            </h2>
-            <p className="text-gray-600 mb-6">
-              The uploaded document did not pass verification checks. Please try again with a valid document.
-            </p>
-            <Button onClick={resetVerification}>
-              <ArrowLeft className="mr-2" />
-              Return to Verify Document
-            </Button>
-          </div>
+        {verificationResult && (
+          <DocumentVerificationStatus
+            verificationDetails={verificationResult.details}
+            onReset={resetVerification}
+          />
         )}
 
         <PreviewDialog

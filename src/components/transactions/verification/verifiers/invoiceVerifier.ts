@@ -1,5 +1,24 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
 
+interface InvoiceVerificationDetails {
+  issuanceStatus: {
+    valid: boolean;
+    message: string;
+  };
+  issuerIdentity: {
+    valid: boolean;
+    message: string;
+    details?: {
+      name?: string;
+      domain?: string;
+    };
+  };
+  documentIntegrity: {
+    valid: boolean;
+    message: string;
+  };
+}
+
 export class InvoiceVerifier implements DocumentVerifier {
   getTemplate(): string {
     return DOCUMENT_TEMPLATES.INVOICE;
@@ -25,52 +44,22 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Verify required invoice fields
-      const requiredFields = ['issuers', 'invoiceDetails'];
-      const missingFields = requiredFields.filter(field => !document[field]);
-      
-      if (missingFields.length > 0) {
-        return {
-          isValid: false,
-          errors: [`Missing required fields: ${missingFields.join(', ')}`]
-        };
-      }
+      // Perform the three key verifications
+      const verificationDetails: InvoiceVerificationDetails = {
+        issuanceStatus: await this.verifyIssuanceStatus(document),
+        issuerIdentity: await this.verifyIssuerIdentity(document),
+        documentIntegrity: await this.verifyDocumentIntegrity(document)
+      };
 
-      // Verify invoice details structure
-      const invoiceDetails = document.invoiceDetails;
-      const requiredInvoiceFields = ['invoiceNumber', 'date', 'billFrom', 'billTo', 'billableItems'];
-      const missingInvoiceFields = requiredInvoiceFields.filter(field => !invoiceDetails[field]);
+      // Document is valid only if all verifications pass
+      const isValid = verificationDetails.issuanceStatus.valid && 
+                     verificationDetails.issuerIdentity.valid && 
+                     verificationDetails.documentIntegrity.valid;
 
-      if (missingInvoiceFields.length > 0) {
-        return {
-          isValid: false,
-          errors: [`Missing invoice details: ${missingInvoiceFields.join(', ')}`]
-        };
-      }
-
-      // Verify billable items
-      if (!Array.isArray(invoiceDetails.billableItems) || invoiceDetails.billableItems.length === 0) {
-        return {
-          isValid: false,
-          errors: ['Invoice must contain at least one billable item']
-        };
-      }
-
-      // Verify issuer information
-      if (!document.issuers[0]?.name) {
-        return {
-          isValid: false,
-          errors: ['Invalid issuer information']
-        };
-      }
-      
       return {
-        isValid: true,
-        details: {
-          template: DOCUMENT_TEMPLATES.INVOICE,
-          issuer: document.issuers[0]?.name,
-          invoiceNumber: document.invoiceDetails?.invoiceNumber
-        }
+        isValid,
+        details: verificationDetails,
+        errors: isValid ? undefined : ['Document verification failed']
       };
     } catch (error) {
       console.error("Error during invoice verification:", error);
@@ -79,5 +68,32 @@ export class InvoiceVerifier implements DocumentVerifier {
         errors: ['Verification process failed']
       };
     }
+  }
+
+  private async verifyIssuanceStatus(document: any): Promise<{ valid: boolean; message: string }> {
+    // Placeholder for issuance status verification
+    // Will be implemented based on your next message
+    return {
+      valid: false,
+      message: "Document has not been issued, or the document is revoked"
+    };
+  }
+
+  private async verifyIssuerIdentity(document: any): Promise<{ valid: boolean; message: string; details?: { name?: string; domain?: string } }> {
+    // Placeholder for issuer identity verification
+    // Will be implemented based on your next message
+    return {
+      valid: false,
+      message: "Issuer not identified"
+    };
+  }
+
+  private async verifyDocumentIntegrity(document: any): Promise<{ valid: boolean; message: string }> {
+    // Placeholder for document integrity verification
+    // Will be implemented based on your next message
+    return {
+      valid: false,
+      message: "Document has been tampered with"
+    };
   }
 }
