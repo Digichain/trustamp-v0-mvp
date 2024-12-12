@@ -13,8 +13,18 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
   const { toast } = useToast();
 
   const validateFileType = (file: File): boolean => {
-    const validTypes = ['application/json'];
-    if (!validTypes.includes(file.type) && !file.name.endsWith('.json')) {
+    // Check both MIME type and file extension for JSON
+    const isJsonMime = file.type === 'application/json';
+    const isJsonExtension = file.name.toLowerCase().endsWith('.json');
+    
+    console.log('File validation:', {
+      fileName: file.name,
+      fileType: file.type,
+      isJsonMime,
+      isJsonExtension
+    });
+
+    if (!isJsonMime && !isJsonExtension) {
       toast({
         title: "Invalid File Type",
         description: "Please upload a JSON file",
@@ -30,15 +40,21 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
     setIsDragging(false);
     
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && validateFileType(droppedFile)) {
-      await onFileProcess(droppedFile);
+    if (droppedFile) {
+      console.log('File dropped:', droppedFile.name);
+      if (validateFileType(droppedFile)) {
+        await onFileProcess(droppedFile);
+      }
     }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile && validateFileType(selectedFile)) {
-      await onFileProcess(selectedFile);
+    if (selectedFile) {
+      console.log('File selected:', selectedFile.name);
+      if (validateFileType(selectedFile)) {
+        await onFileProcess(selectedFile);
+      }
     }
   };
 
