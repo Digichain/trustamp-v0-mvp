@@ -37,7 +37,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
 
       console.log("Starting verification with options:", verificationOptions);
-      const fragments = await verify(document, verificationOptions as any);
+      const fragments = await verify(document, verificationOptions);
       console.log("Verification fragments received:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
