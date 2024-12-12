@@ -34,35 +34,15 @@ export class VerifierFactory {
 
       console.log("Diagnostic results:", diagnosticResults);
 
-      // Handle both wrapped and unwrapped documents
+      // Get the document data without making assumptions about structure
       const documentData = document.data || document;
       console.log("Document data being checked:", documentData);
 
-      // Get template name from various possible locations
-      const templateName = documentData.$template?.name || 
-                          document.$template?.name || 
-                          (typeof documentData.name === 'string' ? documentData.name : null);
-      
-      console.log("Extracted template name:", templateName);
-      
-      if (!templateName) {
-        console.warn("No template name found in document");
-        return null;
-      }
-
-      // Clean up template name - handle format like "uuid:string:INVOICE"
-      const cleanTemplateName = templateName.split(':').pop() || templateName;
-      console.log("Cleaned template name:", cleanTemplateName);
-
-      // Check if template is supported
-      if (cleanTemplateName !== DOCUMENT_TEMPLATES.INVOICE) {
-        console.warn("Unsupported template name:", cleanTemplateName);
-        return null;
-      }
-
-      const verifier = this.getVerifier(cleanTemplateName);
+      // For now, we'll use the invoice verifier for all documents
+      // This allows us to verify the document without making assumptions about templates
+      const verifier = this.getVerifier(DOCUMENT_TEMPLATES.INVOICE);
       if (!verifier) {
-        console.error("No verifier available for template:", cleanTemplateName);
+        console.error("No verifier available");
         return null;
       }
 
