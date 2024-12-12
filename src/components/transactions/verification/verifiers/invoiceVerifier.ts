@@ -6,31 +6,10 @@ import { ExtendedVerificationFragment } from "../types/verificationTypes";
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
-      console.log("Starting verification with original document:", document);
+      console.log("Starting verification with document:", document);
 
-      // Deep clone the document to avoid modifying the original
-      const documentToVerify = JSON.parse(JSON.stringify(document));
-
-      // Add revocation block to issuers if missing
-      if (documentToVerify.issuers && Array.isArray(documentToVerify.issuers)) {
-        documentToVerify.issuers = documentToVerify.issuers.map((issuer: any) => {
-          if (!issuer.revocation) {
-            console.log("Adding revocation block to issuer:", issuer.name);
-            return {
-              ...issuer,
-              revocation: {
-                type: "NONE"
-              }
-            };
-          }
-          return issuer;
-        });
-      }
-
-      console.log("Modified document for verification:", documentToVerify);
-
-      // Use the built-in verify function with modified document
-      const fragments = await verify(documentToVerify) as ExtendedVerificationFragment[];
+      // Use the built-in verify function
+      const fragments = await verify(document) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       // Log each fragment type and status
