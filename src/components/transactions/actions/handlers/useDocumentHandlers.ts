@@ -96,7 +96,7 @@ export const useDocumentHandlers = () => {
       }
 
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
-      wrappedDoc.transactionId = transaction.id;
+      // Removed the line that added transactionId to wrappedDoc
 
       const { signedDocument, publicUrl } = await signAndStoreDocument(wrappedDoc, walletAddress);
 
