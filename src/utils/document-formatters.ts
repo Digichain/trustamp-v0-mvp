@@ -11,6 +11,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
   
   return {
+    version: "https://schema.openattestation.com/2.0/schema.json",
     $template: {
       name: "INVOICE",
       type: "EMBEDDED_RENDERER",
