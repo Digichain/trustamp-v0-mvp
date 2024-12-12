@@ -87,14 +87,28 @@ export class InvoiceVerifier implements DocumentVerifier {
       if (!document || typeof document !== 'object') {
         return {
           isValid: false,
-          errors: ['Invalid document format']
+          errors: ['Invalid document format'],
+          details: {
+            issuanceStatus: {
+              valid: false,
+              message: "Invalid document format"
+            },
+            issuerIdentity: {
+              valid: false,
+              message: "Invalid document format"
+            },
+            documentIntegrity: {
+              valid: false,
+              message: "Invalid document format"
+            }
+          }
         };
       }
 
       // Perform OpenAttestation verification with custom verifier
       const fragments = await verify(document, {
         customVerifier: invoiceCustomVerifier
-      } as any); // Type assertion to bypass strict type checking
+      } as any);
       console.log("Verification fragments:", fragments);
 
       // Document Integrity Check
@@ -119,7 +133,6 @@ export class InvoiceVerifier implements DocumentVerifier {
       const identityFragment = utils.getOpenAttestationDnsDidIdentityProofFragment(fragments);
       const identityData = utils.isValidFragment(identityFragment) ? identityFragment.data : null;
       
-      // Handle both single object and array cases for identity data
       const issuerIdentity = {
         valid: utils.isValidFragment(identityFragment),
         message: utils.isValidFragment(identityFragment)
@@ -154,9 +167,24 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
     } catch (error) {
       console.error("Error during invoice verification:", error);
+      // Return a properly structured error response
       return {
         isValid: false,
-        errors: ['Verification process failed']
+        errors: ['Verification process failed'],
+        details: {
+          issuanceStatus: {
+            valid: false,
+            message: "Verification process failed"
+          },
+          issuerIdentity: {
+            valid: false,
+            message: "Verification process failed"
+          },
+          documentIntegrity: {
+            valid: false,
+            message: "Verification process failed"
+          }
+        }
       };
     }
   }
