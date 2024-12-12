@@ -2,6 +2,27 @@ import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../typ
 import { verify, utils, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 
+// Define the expected document structure
+interface OpenAttestationDocument {
+  version: string;
+  data: {
+    $template: {
+      name: string;
+      type: string;
+      url: string;
+    };
+    issuers: Array<{
+      id: string;
+      name: string;
+      identityProof: {
+        type: string;
+        key: string;
+        location: string;
+      };
+    }>;
+  };
+}
+
 const invoiceCustomVerifier: Verifier<any> = {
   skip: async () => {
     return {
@@ -16,22 +37,24 @@ const invoiceCustomVerifier: Verifier<any> = {
     };
   },
   test: (document: any) => {
+    const data = getData(document);
     return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
-           document.$template?.name === DOCUMENT_TEMPLATES.INVOICE;
+           data.$template?.name === DOCUMENT_TEMPLATES.INVOICE;
   },
   verify: async (document: any) => {
     const documentData = getData(document);
+    const templateName = documentData.$template?.name;
     
     // Check if it's an invoice template
-    if (documentData.$template?.name !== DOCUMENT_TEMPLATES.INVOICE) {
+    if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
       return {
         type: "DOCUMENT_INTEGRITY",
         name: "InvoiceVerifier",
-        data: documentData.$template?.name,
+        data: templateName,
         reason: {
           code: 1,
           codeString: "INVALID_TEMPLATE",
-          message: `Document template is not an invoice: ${documentData.$template?.name}`,
+          message: `Document template is not an invoice: ${templateName}`,
         },
         status: "INVALID",
       };
@@ -40,7 +63,7 @@ const invoiceCustomVerifier: Verifier<any> = {
     return {
       type: "DOCUMENT_INTEGRITY",
       name: "InvoiceVerifier",
-      data: documentData.$template?.name,
+      data: templateName,
       status: "VALID",
     };
   },
@@ -66,7 +89,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Perform OpenAttestation verification with custom verifier
       const fragments = await verify(document, {
         customVerifier: invoiceCustomVerifier
-      });
+      } as any); // Type assertion to bypass strict type checking
       console.log("Verification fragments:", fragments);
 
       // Document Integrity Check
