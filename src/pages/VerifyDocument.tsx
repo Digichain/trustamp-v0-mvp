@@ -31,11 +31,40 @@ const VerifyDocument = () => {
     setShowPreview(false);
   };
 
+  const validateFileType = (file: File): boolean => {
+    const validTypes = ['application/json'];
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.json')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a JSON file",
+        variant: "destructive"
+      });
+      return false;
+    }
+    return true;
+  };
+
   const processFile = async (file: File) => {
     try {
+      if (!validateFileType(file)) {
+        return;
+      }
+
       console.log("Processing file:", file.name);
       const fileContent = await file.text();
-      const document = JSON.parse(fileContent);
+      let document;
+      
+      try {
+        document = JSON.parse(fileContent);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        toast({
+          title: "Invalid JSON",
+          description: "The file contains invalid JSON data",
+          variant: "destructive"
+        });
+        return;
+      }
       
       const verifier = await VerifierFactory.verifyDocument(document);
       if (!verifier) {
@@ -116,7 +145,7 @@ const VerifyDocument = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Verify Document</h1>
           <p className="mt-2 text-gray-600">
-            Upload a document to verify its authenticity and integrity.
+            Upload a JSON document to verify its authenticity and integrity.
           </p>
         </div>
 
@@ -138,7 +167,7 @@ const VerifyDocument = () => {
                   Drag and drop your file here
                 </p>
                 <p className="text-sm text-gray-500">
-                  or click the button below to browse
+                  Supported format: JSON
                 </p>
               </div>
               <div className="mt-4">
@@ -154,7 +183,7 @@ const VerifyDocument = () => {
                   id="file-upload"
                   className="hidden"
                   onChange={handleFileSelect}
-                  accept=".json"
+                  accept=".json,application/json"
                 />
               </div>
             </div>
