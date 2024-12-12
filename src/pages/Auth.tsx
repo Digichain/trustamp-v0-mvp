@@ -12,7 +12,8 @@ const Auth = () => {
 
   useEffect(() => {
     console.log("Auth useEffect running - checking user session...");
-    // Check if user is already logged in
+    
+    // Check initial session
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       console.log("Current session:", session);
@@ -24,11 +25,12 @@ const Auth = () => {
 
     checkUser();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session);
       
       if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, redirecting to dashboard...');
         navigate('/dashboard');
         toast({
           title: "Welcome back!",
@@ -36,28 +38,25 @@ const Auth = () => {
         });
       }
 
-      if (event === 'USER_UPDATED') {
-        toast({
-          title: "Account updated",
-          description: "Your account has been successfully updated.",
-        });
-      }
-
       if (event === 'SIGNED_OUT') {
+        console.log('User signed out, staying on auth page');
         toast({
-          variant: "destructive",
           title: "Signed out",
           description: "You have been signed out of your account.",
         });
       }
+
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Session token refreshed');
+      }
     });
 
     return () => {
+      console.log("Cleaning up auth subscriptions...");
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
 
-  console.log("Rendering Auth UI components...");
   return (
     <div className="container flex min-h-screen items-center justify-center">
       <div className="mx-auto w-full max-w-[400px] space-y-8 rounded-lg bg-card p-8 shadow-lg">
