@@ -1,3 +1,17 @@
+export const generateDocumentId = () => {
+  // Generate 4 random uppercase letters
+  const letters = Array.from({ length: 4 }, () => 
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join('');
+  
+  // Generate 4 random numbers
+  const numbers = Array.from({ length: 4 }, () => 
+    Math.floor(Math.random() * 10)
+  ).join('');
+  
+  return `${letters}${numbers}`;
+};
+
 export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: any) => {
   if (!didDocument) {
     throw new Error("DID document is required to create a verifiable document");
@@ -7,6 +21,10 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
 
   // The base DID without #controller
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
+  
+  // Generate document ID in the new format (4 letters + 4 numbers)
+  const documentId = generateDocumentId();
+  console.log("Generated document ID:", documentId);
   
   // Create a clean object without prototypes
   const cleanInvoiceData = {
@@ -22,9 +40,6 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   };
 
   console.log("Clean invoice data:", cleanInvoiceData);
-  
-  const documentId = crypto.randomUUID();
-  console.log("Generated document ID:", documentId);
   
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
