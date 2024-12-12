@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, utils, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
+import { verify, utils, Verifier } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 
 // Define the template object type
@@ -128,14 +128,12 @@ export class InvoiceVerifier implements DocumentVerifier {
       const verificationOptions = {
         network: "sepolia",
         provider: { network: "sepolia" },
-        resolver: { network: "sepolia" }
+        resolver: { network: "sepolia" },
+        verifiers: [invoiceCustomVerifier]  // Use the verifiers array instead of customVerifier
       };
 
-      // Perform OpenAttestation verification with custom verifier and options
-      const fragments = await verify(document, {
-        ...verificationOptions,
-        customVerifier: invoiceCustomVerifier
-      });
+      // Perform OpenAttestation verification with options
+      const fragments = await verify(document, verificationOptions);
       
       console.log("Verification fragments:", fragments);
 
@@ -195,7 +193,6 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
     } catch (error) {
       console.error("Error during invoice verification:", error);
-      // Return a properly structured error response
       return {
         isValid: false,
         errors: ['Verification process failed'],
