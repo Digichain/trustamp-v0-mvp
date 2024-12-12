@@ -35,6 +35,15 @@ const VerifyDocument = () => {
         });
         return;
       }
+
+      // Add sample template if not present (for testing)
+      if (!document.$template) {
+        document.$template = {
+          name: "INVOICE",
+          type: "EMBEDDED_RENDERER",
+          url: "https://generic-templates.openattestation.com"
+        };
+      }
       
       console.log("Getting verifier for document template:", document.$template?.name);
       const verifier = await VerifierFactory.verifyDocument(document);
@@ -52,13 +61,13 @@ const VerifyDocument = () => {
       const result = await verifier.verify(document);
       console.log("Verification result:", result);
 
+      // Always set verification result and show preview
       setVerificationResult({
         isValid: result.isValid,
         document: document,
         details: result.details
       });
 
-      // Always show preview after verification
       setShowPreview(true);
 
       if (result.isValid) {
