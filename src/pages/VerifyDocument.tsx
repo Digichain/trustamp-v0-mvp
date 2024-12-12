@@ -18,13 +18,14 @@ const VerifyDocument = () => {
 
   const processFile = async (file: File) => {
     try {
-      console.log("Processing file:", file.name);
+      console.log("Starting file processing:", file.name);
       const fileContent = await file.text();
-      let document;
+      console.log("File content read successfully");
       
+      let document;
       try {
         document = JSON.parse(fileContent);
-        console.log("Parsed document:", document);
+        console.log("Document parsed successfully:", document);
       } catch (error) {
         console.error("Error parsing JSON:", error);
         toast({
@@ -35,8 +36,10 @@ const VerifyDocument = () => {
         return;
       }
       
+      console.log("Getting verifier for document template:", document.$template?.name);
       const verifier = await VerifierFactory.verifyDocument(document);
       if (!verifier) {
+        console.error("No verifier found for document");
         toast({
           title: "Verification Error",
           description: "Unsupported document type",
@@ -45,6 +48,7 @@ const VerifyDocument = () => {
         return;
       }
 
+      console.log("Starting document verification");
       const result = await verifier.verify(document);
       console.log("Verification result:", result);
 
