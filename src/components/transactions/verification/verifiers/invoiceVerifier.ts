@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, utils, Verifier } from "@govtechsg/oa-verify";
+import { verify, utils, Verifier, VerificationFragment, VerificationOptions } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 
 // Define the template object type
@@ -124,12 +124,12 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Configure verification options
-      const verificationOptions = {
+      // Configure verification options with correct typing
+      const verificationOptions: VerificationOptions = {
         network: "sepolia",
         provider: { network: "sepolia" },
         resolver: { network: "sepolia" },
-        verifiers: [invoiceCustomVerifier]  // Use the verifiers array instead of customVerifier
+        verifiers: [invoiceCustomVerifier]
       };
 
       // Perform OpenAttestation verification with options
