@@ -69,14 +69,17 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       // Issuer Identity Check
       const identityFragment = utils.getOpenAttestationDnsDidIdentityProofFragment(fragments);
+      const identityData = utils.isValidFragment(identityFragment) ? identityFragment.data : null;
+      
+      // Handle both single object and array cases for identity data
       const issuerIdentity = {
         valid: utils.isValidFragment(identityFragment),
         message: utils.isValidFragment(identityFragment)
           ? "Document issuer has been identified"
           : "Issuer not identified",
-        details: utils.isValidFragment(identityFragment) ? {
-          name: identityFragment.data.key, // Changed from identifier to key
-          domain: identityFragment.data.location
+        details: identityData ? {
+          name: Array.isArray(identityData) ? identityData[0]?.key : identityData.key,
+          domain: Array.isArray(identityData) ? identityData[0]?.location : identityData.location
         } : undefined
       };
 
