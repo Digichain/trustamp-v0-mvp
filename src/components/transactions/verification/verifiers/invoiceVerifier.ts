@@ -1,8 +1,9 @@
-import { verify, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
 import { utils } from "@govtechsg/open-attestation";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
 import { createInvoiceCustomVerifier } from "../utils/customVerifier";
+import { VerificationOptions } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
@@ -27,7 +28,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
 
       // Configure verification options for v2.0 document on Sepolia
-      const verificationOptions = {
+      const verificationOptions: VerificationOptions = {
         network: "sepolia",
         provider: { network: "sepolia" },
         resolver: { network: "sepolia" },
