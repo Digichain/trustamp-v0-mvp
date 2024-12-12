@@ -54,18 +54,13 @@ const saltData = (data: any): any => {
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
-  // Ensure consistent document structure
-  const documentWithTemplate = {
-    ...rawDocument,
-    $template: {
-      name: "INVOICE",
-      type: "EMBEDDED_RENDERER",
-      url: "https://generic-templates.openattestation.com"
-    }
-  };
+  if (!rawDocument.data?.id) {
+    console.error("Document data or ID is missing:", rawDocument);
+    throw new Error("Document ID is required for wrapping");
+  }
 
   // Sort all object keys for consistent ordering
-  const sortedDocument = JSON.parse(JSON.stringify(documentWithTemplate, Object.keys(documentWithTemplate).sort()));
+  const sortedDocument = JSON.parse(JSON.stringify(rawDocument, Object.keys(rawDocument).sort()));
   console.log("Document with sorted keys:", sortedDocument);
 
   // Salt the data
@@ -77,7 +72,6 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Generated target hash:", targetHash);
   
   // For single documents, merkle root is the same as target hash
-  // but we ensure it's properly formatted
   const merkleRoot = targetHash;
   console.log("Using merkle root:", merkleRoot);
 
