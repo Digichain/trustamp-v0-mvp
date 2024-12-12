@@ -22,11 +22,10 @@ export class InvoiceVerifier implements DocumentVerifier {
       const invoiceCustomVerifier = createInvoiceCustomVerifier();
 
       // Perform OpenAttestation verification
-      const fragments = await verify(document, {
-        verify: async (promises: Promise<VerificationFragment>[]) => {
-          const results = await Promise.all(promises);
-          return results.concat(await invoiceCustomVerifier.verify(document));
-        }
+      const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
+        const results = await Promise.all(promises);
+        const customResult = await invoiceCustomVerifier.verify(document);
+        return [...results, customResult];
       });
       
       console.log("Verification fragments:", fragments);
