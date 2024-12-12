@@ -43,8 +43,8 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       }]
     };
 
-    // Store signed document
-    const fileName = `${wrappedDocument.transactionId}_signed.json`;
+    // Store signed document using the document's id from the data field
+    const fileName = `${wrappedDocument.data.id}_signed.json`;
     console.log("Storing signed document with filename:", fileName);
 
     const { error: uploadError } = await supabase.storage

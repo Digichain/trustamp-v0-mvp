@@ -25,41 +25,44 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
-    $template: {
-      name: "INVOICE",
-      type: "EMBEDDED_RENDERER",
-      url: "https://generic-templates.openattestation.com"
-    },
-    issuers: [{
-      id: baseId,
-      name: cleanInvoiceData.billFrom.name,
-      revocation: {
-        type: "NONE"
+    data: {
+      id: crypto.randomUUID(), // Add unique ID as first field under data
+      $template: {
+        name: "INVOICE",
+        type: "EMBEDDED_RENDERER",
+        url: "https://generic-templates.openattestation.com"
       },
-      identityProof: {
-        type: "DNS-DID",
-        location: "tempdns.trustamp.in",
-        key: `${baseId}#controller`
+      issuers: [{
+        id: baseId,
+        name: cleanInvoiceData.billFrom.name,
+        revocation: {
+          type: "NONE"
+        },
+        identityProof: {
+          type: "DNS-DID",
+          location: "tempdns.trustamp.in",
+          key: `${baseId}#controller`
+        }
+      }],
+      network: {
+        chain: "sepolia",
+        chainId: "11155111"
+      },
+      recipient: {
+        name: cleanInvoiceData.billTo.name,
+        company: cleanInvoiceData.billTo.company
+      },
+      invoiceDetails: {
+        invoiceNumber: cleanInvoiceData.id,
+        date: cleanInvoiceData.date,
+        billFrom: cleanInvoiceData.billFrom,
+        billTo: cleanInvoiceData.billTo,
+        billableItems: cleanInvoiceData.billableItems,
+        subtotal: cleanInvoiceData.subtotal,
+        tax: cleanInvoiceData.tax,
+        taxTotal: cleanInvoiceData.taxTotal,
+        total: cleanInvoiceData.total
       }
-    }],
-    network: {
-      chain: "sepolia",
-      chainId: "11155111"
-    },
-    recipient: {
-      name: cleanInvoiceData.billTo.name,
-      company: cleanInvoiceData.billTo.company
-    },
-    invoiceDetails: {
-      invoiceNumber: cleanInvoiceData.id,
-      date: cleanInvoiceData.date,
-      billFrom: cleanInvoiceData.billFrom,
-      billTo: cleanInvoiceData.billTo,
-      billableItems: cleanInvoiceData.billableItems,
-      subtotal: cleanInvoiceData.subtotal,
-      tax: cleanInvoiceData.tax,
-      taxTotal: cleanInvoiceData.taxTotal,
-      total: cleanInvoiceData.total
     }
   };
 };
