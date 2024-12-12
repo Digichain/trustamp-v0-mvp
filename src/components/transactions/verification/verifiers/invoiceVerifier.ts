@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
@@ -22,9 +22,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       const invoiceCustomVerifier = createInvoiceCustomVerifier();
 
       // Perform OpenAttestation verification
-      const fragments = await verify(document, {
-        verifiers: [invoiceCustomVerifier]
-      }) as VerificationFragment[];
+      const fragments = await verify(document, invoiceCustomVerifier);
       
       console.log("Verification fragments:", fragments);
 
@@ -42,7 +40,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     }
   }
 
-  private processVerificationFragments(fragments: VerificationFragment[]): VerificationDetails {
+  private processVerificationFragments(fragments: any[]): VerificationDetails {
     // Document Integrity Check
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
     const documentIntegrity = {
@@ -63,17 +61,17 @@ export class InvoiceVerifier implements DocumentVerifier {
 
     // Issuer Identity Check
     const identityFragment = fragments.find(f => f.name === "OpenAttestationDnsTxt");
-    const identityData = identityFragment?.data;
+    const identityDetails = identityFragment?.data || {};
     
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
       message: identityFragment?.status === "VALID"
         ? "Document issuer has been identified"
         : "Issuer not identified",
-      details: identityData ? {
-        name: Array.isArray(identityData) ? identityData[0]?.key : identityData.key,
-        domain: Array.isArray(identityData) ? identityData[0]?.location : identityData.location
-      } : undefined
+      details: {
+        name: identityDetails.key,
+        domain: identityDetails.location
+      }
     };
 
     return {
