@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, utils } from "@govtechsg/oa-verify";
+import { verify, utils, VerificationFragment } from "@govtechsg/oa-verify";
 
 interface InvoiceVerificationDetails {
   issuanceStatus: {
@@ -46,7 +46,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
 
       // Perform OpenAttestation verification
-      const fragments = await verify(document, { network: "sepolia" });
+      const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
 
       // Document Integrity Check
@@ -75,7 +75,7 @@ export class InvoiceVerifier implements DocumentVerifier {
           ? "Document issuer has been identified"
           : "Issuer not identified",
         details: utils.isValidFragment(identityFragment) ? {
-          name: identityFragment.data.identifier,
+          name: identityFragment.data.key, // Changed from identifier to key
           domain: identityFragment.data.location
         } : undefined
       };
