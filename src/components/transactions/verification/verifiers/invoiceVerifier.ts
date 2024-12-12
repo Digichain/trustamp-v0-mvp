@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify } from "@govtechsg/oa-verify";
+import { verify, openAttestationHash, documentStatus, documentIdentity } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
@@ -23,10 +23,8 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       // Perform OpenAttestation verification
       const fragments = await verify(document, {
-        network: "sepolia",
-        provider: { network: "sepolia" },
-        resolver: { network: "sepolia" },
         verificationMethod: ["did", "dnssec"],
+        networks: ["sepolia"],
         verifiers: [invoiceCustomVerifier]
       });
       
@@ -48,30 +46,30 @@ export class InvoiceVerifier implements DocumentVerifier {
 
   private processVerificationFragments(fragments: any[]): VerificationDetails {
     // Document Integrity Check
-    const integrityFragment = utils.getOpenAttestationHashFragment(fragments);
+    const integrityFragment = fragments.find(f => f.type === openAttestationHash.type);
     const documentIntegrity = {
-      valid: utils.isValidFragment(integrityFragment),
-      message: utils.isValidFragment(integrityFragment) 
+      valid: integrityFragment?.status === "VALID",
+      message: integrityFragment?.status === "VALID"
         ? "Document has not been tampered with"
         : "Document has been tampered with"
     };
 
     // Issuance Status Check
-    const statusFragment = utils.getOpenAttestationEthereumDocumentStoreStatusFragment(fragments);
+    const statusFragment = fragments.find(f => f.type === documentStatus.type);
     const issuanceStatus = {
-      valid: utils.isValidFragment(statusFragment),
-      message: utils.isValidFragment(statusFragment)
+      valid: statusFragment?.status === "VALID",
+      message: statusFragment?.status === "VALID"
         ? "Document has been issued"
         : "Document has not been issued, or the document is revoked"
     };
 
     // Issuer Identity Check
-    const identityFragment = utils.getOpenAttestationDnsDidIdentityProofFragment(fragments);
-    const identityData = utils.isValidFragment(identityFragment) ? identityFragment.data : null;
+    const identityFragment = fragments.find(f => f.type === documentIdentity.type);
+    const identityData = identityFragment?.data;
     
     const issuerIdentity = {
-      valid: utils.isValidFragment(identityFragment),
-      message: utils.isValidFragment(identityFragment)
+      valid: identityFragment?.status === "VALID",
+      message: identityFragment?.status === "VALID"
         ? "Document issuer has been identified"
         : "Issuer not identified",
       details: identityData ? {
