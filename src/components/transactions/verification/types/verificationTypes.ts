@@ -49,3 +49,15 @@ export interface OpenAttestationDocument {
     }>;
   };
 }
+
+// Add specific type for verification fragment data
+export interface VerificationFragmentData {
+  identifier?: string;
+  location?: string;
+  status?: string;
+  value?: any;
+}
+
+export interface ExtendedVerificationFragment extends VerificationFragment {
+  data?: VerificationFragmentData;
+}
