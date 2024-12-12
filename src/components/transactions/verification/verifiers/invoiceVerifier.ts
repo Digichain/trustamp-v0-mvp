@@ -2,6 +2,7 @@ import { verify, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
 import { createInvoiceCustomVerifier } from "../utils/customVerifier";
+import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
@@ -12,9 +13,8 @@ export class InvoiceVerifier implements DocumentVerifier {
       const customVerifier = createInvoiceCustomVerifier();
       
       console.log("Starting document verification with custom verifier");
-      // Correctly use the verify function by calling it with document first,
-      // then calling the returned function with an array of verifiers
-      const fragments = await verify(document)([customVerifier]);
+      const verifyWithDoc = verify(document);
+      const fragments = await verifyWithDoc([customVerifier]) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
 
       // Process fragments
@@ -38,7 +38,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     return DOCUMENT_TEMPLATES.INVOICE;
   }
 
-  private processVerificationFragments(fragments: VerificationFragment[]): any {
+  private processVerificationFragments(fragments: ExtendedVerificationFragment[]): any {
     console.log("Processing verification fragments:", fragments);
 
     // Document Integrity Check
@@ -94,7 +94,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
   }
 
-  private getFragmentMessage(fragment: VerificationFragment | undefined, successMessage: string, failureMessage: string): string {
+  private getFragmentMessage(fragment: ExtendedVerificationFragment | undefined, successMessage: string, failureMessage: string): string {
     if (!fragment) return "Verification check not performed";
     if (fragment.status === "VALID") return successMessage;
     
