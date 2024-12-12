@@ -6,7 +6,7 @@ import { DOCUMENT_TEMPLATES } from "../types";
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
-      console.log("Starting document verification for v2.0");
+      console.log("Starting document verification for v2.0 document:", document);
       
       // First, run diagnostics to ensure it's a valid v2.0 document
       const diagnosticResults = utils.diagnose({ 
@@ -15,7 +15,7 @@ export class InvoiceVerifier implements DocumentVerifier {
         document: document, 
         mode: "strict" 
       });
-      console.log("Document diagnostics:", diagnosticResults);
+      console.log("Document diagnostics results:", diagnosticResults);
 
       // Handle diagnostic results based on the returned array
       if (diagnosticResults.length > 0) {
@@ -25,10 +25,15 @@ export class InvoiceVerifier implements DocumentVerifier {
         );
       }
 
-      // Proceed with verification using v2.0 specific options
-      const verifier = verify(document);
-      const fragments = await verifier;
-      console.log("Raw verification fragments:", fragments);
+      // Configure verification options for v2.0 document on Sepolia
+      const verificationOptions = {
+        provider: { network: "sepolia" },
+        resolver: { network: "sepolia" }
+      };
+
+      console.log("Starting verification with options:", verificationOptions);
+      const fragments = await verify(document, verificationOptions);
+      console.log("Verification fragments received:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
