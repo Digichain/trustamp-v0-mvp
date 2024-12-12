@@ -1,21 +1,12 @@
-import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
 import { verify } from "@govtechsg/oa-verify";
-import { VerificationDetails } from '../types/verificationTypes';
+import { VerificationResult, VerificationDetails } from "../types/verificationTypes";
+import { OpenAttestationDocument } from "../types/verificationTypes";
 
-export class InvoiceVerifier implements DocumentVerifier {
-  getTemplate(): string {
-    return DOCUMENT_TEMPLATES.INVOICE;
-  }
-
-  async verify(document: any): Promise<VerificationResult> {
-    console.log("Starting invoice verification for document:", document);
-    
+export class InvoiceVerifier {
+  async verify(document: OpenAttestationDocument): Promise<VerificationResult> {
     try {
-      // Basic structure validation
-      if (!document || typeof document !== 'object') {
-        return this.createErrorResponse('Invalid document format');
-      }
-
+      console.log("Starting document verification");
+      
       // Perform OpenAttestation verification
       const fragments = await verify(document);
       console.log("Raw verification fragments:", fragments);
@@ -28,12 +19,12 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       return {
         isValid,
-        details: verificationDetails,
-        errors: isValid ? undefined : ['Document verification failed']
+        document,
+        details: verificationDetails
       };
     } catch (error) {
-      console.error("Error during invoice verification:", error);
-      return this.createErrorResponse('Verification process failed');
+      console.error("Verification error:", error);
+      return this.createErrorResponse(error instanceof Error ? error.message : "Unknown verification error");
     }
   }
 
@@ -88,35 +79,38 @@ export class InvoiceVerifier implements DocumentVerifier {
 
   private getFragmentMessage(fragment: any, successMessage: string, failureMessage: string): string {
     if (!fragment) return "Verification check not performed";
-    return fragment.status === "VALID" ? successMessage : (fragment.reason || failureMessage);
+    if (fragment.status === "VALID") return successMessage;
+    
+    // Ensure we return a string message
+    if (fragment.reason) {
+      return typeof fragment.reason === 'string' ? fragment.reason : 'Verification failed';
+    }
+    return failureMessage;
   }
 
   private isVerificationValid(details: VerificationDetails): boolean {
     // For DNS-DID verification, we primarily care about document integrity
-    // since the document might not be issued on-chain
     return details.documentIntegrity.valid;
   }
 
   private createErrorResponse(message: string): VerificationResult {
-    const errorDetails: VerificationDetails = {
-      issuanceStatus: {
-        valid: false,
-        message
-      },
-      issuerIdentity: {
-        valid: false,
-        message
-      },
-      documentIntegrity: {
-        valid: false,
-        message
-      }
-    };
-
     return {
       isValid: false,
-      errors: [message],
-      details: errorDetails
+      document: null,
+      details: {
+        issuanceStatus: {
+          valid: false,
+          message: message
+        },
+        issuerIdentity: {
+          valid: false,
+          message: "Verification failed"
+        },
+        documentIntegrity: {
+          valid: false,
+          message: "Unable to verify document integrity"
+        }
+      }
     };
   }
 }
