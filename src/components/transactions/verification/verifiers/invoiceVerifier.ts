@@ -2,27 +2,22 @@ import { verify, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
 import { createInvoiceCustomVerifier } from "../utils/customVerifier";
-import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting verification with document:", document);
 
-      // Configure verification options
-      const verificationOptions = {
-        network: "sepolia",
-        provider: { network: "sepolia" },
-        resolver: { network: "sepolia" },
-        verificationMethod: "did",
-        verifiers: [createInvoiceCustomVerifier()]
-      };
-
-      console.log("Starting verification with options:", verificationOptions);
-      const fragments = await verify(document, verificationOptions);
+      // Create custom verifier
+      const customVerifier = createInvoiceCustomVerifier();
+      
+      console.log("Starting document verification with custom verifier");
+      // Correctly use the verify function by calling it with document first,
+      // then calling the returned function with an array of verifiers
+      const fragments = await verify(document)([customVerifier]);
       console.log("Raw verification fragments received:", fragments);
 
-      // Process fragments more carefully with type checking
+      // Process fragments
       const verificationDetails = this.processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
       
@@ -113,7 +108,6 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   private isVerificationValid(details: any): boolean {
-    // For v2.0 documents, we check all aspects
     return details.documentIntegrity.valid && 
            details.issuanceStatus.valid && 
            details.issuerIdentity.valid;
