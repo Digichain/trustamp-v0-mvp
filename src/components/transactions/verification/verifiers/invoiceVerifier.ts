@@ -1,23 +1,26 @@
-import { verify } from "@govtechsg/oa-verify";
+import { verify, Verifier } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
+import { VerificationOptions } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting document verification for v2.0");
       
-      // Use the correct options format for v2.0 verification
-      const fragments = await verify(document, {
+      // Create verifier options for v2.0
+      const verifierOptions: VerificationOptions = {
         network: "sepolia",
         provider: {
           network: "sepolia"
         },
         resolver: {
           network: "sepolia"
-        }
-      });
+        },
+        verifiers: [] as Verifier<any>[]
+      };
       
+      const fragments = await verify(document, verifierOptions);
       console.log("Raw verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
