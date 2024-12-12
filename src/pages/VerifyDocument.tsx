@@ -9,7 +9,6 @@ import { useWallet } from '@/contexts/WalletContext';
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
   const { toast } = useToast();
-  const { network } = useWallet();
 
   const resetVerification = () => {
     setVerificationResult(null);
@@ -34,12 +33,8 @@ const VerifyDocument = () => {
         });
         return;
       }
-      
-      // Get the network from the wallet context
-      const networkForVerification = network?.toLowerCase().includes('sepolia') ? 'sepolia' : network;
-      console.log("Using network for verification:", networkForVerification);
 
-      const verifier = await VerifierFactory.verifyDocument(document, networkForVerification);
+      const verifier = await VerifierFactory.verifyDocument(document);
       if (!verifier) {
         console.error("No verifier found for document");
         toast({
@@ -51,7 +46,7 @@ const VerifyDocument = () => {
       }
 
       console.log("Starting document verification");
-      const result = await verifier.verify(document, networkForVerification);
+      const result = await verifier.verify(document);
       console.log("Verification result:", result);
 
       setVerificationResult({

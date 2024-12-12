@@ -5,17 +5,15 @@ import { createInvoiceCustomVerifier } from "../utils/customVerifier";
 import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
-  async verify(document: any, network?: string): Promise<VerificationResult> {
+  async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting verification with document:", document);
-      console.log("Using network for verification:", network);
 
-      // Configure verification options using the provided network
-      const verificationNetwork = network || 'sepolia'; // Fallback to sepolia if no network provided
+      // Configure verification options
       const verificationOptions = {
-        network: verificationNetwork,
-        provider: { network: verificationNetwork },
-        resolver: { network: verificationNetwork },
+        network: "sepolia",
+        provider: { network: "sepolia" },
+        resolver: { network: "sepolia" },
         verificationMethod: "did",
         verifiers: [createInvoiceCustomVerifier()]
       };

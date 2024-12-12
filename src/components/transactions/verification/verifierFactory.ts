@@ -20,9 +20,8 @@ export class VerifierFactory {
     return verifier;
   }
 
-  static async verifyDocument(document: any, network?: string): Promise<DocumentVerifier | null> {
+  static async verifyDocument(document: any): Promise<DocumentVerifier | null> {
     console.log("Starting document verification process with document:", document);
-    console.log("Using network for verification:", network);
     
     try {
       // For now, we'll use the invoice verifier for all documents
