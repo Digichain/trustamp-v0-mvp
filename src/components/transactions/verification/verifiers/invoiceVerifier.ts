@@ -13,7 +13,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       const customVerifier = createInvoiceCustomVerifier();
       
       console.log("Starting document verification with custom verifier");
-      const fragments = await verify(document, [customVerifier]) as ExtendedVerificationFragment[];
+      const fragments = await verify(document, customVerifier) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
 
       // Process fragments
