@@ -2,15 +2,18 @@ import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../typ
 import { verify, utils, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 
+// Define the template object type
+interface TemplateObject {
+  name: string;
+  type: string;
+  url: string;
+}
+
 // Define the expected document structure
 interface OpenAttestationDocument {
   version: string;
   data: {
-    $template: {
-      name: string;
-      type: string;
-      url: string;
-    };
+    $template: TemplateObject;
     issuers: Array<{
       id: string;
       name: string;
@@ -38,12 +41,14 @@ const invoiceCustomVerifier: Verifier<any> = {
   },
   test: (document: any) => {
     const data = getData(document);
+    const template = data.$template as TemplateObject;
     return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
-           data.$template?.name === DOCUMENT_TEMPLATES.INVOICE;
+           template?.name === DOCUMENT_TEMPLATES.INVOICE;
   },
   verify: async (document: any) => {
     const documentData = getData(document);
-    const templateName = documentData.$template?.name;
+    const template = documentData.$template as TemplateObject;
+    const templateName = template?.name;
     
     // Check if it's an invoice template
     if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
