@@ -50,7 +50,7 @@ export interface OpenAttestationDocument {
   };
 }
 
-// Add specific type for verification fragment data
+// Add specific type for verification fragment data and reason
 export interface VerificationFragmentData {
   identifier?: string;
   location?: string;
@@ -58,6 +58,13 @@ export interface VerificationFragmentData {
   value?: any;
 }
 
+export interface VerificationReason {
+  code: number;
+  codeString: string;
+  message: string;
+}
+
 export interface ExtendedVerificationFragment extends VerificationFragment {
   data?: VerificationFragmentData;
+  reason?: VerificationReason | string;
 }

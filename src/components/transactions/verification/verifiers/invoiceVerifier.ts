@@ -112,9 +112,11 @@ export class InvoiceVerifier implements DocumentVerifier {
     if (!fragment) return "Verification check not performed";
     if (fragment.status === "VALID") return successMessage;
     
-    // Ensure we return a string message
     if (fragment.reason) {
-      return typeof fragment.reason === 'string' ? fragment.reason : 'Verification failed';
+      if (typeof fragment.reason === 'string') {
+        return fragment.reason;
+      }
+      return fragment.reason.message || failureMessage;
     }
     return failureMessage;
   }
