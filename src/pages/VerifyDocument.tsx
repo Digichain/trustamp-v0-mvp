@@ -3,17 +3,14 @@ import { FileUploader } from '@/components/transactions/verification/FileUploade
 import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
-import { PreviewDialog } from '@/components/transactions/previews/PreviewDialog';
 import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
 
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   const resetVerification = () => {
     setVerificationResult(null);
-    setShowPreview(false);
   };
 
   const processFile = async (file: File) => {
@@ -61,14 +58,11 @@ const VerifyDocument = () => {
       const result = await verifier.verify(document);
       console.log("Verification result:", result);
 
-      // Always set verification result and show preview
       setVerificationResult({
         isValid: result.isValid,
         document: document,
         details: result.details
       });
-
-      setShowPreview(true);
 
       if (result.isValid) {
         toast({
@@ -94,7 +88,7 @@ const VerifyDocument = () => {
   };
 
   const renderPreview = () => {
-    if (!verificationResult?.document) return null;
+    if (!verificationResult?.document || !verificationResult.isValid) return null;
 
     switch (verificationResult.document.$template?.name) {
       case 'INVOICE':
@@ -106,7 +100,7 @@ const VerifyDocument = () => {
 
   return (
     <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Verify Document</h1>
           <p className="mt-2 text-gray-600">
@@ -119,19 +113,14 @@ const VerifyDocument = () => {
         )}
 
         {verificationResult && (
-          <DocumentVerificationStatus
-            verificationDetails={verificationResult.details}
-            onReset={resetVerification}
-          />
+          <div className="space-y-8">
+            <DocumentVerificationStatus
+              verificationDetails={verificationResult.details}
+              onReset={resetVerification}
+            />
+            {renderPreview()}
+          </div>
         )}
-
-        <PreviewDialog
-          title="Document Preview"
-          isOpen={showPreview}
-          onOpenChange={setShowPreview}
-        >
-          {renderPreview()}
-        </PreviewDialog>
       </div>
     </div>
   );
