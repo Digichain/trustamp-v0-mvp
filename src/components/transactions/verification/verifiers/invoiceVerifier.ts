@@ -1,4 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
+import { verify, utils } from "@govtechsg/oa-verify";
 
 interface InvoiceVerificationDetails {
   issuanceStatus: {
@@ -44,11 +45,45 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Perform the three key verifications
+      // Perform OpenAttestation verification
+      const fragments = await verify(document, { network: "sepolia" });
+      console.log("Verification fragments:", fragments);
+
+      // Document Integrity Check
+      const integrityFragment = utils.getOpenAttestationHashFragment(fragments);
+      const documentIntegrity = {
+        valid: utils.isValidFragment(integrityFragment),
+        message: utils.isValidFragment(integrityFragment) 
+          ? "Document has not been tampered with"
+          : "Document has been tampered with"
+      };
+
+      // Issuance Status Check
+      const statusFragment = utils.getOpenAttestationEthereumDocumentStoreStatusFragment(fragments);
+      const issuanceStatus = {
+        valid: utils.isValidFragment(statusFragment),
+        message: utils.isValidFragment(statusFragment)
+          ? "Document has been issued"
+          : "Document has not been issued, or the document is revoked"
+      };
+
+      // Issuer Identity Check
+      const identityFragment = utils.getOpenAttestationDnsDidIdentityProofFragment(fragments);
+      const issuerIdentity = {
+        valid: utils.isValidFragment(identityFragment),
+        message: utils.isValidFragment(identityFragment)
+          ? "Document issuer has been identified"
+          : "Issuer not identified",
+        details: utils.isValidFragment(identityFragment) ? {
+          name: identityFragment.data.identifier,
+          domain: identityFragment.data.location
+        } : undefined
+      };
+
       const verificationDetails: InvoiceVerificationDetails = {
-        issuanceStatus: await this.verifyIssuanceStatus(document),
-        issuerIdentity: await this.verifyIssuerIdentity(document),
-        documentIntegrity: await this.verifyDocumentIntegrity(document)
+        issuanceStatus,
+        issuerIdentity,
+        documentIntegrity
       };
 
       // Document is valid only if all verifications pass
@@ -68,32 +103,5 @@ export class InvoiceVerifier implements DocumentVerifier {
         errors: ['Verification process failed']
       };
     }
-  }
-
-  private async verifyIssuanceStatus(document: any): Promise<{ valid: boolean; message: string }> {
-    // Placeholder for issuance status verification
-    // Will be implemented based on your next message
-    return {
-      valid: false,
-      message: "Document has not been issued, or the document is revoked"
-    };
-  }
-
-  private async verifyIssuerIdentity(document: any): Promise<{ valid: boolean; message: string; details?: { name?: string; domain?: string } }> {
-    // Placeholder for issuer identity verification
-    // Will be implemented based on your next message
-    return {
-      valid: false,
-      message: "Issuer not identified"
-    };
-  }
-
-  private async verifyDocumentIntegrity(document: any): Promise<{ valid: boolean; message: string }> {
-    // Placeholder for document integrity verification
-    // Will be implemented based on your next message
-    return {
-      valid: false,
-      message: "Document has been tampered with"
-    };
   }
 }
