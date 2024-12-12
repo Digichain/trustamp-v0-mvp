@@ -36,7 +36,33 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Add more specific invoice validation logic here
+      // Verify invoice details structure
+      const invoiceDetails = document.invoiceDetails;
+      const requiredInvoiceFields = ['invoiceNumber', 'date', 'billFrom', 'billTo', 'billableItems'];
+      const missingInvoiceFields = requiredInvoiceFields.filter(field => !invoiceDetails[field]);
+
+      if (missingInvoiceFields.length > 0) {
+        return {
+          isValid: false,
+          errors: [`Missing invoice details: ${missingInvoiceFields.join(', ')}`]
+        };
+      }
+
+      // Verify billable items
+      if (!Array.isArray(invoiceDetails.billableItems) || invoiceDetails.billableItems.length === 0) {
+        return {
+          isValid: false,
+          errors: ['Invoice must contain at least one billable item']
+        };
+      }
+
+      // Verify issuer information
+      if (!document.issuers[0]?.name) {
+        return {
+          isValid: false,
+          errors: ['Invalid issuer information']
+        };
+      }
       
       return {
         isValid: true,
