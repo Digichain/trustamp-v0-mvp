@@ -54,10 +54,15 @@ const saltData = (data: any): any => {
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
+  // Ensure document ID exists in the raw document
   if (!rawDocument.data?.id) {
     console.error("Document data or ID is missing:", rawDocument);
     throw new Error("Document ID is required for wrapping");
   }
+
+  // Preserve the original document ID before salting
+  const documentId = rawDocument.data.id;
+  console.log("Preserving document ID:", documentId);
 
   // Sort all object keys for consistent ordering
   const sortedDocument = JSON.parse(JSON.stringify(rawDocument, Object.keys(rawDocument).sort()));
@@ -75,9 +80,13 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   const merkleRoot = targetHash;
   console.log("Using merkle root:", merkleRoot);
 
+  // Create wrapped document with preserved ID
   const wrappedDoc: WrappedDocument = {
     version: "https://schema.openattestation.com/2.0/schema.json",
-    data: saltedData,
+    data: {
+      ...saltedData,
+      id: documentId // Ensure ID is preserved unsalted
+    },
     signature: {
       type: "SHA3MerkleProof",
       targetHash,
