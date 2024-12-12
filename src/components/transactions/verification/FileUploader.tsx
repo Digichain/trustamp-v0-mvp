@@ -16,19 +16,23 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
     const isJsonMime = file.type === 'application/json';
     const isJsonExtension = file.name.toLowerCase().endsWith('.json');
     const isTtExtension = file.name.toLowerCase().endsWith('.tt');
+    const isOaExtension = file.name.toLowerCase().endsWith('.oa');
+    const isOpenCertExtension = file.name.toLowerCase().endsWith('.opencert');
     
     console.log('File validation:', {
       fileName: file.name,
       fileType: file.type,
       isJsonMime,
       isJsonExtension,
-      isTtExtension
+      isTtExtension,
+      isOaExtension,
+      isOpenCertExtension
     });
 
-    if (!isJsonMime && !isJsonExtension && !isTtExtension) {
+    if (!isJsonMime && !isJsonExtension && !isTtExtension && !isOaExtension && !isOpenCertExtension) {
       toast({
         title: "Invalid File Type",
-        description: "Please upload either a JSON file or a .tt file in OpenAttestation v2.0 format",
+        description: "Please upload a document in OpenAttestation v2.0 format (.json, .tt, .oa, or .opencert)",
         variant: "destructive"
       });
       return false;
@@ -83,7 +87,7 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
             Drag and drop your file here
           </p>
           <p className="text-sm text-gray-500">
-            Supported formats: JSON or .tt (OpenAttestation v2.0)
+            Supported formats: JSON, .tt, .oa, or .opencert (OpenAttestation v2.0)
           </p>
         </div>
         <div className="mt-4">
@@ -99,7 +103,7 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
             id="file-upload"
             className="hidden"
             onChange={handleFileSelect}
-            accept=".json,.tt,application/json"
+            accept=".json,.tt,.oa,.opencert,application/json"
           />
         </div>
       </div>
