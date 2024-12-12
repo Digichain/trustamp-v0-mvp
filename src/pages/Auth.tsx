@@ -6,14 +6,18 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
 const Auth = () => {
+  console.log("Auth component rendering...");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Auth useEffect running - checking user session...");
     // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Current session:", session);
       if (session) {
+        console.log("User is logged in, redirecting to dashboard...");
         navigate('/dashboard');
       }
     };
@@ -22,7 +26,7 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event);
+      console.log('Auth event:', event, 'Session:', session);
       
       if (event === 'SIGNED_IN' && session) {
         navigate('/dashboard');
@@ -39,7 +43,6 @@ const Auth = () => {
         });
       }
 
-      // Handle specific error events
       if (event === 'SIGNED_OUT') {
         toast({
           variant: "destructive",
@@ -54,6 +57,7 @@ const Auth = () => {
     };
   }, [navigate, toast]);
 
+  console.log("Rendering Auth UI components...");
   return (
     <div className="container flex min-h-screen items-center justify-center">
       <div className="mx-auto w-full max-w-[400px] space-y-8 rounded-lg bg-card p-8 shadow-lg">
