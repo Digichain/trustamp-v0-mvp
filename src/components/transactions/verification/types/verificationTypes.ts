@@ -8,6 +8,7 @@ export interface VerificationOptions {
   resolver?: {
     network: string;
   };
+  verificationMethod?: string;
   verifiers?: Verifier<any>[];
 }
 
@@ -50,7 +51,6 @@ export interface OpenAttestationDocument {
   };
 }
 
-// Add specific type for verification fragment data and reason
 export interface VerificationFragmentData {
   identifier?: string;
   location?: string;
