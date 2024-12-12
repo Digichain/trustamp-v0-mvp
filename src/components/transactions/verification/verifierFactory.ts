@@ -32,13 +32,16 @@ export class VerifierFactory {
         mode: "strict" 
       });
 
-      if (diagnosticResults.length > 0) {
-        console.warn("Document diagnostics failed:", diagnosticResults);
+      console.log("Diagnostic results:", diagnosticResults);
+
+      // For our JSON format, we expect a wrapped document with data and signature
+      if (!document.data || !document.signature) {
+        console.warn("Document missing required OpenAttestation structure");
         return null;
       }
 
-      // For OpenAttestation v2.0 documents, template is in data.$template
-      const templateName = document.data?.$template?.name;
+      // Get template name - for our format it should be directly in data.$template.name
+      const templateName = document.data.$template?.name;
       console.log("Document template name:", templateName);
       
       if (!templateName) {
@@ -46,18 +49,10 @@ export class VerifierFactory {
         return null;
       }
 
-      // Check if it's an OpenCerts document
-      const isOpenCerts = document.data?.["$template"]?.name?.startsWith("opencerts/");
-      if (isOpenCerts) {
-        console.log("Detected OpenCerts document format");
-        // TODO: Add specific handling for OpenCerts if needed
-      }
-
-      // Check if it's a TradeTrust document
-      const isTradeTrust = document.data?.["$template"]?.name?.startsWith("tt/");
-      if (isTradeTrust) {
-        console.log("Detected TradeTrust document format");
-        // TODO: Add specific handling for TradeTrust if needed
+      // For our format, we expect INVOICE as template name
+      if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
+        console.warn("Unsupported template name:", templateName);
+        return null;
       }
 
       const verifier = this.getVerifier(templateName);
