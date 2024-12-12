@@ -1,26 +1,33 @@
-import { verify, Verifier } from "@govtechsg/oa-verify";
+import { verify } from "@govtechsg/oa-verify";
+import { utils } from "@govtechsg/open-attestation";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
-import { VerificationOptions } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting document verification for v2.0");
       
-      // Create verifier options for v2.0
-      const verifierOptions: VerificationOptions = {
-        network: "sepolia",
-        provider: {
-          network: "sepolia"
-        },
-        resolver: {
-          network: "sepolia"
-        },
-        verifiers: [] as Verifier<any>[]
-      };
-      
-      const fragments = await verify(document, verifierOptions);
+      // First, run diagnostics to ensure it's a valid v2.0 document
+      const diagnostics = utils.diagnose({ 
+        version: "2.0", 
+        kind: "signed", 
+        document: document, 
+        mode: "strict" 
+      });
+      console.log("Document diagnostics:", diagnostics);
+
+      if (!diagnostics.isValid) {
+        console.error("Document diagnostics failed:", diagnostics.errors);
+        return this.createErrorResponse(
+          diagnostics.errors.map(error => error.message).join(", ")
+        );
+      }
+
+      // Proceed with verification using v2.0 specific options
+      const fragments = await verify(document, {
+        network: "sepolia"
+      });
       console.log("Raw verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
