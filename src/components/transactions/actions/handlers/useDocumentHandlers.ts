@@ -49,8 +49,7 @@ export const useDocumentHandlers = () => {
         .update({ 
           status: 'document_wrapped',
           updated_at: new Date().toISOString(),
-          // Store the storage ID in the transaction for later reference
-          transaction_hash: storageId
+          transaction_hash: storageId // Store the storage ID
         })
         .eq('id', transaction.id);
 
@@ -90,14 +89,17 @@ export const useDocumentHandlers = () => {
       }
 
       console.log("Starting document signing process for transaction:", transaction.id);
+      console.log("Transaction data:", transaction);
 
-      // Use the storage ID from transaction_hash for file operations
       const storageId = transaction.transaction_hash;
       if (!storageId) {
+        console.error("No storage ID found in transaction:", transaction);
         throw new Error("Storage ID not found for document");
       }
 
+      console.log("Using storage ID for file operations:", storageId);
       const wrappedFileName = `${storageId}_wrapped.json`;
+      
       const { data: wrappedDocData, error: fetchError } = await supabase.storage
         .from('wrapped-documents')
         .download(wrappedFileName);
@@ -108,8 +110,9 @@ export const useDocumentHandlers = () => {
       }
 
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
+      console.log("Successfully retrieved wrapped document:", wrappedDoc);
       
-      // Use a new storage ID for the signed document
+      // Generate new storage ID for signed document
       const signedStorageId = crypto.randomUUID();
       console.log("Generated new storage ID for signed document:", signedStorageId);
 
@@ -151,7 +154,6 @@ export const useDocumentHandlers = () => {
 
   const handleDownloadSignedDocument = async (transaction: any) => {
     try {
-      // Use the storage ID from transaction_hash
       const storageId = transaction.transaction_hash;
       if (!storageId) {
         throw new Error("Storage ID not found for document");
