@@ -2,13 +2,13 @@ import { Verifier, VerificationFragment } from "@govtechsg/oa-verify";
 
 export interface VerificationOptions {
   network: string;
-  provider: {
+  provider?: {
     network: string;
   };
-  resolver: {
+  resolver?: {
     network: string;
   };
-  verifiers: Verifier<any>[];
+  verifiers?: Verifier<any>[];
 }
 
 export interface VerificationDetails {
