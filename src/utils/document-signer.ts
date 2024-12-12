@@ -11,22 +11,22 @@ declare global {
   }
 }
 
-export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string) => {
+export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, storageId: string) => {
   try {
-    console.log("Starting document signing process with wrapped document:", wrappedDocument);
+    console.log("Starting document signing process with wrapped document");
     
     if (!window.ethereum) {
       throw new Error("No ethereum wallet found");
     }
 
-    // Check for document ID in the wrapped document
-    const documentId = wrappedDocument.data?.id;
-    if (!documentId) {
-      console.error("Document ID is missing from wrapped document:", wrappedDocument);
-      throw new Error("Document ID is required for signing");
+    // Use the salted document ID from the wrapped document for signing
+    const documentData = wrappedDocument.data;
+    if (!documentData || !documentData.id) {
+      console.error("Document data or salted ID is missing from wrapped document:", wrappedDocument);
+      throw new Error("Document data is required for signing");
     }
 
-    console.log("Found document ID:", documentId);
+    console.log("Using salted document ID for signing:", documentData.id);
 
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -52,8 +52,8 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       }]
     };
 
-    // Store signed document using the document ID
-    const fileName = `${documentId}_signed.json`;
+    // Store signed document using the provided storage ID
+    const fileName = `${storageId}_signed.json`;
     console.log("Storing signed document with filename:", fileName);
 
     const { error: uploadError } = await supabase.storage
