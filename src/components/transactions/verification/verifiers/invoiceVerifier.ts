@@ -24,10 +24,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Perform OpenAttestation verification
       const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
         const results = await Promise.all(promises);
-        const customResult = await invoiceCustomVerifier.verify(document, {
-          provider: { url: "https://sepolia.infura.io/v3/" },
-          resolver: { url: "https://public.resolver.trustamp.dev" }
-        });
+        const customResult = await invoiceCustomVerifier.verify(document);
         return [...results, customResult];
       });
       
