@@ -10,6 +10,21 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
   // The base DID without #controller
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
   
+  // Create a clean object without prototypes
+  const cleanInvoiceData = {
+    billFrom: JSON.parse(JSON.stringify(invoiceData.billFrom)),
+    billTo: JSON.parse(JSON.stringify(invoiceData.billTo)),
+    billableItems: JSON.parse(JSON.stringify(invoiceData.billableItems)),
+    subtotal: Number(invoiceData.subtotal),
+    tax: Number(invoiceData.tax),
+    taxTotal: Number(invoiceData.taxTotal),
+    total: Number(invoiceData.total),
+    id: invoiceData.id,
+    date: invoiceData.date
+  };
+
+  console.log("Clean invoice data:", cleanInvoiceData);
+  
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
     $template: {
@@ -19,7 +34,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
     },
     issuers: [{
       id: baseId,
-      name: invoiceData.billFrom.name,
+      name: cleanInvoiceData.billFrom.name,
       identityProof: {
         type: "DNS-DID",
         location: "tempdns.trustamp.in",
@@ -31,19 +46,19 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: DI
       chainId: "11155111"
     },
     recipient: {
-      name: invoiceData.billTo.name,
-      company: invoiceData.billTo.company
+      name: cleanInvoiceData.billTo.name,
+      company: cleanInvoiceData.billTo.company
     },
     invoiceDetails: {
-      invoiceNumber: invoiceData.id,
-      date: invoiceData.date,
-      billFrom: invoiceData.billFrom,
-      billTo: invoiceData.billTo,
-      billableItems: invoiceData.billableItems,
-      subtotal: invoiceData.subtotal,
-      tax: invoiceData.tax,
-      taxTotal: invoiceData.taxTotal,
-      total: invoiceData.total
+      invoiceNumber: cleanInvoiceData.id,
+      date: cleanInvoiceData.date,
+      billFrom: cleanInvoiceData.billFrom,
+      billTo: cleanInvoiceData.billTo,
+      billableItems: cleanInvoiceData.billableItems,
+      subtotal: cleanInvoiceData.subtotal,
+      tax: cleanInvoiceData.tax,
+      taxTotal: cleanInvoiceData.taxTotal,
+      total: cleanInvoiceData.total
     }
   };
 };
