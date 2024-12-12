@@ -12,6 +12,17 @@ export class InvoiceVerifier implements DocumentVerifier {
       const fragments = await verify(document) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
+      // Log each fragment type and status
+      fragments.forEach((fragment, index) => {
+        console.log(`Fragment ${index + 1}:`, {
+          name: fragment.name,
+          type: fragment.type,
+          status: fragment.status,
+          data: fragment.data,
+          reason: fragment.reason
+        });
+      });
+
       // Check if the document is valid using the built-in isValid helper
       const documentIsValid = isValid(fragments);
       console.log("Document validity check:", documentIsValid);
@@ -47,11 +58,14 @@ export class InvoiceVerifier implements DocumentVerifier {
       )
     };
 
-    // Issuance Status Check
+    // Issuance Status Check - now checking for DidSignedDocumentStatus as well
     const statusFragment = fragments.find(f => 
       f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
-      f.name === "OpenAttestationEthereumDocumentStoreStatus"
+      f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
+      f.name === "DidSignedDocumentStatus"
     );
+    console.log("Status fragment found:", statusFragment);
+    
     const issuanceStatus = {
       valid: statusFragment?.status === "VALID",
       message: this.getFragmentMessage(statusFragment,
@@ -63,7 +77,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     // Issuer Identity Check
     const identityFragment = fragments.find(f => 
       f.name === "OpenAttestationDnsTxt" || 
-      f.name === "DnsDidVerifier"
+      f.name === "DnsDidProof"
     );
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
