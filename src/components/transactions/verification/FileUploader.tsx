@@ -3,6 +3,7 @@ import { Upload, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { utils } from "@govtechsg/open-attestation";
 
 interface FileUploaderProps {
   onFileProcess: (file: File) => Promise<void>;
@@ -13,21 +14,24 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
   const { toast } = useToast();
 
   const validateFileType = (file: File): boolean => {
-    // Check both MIME type and file extension for JSON
     const isJsonMime = file.type === 'application/json';
     const isJsonExtension = file.name.toLowerCase().endsWith('.json');
+    const isOpenCertExtension = file.name.toLowerCase().endsWith('.opencert');
+    const isTTExtension = file.name.toLowerCase().endsWith('.tt');
     
     console.log('File validation:', {
       fileName: file.name,
       fileType: file.type,
       isJsonMime,
-      isJsonExtension
+      isJsonExtension,
+      isOpenCertExtension,
+      isTTExtension
     });
 
-    if (!isJsonMime && !isJsonExtension) {
+    if (!isJsonMime && !isJsonExtension && !isOpenCertExtension && !isTTExtension) {
       toast({
         title: "Invalid File Type",
-        description: "Please upload a JSON file",
+        description: "Please upload a JSON, OpenCert (.opencert), or TradeTrust (.tt) file",
         variant: "destructive"
       });
       return false;
@@ -82,7 +86,7 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
             Drag and drop your file here
           </p>
           <p className="text-sm text-gray-500">
-            Supported format: JSON
+            Supported formats: JSON, OpenCert (.opencert), TradeTrust (.tt)
           </p>
         </div>
         <div className="mt-4">
@@ -98,7 +102,7 @@ export const FileUploader = ({ onFileProcess }: FileUploaderProps) => {
             id="file-upload"
             className="hidden"
             onChange={handleFileSelect}
-            accept=".json,application/json"
+            accept=".json,.opencert,.tt,application/json"
           />
         </div>
       </div>
