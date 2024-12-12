@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Upload, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
+import { useToast } from '@/components/ui/use-toast';
 
 const VerifyDocument = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -17,22 +20,58 @@ const VerifyDocument = () => {
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const processFile = async (file: File) => {
+    try {
+      console.log("Processing file:", file.name);
+      const fileContent = await file.text();
+      const document = JSON.parse(fileContent);
+      
+      const verifier = await VerifierFactory.verifyDocument(document);
+      if (!verifier) {
+        toast({
+          title: "Verification Error",
+          description: "Unsupported document type",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const result = await verifier.verify(document);
+      console.log("Verification result:", result);
+
+      // We'll implement the UI for showing verification results later
+      toast({
+        title: result.isValid ? "Document Valid" : "Document Invalid",
+        description: result.errors ? result.errors[0] : "Document verified successfully",
+        variant: result.isValid ? "default" : "destructive"
+      });
+
+    } catch (error) {
+      console.error("Error processing file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process document",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
-      console.log("File dropped:", droppedFile.name);
       setFile(droppedFile);
+      await processFile(droppedFile);
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      console.log("File selected:", selectedFile.name);
       setFile(selectedFile);
+      await processFile(selectedFile);
     }
   };
 
@@ -79,6 +118,7 @@ const VerifyDocument = () => {
                 id="file-upload"
                 className="hidden"
                 onChange={handleFileSelect}
+                accept=".json"
               />
             </div>
           </div>
