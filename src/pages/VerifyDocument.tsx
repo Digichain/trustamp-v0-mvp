@@ -39,7 +39,7 @@ const VerifyDocument = () => {
       const networkForVerification = network?.toLowerCase().includes('sepolia') ? 'sepolia' : network;
       console.log("Using network for verification:", networkForVerification);
 
-      const verifier = await VerifierFactory.verifyDocument(document);
+      const verifier = await VerifierFactory.verifyDocument(document, networkForVerification);
       if (!verifier) {
         console.error("No verifier found for document");
         toast({
