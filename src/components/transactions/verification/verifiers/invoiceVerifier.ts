@@ -1,7 +1,7 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, utils } from "@govtechsg/oa-verify";
+import { verify } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
-import { VerificationOptions, VerificationDetails } from '../types/verificationTypes';
+import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
 
 export class InvoiceVerifier implements DocumentVerifier {
@@ -18,15 +18,18 @@ export class InvoiceVerifier implements DocumentVerifier {
         return this.createErrorResponse('Invalid document format');
       }
 
-      const verificationOptions: VerificationOptions = {
+      // Create custom verifier
+      const invoiceCustomVerifier = createInvoiceCustomVerifier();
+
+      // Perform OpenAttestation verification
+      const fragments = await verify(document, {
         network: "sepolia",
         provider: { network: "sepolia" },
         resolver: { network: "sepolia" },
-        verifiers: [createInvoiceCustomVerifier()]
-      };
-
-      // Perform OpenAttestation verification with options
-      const fragments = await verify(document, verificationOptions);
+        verificationMethod: ["did", "dnssec"],
+        verifiers: [invoiceCustomVerifier]
+      });
+      
       console.log("Verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);

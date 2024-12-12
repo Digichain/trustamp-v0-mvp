@@ -2,6 +2,12 @@ import { Verifier } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { DOCUMENT_TEMPLATES } from "../types";
 
+interface TemplateObject {
+  name: string;
+  type: string;
+  url: string;
+}
+
 export const createInvoiceCustomVerifier = (): Verifier<any> => ({
   skip: () => {
     return Promise.resolve({
@@ -19,7 +25,7 @@ export const createInvoiceCustomVerifier = (): Verifier<any> => ({
   test: (document: any) => {
     try {
       const data = getData(document);
-      const template = data.$template;
+      const template = data.$template as TemplateObject;
       return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
              template?.name === DOCUMENT_TEMPLATES.INVOICE;
     } catch (error) {
@@ -31,7 +37,7 @@ export const createInvoiceCustomVerifier = (): Verifier<any> => ({
   verify: async (document: any) => {
     try {
       const documentData = getData(document);
-      const template = documentData.$template;
+      const template = documentData.$template as TemplateObject;
       const templateName = template?.name;
       
       if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
