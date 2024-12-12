@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify } from "@govtechsg/oa-verify";
+import { verify, VerificationFragment } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
@@ -21,8 +21,13 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Create custom verifier
       const invoiceCustomVerifier = createInvoiceCustomVerifier();
 
-      // Perform OpenAttestation verification with verifier array
-      const fragments = await verify(document, [invoiceCustomVerifier]);
+      // Perform OpenAttestation verification
+      const fragments = await verify(document, {
+        verify: async (promises: Promise<VerificationFragment>[]) => {
+          const results = await Promise.all(promises);
+          return results.concat(await invoiceCustomVerifier.verify(document));
+        }
+      });
       
       console.log("Verification fragments:", fragments);
 
