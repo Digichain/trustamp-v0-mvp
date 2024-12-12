@@ -25,8 +25,8 @@ export class InvoiceVerifier implements DocumentVerifier {
       const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
         const results = await Promise.all(promises);
         const customResult = await invoiceCustomVerifier.verify(document, {
-          provider: { network: "sepolia" }, // Use network instead of chainId
-          resolver: { networks: [{ name: "sepolia", chainId: 11155111, provider: { url: "https://sepolia.infura.io/v3/" } }] } // Use networks array for resolver
+          provider: { url: "https://sepolia.infura.io/v3/" },
+          resolver: { url: "https://public.resolver.trustamp.dev" }
         });
         return [...results, customResult];
       });
