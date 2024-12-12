@@ -1,37 +1,20 @@
 import { verify, VerificationFragment, Verifier } from "@govtechsg/oa-verify";
-import { utils } from "@govtechsg/open-attestation";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
 import { createInvoiceCustomVerifier } from "../utils/customVerifier";
-import { VerificationOptions, ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
-  async verify(document: any): Promise<VerificationResult> {
+  async verify(document: any, network?: string): Promise<VerificationResult> {
     try {
-      console.log("Starting document verification for v2.0 document:", document);
-      
-      // First, run diagnostics to ensure it's a valid v2.0 document
-      const diagnosticResults = utils.diagnose({ 
-        version: "2.0", 
-        kind: "signed", 
-        document: document, 
-        mode: "strict" 
-      });
-      console.log("Document diagnostics results:", diagnosticResults);
+      console.log("Starting verification with document:", document);
+      console.log("Using network for verification:", network);
 
-      // Handle diagnostic results based on the returned array
-      if (diagnosticResults.length > 0) {
-        console.error("Document diagnostics failed:", diagnosticResults);
-        return this.createErrorResponse(
-          diagnosticResults.map(error => error.message).join(", ")
-        );
-      }
-
-      // Configure verification options for v2.0 document on Sepolia
+      // Configure verification options using the provided network
+      const verificationNetwork = network || 'sepolia'; // Fallback to sepolia if no network provided
       const verificationOptions = {
-        network: "sepolia",
-        provider: { network: "sepolia" },
-        resolver: { network: "sepolia" },
+        network: verificationNetwork,
+        provider: { network: verificationNetwork },
+        resolver: { network: verificationNetwork },
         verificationMethod: "did",
         verifiers: [createInvoiceCustomVerifier()]
       };
@@ -155,5 +138,4 @@ export class InvoiceVerifier implements DocumentVerifier {
       }
     };
   }
-
 }
