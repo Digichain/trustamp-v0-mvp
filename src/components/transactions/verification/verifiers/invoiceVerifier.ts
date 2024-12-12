@@ -27,8 +27,8 @@ interface OpenAttestationDocument {
 }
 
 const invoiceCustomVerifier: Verifier<any> = {
-  skip: async () => {
-    return {
+  skip: () => {
+    return Promise.resolve({
       status: "SKIPPED",
       type: "DOCUMENT_INTEGRITY",
       name: "InvoiceVerifier",
@@ -37,40 +37,59 @@ const invoiceCustomVerifier: Verifier<any> = {
         codeString: "SKIPPED",
         message: "Document format verification skipped",
       },
-    };
+    });
   },
   test: (document: any) => {
-    const data = getData(document);
-    const template = data.$template as TemplateObject;
-    return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
-           template?.name === DOCUMENT_TEMPLATES.INVOICE;
+    try {
+      const data = getData(document);
+      const template = data.$template as TemplateObject;
+      return document.version === "https://schema.openattestation.com/2.0/schema.json" &&
+             template?.name === DOCUMENT_TEMPLATES.INVOICE;
+    } catch (error) {
+      console.error("Error in test function:", error);
+      return false;
+    }
   },
   verify: async (document: any) => {
-    const documentData = getData(document);
-    const template = documentData.$template as TemplateObject;
-    const templateName = template?.name;
-    
-    // Check if it's an invoice template
-    if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
+    try {
+      const documentData = getData(document);
+      const template = documentData.$template as TemplateObject;
+      const templateName = template?.name;
+      
+      if (templateName !== DOCUMENT_TEMPLATES.INVOICE) {
+        return {
+          type: "DOCUMENT_INTEGRITY",
+          name: "InvoiceVerifier",
+          data: templateName,
+          reason: {
+            code: 1,
+            codeString: "INVALID_TEMPLATE",
+            message: `Document template is not an invoice: ${templateName}`,
+          },
+          status: "INVALID",
+        };
+      }
+
       return {
         type: "DOCUMENT_INTEGRITY",
         name: "InvoiceVerifier",
         data: templateName,
+        status: "VALID",
+      };
+    } catch (error) {
+      console.error("Error in verify function:", error);
+      return {
+        type: "DOCUMENT_INTEGRITY",
+        name: "InvoiceVerifier",
+        data: null,
         reason: {
-          code: 1,
-          codeString: "INVALID_TEMPLATE",
-          message: `Document template is not an invoice: ${templateName}`,
+          code: 2,
+          codeString: "VERIFICATION_ERROR",
+          message: "Error during verification",
         },
-        status: "INVALID",
+        status: "ERROR",
       };
     }
-
-    return {
-      type: "DOCUMENT_INTEGRITY",
-      name: "InvoiceVerifier",
-      data: templateName,
-      status: "VALID",
-    };
   },
 };
 
@@ -105,10 +124,19 @@ export class InvoiceVerifier implements DocumentVerifier {
         };
       }
 
-      // Perform OpenAttestation verification with custom verifier
+      // Configure verification options
+      const verificationOptions = {
+        network: "sepolia",
+        provider: { network: "sepolia" },
+        resolver: { network: "sepolia" }
+      };
+
+      // Perform OpenAttestation verification with custom verifier and options
       const fragments = await verify(document, {
+        ...verificationOptions,
         customVerifier: invoiceCustomVerifier
-      } as any);
+      });
+      
       console.log("Verification fragments:", fragments);
 
       // Document Integrity Check
