@@ -1,5 +1,5 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, openAttestationHash, documentStatus, documentIdentity } from "@govtechsg/oa-verify";
+import { verify, isValid, utils } from "@govtechsg/oa-verify";
 import { getData } from "@govtechsg/open-attestation";
 import { VerificationDetails } from '../types/verificationTypes';
 import { createInvoiceCustomVerifier } from '../utils/customVerifier';
@@ -23,7 +23,6 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       // Perform OpenAttestation verification
       const fragments = await verify(document, {
-        verificationMethod: ["did", "dnssec"],
         networks: ["sepolia"],
         verifiers: [invoiceCustomVerifier]
       });
@@ -46,7 +45,7 @@ export class InvoiceVerifier implements DocumentVerifier {
 
   private processVerificationFragments(fragments: any[]): VerificationDetails {
     // Document Integrity Check
-    const integrityFragment = fragments.find(f => f.type === openAttestationHash.type);
+    const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
     const documentIntegrity = {
       valid: integrityFragment?.status === "VALID",
       message: integrityFragment?.status === "VALID"
@@ -55,7 +54,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
 
     // Issuance Status Check
-    const statusFragment = fragments.find(f => f.type === documentStatus.type);
+    const statusFragment = fragments.find(f => f.name === "OpenAttestationEthereumDocumentStoreStatus");
     const issuanceStatus = {
       valid: statusFragment?.status === "VALID",
       message: statusFragment?.status === "VALID"
@@ -64,7 +63,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
 
     // Issuer Identity Check
-    const identityFragment = fragments.find(f => f.type === documentIdentity.type);
+    const identityFragment = fragments.find(f => f.name === "OpenAttestationDnsTxt");
     const identityData = identityFragment?.data;
     
     const issuerIdentity = {
