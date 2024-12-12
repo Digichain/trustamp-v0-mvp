@@ -1,8 +1,6 @@
 import { DocumentVerifier, VerificationResult, DOCUMENT_TEMPLATES } from '../types';
-import { verify, VerificationFragment } from "@govtechsg/oa-verify";
-import { getData } from "@govtechsg/open-attestation";
+import { verify } from "@govtechsg/oa-verify";
 import { VerificationDetails } from '../types/verificationTypes';
-import { createInvoiceCustomVerifier } from '../utils/customVerifier';
 
 export class InvoiceVerifier implements DocumentVerifier {
   getTemplate(): string {
@@ -18,24 +16,8 @@ export class InvoiceVerifier implements DocumentVerifier {
         return this.createErrorResponse('Invalid document format');
       }
 
-      // Create custom verifier
-      const invoiceCustomVerifier = createInvoiceCustomVerifier();
-
       // Perform OpenAttestation verification
-      const fragments = await verify(document, async (promises: Promise<VerificationFragment>[]) => {
-        const results = await Promise.all(promises);
-        const customResult = await invoiceCustomVerifier.verify(document, {
-          provider: {
-            url: "https://eth-sepolia.g.alchemy.com/v2/demo"
-          },
-          resolver: {
-            url: "https://api.example.com/resolver",
-            apiKey: "demo"
-          }
-        });
-        return [...results, customResult];
-      });
-      
+      const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
 
       const verificationDetails = this.processVerificationFragments(fragments);
@@ -71,7 +53,7 @@ export class InvoiceVerifier implements DocumentVerifier {
         : "Document has not been issued, or the document is revoked"
     };
 
-    // Issuer Identity Check
+    // Issuer Identity Check (DNS-DID)
     const identityFragment = fragments.find(f => f.name === "OpenAttestationDnsTxt");
     const identityDetails = identityFragment?.data || {};
     
