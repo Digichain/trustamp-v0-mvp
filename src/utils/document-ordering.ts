@@ -18,6 +18,7 @@ export const createOrderedDocument = (document: any) => {
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
     data: reorderDocumentData(document.data),
-    signature: document.signature
+    signature: document.signature,
+    proof: document.proof || [] // Add proof property, default to empty array if not present
   };
 };
