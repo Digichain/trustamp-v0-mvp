@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
