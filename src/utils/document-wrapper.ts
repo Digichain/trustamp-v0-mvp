@@ -95,9 +95,9 @@ const saltData = (data: any): any => {
   return data;
 };
 
-// Convert hex to bytes format
+// Convert hex to bytes format using ethers v6 syntax
 const toBytes = (hex: string): Uint8Array => {
-  return ethers.utils.arrayify(hex);
+  return ethers.getBytes(hex);
 };
 
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
