@@ -1,44 +1,11 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
-
-interface WrappedDocument {
-  version: string;
-  data: {
-    id: string;
-    $template: {
-      name: string;
-      type: string;
-      url: string;
-    };
-    issuers: Array<{
-      id: string;
-      name: string;
-      revocation: {
-        type: string;
-      };
-      identityProof: {
-        type: string;
-        location: string;
-        key: string;
-      };
-    }>;
-    network: {
-      chain: string;
-      chainId: string;
-    };
-    recipient: {
-      name: string;
-      company: any;
-    };
-    invoiceDetails: any;
-  };
-  signature: {
-    type: string;
-    targetHash: string;
-    proof: any[];
-    merkleRoot: string;
-  };
-}
+import { SchematisedDocument, WrappedDocument } from "./types"; // Assuming types are defined here
+import { validateSchema as validate } from "../shared/validate"; // Schema validation
+import { getSchema } from "../shared/ajv"; // Get schema function
+import { SchemaId } from "../shared/@types/document"; // Schema identifiers
+import { SchemaValidationError } from "../shared/utils"; // Validation error handling
+import { OpenAttestationDocument } from "../__generated__/schema.2.0"; // Open Attestation Schema
 
 // Hashing function: Generate hash without stringifying the data
 const generateHash = (data: any): string => {
@@ -52,16 +19,17 @@ const generateHash = (data: any): string => {
   return hash;
 };
 
+// Salt generation function (using random UUID)
 const generateSalt = (): string => {
   return crypto.randomUUID();
 };
 
-// Salt the document data
-const saltData = (data: any): any => {
+// Salt the document data (applies salting to each field)
+const saltDocumentData = (data: any): any => {
   console.log("Starting data salting process with:", data);
 
   if (Array.isArray(data)) {
-    return data.map(item => saltData(item));
+    return data.map(item => saltDocumentData(item));
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -82,7 +50,7 @@ const saltData = (data: any): any => {
       if (data[key] === null || data[key] === undefined) {
         salted[key] = data[key];
       } else if (typeof data[key] === 'object') {
-        salted[key] = saltData(data[key]);
+        salted[key] = saltDocumentData(data[key]);
       } else {
         const salt = generateSalt();
         const value = data[key].toString();
@@ -97,34 +65,52 @@ const saltData = (data: any): any => {
   return data;
 };
 
-// Convert hex to bytes format using ethers v6 syntax
-const toBytes = (hex: string): Uint8Array => {
-  return ethers.getBytes(hex);
+// Function to create the schematized document
+const createDocument = <T extends OpenAttestationDocument = OpenAttestationDocument>(
+  data: any,
+  schemaId: string = SchemaId.v2
+): SchematisedDocument<T> => {
+  const documentSchema: SchematisedDocument<T> = {
+    version: schemaId,
+    data: saltDocumentData(data),
+  };
+  return documentSchema;
 };
 
-export const wrapDocument = (rawDocument: any): WrappedDocument => {
+// Function to wrap the document and generate signature
+export const wrapDocument = <T extends OpenAttestationDocument = OpenAttestationDocument>(
+  rawDocument: T,
+  schemaId: string = SchemaId.v2
+): WrappedDocument<T> => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
-  // Salt the document data
-  const saltedData = saltData(rawDocument);
-  console.log("Document data after salting:", saltedData);
+  // Create the schematized document (adds the schema and salts the data)
+  const document: SchematisedDocument<T> = createDocument(rawDocument, schemaId);
 
-  // Generate document hash
-  const documentHash = generateHash(saltedData);
+  // Validate the document schema
+  const errors = validate(document, getSchema(schemaId));
+  if (errors.length > 0) {
+    throw new SchemaValidationError("Invalid document", errors, document);
+  }
+
+  // Generate the document hash
+  const documentHash = generateHash(document.data);
   console.log("Generated document hash:", documentHash);
 
-  // Create wrapped document structure
-  const wrappedDoc: WrappedDocument = {
-    version: "2.0",
-    data: saltedData,
-    signature: {
-      type: "SHA3MerkleProof",
-      targetHash: documentHash,
-      proof: [],
-      merkleRoot: documentHash
-    }
+  // Create the signature object
+  const signature = {
+    type: "SHA3MerkleProof",
+    targetHash: documentHash,
+    proof: [],
+    merkleRoot: documentHash,
   };
 
-  console.log("Final wrapped document structure:", wrappedDoc);
-  return wrappedDoc;
+  // Wrap the document and return the wrapped document structure
+  const wrappedDocument: WrappedDocument<T> = {
+    ...document,
+    signature,
+  };
+
+  console.log("Final wrapped document structure:", wrappedDocument);
+  return wrappedDocument;
 };
