@@ -1,9 +1,9 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
-import { validateSchema as validate } from "../shared/validate";  // Schema validation import
-import { getSchema } from "../shared/ajv";  // Import for getting schema
-import { SchemaId } from "../shared/@types/document";  // Schema IDs definition
-import { SchemaValidationError } from "../shared/utils";  // Error handling for invalid schemas
+import { validateSchema as validate } from "../shared/validate";
+import { getSchema } from "../shared/ajv";
+import { SchemaId } from "../shared/@types/document";
+import { SchemaValidationError } from "../shared/utils";
 
 // Hashing function: Generate hash without stringifying the data
 const generateHash = (data: any): string => {
@@ -79,27 +79,27 @@ export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) =
   // Create the schematized document (adds the schema and salts the data)
   const document = createDocument(rawDocument, schemaId);
 
-  // Fetch the schema for validation using schemaId
-  const schema = getSchema(schemaId);
-  
   // Validate the document schema
-  const errors = validate(document, schema);
-  
-  // If validation errors exist, throw a SchemaValidationError
+  const errors = validate(document, getSchema(schemaId));
   if (errors.length > 0) {
     throw new SchemaValidationError("Invalid document", errors, document);
   }
 
-  // Generate the document hash
+  // Generate the document hash (targetHash)
   const documentHash = generateHash(document.data);
   console.log("Generated document hash:", documentHash);
+
+  // Generate the merkleRoot (this should be the root of a Merkle tree based on the document hash)
+  const merkleRoot = documentHash; // In this example, we're directly using the hash as the root, but this could be different if you're using a Merkle tree
+
+  console.log("Generated Merkle root:", merkleRoot);
 
   // Create the signature object
   const signature = {
     type: "SHA3MerkleProof",
     targetHash: documentHash,
-    proof: [],  // You might want to populate the Merkle proof here if working with a Merkle tree
-    merkleRoot: documentHash,
+    proof: [],
+    merkleRoot: merkleRoot,
   };
 
   // Wrap the document and return the wrapped document structure
