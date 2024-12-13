@@ -1,11 +1,9 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
-import { SchematisedDocument, WrappedDocument } from "./types"; // Assuming types are defined here
-import { validateSchema as validate } from "../shared/validate"; // Schema validation
-import { getSchema } from "../shared/ajv"; // Get schema function
-import { SchemaId } from "../shared/@types/document"; // Schema identifiers
-import { SchemaValidationError } from "../shared/utils"; // Validation error handling
-import { OpenAttestationDocument } from "../__generated__/schema.2.0"; // Open Attestation Schema
+import { validateSchema as validate } from "../shared/validate";
+import { getSchema } from "../shared/ajv";
+import { SchemaId } from "../shared/@types/document";
+import { SchemaValidationError } from "../shared/utils";
 
 // Hashing function: Generate hash without stringifying the data
 const generateHash = (data: any): string => {
@@ -66,11 +64,8 @@ const saltDocumentData = (data: any): any => {
 };
 
 // Function to create the schematized document
-const createDocument = <T extends OpenAttestationDocument = OpenAttestationDocument>(
-  data: any,
-  schemaId: string = SchemaId.v2
-): SchematisedDocument<T> => {
-  const documentSchema: SchematisedDocument<T> = {
+const createDocument = (data: any, schemaId: string = SchemaId.v2) => {
+  const documentSchema = {
     version: schemaId,
     data: saltDocumentData(data),
   };
@@ -78,14 +73,11 @@ const createDocument = <T extends OpenAttestationDocument = OpenAttestationDocum
 };
 
 // Function to wrap the document and generate signature
-export const wrapDocument = <T extends OpenAttestationDocument = OpenAttestationDocument>(
-  rawDocument: T,
-  schemaId: string = SchemaId.v2
-): WrappedDocument<T> => {
+export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
   // Create the schematized document (adds the schema and salts the data)
-  const document: SchematisedDocument<T> = createDocument(rawDocument, schemaId);
+  const document = createDocument(rawDocument, schemaId);
 
   // Validate the document schema
   const errors = validate(document, getSchema(schemaId));
@@ -106,7 +98,7 @@ export const wrapDocument = <T extends OpenAttestationDocument = OpenAttestation
   };
 
   // Wrap the document and return the wrapped document structure
-  const wrappedDocument: WrappedDocument<T> = {
+  const wrappedDocument = {
     ...document,
     signature,
   };
