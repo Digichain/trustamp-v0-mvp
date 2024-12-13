@@ -24,7 +24,6 @@ export const useInvoiceSubmission = () => {
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
       console.log("RAW DOCUMENT STRUCTURE:", JSON.stringify(openAttestationDocument, null, 2));
       console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(openAttestationDocument));
-      console.log("RAW DOCUMENT DATA KEYS ORDER:", Object.keys(openAttestationDocument.data || {}));
 
       // Create transaction record first to get the ID
       const { data: transactionData, error: transactionError } = await supabase
@@ -85,10 +84,10 @@ export const useInvoiceSubmission = () => {
         .from("invoice_documents")
         .insert({
           transaction_id: transactionData.id,
-          invoice_number: formData.id,
-          date: formData.date,
-          bill_from: formData.billFrom,
-          bill_to: formData.billTo,
+          invoice_number: formData.invoiceDetails.invoiceNumber,
+          date: formData.invoiceDetails.date,
+          bill_from: formData.invoiceDetails.billFrom,
+          bill_to: formData.invoiceDetails.billTo,
           billable_items: formData.billableItems,
           subtotal: subtotal,
           tax: tax,
