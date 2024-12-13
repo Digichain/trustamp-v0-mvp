@@ -14,7 +14,7 @@ declare global {
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
-    
+
     if (!window.ethereum) {
       throw new Error("No ethereum wallet found");
     }
@@ -28,18 +28,18 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-    
+
     console.log("Got signer from wallet:", await signer.getAddress());
 
     // Convert merkle root to proper bytes format
     const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
     const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
     console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
-    
+
     // Convert to bytes and sign
     const messageToSign = ethers.getBytes(merkleRootWithPrefix);
     console.log("Message to sign (in bytes):", messageToSign);
-    
+
     // Sign the message
     const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
