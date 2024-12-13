@@ -18,11 +18,11 @@ interface BillToSectionProps {
 
 export const BillToSection = ({ billTo, onInputChange }: BillToSectionProps) => {
   const handleCompanyInput = (field: string, value: string) => {
-    onInputChange("billTo", `company.${field}`, value);
+    onInputChange("invoiceDetails.billTo", `company.${field}`, value);
   };
 
   const handlePersonalInput = (field: string, value: string) => {
-    onInputChange("billTo", field, value);
+    onInputChange("invoiceDetails.billTo", field, value);
   };
 
   return (
@@ -45,6 +45,33 @@ export const BillToSection = ({ billTo, onInputChange }: BillToSectionProps) => 
             value={billTo.company.streetAddress}
             onChange={(e) => handleCompanyInput("streetAddress", e.target.value)}
             placeholder="Enter street address"
+          />
+        </div>
+
+        <div>
+          <Label>City</Label>
+          <Input
+            value={billTo.company.city}
+            onChange={(e) => handleCompanyInput("city", e.target.value)}
+            placeholder="Enter city"
+          />
+        </div>
+
+        <div>
+          <Label>Postal Code</Label>
+          <Input
+            value={billTo.company.postalCode}
+            onChange={(e) => handleCompanyInput("postalCode", e.target.value)}
+            placeholder="Enter postal code"
+          />
+        </div>
+
+        <div>
+          <Label>Phone Number</Label>
+          <Input
+            value={billTo.company.phoneNumber}
+            onChange={(e) => handleCompanyInput("phoneNumber", e.target.value)}
+            placeholder="Enter phone number"
           />
         </div>
 

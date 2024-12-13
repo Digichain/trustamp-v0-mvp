@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface BillFromSectionProps {
   billFrom: {
@@ -6,6 +7,7 @@ interface BillFromSectionProps {
     streetAddress: string;
     city: string;
     postalCode: string;
+    phoneNumber?: string;
   };
   onInputChange: (field: string, value: string) => void;
 }
@@ -16,35 +18,43 @@ export const BillFromSection = ({ billFrom, onInputChange }: BillFromSectionProp
       <h3 className="text-lg font-medium">Bill From</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Company Name</label>
+          <Label>Company Name</Label>
           <Input
-            value={billFrom.name}
+            value={billFrom.name || ""}
             onChange={(e) => onInputChange("name", e.target.value)}
             placeholder="Company Name"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Street Address</label>
+          <Label>Street Address</Label>
           <Input
-            value={billFrom.streetAddress}
+            value={billFrom.streetAddress || ""}
             onChange={(e) => onInputChange("streetAddress", e.target.value)}
             placeholder="Street Address"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">City</label>
+          <Label>City</Label>
           <Input
-            value={billFrom.city}
+            value={billFrom.city || ""}
             onChange={(e) => onInputChange("city", e.target.value)}
             placeholder="City"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Postal Code</label>
+          <Label>Postal Code</Label>
           <Input
-            value={billFrom.postalCode}
+            value={billFrom.postalCode || ""}
             onChange={(e) => onInputChange("postalCode", e.target.value)}
             placeholder="Postal Code"
+          />
+        </div>
+        <div>
+          <Label>Phone Number</Label>
+          <Input
+            value={billFrom.phoneNumber || ""}
+            onChange={(e) => onInputChange("phoneNumber", e.target.value)}
+            placeholder="Phone Number"
           />
         </div>
       </div>
