@@ -62,7 +62,7 @@ const saltData = (data: any): any => {
   if (typeof data === 'object' && data !== null) {
     const salted: any = {};
     for (const key of Object.keys(data).sort()) {
-      // Skip salting the version field if it exists in the data
+      // Skip salting the version field
       if (key === 'version') {
         continue;
       }
@@ -73,8 +73,9 @@ const saltData = (data: any): any => {
         salted[key] = saltData(data[key]);
       } else {
         const salt = generateSalt();
+        const value = data[key].toString();
         const type = typeof data[key];
-        salted[key] = `${salt}:${type}:${data[key]}`;
+        salted[key] = `${salt}:${type}:${value}`;
       }
     }
     return salted;
@@ -87,7 +88,7 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
   // Remove version from raw document if it exists to prevent duplication
-  const { version, ...documentWithoutVersion } = rawDocument;
+  const { version: docVersion, ...documentWithoutVersion } = rawDocument;
 
   // Ensure document has required fields
   if (!documentWithoutVersion.id || !documentWithoutVersion.$template) {
@@ -95,9 +96,9 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
     throw new Error("Document must have id and $template fields");
   }
 
-  // Sort all object keys for consistent ordering
-  const sortedDocument = JSON.parse(JSON.stringify(documentWithoutVersion, Object.keys(documentWithoutVersion).sort()));
-  console.log("Document with sorted keys:", sortedDocument);
+  // Create a deep copy of the document and sort keys
+  const sortedDocument = JSON.parse(JSON.stringify(documentWithoutVersion));
+  console.log("Document prepared for salting:", sortedDocument);
 
   // Salt all the data
   const saltedData = saltData(sortedDocument);
