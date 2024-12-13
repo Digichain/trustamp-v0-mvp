@@ -1,16 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-import { ethers } from "ethers";
-
-enum ProofType {
-  OpenAttestationSignature2018 = 'OpenAttestationSignature2018'
-}
-
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
-
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
@@ -25,27 +12,38 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       throw new Error("Document missing required signature properties");
     }
 
+    // Log the merkleRoot to ensure it's not undefined
+    console.log("Merkle Root:", wrappedDocument.signature.merkleRoot);
+
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     
     console.log("Got signer from wallet:", await signer.getAddress());
 
-    // Convert merkle root to proper bytes format
-    let merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
-    if (!merkleRoot.startsWith('0x')) {
-      merkleRoot = `0x${merkleRoot}`; // Ensure it's a valid hex format with '0x' prefix
+    let merkleRoot = wrappedDocument.signature.merkleRoot?.toLowerCase();
+    
+    // Log the prepared merkleRoot
+    console.log("Prepared Merkle Root:", merkleRoot);
+
+    if (!merkleRoot) {
+      throw new Error("Merkle Root is undefined or null");
     }
 
-    console.log("Merkle root prepared for signing:", merkleRoot);
-    
-    // Ensure merkleRoot is a valid hex string
+    // Ensure it's in a valid hex format
+    if (!merkleRoot.startsWith('0x')) {
+      merkleRoot = `0x${merkleRoot}`; // Add '0x' prefix if it's missing
+    }
+
+    console.log("Final Merkle Root before arrayify:", merkleRoot);
+
+    // Check if the merkleRoot is a valid hex string
     if (!ethers.utils.isHexString(merkleRoot)) {
       throw new Error(`Invalid merkleRoot format: ${merkleRoot}`);
     }
 
     // Convert to bytes and sign
-    const messageToSign = ethers.utils.arrayify(merkleRoot);  // Use arrayify to ensure it's in proper bytes format
+    const messageToSign = ethers.utils.arrayify(merkleRoot);  // Convert to bytes format
     console.log("Message to sign (in bytes):", messageToSign);
     
     // Sign the message
