@@ -11,34 +11,12 @@ declare global {
   }
 }
 
-interface DocumentSignature {
-  type: string;
-  targetHash: string;
-  proof: any[];
-  merkleRoot: string;
-}
-
-interface WrappedDocument {
-  version: string;
-  data: any;
-  signature: DocumentSignature;
-  proof?: any[];
-}
-
-interface Proof {
-  type: ProofType;
-  created: string;
-  proofPurpose: string;
-  verificationMethod: string;
-  signature: string;
-}
-
-export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, walletAddress: string, transactionId: string) => {
+export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
-
-    if (typeof window === "undefined" || !window.ethereum) {
-      throw new Error("No Ethereum wallet found or environment is not suitable.");
+    
+    if (!window.ethereum) {
+      throw new Error("No ethereum wallet found");
     }
 
     // Validate wrapped document structure
@@ -47,32 +25,35 @@ export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, wal
       throw new Error("Document missing required signature properties");
     }
 
-    // Ensure that merkleRoot is a valid string before calling arrayify
-    const merkleRoot = wrappedDocument.signature.merkleRoot;
-    if (!merkleRoot || typeof merkleRoot !== "string") {
-      throw new Error("Invalid merkleRoot value in wrapped document");
-    }
-
-    // Convert merkle root to proper bytes format
-    const merkleRootWithPrefix = merkleRoot.toLowerCase().startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-    console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
-
-    // Convert to bytes and sign
-    const messageToSign = ethers.utils.arrayify(merkleRootWithPrefix);
-    console.log("Message to sign (in bytes):", messageToSign);
-
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     
     console.log("Got signer from wallet:", await signer.getAddress());
 
+    // Convert merkle root to proper bytes format
+    let merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
+    if (!merkleRoot.startsWith('0x')) {
+      merkleRoot = `0x${merkleRoot}`; // Ensure it's a valid hex format with '0x' prefix
+    }
+
+    console.log("Merkle root prepared for signing:", merkleRoot);
+    
+    // Ensure merkleRoot is a valid hex string
+    if (!ethers.utils.isHexString(merkleRoot)) {
+      throw new Error(`Invalid merkleRoot format: ${merkleRoot}`);
+    }
+
+    // Convert to bytes and sign
+    const messageToSign = ethers.utils.arrayify(merkleRoot);  // Use arrayify to ensure it's in proper bytes format
+    console.log("Message to sign (in bytes):", messageToSign);
+    
     // Sign the message
     const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
 
     // Create the proof separately, outside the signature object
-    const proof: Proof[] = [{
+    const proof = [{
       type: ProofType.OpenAttestationSignature2018,
       created: new Date().toISOString(),
       proofPurpose: "assertionMethod",
@@ -107,7 +88,7 @@ export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, wal
       });
 
     if (uploadError) {
-      console.error("Error uploading signed document:", uploadError.message);
+      console.error("Error uploading signed document:", uploadError);
       throw uploadError;
     }
 
@@ -119,8 +100,7 @@ export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, wal
 
     return {
       signedDocument,
-      publicUrl,
-      success: true, // Confirmation flag or additional info
+      publicUrl
     };
 
   } catch (error: any) {
