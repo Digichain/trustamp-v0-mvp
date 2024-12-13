@@ -101,4 +101,28 @@ const toBytes = (hex: string): Uint8Array => {
 };
 
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
-  console.log("Starting document wrapping process with raw document:
+  console.log("Starting document wrapping process with raw document:", rawDocument);
+
+  // Salt the document data
+  const saltedData = saltData(rawDocument);
+  console.log("Document data after salting:", saltedData);
+
+  // Generate document hash
+  const documentHash = generateHash(saltedData);
+  console.log("Generated document hash:", documentHash);
+
+  // Create wrapped document structure
+  const wrappedDoc: WrappedDocument = {
+    version: "2.0",
+    data: saltedData,
+    signature: {
+      type: "SHA3MerkleProof",
+      targetHash: documentHash,
+      proof: [],
+      merkleRoot: documentHash
+    }
+  };
+
+  console.log("Final wrapped document structure:", wrappedDoc);
+  return wrappedDoc;
+};
