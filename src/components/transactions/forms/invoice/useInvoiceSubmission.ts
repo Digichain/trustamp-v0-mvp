@@ -20,8 +20,21 @@ export const useInvoiceSubmission = () => {
         throw new Error("No authenticated session found");
       }
 
+      // Ensure all required nested objects exist
+      const sanitizedFormData = {
+        ...formData,
+        invoiceDetails: {
+          ...formData.invoiceDetails,
+          billFrom: formData.invoiceDetails.billFrom || {},
+          billTo: {
+            ...formData.invoiceDetails.billTo,
+            company: formData.invoiceDetails.billTo?.company || {}
+          }
+        }
+      };
+
       // Format the document according to OpenAttestation schema
-      const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
+      const openAttestationDocument = formatInvoiceToOpenAttestation(sanitizedFormData, didDocument);
       console.log("RAW DOCUMENT STRUCTURE:", JSON.stringify(openAttestationDocument, null, 2));
       console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(openAttestationDocument));
 
@@ -84,11 +97,11 @@ export const useInvoiceSubmission = () => {
         .from("invoice_documents")
         .insert({
           transaction_id: transactionData.id,
-          invoice_number: formData.invoiceDetails.invoiceNumber,
-          date: formData.invoiceDetails.date,
-          bill_from: formData.invoiceDetails.billFrom,
-          bill_to: formData.invoiceDetails.billTo,
-          billable_items: formData.billableItems,
+          invoice_number: sanitizedFormData.invoiceDetails.invoiceNumber,
+          date: sanitizedFormData.invoiceDetails.date,
+          bill_from: sanitizedFormData.invoiceDetails.billFrom,
+          bill_to: sanitizedFormData.invoiceDetails.billTo,
+          billable_items: sanitizedFormData.billableItems,
           subtotal: subtotal,
           tax: tax,
           tax_total: taxTotal,
