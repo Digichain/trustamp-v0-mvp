@@ -24,11 +24,8 @@ export const useDocumentHandlers = () => {
       const merkleRoot = wrappedDoc.signature.merkleRoot;
       console.log("Generated merkle root:", merkleRoot);
 
-      // Generate a proper UUID for storage
-      const storageId = crypto.randomUUID();
-      console.log("Generated storage ID for wrapped document:", storageId);
-
-      const fileName = `${storageId}_wrapped.json`;
+      // Use transaction ID for file naming
+      const fileName = `${transaction.id}_wrapped.json`;
       console.log("Creating wrapped document with filename:", fileName);
 
       const { error: uploadError } = await supabase.storage
@@ -43,13 +40,12 @@ export const useDocumentHandlers = () => {
         throw uploadError;
       }
 
-      console.log("Updating transaction with storage ID:", storageId);
+      console.log("Updating transaction status to document_wrapped");
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
           status: 'document_wrapped',
-          updated_at: new Date().toISOString(),
-          transaction_hash: storageId
+          updated_at: new Date().toISOString()
         })
         .eq('id', transaction.id);
 
@@ -84,16 +80,10 @@ export const useDocumentHandlers = () => {
       console.log("Starting document signing process for transaction:", transaction.id);
       console.log("Transaction data:", transaction);
 
-      const storageId = transaction.transaction_hash;
-      if (!storageId) {
-        console.error("No storage ID found in transaction:", transaction);
-        throw new Error("Storage ID not found for document");
-      }
-
-      console.log("Using storage ID for file operations:", storageId);
-      const wrappedFileName = `${storageId}_wrapped.json`;
-      
+      // Use transaction ID for file operations
+      const wrappedFileName = `${transaction.id}_wrapped.json`;
       console.log("Attempting to fetch wrapped document:", wrappedFileName);
+      
       const { data: wrappedDocData, error: fetchError } = await supabase.storage
         .from('wrapped-documents')
         .download(wrappedFileName);
@@ -105,15 +95,11 @@ export const useDocumentHandlers = () => {
 
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
       console.log("Successfully retrieved wrapped document:", wrappedDoc);
-      
-      // Generate new storage ID for signed document
-      const signedStorageId = crypto.randomUUID();
-      console.log("Generated new storage ID for signed document:", signedStorageId);
 
       const { signedDocument, publicUrl } = await signAndStoreDocument(
         wrappedDoc,
         walletAddress,
-        signedStorageId
+        transaction.id // Use transaction ID for signed document
       );
 
       console.log("Updating transaction status to document_issued");
@@ -148,12 +134,8 @@ export const useDocumentHandlers = () => {
 
   const handleDownloadSignedDocument = async (transaction: any) => {
     try {
-      const storageId = transaction.transaction_hash;
-      if (!storageId) {
-        throw new Error("Storage ID not found for document");
-      }
-
-      const signedFileName = `${storageId}_signed.json`;
+      // Use transaction ID for file operations
+      const signedFileName = `${transaction.id}_signed.json`;
       const { data, error } = await supabase.storage
         .from('signed-documents')
         .download(signedFileName);

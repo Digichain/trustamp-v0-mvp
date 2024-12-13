@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, storageId: string) => {
+export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document");
     
@@ -52,8 +52,8 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       }]
     };
 
-    // Store signed document using the provided storage ID
-    const fileName = `${storageId}_signed.json`;
+    // Store signed document using transaction ID
+    const fileName = `${transactionId}_signed.json`;
     console.log("Storing signed document with filename:", fileName);
 
     const { error: uploadError } = await supabase.storage
