@@ -18,8 +18,14 @@ export const useDocumentHandlers = () => {
         throw new Error("No raw document found");
       }
 
+      console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
+      console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(transaction.raw_document));
+      console.log("RAW DOCUMENT DATA KEYS ORDER:", Object.keys(transaction.raw_document.data || {}));
+
       const wrappedDoc = wrapDocument(transaction.raw_document);
-      console.log("Document wrapped successfully:", wrappedDoc);
+      console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
+      console.log("WRAPPED DOCUMENT KEYS ORDER:", Object.keys(wrappedDoc));
+      console.log("WRAPPED DOCUMENT DATA KEYS ORDER:", Object.keys(wrappedDoc.data || {}));
 
       const merkleRoot = wrappedDoc.signature.merkleRoot;
       console.log("Generated merkle root:", merkleRoot);
@@ -78,8 +84,7 @@ export const useDocumentHandlers = () => {
       }
 
       console.log("Starting document signing process for transaction:", transaction.id);
-      console.log("Transaction data:", transaction);
-
+      
       // Use transaction ID for file operations
       const wrappedFileName = `${transaction.id}_wrapped.json`;
       console.log("Attempting to fetch wrapped document:", wrappedFileName);
@@ -94,13 +99,19 @@ export const useDocumentHandlers = () => {
       }
 
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
-      console.log("Successfully retrieved wrapped document:", wrappedDoc);
+      console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
+      console.log("WRAPPED DOCUMENT KEYS ORDER:", Object.keys(wrappedDoc));
+      console.log("WRAPPED DOCUMENT DATA KEYS ORDER:", Object.keys(wrappedDoc.data || {}));
 
       const { signedDocument, publicUrl } = await signAndStoreDocument(
         wrappedDoc,
         walletAddress,
-        transaction.id // Use transaction ID for signed document
+        transaction.id
       );
+
+      console.log("SIGNED DOCUMENT STRUCTURE:", JSON.stringify(signedDocument, null, 2));
+      console.log("SIGNED DOCUMENT KEYS ORDER:", Object.keys(signedDocument));
+      console.log("SIGNED DOCUMENT DATA KEYS ORDER:", Object.keys(signedDocument.data || {}));
 
       console.log("Updating transaction status to document_issued");
       const { error: updateError } = await supabase

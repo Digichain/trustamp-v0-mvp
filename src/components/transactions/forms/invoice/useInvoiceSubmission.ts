@@ -22,7 +22,9 @@ export const useInvoiceSubmission = () => {
 
       // Format the document according to OpenAttestation schema
       const openAttestationDocument = formatInvoiceToOpenAttestation(formData, didDocument);
-      console.log("Formatted OpenAttestation document:", openAttestationDocument);
+      console.log("RAW DOCUMENT STRUCTURE:", JSON.stringify(openAttestationDocument, null, 2));
+      console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(openAttestationDocument));
+      console.log("RAW DOCUMENT DATA KEYS ORDER:", Object.keys(openAttestationDocument.data || {}));
 
       // Create transaction record first to get the ID
       const { data: transactionData, error: transactionError } = await supabase
