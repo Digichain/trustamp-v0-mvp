@@ -17,70 +17,53 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
     throw new Error("DID document is required to create a verifiable document");
   }
 
-  console.log("Formatting document with DID:", didDocument);
+  console.log("Formatting invoice with DID:", didDocument);
 
   // The base DID without #controller
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
   
-  // Generate document ID in the new format (4 letters + 4 numbers)
+  // Generate document ID in the format (4 letters + 4 numbers)
   const documentId = generateDocumentId();
   console.log("Generated document ID:", documentId);
-  
-  // Create a clean object without prototypes
-  const cleanInvoiceData = {
-    billFrom: JSON.parse(JSON.stringify(invoiceData.billFrom)),
-    billTo: JSON.parse(JSON.stringify(invoiceData.billTo)),
-    billableItems: JSON.parse(JSON.stringify(invoiceData.billableItems)),
-    subtotal: Number(invoiceData.subtotal),
-    tax: Number(invoiceData.tax),
-    taxTotal: Number(invoiceData.taxTotal),
-    total: Number(invoiceData.total),
-    id: invoiceData.id,
-    date: invoiceData.date
-  };
 
-  console.log("Clean invoice data:", cleanInvoiceData);
-  
   return {
     version: "https://schema.openattestation.com/2.0/schema.json",
-    data: {
-      id: documentId,
-      $template: {
-        name: "INVOICE",
-        type: "EMBEDDED_RENDERER",
-        url: "https://generic-templates.openattestation.com"
+    id: documentId,
+    $template: {
+      name: "INVOICE",
+      type: "EMBEDDED_RENDERER",
+      url: "https://generic-templates.openattestation.com"
+    },
+    issuers: [{
+      id: baseId,
+      name: invoiceData.billFrom.name,
+      revocation: {
+        type: "NONE"
       },
-      issuers: [{
-        id: baseId,
-        name: cleanInvoiceData.billFrom.name,
-        revocation: {
-          type: "NONE"
-        },
-        identityProof: {
-          type: "DNS-DID",
-          location: "tempdns.trustamp.in",
-          key: `${baseId}#controller`
-        }
-      }],
-      network: {
-        chain: "sepolia",
-        chainId: "11155111"
-      },
-      recipient: {
-        name: cleanInvoiceData.billTo.name,
-        company: cleanInvoiceData.billTo.company
-      },
-      invoiceDetails: {
-        invoiceNumber: cleanInvoiceData.id,
-        date: cleanInvoiceData.date,
-        billFrom: cleanInvoiceData.billFrom,
-        billTo: cleanInvoiceData.billTo,
-        billableItems: cleanInvoiceData.billableItems,
-        subtotal: cleanInvoiceData.subtotal,
-        tax: cleanInvoiceData.tax,
-        taxTotal: cleanInvoiceData.taxTotal,
-        total: cleanInvoiceData.total
+      identityProof: {
+        type: "DNS-DID",
+        location: "tempdns.trustamp.in",
+        key: `${baseId}#controller`
       }
+    }],
+    network: {
+      chain: "sepolia",
+      chainId: "11155111"
+    },
+    recipient: {
+      name: invoiceData.billTo.name,
+      company: invoiceData.billTo.company
+    },
+    invoiceDetails: {
+      invoiceNumber: invoiceData.id,
+      date: invoiceData.date,
+      billFrom: invoiceData.billFrom,
+      billTo: invoiceData.billTo,
+      billableItems: invoiceData.billableItems,
+      subtotal: Number(invoiceData.subtotal),
+      tax: Number(invoiceData.tax),
+      taxTotal: Number(invoiceData.taxTotal),
+      total: Number(invoiceData.total)
     }
   };
 };

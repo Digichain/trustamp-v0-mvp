@@ -2,7 +2,33 @@ import CryptoJS from 'crypto-js';
 
 interface WrappedDocument {
   version: string;
-  data: any;
+  id: string;
+  $template: {
+    name: string;
+    type: string;
+    url: string;
+  };
+  issuers: Array<{
+    id: string;
+    name: string;
+    revocation: {
+      type: string;
+    };
+    identityProof: {
+      type: string;
+      location: string;
+      key: string;
+    };
+  }>;
+  network: {
+    chain: string;
+    chainId: string;
+  };
+  recipient: {
+    name: string;
+    company: any;
+  };
+  invoiceDetails: any;
   signature: {
     type: string;
     targetHash: string;
@@ -35,8 +61,10 @@ const saltData = (data: any): any => {
   
   if (typeof data === 'object' && data !== null) {
     const salted: any = {};
-    for (const key of Object.keys(data).sort()) { // Sort keys for consistent ordering
-      if (data[key] === null || data[key] === undefined) {
+    for (const key of Object.keys(data).sort()) {
+      if (key === 'id' || key === 'version' || key === '$template') {
+        salted[key] = data[key];
+      } else if (data[key] === null || data[key] === undefined) {
         salted[key] = data[key];
       } else if (typeof data[key] === 'object') {
         salted[key] = saltData(data[key]);
@@ -54,21 +82,17 @@ const saltData = (data: any): any => {
 export const wrapDocument = (rawDocument: any): WrappedDocument => {
   console.log("Starting document wrapping process with raw document:", rawDocument);
 
-  // Ensure document ID exists in the raw document
-  if (!rawDocument.data?.id) {
-    console.error("Document data or ID is missing:", rawDocument);
-    throw new Error("Document ID is required for wrapping");
+  // Ensure document has required fields
+  if (!rawDocument.id || !rawDocument.$template) {
+    console.error("Document missing required fields:", rawDocument);
+    throw new Error("Document must have id and $template fields");
   }
-
-  // Preserve the original document ID before salting
-  const documentId = rawDocument.data.id;
-  console.log("Preserving document ID:", documentId);
 
   // Sort all object keys for consistent ordering
   const sortedDocument = JSON.parse(JSON.stringify(rawDocument, Object.keys(rawDocument).sort()));
   console.log("Document with sorted keys:", sortedDocument);
 
-  // Salt the data
+  // Salt the data while preserving specific fields
   const saltedData = saltData(sortedDocument);
   console.log("Document salted with UUIDs:", saltedData);
   
@@ -80,13 +104,9 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   const merkleRoot = targetHash;
   console.log("Using merkle root:", merkleRoot);
 
-  // Create wrapped document with preserved ID
+  // Create wrapped document
   const wrappedDoc: WrappedDocument = {
-    version: "https://schema.openattestation.com/2.0/schema.json",
-    data: {
-      ...saltedData,
-      id: documentId // Ensure ID is preserved unsalted
-    },
+    ...saltedData,
     signature: {
       type: "SHA3MerkleProof",
       targetHash,
