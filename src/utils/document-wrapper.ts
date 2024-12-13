@@ -1,9 +1,9 @@
 import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
-import { validateSchema as validate } from "../shared/validate";
-import { getSchema } from "../shared/ajv";
-import { SchemaId } from "../shared/@types/document";
-import { SchemaValidationError } from "../shared/utils";
+import { validateSchema as validate } from "../shared/validate";  // Schema validation import
+import { getSchema } from "../shared/ajv";  // Import for getting schema
+import { SchemaId } from "../shared/@types/document";  // Schema IDs definition
+import { SchemaValidationError } from "../shared/utils";  // Error handling for invalid schemas
 
 // Hashing function: Generate hash without stringifying the data
 const generateHash = (data: any): string => {
@@ -79,8 +79,13 @@ export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) =
   // Create the schematized document (adds the schema and salts the data)
   const document = createDocument(rawDocument, schemaId);
 
+  // Fetch the schema for validation using schemaId
+  const schema = getSchema(schemaId);
+  
   // Validate the document schema
-  const errors = validate(document, getSchema(schemaId));
+  const errors = validate(document, schema);
+  
+  // If validation errors exist, throw a SchemaValidationError
   if (errors.length > 0) {
     throw new SchemaValidationError("Invalid document", errors, document);
   }
@@ -93,7 +98,7 @@ export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) =
   const signature = {
     type: "SHA3MerkleProof",
     targetHash: documentHash,
-    proof: [],
+    proof: [],  // You might want to populate the Merkle proof here if working with a Merkle tree
     merkleRoot: documentHash,
   };
 
