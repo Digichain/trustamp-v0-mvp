@@ -34,9 +34,15 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     
     console.log("Got signer from wallet:", await signer.getAddress());
 
-    // Create signature using the document's merkle root
-    const messageToSign = ethers.getBytes(wrappedDocument.signature.merkleRoot);
-    console.log("Message to sign (merkle root in bytes):", messageToSign);
+    // Convert merkle root to proper bytes format
+    // First ensure the merkle root is lowercase and has 0x prefix
+    const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
+    const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+    console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
+    
+    // Convert to bytes
+    const messageToSign = ethers.getBytes(merkleRootWithPrefix);
+    console.log("Message to sign (in bytes):", messageToSign);
     
     // Sign the message using personal_sign
     const signature = await signer.signMessage(messageToSign);
