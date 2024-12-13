@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
 
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
