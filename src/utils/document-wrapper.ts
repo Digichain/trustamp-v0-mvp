@@ -2,33 +2,35 @@ import CryptoJS from 'crypto-js';
 
 interface WrappedDocument {
   version: string;
-  id: string;
-  $template: {
-    name: string;
-    type: string;
-    url: string;
-  };
-  issuers: Array<{
+  data: {
     id: string;
-    name: string;
-    revocation: {
+    $template: {
+      name: string;
       type: string;
+      url: string;
     };
-    identityProof: {
-      type: string;
-      location: string;
-      key: string;
+    issuers: Array<{
+      id: string;
+      name: string;
+      revocation: {
+        type: string;
+      };
+      identityProof: {
+        type: string;
+        location: string;
+        key: string;
+      };
+    }>;
+    network: {
+      chain: string;
+      chainId: string;
     };
-  }>;
-  network: {
-    chain: string;
-    chainId: string;
+    recipient: {
+      name: string;
+      company: any;
+    };
+    invoiceDetails: any;
   };
-  recipient: {
-    name: string;
-    company: any;
-  };
-  invoiceDetails: any;
   signature: {
     type: string;
     targetHash: string;
@@ -38,11 +40,9 @@ interface WrappedDocument {
 }
 
 const generateHash = (data: any): string => {
-  // Convert the data to a canonical form
   const jsonString = JSON.stringify(data, Object.keys(data).sort());
   console.log("Generating hash for data:", jsonString);
   
-  // Use SHA3-256 for hashing
   const wordArray = CryptoJS.SHA3(jsonString, { outputLength: 256 });
   const hash = wordArray.toString(CryptoJS.enc.Hex);
   console.log("Generated hash:", hash);
@@ -62,9 +62,7 @@ const saltData = (data: any): any => {
   if (typeof data === 'object' && data !== null) {
     const salted: any = {};
     for (const key of Object.keys(data).sort()) {
-      if (key === 'id' || key === 'version' || key === '$template') {
-        salted[key] = data[key];
-      } else if (data[key] === null || data[key] === undefined) {
+      if (data[key] === null || data[key] === undefined) {
         salted[key] = data[key];
       } else if (typeof data[key] === 'object') {
         salted[key] = saltData(data[key]);
@@ -92,11 +90,11 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   const sortedDocument = JSON.parse(JSON.stringify(rawDocument, Object.keys(rawDocument).sort()));
   console.log("Document with sorted keys:", sortedDocument);
 
-  // Salt the data while preserving specific fields
+  // Salt all the data
   const saltedData = saltData(sortedDocument);
   console.log("Document salted with UUIDs:", saltedData);
   
-  // Generate the target hash
+  // Generate the target hash from the salted data
   const targetHash = generateHash(saltedData);
   console.log("Generated target hash:", targetHash);
   
@@ -104,9 +102,10 @@ export const wrapDocument = (rawDocument: any): WrappedDocument => {
   const merkleRoot = targetHash;
   console.log("Using merkle root:", merkleRoot);
 
-  // Create wrapped document
+  // Create wrapped document with data nesting
   const wrappedDoc: WrappedDocument = {
-    ...saltedData,
+    version: "https://schema.openattestation.com/2.0/schema.json",
+    data: saltedData,
     signature: {
       type: "SHA3MerkleProof",
       targetHash,
