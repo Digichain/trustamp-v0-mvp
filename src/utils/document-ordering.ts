@@ -1,14 +1,13 @@
-import { utils } from "@govtechsg/open-attestation";
-
 export const reorderDocumentData = (documentData: any) => {
-  // Create a new object with the correct order
+  // Create a new object with the correct order based on schema
   const orderedData = {
+    version: documentData.version,
     id: documentData.id,
-    "$template": documentData.$template,
+    $template: documentData.$template,
     issuers: documentData.issuers,
     recipient: documentData.recipient,
-    invoiceDetails: documentData.invoiceDetails,
-    network: documentData.network
+    network: documentData.network,
+    invoiceDetails: documentData.invoiceDetails
   };
 
   return orderedData;
@@ -16,8 +15,8 @@ export const reorderDocumentData = (documentData: any) => {
 
 export const createOrderedDocument = (document: any) => {
   return {
-    version: "https://schema.openattestation.com/2.0/schema.json",
-    data: reorderDocumentData(document.data),
+    version: "https://schema.openattestation.com/2.0/schema.json" as const,
+    data: reorderDocumentData(document),
     signature: document.signature,
     proof: document.proof || [] // Add proof property, default to empty array if not present
   };

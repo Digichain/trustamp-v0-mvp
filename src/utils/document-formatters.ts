@@ -27,7 +27,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   const documentId = generateDocumentId();
   console.log("Generated document ID:", documentId);
 
-  // Create document with explicit ordering
+  // Create document with explicit ordering based on schema
   const formattedDoc = {
     version: "https://schema.openattestation.com/2.0/schema.json" as const,
     id: documentId,
@@ -48,13 +48,13 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
         key: `${baseId}#controller`
       }
     }],
-    network: {
-      chain: "sepolia",
-      chainId: "11155111"
-    },
     recipient: {
       name: invoiceData.billTo.name,
       company: invoiceData.billTo.company
+    },
+    network: {
+      chain: "sepolia",
+      chainId: "11155111"
     },
     invoiceDetails: {
       invoiceNumber: invoiceData.id,
