@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
 
 interface WrappedDocument {
   version: string;
@@ -20,7 +21,7 @@ interface WrappedDocument {
         location: string;
         key: string;
       };
-    }> ;
+    }>;
     network: {
       chain: string;
       chainId: string;
@@ -94,43 +95,10 @@ const saltData = (data: any): any => {
   return data;
 };
 
-export const wrapDocument = (rawDocument: any): WrappedDocument => {
-  console.log("Starting document wrapping process with raw document:", rawDocument);
-
-  if (!rawDocument.id || !rawDocument.$template) {
-    console.error("Document missing required fields:", rawDocument);
-    throw new Error("Document must have id and $template fields");
-  }
-
-  // Create a deep copy and ensure correct property order
-  const orderedDocument = {
-    version: rawDocument.version,
-    data: saltData({
-      id: rawDocument.id,
-      $template: rawDocument.$template,
-      issuers: rawDocument.issuers,
-      recipient: rawDocument.recipient,
-      network: rawDocument.network,
-      invoiceDetails: rawDocument.invoiceDetails
-    }),
-    signature: {
-      type: "SHA3MerkleProof",
-      targetHash: "",
-      proof: [],
-      merkleRoot: ""
-    }
-  };
-
-  console.log("Document prepared with ordered properties:", orderedDocument);
-
-  // Generate the target hash from the salted data
-  const targetHash = generateHash(orderedDocument.data);
-  console.log("Generated target hash:", targetHash);
-
-  // For single documents, merkle root is the same as target hash
-  orderedDocument.signature.targetHash = targetHash;
-  orderedDocument.signature.merkleRoot = targetHash;
-
-  console.log("Final wrapped document structure:", orderedDocument);
-  return orderedDocument;
+// Convert hex to bytes format
+const toBytes = (hex: string): Uint8Array => {
+  return ethers.utils.arrayify(hex);
 };
+
+export const wrapDocument = (rawDocument: any): WrappedDocument => {
+  console.log("Starting document wrapping process with raw document:
