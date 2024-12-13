@@ -11,6 +11,10 @@ declare global {
   }
 }
 
+const toBytes = (hex: string): Uint8Array => {
+  return ethers.utils.arrayify(hex);
+};
+
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
@@ -32,12 +36,13 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     console.log("Got signer from wallet:", await signer.getAddress());
 
     // Convert merkle root to proper bytes format
-    const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
-    const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-    console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
+    const merkleRootHex = wrappedDocument.signature.merkleRoot.toLowerCase();
+    const merkleRootWithPrefix = merkleRootHex.startsWith('0x') ? merkleRootHex : `0x${merkleRootHex}`;
+    const merkleRootBytes = toBytes(merkleRootWithPrefix);
+    console.log("Merkle root prepared for signing:", merkleRootBytes);
 
     // Convert to bytes and sign
-    const messageToSign = ethers.getBytes(merkleRootWithPrefix);
+    const messageToSign = merkleRootBytes;
     console.log("Message to sign (in bytes):", messageToSign);
 
     // Sign the message
