@@ -11,12 +11,34 @@ declare global {
   }
 }
 
-export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
+interface DocumentSignature {
+  type: string;
+  targetHash: string;
+  proof: any[];
+  merkleRoot: string;
+}
+
+interface WrappedDocument {
+  version: string;
+  data: any;
+  signature: DocumentSignature;
+  proof?: any[];
+}
+
+interface Proof {
+  type: ProofType;
+  created: string;
+  proofPurpose: string;
+  verificationMethod: string;
+  signature: string;
+}
+
+export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
-    
-    if (!window.ethereum) {
-      throw new Error("No ethereum wallet found");
+
+    if (typeof window === "undefined" || !window.ethereum) {
+      throw new Error("No Ethereum wallet found or environment is not suitable.");
     }
 
     // Validate wrapped document structure
@@ -35,17 +57,17 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
     const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
     console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
-    
+
     // Convert to bytes and sign
-    const messageToSign = ethers.getBytes(merkleRootWithPrefix);
+    const messageToSign = ethers.utils.arrayify(merkleRootWithPrefix);
     console.log("Message to sign (in bytes):", messageToSign);
-    
+
     // Sign the message
     const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
 
     // Create the proof separately, outside the signature object
-    const proof = [{
+    const proof: Proof[] = [{
       type: ProofType.OpenAttestationSignature2018,
       created: new Date().toISOString(),
       proofPurpose: "assertionMethod",
@@ -80,7 +102,7 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       });
 
     if (uploadError) {
-      console.error("Error uploading signed document:", uploadError);
+      console.error("Error uploading signed document:", uploadError.message);
       throw uploadError;
     }
 
@@ -92,7 +114,8 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
 
     return {
       signedDocument,
-      publicUrl
+      publicUrl,
+      success: true, // Confirmation flag or additional info
     };
 
   } catch (error: any) {
