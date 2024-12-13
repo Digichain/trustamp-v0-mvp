@@ -2,19 +2,14 @@ import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
 import { ExtendedVerificationFragment } from "../types/verificationTypes";
-import { createOrderedDocument } from "@/utils/document-ordering";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
-      console.log("Starting verification with original document:", document);
+      console.log("Starting verification with document:", document);
 
-      // Reorder the document properties
-      const orderedDocument = createOrderedDocument(document);
-      console.log("Verification with reordered document:", orderedDocument);
-
-      // Use the built-in verify function with ordered document
-      const fragments = await verify(orderedDocument) as ExtendedVerificationFragment[];
+      // Use the original document structure for verification
+      const fragments = await verify(document) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       // Log each fragment type and status
