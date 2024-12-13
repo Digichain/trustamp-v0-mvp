@@ -53,18 +53,45 @@ export const useInvoiceForm = () => {
       } catch (error) {
         console.error("Error parsing billable items:", error);
       }
-    } else if (field.includes('.')) {
-      const [parentField, childField] = field.split('.');
+    } else if (section.startsWith("invoiceDetails.billFrom")) {
       setFormData(prev => ({
         ...prev,
-        [section]: {
-          ...prev[section],
-          [parentField]: {
-            ...prev[section][parentField],
-            [childField]: value
+        invoiceDetails: {
+          ...prev.invoiceDetails,
+          billFrom: {
+            ...prev.invoiceDetails.billFrom,
+            [field]: value
           }
         }
       }));
+    } else if (section.startsWith("invoiceDetails.billTo")) {
+      if (field.startsWith("company.")) {
+        const companyField = field.split(".")[1];
+        setFormData(prev => ({
+          ...prev,
+          invoiceDetails: {
+            ...prev.invoiceDetails,
+            billTo: {
+              ...prev.invoiceDetails.billTo,
+              company: {
+                ...prev.invoiceDetails.billTo.company,
+                [companyField]: value
+              }
+            }
+          }
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          invoiceDetails: {
+            ...prev.invoiceDetails,
+            billTo: {
+              ...prev.invoiceDetails.billTo,
+              [field]: value
+            }
+          }
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
