@@ -19,28 +19,46 @@ console.log("App component initializing...");
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("ProtectedRoute - Checking authentication...");
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log("ProtectedRoute - Auth check result:", !!session);
-      setIsAuthenticated(!!session);
-    };
     
-    checkAuth();
+    // Get the initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("ProtectedRoute - Initial session:", !!session);
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    getInitialSession();
+
+    // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("ProtectedRoute - Auth state changed:", event, !!session);
       setIsAuthenticated(!!session);
+      setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  if (isAuthenticated === null) {
+  // Show loading state while checking authentication
+  if (isLoading) {
     console.log("ProtectedRoute - Loading state");
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
