@@ -13,7 +13,7 @@ declare global {
 
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
-    console.log("Starting document signing process with wrapped document");
+    console.log("Starting document signing process with wrapped document:", wrappedDocument);
     
     if (!window.ethereum) {
       throw new Error("No ethereum wallet found");
@@ -35,9 +35,11 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     console.log("Got signer from wallet:", await signer.getAddress());
 
     // Create signature using the document's merkle root
-    const messageToSign = wrappedDocument.signature.merkleRoot;
-    const signature = await signer.signMessage(messageToSign);
+    const messageToSign = ethers.getBytes(wrappedDocument.signature.merkleRoot);
+    console.log("Message to sign (merkle root in bytes):", messageToSign);
     
+    // Sign the message using personal_sign
+    const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
 
     // Create signed document with proper proof structure
@@ -51,6 +53,8 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
         signature: signature
       }]
     };
+
+    console.log("Final signed document:", signedDocument);
 
     // Store signed document using transaction ID
     const fileName = `${transactionId}_signed.json`;
