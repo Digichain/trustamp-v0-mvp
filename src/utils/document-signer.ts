@@ -19,14 +19,11 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
       throw new Error("No ethereum wallet found");
     }
 
-    // Use the salted document ID from the wrapped document for signing
-    const documentData = wrappedDocument.data;
-    if (!documentData || !documentData.id) {
-      console.error("Document data or salted ID is missing from wrapped document:", wrappedDocument);
-      throw new Error("Document data is required for signing");
+    // Validate wrapped document structure
+    if (!wrappedDocument.signature?.merkleRoot || !wrappedDocument.signature?.targetHash) {
+      console.error("Invalid wrapped document structure:", wrappedDocument);
+      throw new Error("Document missing required signature properties");
     }
-
-    console.log("Using salted document ID for signing:", documentData.id);
 
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -35,32 +32,35 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     console.log("Got signer from wallet:", await signer.getAddress());
 
     // Convert merkle root to proper bytes format
-    // First ensure the merkle root is lowercase and has 0x prefix
     const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
     const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
     console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
     
-    // Convert to bytes
+    // Convert to bytes and sign
     const messageToSign = ethers.getBytes(merkleRootWithPrefix);
     console.log("Message to sign (in bytes):", messageToSign);
     
-    // Sign the message using personal_sign
+    // Sign the message
     const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
 
-    // Create signed document with proper proof structure
+    // Create signed document with OpenAttestation V2 structure
     const signedDocument = {
-      ...wrappedDocument,
-      proof: [{
-        type: ProofType.OpenAttestationSignature2018,
-        created: new Date().toISOString(),
-        proofPurpose: "assertionMethod",
-        verificationMethod: `did:ethr:${walletAddress}#controller`,
-        signature: signature
-      }]
+      version: wrappedDocument.version,
+      data: wrappedDocument.data,
+      signature: {
+        ...wrappedDocument.signature,
+        proof: [{
+          type: ProofType.OpenAttestationSignature2018,
+          created: new Date().toISOString(),
+          proofPurpose: "assertionMethod",
+          verificationMethod: `did:ethr:${walletAddress}#controller`,
+          signature: signature
+        }]
+      }
     };
 
-    console.log("Final signed document:", signedDocument);
+    console.log("Final signed document structure:", signedDocument);
 
     // Store signed document using transaction ID
     const fileName = `${transactionId}_signed.json`;
