@@ -27,6 +27,11 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   const documentId = generateDocumentId();
   console.log("Generated document ID:", documentId);
 
+  // Ensure billFrom exists and has required properties
+  const billFrom = invoiceData.invoiceDetails?.billFrom || {};
+  const billTo = invoiceData.invoiceDetails?.billTo || {};
+  const company = billTo.company || {};
+
   // Create document with explicit ordering based on schema
   const formattedDoc = {
     version: "https://schema.openattestation.com/2.0/schema.json" as const,
@@ -38,7 +43,7 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
     },
     issuers: [{
       id: baseId,
-      name: invoiceData.billFrom.name,
+      name: billFrom.name || "",
       revocation: {
         type: "NONE"
       },
@@ -49,24 +54,46 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
       }
     }],
     recipient: {
-      name: invoiceData.billTo.name,
-      company: invoiceData.billTo.company
+      name: billTo.name || "",
+      company: {
+        name: company.name || "",
+        streetAddress: company.streetAddress || "",
+        city: company.city || "",
+        postalCode: company.postalCode || "",
+        phoneNumber: company.phoneNumber || ""
+      }
     },
     network: {
       chain: "sepolia",
       chainId: "11155111"
     },
     invoiceDetails: {
-      invoiceNumber: invoiceData.id,
-      date: invoiceData.date,
-      billFrom: invoiceData.billFrom,
-      billTo: invoiceData.billTo,
-      billableItems: invoiceData.billableItems,
-      subtotal: Number(invoiceData.subtotal),
-      tax: Number(invoiceData.tax),
-      taxTotal: Number(invoiceData.taxTotal),
-      total: Number(invoiceData.total)
-    }
+      invoiceNumber: invoiceData.invoiceDetails?.invoiceNumber || "",
+      date: invoiceData.invoiceDetails?.date || "",
+      billFrom: {
+        name: billFrom.name || "",
+        streetAddress: billFrom.streetAddress || "",
+        city: billFrom.city || "",
+        postalCode: billFrom.postalCode || "",
+        phoneNumber: billFrom.phoneNumber || ""
+      },
+      billTo: {
+        company: {
+          name: company.name || "",
+          streetAddress: company.streetAddress || "",
+          city: company.city || "",
+          postalCode: company.postalCode || "",
+          phoneNumber: company.phoneNumber || ""
+        },
+        name: billTo.name || "",
+        email: billTo.email || ""
+      }
+    },
+    billableItems: invoiceData.billableItems || [],
+    subtotal: Number(invoiceData.subtotal) || 0,
+    tax: Number(invoiceData.tax) || 0,
+    taxTotal: Number(invoiceData.taxTotal) || 0,
+    total: Number(invoiceData.total) || 0
   };
 
   console.log("FORMATTED DOCUMENT STRUCTURE:", JSON.stringify(formattedDoc, null, 2));
