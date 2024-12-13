@@ -11,15 +11,10 @@ declare global {
   }
 }
 
-// Convert hex to bytes format using ethers v6 syntax
-const toBytes = (hex: string): Uint8Array => {
-  return ethers.getBytes(hex);
-};
-
 export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: string, transactionId: string) => {
   try {
     console.log("Starting document signing process with wrapped document:", wrappedDocument);
-
+    
     if (!window.ethereum) {
       throw new Error("No ethereum wallet found");
     }
@@ -33,37 +28,42 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     // Request wallet signature using ethers provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-
+    
     console.log("Got signer from wallet:", await signer.getAddress());
 
     // Convert merkle root to proper bytes format
-    const merkleRootHex = wrappedDocument.signature.merkleRoot.toLowerCase();
-    const merkleRootWithPrefix = merkleRootHex.startsWith('0x') ? merkleRootHex : `0x${merkleRootHex}`;
-    const merkleRootBytes = toBytes(merkleRootWithPrefix);
-    console.log("Merkle root prepared for signing:", merkleRootBytes);
-
+    const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
+    const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+    console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
+    
     // Convert to bytes and sign
-    const messageToSign = merkleRootBytes;
+    const messageToSign = ethers.getBytes(merkleRootWithPrefix);
     console.log("Message to sign (in bytes):", messageToSign);
-
+    
     // Sign the message
     const signature = await signer.signMessage(messageToSign);
     console.log("Document signed with signature:", signature);
 
-    // Create signed document with OpenAttestation V2 structure
+    // Create the proof separately, outside the signature object
+    const proof = [{
+      type: ProofType.OpenAttestationSignature2018,
+      created: new Date().toISOString(),
+      proofPurpose: "assertionMethod",
+      verificationMethod: `did:ethr:${walletAddress}#controller`,
+      signature: signature
+    }];
+
+    // Prepare the signed document with signature (no proof in signature)
     const signedDocument = {
       version: wrappedDocument.version,
       data: wrappedDocument.data,
       signature: {
-        ...wrappedDocument.signature,
-        proof: [{
-          type: ProofType.OpenAttestationSignature2018,
-          created: new Date().toISOString(),
-          proofPurpose: "assertionMethod",
-          verificationMethod: `did:ethr:${walletAddress}#controller`,
-          signature: signature
-        }]
-      }
+        type: "SHA3MerkleProof",
+        targetHash: wrappedDocument.signature.targetHash,
+        proof: [], // No proof here, as it will be placed separately
+        merkleRoot: wrappedDocument.signature.merkleRoot
+      },
+      proof: proof // Add proof separately
     };
 
     console.log("Final signed document structure:", signedDocument);
