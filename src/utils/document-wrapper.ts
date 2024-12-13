@@ -40,11 +40,12 @@ interface WrappedDocument {
   };
 }
 
+// Hashing function: Generate hash without stringifying the data
 const generateHash = (data: any): string => {
-  const jsonString = JSON.stringify(data, Object.keys(data).sort());
-  console.log("Generating hash for data:", jsonString);
+  console.log("Generating hash for data:", data);
 
-  const wordArray = CryptoJS.SHA3(jsonString, { outputLength: 256 });
+  // Convert the data to a canonical form (without stringifying)
+  const wordArray = CryptoJS.SHA3(CryptoJS.enc.Utf8.parse(JSON.stringify(data)), { outputLength: 256 });
   const hash = wordArray.toString(CryptoJS.enc.Hex);
   console.log("Generated hash:", hash);
 
@@ -55,6 +56,7 @@ const generateSalt = (): string => {
   return crypto.randomUUID();
 };
 
+// Salt the document data
 const saltData = (data: any): any => {
   console.log("Starting data salting process with:", data);
 
