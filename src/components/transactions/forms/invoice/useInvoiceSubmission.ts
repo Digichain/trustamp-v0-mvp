@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { DIDDocument } from "../../identity/DIDCreator";
 import { formatInvoiceToOpenAttestation } from "@/utils/document-formatters";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useInvoiceSubmission = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (formData: any, didDocument: DIDDocument) => {
     console.log("Starting invoice submission with data:", { formData, didDocument });
@@ -112,6 +114,9 @@ export const useInvoiceSubmission = () => {
         console.error("Error creating invoice document:", invoiceError);
         throw new Error("Failed to create invoice document");
       }
+
+      // Invalidate the transactions query to trigger a refresh
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
 
       toast({
         title: "Success",
