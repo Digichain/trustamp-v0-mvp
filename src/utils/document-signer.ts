@@ -43,63 +43,68 @@ export const signAndStoreDocument = async (wrappedDocument: any, walletAddress: 
     }
 
     // Convert to bytes and sign
-    const messageToSign = ethers.utils.arrayify(merkleRoot);  // Convert to bytes format
-    console.log("Message to sign (in bytes):", messageToSign);
-    
-    // Sign the message
-    const signature = await signer.signMessage(messageToSign);
-    console.log("Document signed with signature:", signature);
+    try {
+      const messageToSign = ethers.utils.arrayify(merkleRoot);  // Convert to bytes format
+      console.log("Message to sign (in bytes):", messageToSign);
 
-    // Create the proof separately, outside the signature object
-    const proof = [{
-      type: ProofType.OpenAttestationSignature2018,
-      created: new Date().toISOString(),
-      proofPurpose: "assertionMethod",
-      verificationMethod: `did:ethr:${walletAddress}#controller`,
-      signature: signature
-    }];
+      // Sign the message
+      const signature = await signer.signMessage(messageToSign);
+      console.log("Document signed with signature:", signature);
 
-    // Prepare the signed document with signature (no proof in signature)
-    const signedDocument = {
-      version: wrappedDocument.version,
-      data: wrappedDocument.data,
-      signature: {
-        type: "SHA3MerkleProof",
-        targetHash: wrappedDocument.signature.targetHash,
-        proof: [], // No proof here, as it will be placed separately
-        merkleRoot: wrappedDocument.signature.merkleRoot
-      },
-      proof: proof // Add proof separately
-    };
+      // Create the proof separately, outside the signature object
+      const proof = [{
+        type: ProofType.OpenAttestationSignature2018,
+        created: new Date().toISOString(),
+        proofPurpose: "assertionMethod",
+        verificationMethod: `did:ethr:${walletAddress}#controller`,
+        signature: signature
+      }];
 
-    console.log("Final signed document structure:", signedDocument);
+      // Prepare the signed document with signature (no proof in signature)
+      const signedDocument = {
+        version: wrappedDocument.version,
+        data: wrappedDocument.data,
+        signature: {
+          type: "SHA3MerkleProof",
+          targetHash: wrappedDocument.signature.targetHash,
+          proof: [], // No proof here, as it will be placed separately
+          merkleRoot: wrappedDocument.signature.merkleRoot
+        },
+        proof: proof // Add proof separately
+      };
 
-    // Store signed document using transaction ID
-    const fileName = `${transactionId}_signed.json`;
-    console.log("Storing signed document with filename:", fileName);
+      console.log("Final signed document structure:", signedDocument);
 
-    const { error: uploadError } = await supabase.storage
-      .from('signed-documents')
-      .upload(fileName, JSON.stringify(signedDocument, null, 2), {
-        contentType: 'application/json',
-        upsert: true
-      });
+      // Store signed document using transaction ID
+      const fileName = `${transactionId}_signed.json`;
+      console.log("Storing signed document with filename:", fileName);
 
-    if (uploadError) {
-      console.error("Error uploading signed document:", uploadError);
-      throw uploadError;
+      const { error: uploadError } = await supabase.storage
+        .from('signed-documents')
+        .upload(fileName, JSON.stringify(signedDocument, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Error uploading signed document:", uploadError);
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('signed-documents')
+        .getPublicUrl(fileName);
+
+      console.log("Document signed and stored successfully at:", publicUrl);
+
+      return {
+        signedDocument,
+        publicUrl
+      };
+    } catch (signingError) {
+      console.error("Error signing document:", signingError);
+      throw signingError;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('signed-documents')
-      .getPublicUrl(fileName);
-
-    console.log("Document signed and stored successfully at:", publicUrl);
-
-    return {
-      signedDocument,
-      publicUrl
-    };
 
   } catch (error: any) {
     console.error("Error in signAndStoreDocument:", error);
