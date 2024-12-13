@@ -17,7 +17,8 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
     throw new Error("DID document is required to create a verifiable document");
   }
 
-  console.log("Formatting invoice with DID:", didDocument);
+  console.log("Starting document formatting with invoice data:", invoiceData);
+  console.log("Using DID document:", didDocument);
 
   // The base DID without #controller
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
@@ -26,8 +27,9 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   const documentId = generateDocumentId();
   console.log("Generated document ID:", documentId);
 
-  return {
-    version: "https://schema.openattestation.com/2.0/schema.json",
+  // Create document with explicit ordering
+  const formattedDoc = {
+    version: "https://schema.openattestation.com/2.0/schema.json" as const,
     id: documentId,
     $template: {
       name: "INVOICE",
@@ -66,4 +68,9 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
       total: Number(invoiceData.total)
     }
   };
+
+  console.log("FORMATTED DOCUMENT STRUCTURE:", JSON.stringify(formattedDoc, null, 2));
+  console.log("FORMATTED DOCUMENT KEYS ORDER:", Object.keys(formattedDoc));
+  
+  return formattedDoc;
 };
