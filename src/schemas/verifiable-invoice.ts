@@ -1,5 +1,7 @@
+import { SchemaId } from "@govtechsg/open-attestation";
+
 export const verifiableInvoiceSchema = {
-  version: "https://schema.openattestation.com/2.0/schema.json" as const,
+  version: SchemaId.v2,
   id: "",
   $template: {
     name: "INVOICE",

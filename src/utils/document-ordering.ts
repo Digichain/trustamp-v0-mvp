@@ -1,3 +1,5 @@
+import { SchemaId } from "@govtechsg/open-attestation";
+
 export const reorderDocumentData = (documentData: any) => {
   // Create a new object with the correct order based on schema
   const orderedData = {
@@ -15,7 +17,7 @@ export const reorderDocumentData = (documentData: any) => {
 
 export const createOrderedDocument = (document: any) => {
   return {
-    version: "https://schema.openattestation.com/2.0/schema.json" as const,
+    version: SchemaId.v2,
     data: reorderDocumentData(document),
     signature: document.signature,
     proof: document.proof || [] // Add proof property, default to empty array if not present

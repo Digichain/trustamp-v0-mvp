@@ -41,7 +41,7 @@ export const VerifiableInvoiceForm = () => {
     }
     
     // Only submit if we have form data
-    if (formData.id && formData.date) {
+    if (formData.invoiceDetails.invoiceNumber && formData.invoiceDetails.date) {
       console.log("Submitting form with data:", formData);
       await handleSubmit(formData, didDocument);
     } else {
@@ -64,8 +64,8 @@ export const VerifiableInvoiceForm = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">Invoice ID</label>
                   <Input
-                    value={formData.id}
-                    onChange={(e) => handleInputChange("", "id", e.target.value)}
+                    value={formData.invoiceDetails.invoiceNumber}
+                    onChange={(e) => handleInputChange("invoiceDetails", "invoiceNumber", e.target.value)}
                     placeholder="Invoice ID"
                     required
                   />
@@ -74,20 +74,20 @@ export const VerifiableInvoiceForm = () => {
                   <label className="block text-sm font-medium mb-1">Date</label>
                   <Input
                     type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("", "date", e.target.value)}
+                    value={formData.invoiceDetails.date}
+                    onChange={(e) => handleInputChange("invoiceDetails", "date", e.target.value)}
                     required
                   />
                 </div>
               </div>
 
               <BillFromSection
-                billFrom={formData.billFrom}
-                onInputChange={(field, value) => handleInputChange("billFrom", field, value)}
+                billFrom={formData.invoiceDetails.billFrom}
+                onInputChange={(field, value) => handleInputChange("invoiceDetails.billFrom", field, value)}
               />
 
               <BillToSection
-                billTo={formData.billTo}
+                billTo={formData.invoiceDetails.billTo}
                 onInputChange={handleNestedInputChange}
               />
 
