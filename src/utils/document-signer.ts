@@ -47,20 +47,25 @@ export const signAndStoreDocument = async (wrappedDocument: WrappedDocument, wal
       throw new Error("Document missing required signature properties");
     }
 
-    // Request wallet signature using ethers provider
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    
-    console.log("Got signer from wallet:", await signer.getAddress());
+    // Ensure that merkleRoot is a valid string before calling arrayify
+    const merkleRoot = wrappedDocument.signature.merkleRoot;
+    if (!merkleRoot || typeof merkleRoot !== "string") {
+      throw new Error("Invalid merkleRoot value in wrapped document");
+    }
 
     // Convert merkle root to proper bytes format
-    const merkleRoot = wrappedDocument.signature.merkleRoot.toLowerCase();
-    const merkleRootWithPrefix = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+    const merkleRootWithPrefix = merkleRoot.toLowerCase().startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
     console.log("Merkle root prepared for signing:", merkleRootWithPrefix);
 
     // Convert to bytes and sign
     const messageToSign = ethers.utils.arrayify(merkleRootWithPrefix);
     console.log("Message to sign (in bytes):", messageToSign);
+
+    // Request wallet signature using ethers provider
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    
+    console.log("Got signer from wallet:", await signer.getAddress());
 
     // Sign the message
     const signature = await signer.signMessage(messageToSign);
