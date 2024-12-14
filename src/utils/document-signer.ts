@@ -68,14 +68,11 @@ export const signAndStoreDocument = async (
       signature: signature
     };
 
-    // Create the signed document with the proof in the correct structure
+    // Create the signed document maintaining the original structure
+    // and adding the proof array at the end
     const signedDocument = {
-      version: wrappedDocument.version,
-      data: wrappedDocument.data,
-      signature: {
-        ...wrappedDocument.signature,
-        proof: [proof]
-      }
+      ...wrappedDocument,
+      proof: [proof]
     };
 
     console.log("Final signed document structure:", signedDocument);
