@@ -68,8 +68,8 @@ export const signAndStoreDocument = async (
       signature: signature
     };
 
-    // Create the signed document maintaining the original structure
-    // and adding the proof array at the end
+    // Create the signed document by adding the proof array at the root level
+    // without modifying the existing structure
     const signedDocument = {
       ...wrappedDocument,
       proof: [proof]
