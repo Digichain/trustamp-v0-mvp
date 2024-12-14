@@ -58,43 +58,77 @@ export class InvoiceVerifier implements DocumentVerifier {
       )
     };
 
-    // Issuance Status Check - now checking for DidSignedDocumentStatus as well
-    const statusFragment = fragments.find(f => 
-      f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
-      f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
-      f.name === "OpenAttestationDidSignedDocumentStatus"
-    );
-    console.log("Status fragment found:", statusFragment);
-    
-    const issuanceStatus = {
-      valid: statusFragment?.status === "VALID",
-      message: this.getFragmentMessage(statusFragment,
-        "Document has been issued",
-        "Document has not been issued or has been revoked"
-      )
-    };
+    // Issuance Status Check - check if any of the fragments is valid
+    const issuanceStatus = this.processIssuanceStatus(fragments);
 
-    // Issuer Identity Check
-    const identityFragment = fragments.find(f => 
-      f.name === "OpenAttestationDnsTxtIdentityProof" || 
-      f.name === "OpenAttestationDnsDidIdentityProof"
-    );
-    const issuerIdentity = {
-      valid: identityFragment?.status === "VALID",
-      message: this.getFragmentMessage(identityFragment,
-        "Document issuer has been identified",
-        "Unable to verify document issuer"
-      ),
-      details: identityFragment?.data ? {
-        name: identityFragment.data.identifier,
-        domain: identityFragment.data.location
-      } : undefined
-    };
+    // Issuer Identity Check - check if any of the fragments is valid
+    const issuerIdentity = this.processIssuerIdentity(fragments);
 
     return {
       issuanceStatus,
       issuerIdentity,
       documentIntegrity
+    };
+  }
+
+  private processIssuanceStatus(fragments: ExtendedVerificationFragment[]): any {
+    // Find relevant fragments for issuance status
+    const statusFragments = fragments.filter(f => 
+      f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
+      f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
+      f.name === "OpenAttestationDidSignedDocumentStatus"
+    );
+
+    // Check if any of the status fragments is valid
+    const validFragment = statusFragments.find(f => f.status === "VALID");
+    
+    if (validFragment) {
+      return {
+        valid: true,
+        message: "Document has been issued"
+      };
+    }
+
+    // If all are skipped, we aggregate their messages
+    const skippedMessages = statusFragments.filter(f => f.status === "SKIPPED")
+                                           .map(f => f.reason?.message || "Status skipped without a reason")
+                                           .join("; ");
+    
+    return {
+      valid: false,
+      message: skippedMessages || "Issuance status verification failed"
+    };
+  }
+
+  private processIssuerIdentity(fragments: ExtendedVerificationFragment[]): any {
+    // Find relevant fragments for issuer identity
+    const identityFragments = fragments.filter(f => 
+      f.name === "OpenAttestationDnsTxtIdentityProof" || 
+      f.name === "OpenAttestationDnsDidIdentityProof"
+    );
+
+    // Check if any of the identity fragments is valid
+    const validFragment = identityFragments.find(f => f.status === "VALID");
+    
+    if (validFragment) {
+      return {
+        valid: true,
+        message: "Document issuer has been identified",
+        details: validFragment.data ? {
+          name: validFragment.data.identifier,
+          domain: validFragment.data.location
+        } : undefined
+      };
+    }
+
+    // If all are skipped, we aggregate their messages
+    const skippedMessages = identityFragments.filter(f => f.status === "SKIPPED")
+                                             .map(f => f.reason?.message || "Identity check skipped without a reason")
+                                             .join("; ");
+    
+    return {
+      valid: false,
+      message: skippedMessages || "Issuer identity verification failed"
     };
   }
 
