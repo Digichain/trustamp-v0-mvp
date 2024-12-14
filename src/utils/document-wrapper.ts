@@ -1,27 +1,23 @@
 import CryptoJS from 'crypto-js';
+import { keccak256 } from 'js-sha3';
 import { validateSchema as validate } from "../shared/validate";
 import { getSchema } from "../shared/ajv";
 import { SchemaId } from "../shared/@types/document";
 import { SchemaValidationError } from "../shared/utils";
 
-// Hashing function: Generate hash following OpenAttestation approach
+// Convert data to buffer for hashing, following OpenAttestation approach
+const toBuffer = (data: any): Buffer => {
+  const stringified = JSON.stringify(data);
+  console.log("Converting to buffer, stringified data:", stringified);
+  return Buffer.from(keccak256(stringified), 'hex');
+};
+
+// Generate hash following OpenAttestation approach
 const generateHash = (data: any): string => {
   console.log("Starting hash generation for data:", data);
-  
-  // Convert data to canonical JSON string
-  // This ensures consistent ordering and formatting
-  const canonicalString = JSON.stringify(data);
-  console.log("Canonical JSON string:", canonicalString);
-
-  // Use SHA3-256 for hashing (same as OpenAttestation)
-  const wordArray = CryptoJS.SHA3(canonicalString, { 
-    outputLength: 256 
-  });
-  
-  // Convert to hex string
-  const hash = wordArray.toString(CryptoJS.enc.Hex);
+  const buffer = toBuffer(data);
+  const hash = buffer.toString('hex');
   console.log("Generated hash:", hash);
-  
   return hash;
 };
 
@@ -95,7 +91,7 @@ export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) =
     throw new SchemaValidationError("Invalid document", errors, document);
   }
 
-  // Generate the document hash using the entire data object
+  // Generate the document hash using the data object
   const documentHash = generateHash(document.data);
   console.log("Generated document hash:", documentHash);
 
