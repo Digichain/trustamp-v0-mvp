@@ -1,6 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ethers } from 'ethers';
-import CryptoJS from 'crypto-js';
+
+// Add type declaration for the ethereum property on window
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
 const signDocument = async (merkleRoot: string, walletAddress: string): Promise<string> => {
   try {
