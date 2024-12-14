@@ -62,7 +62,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     const statusFragment = fragments.find(f => 
       f.name === "OpenAttestationEthereumTokenRegistryStatus" || 
       f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
-      f.name === "DidSignedDocumentStatus"
+      f.name === "OpenAttestationDidSignedDocumentStatus"
     );
     console.log("Status fragment found:", statusFragment);
     
@@ -76,8 +76,8 @@ export class InvoiceVerifier implements DocumentVerifier {
 
     // Issuer Identity Check
     const identityFragment = fragments.find(f => 
-      f.name === "OpenAttestationDnsTxt" || 
-      f.name === "DnsDidProof"
+      f.name === "OpenAttestationDnsTxtIdentityProof" || 
+      f.name === "OpenAttestationDnsDidIdentityProof"
     );
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
