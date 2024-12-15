@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { TokenRegistryDocument } from "./types";
 import { supabase } from "@/integrations/supabase/client";
-import { deploy } from "@govtechsg/token-registry";
-import { ethers } from "ethers";
+import { ContractFactory, ethers } from "ethers";
+import TitleEscrowCreatorArtifact from "@govtechsg/token-registry/dist/contracts/TitleEscrowCreator.json";
+import TitleEscrowFactoryArtifact from "@govtechsg/token-registry/dist/contracts/TitleEscrowFactory.json";
+import TokenRegistryArtifact from "@govtechsg/token-registry/dist/contracts/TokenRegistry.json";
 
 export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
   const { toast } = useToast();
@@ -19,18 +21,51 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const { ethereum } = window as any;
       if (!ethereum) throw new Error('MetaMask not found');
       
-      const provider = new ethers.BrowserProvider(ethereum);
-      const signer = await provider.getSigner();
-      
-      // Deploy the token registry contract
-      console.log('Deploying token registry contract...');
-      const contractAddress = await deploy(name, symbol, signer);
-      console.log('Token Registry deployed at:', contractAddress);
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+
+      // Deploy TitleEscrowCreator
+      console.log('Deploying TitleEscrowCreator...');
+      const titleEscrowCreatorFactory = new ContractFactory(
+        TitleEscrowCreatorArtifact.abi,
+        TitleEscrowCreatorArtifact.bytecode,
+        signer
+      );
+      const titleEscrowCreator = await titleEscrowCreatorFactory.deploy();
+      await titleEscrowCreator.deployed();
+      console.log('TitleEscrowCreator deployed at:', titleEscrowCreator.address);
+
+      // Deploy TitleEscrowFactory
+      console.log('Deploying TitleEscrowFactory...');
+      const titleEscrowFactoryFactory = new ContractFactory(
+        TitleEscrowFactoryArtifact.abi,
+        TitleEscrowFactoryArtifact.bytecode,
+        signer
+      );
+      const titleEscrowFactory = await titleEscrowFactoryFactory.deploy();
+      await titleEscrowFactory.deployed();
+      console.log('TitleEscrowFactory deployed at:', titleEscrowFactory.address);
+
+      // Deploy TokenRegistry
+      console.log('Deploying TokenRegistry...');
+      const tokenRegistryFactory = new ContractFactory(
+        TokenRegistryArtifact.abi,
+        TokenRegistryArtifact.bytecode,
+        signer
+      );
+      const tokenRegistry = await tokenRegistryFactory.deploy(
+        name,
+        symbol,
+        titleEscrowCreator.address,
+        titleEscrowFactory.address
+      );
+      await tokenRegistry.deployed();
+      console.log('TokenRegistry deployed at:', tokenRegistry.address);
 
       // Create DNS record through Edge Function
       const { data, error } = await supabase.functions.invoke('oa-dns-records', {
         body: { 
-          contractAddress,
+          contractAddress: tokenRegistry.address,
           action: 'create',
           type: 'token-registry'
         }
@@ -48,7 +83,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       console.log('DNS Record creation response:', data);
 
       const newRegistryDocument: TokenRegistryDocument = {
-        contractAddress,
+        contractAddress: tokenRegistry.address,
         name,
         symbol,
         dnsLocation: data.data.dnsLocation
