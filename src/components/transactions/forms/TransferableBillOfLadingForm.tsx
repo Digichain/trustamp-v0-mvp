@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
+import { TokenRegistryCreator, TokenRegistryDocument } from "../identity/TokenRegistryCreator";
 
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
   const [formData, setFormData] = useState({
     blNumber: "",
     companyName: "",
@@ -40,6 +42,15 @@ export const TransferableBillOfLadingForm = () => {
       e.preventDefault();
     }
     
+    if (!registryDocument) {
+      toast({
+        title: "Error",
+        description: "Please deploy a token registry first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     console.log("Submitting form data:", formData);
 
     try {
@@ -59,7 +70,11 @@ export const TransferableBillOfLadingForm = () => {
           document_subtype: "transferable",
           title: "BILL_OF_LADING",
           transaction_type: "trade",
-          user_id: user.id
+          user_id: user.id,
+          raw_document: {
+            ...formData,
+            tokenRegistry: registryDocument.contractAddress
+          }
         })
         .select();
 
@@ -97,7 +112,9 @@ export const TransferableBillOfLadingForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Card>
+      <TokenRegistryCreator onRegistryCreated={setRegistryDocument} />
+      
+      <Card className={!registryDocument ? "opacity-50 pointer-events-none" : ""}>
         <CardHeader>
           <CardTitle>Bill of Lading Details</CardTitle>
         </CardHeader>
@@ -123,8 +140,8 @@ export const TransferableBillOfLadingForm = () => {
         <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
           Cancel
         </Button>
-        <PreviewButton onClick={() => setShowPreview(true)} />
-        <Button type="submit">Create Bill of Lading</Button>
+        <PreviewButton onClick={() => setShowPreview(true)} disabled={!registryDocument} />
+        <Button type="submit" disabled={!registryDocument}>Create Bill of Lading</Button>
       </div>
 
       <PreviewDialog

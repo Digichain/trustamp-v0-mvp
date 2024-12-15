@@ -14,6 +14,7 @@
     "@govtechsg/oa-verify": "^9.4.0",
     "@govtechsg/open-attestation": "^6.9.5",
     "@govtechsg/open-attestation-cli": "^2.11.1",
+    "@govtechsg/token-registry": "^4.4.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",

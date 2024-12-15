@@ -16,14 +16,23 @@ serve(async (req) => {
     const requestData = await req.json();
     console.log("Request data:", requestData);
 
-    const { did } = requestData;
-    if (!did) {
-      throw new Error('DID is required');
+    const { did, contractAddress, action, type } = requestData;
+    
+    if (action !== 'create') {
+      throw new Error('Only create action is supported');
     }
 
-    const addressMatch = did.match(/did:ethr:(0x[a-fA-F0-9]{40})/);
-    if (!addressMatch) {
-      throw new Error('Invalid DID format');
+    if (type === 'token-registry' && !contractAddress) {
+      throw new Error('Contract address is required for token registry');
+    } else if (!type && !did) {
+      throw new Error('DID is required for DID records');
+    }
+
+    // For token registry, use contract address instead of DID
+    const address = type === 'token-registry' ? contractAddress : did.match(/did:ethr:(0x[a-fA-F0-9]{40})/)?.[1];
+    
+    if (!address) {
+      throw new Error('Invalid address format');
     }
 
     return new Response(

@@ -3,5 +3,12 @@ export interface DIDDocument {
   type: string;
   controller: string;
   ethereumAddress: string;
-  dnsLocation?: string;
+  dnsLocation: string;
+}
+
+export interface TokenRegistryDocument {
+  contractAddress: string;
+  name: string;
+  symbol: string;
+  dnsLocation: string;
 }
