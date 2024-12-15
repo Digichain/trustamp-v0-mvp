@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { transferableBillOfLadingSchema } from "@/schemas/transferable-bill-of-lading";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
 import { TokenRegistryCreator, TokenRegistryDocument } from "../identity/TokenRegistryCreator";
+import { useWallet } from "@/contexts/WalletContext";
 
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isWalletConnected, network } = useWallet();
   const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
   const [formData, setFormData] = useState({
     blNumber: "",
@@ -29,6 +31,7 @@ export const TransferableBillOfLadingForm = () => {
     field9: "",
   });
   const [showPreview, setShowPreview] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -41,8 +44,36 @@ export const TransferableBillOfLadingForm = () => {
     if (e) {
       e.preventDefault();
     }
+
+    if (!isWalletConnected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to proceed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (network !== "Sepolia Testnet") {
+      toast({
+        title: "Wrong Network",
+        description: "Please switch to Sepolia Testnet to proceed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registryDocument?.contractAddress) {
+      toast({
+        title: "Token Registry Required",
+        description: "Please deploy a token registry first",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
+      setIsSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -62,10 +93,11 @@ export const TransferableBillOfLadingForm = () => {
           user_id: user.id,
           raw_document: {
             ...formData,
-            tokenRegistry: registryDocument?.contractAddress
+            tokenRegistry: registryDocument.contractAddress
           }
         })
-        .select();
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -82,6 +114,8 @@ export const TransferableBillOfLadingForm = () => {
         description: "Failed to create Bill of Lading",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -118,7 +152,7 @@ export const TransferableBillOfLadingForm = () => {
                   value={formData[field.name as keyof typeof formData]}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
                   placeholder={`Enter ${field.label}`}
-                  disabled={!registryDocument}
+                  disabled={!registryDocument || isSubmitting}
                 />
               </div>
             ))}
@@ -127,11 +161,24 @@ export const TransferableBillOfLadingForm = () => {
       </Card>
 
       <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => navigate("/transactions")}
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
-        <PreviewButton onClick={() => setShowPreview(true)} disabled={!registryDocument} />
-        <Button type="submit" disabled={!registryDocument}>Create Bill of Lading</Button>
+        <PreviewButton 
+          onClick={() => setShowPreview(true)} 
+          disabled={!registryDocument || isSubmitting} 
+        />
+        <Button 
+          type="submit" 
+          disabled={!registryDocument || isSubmitting}
+        >
+          {isSubmitting ? "Creating..." : "Create Bill of Lading"}
+        </Button>
       </div>
 
       <PreviewDialog
