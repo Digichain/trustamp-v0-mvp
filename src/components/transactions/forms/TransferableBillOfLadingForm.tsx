@@ -129,6 +129,7 @@ export const TransferableBillOfLadingForm = () => {
                   value={formData[field.name as keyof typeof formData]}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
                   placeholder={`Enter ${field.label}`}
+                  disabled={!registryDocument}
                 />
               </div>
             ))}
