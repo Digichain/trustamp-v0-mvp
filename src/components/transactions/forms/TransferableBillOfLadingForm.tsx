@@ -42,17 +42,6 @@ export const TransferableBillOfLadingForm = () => {
       e.preventDefault();
     }
     
-    if (!registryDocument) {
-      toast({
-        title: "Error",
-        description: "Please deploy a token registry first",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    console.log("Submitting form data:", formData);
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -73,7 +62,7 @@ export const TransferableBillOfLadingForm = () => {
           user_id: user.id,
           raw_document: {
             ...formData,
-            tokenRegistry: registryDocument.contractAddress
+            tokenRegistry: registryDocument?.contractAddress
           }
         })
         .select();
