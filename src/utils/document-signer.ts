@@ -20,8 +20,8 @@ const signDocument = async (merkleRoot: string, walletAddress: string): Promise<
     const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
     console.log("Prefixed merkle root:", prefixedMerkleRoot);
 
-    // Convert to bytes using ethers v6 syntax
-    const messageBytes = ethers.getBytes(prefixedMerkleRoot);
+    // Convert to bytes using ethers v5 syntax
+    const messageBytes = ethers.utils.arrayify(prefixedMerkleRoot);
     console.log("Message bytes:", messageBytes);
 
     // Request signature from wallet
@@ -29,8 +29,8 @@ const signDocument = async (merkleRoot: string, walletAddress: string): Promise<
       throw new Error("Ethereum provider not found");
     }
 
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
     
     // Sign the message bytes
     const signature = await signer.signMessage(messageBytes);
@@ -90,7 +90,7 @@ export const signAndStoreDocument = async (
       throw uploadError;
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } }  = supabase.storage
       .from('signed-documents')
       .getPublicUrl(fileName);
 
