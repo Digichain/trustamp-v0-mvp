@@ -1,7 +1,7 @@
 import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
-import { ExtendedVerificationFragment } from "../types/verificationTypes";
+import { ExtendedVerificationFragment, VerificationReason } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
@@ -90,9 +90,10 @@ export class InvoiceVerifier implements DocumentVerifier {
     }
 
     // If all are skipped, we aggregate their messages
-    const skippedMessages = statusFragments.filter(f => f.status === "SKIPPED")
-                                           .map(f => f.reason?.message || "Status skipped without a reason")
-                                           .join("; ");
+    const skippedMessages = statusFragments
+      .filter(f => f.status === "SKIPPED")
+      .map(f => this.getReasonMessage(f.reason))
+      .join("; ");
     
     return {
       valid: false,
@@ -122,9 +123,10 @@ export class InvoiceVerifier implements DocumentVerifier {
     }
 
     // If all are skipped, we aggregate their messages
-    const skippedMessages = identityFragments.filter(f => f.status === "SKIPPED")
-                                             .map(f => f.reason?.message || "Identity check skipped without a reason")
-                                             .join("; ");
+    const skippedMessages = identityFragments
+      .filter(f => f.status === "SKIPPED")
+      .map(f => this.getReasonMessage(f.reason))
+      .join("; ");
     
     return {
       valid: false,
@@ -132,17 +134,20 @@ export class InvoiceVerifier implements DocumentVerifier {
     };
   }
 
-  private getFragmentMessage(fragment: ExtendedVerificationFragment | undefined, successMessage: string, failureMessage: string): string {
+  private getReasonMessage(reason: string | VerificationReason | undefined): string {
+    if (!reason) return "No reason provided";
+    if (typeof reason === "string") return reason;
+    return reason.message || "Unknown reason";
+  }
+
+  private getFragmentMessage(
+    fragment: ExtendedVerificationFragment | undefined, 
+    successMessage: string, 
+    failureMessage: string
+  ): string {
     if (!fragment) return "Verification check not performed";
     if (fragment.status === "VALID") return successMessage;
-    
-    if (fragment.reason) {
-      if (typeof fragment.reason === 'string') {
-        return fragment.reason;
-      }
-      return fragment.reason.message || failureMessage;
-    }
-    return failureMessage;
+    return this.getReasonMessage(fragment.reason) || failureMessage;
   }
 
   private createErrorResponse(message: string): VerificationResult {
