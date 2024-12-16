@@ -14,7 +14,7 @@ const TitleEscrowFactoryBytecode = "0x608060405234801561001057600080fd5b50610a30
 const TokenRegistryABI = [{"inputs":[{"internalType":"string","name":"_name","type":"string"},{"internalType":"string","name":"_symbol","type":"string"},{"internalType":"address","name":"_titleEscrowCreator","type":"address"},{"internalType":"address","name":"_titleEscrowFactory","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"bytes32","name":"previousAdminRole","type":"bytes32"},{"indexed":true,"internalType":"bytes32","name":"newAdminRole","type":"bytes32"}],"name":"RoleAdminChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"}],"name":"RoleGranted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"}],"name":"RoleRevoked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"DEFAULT_ADMIN_ROLE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINTER_ROLE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"}],"name":"getRoleAdmin","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"grantRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"hasRole","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"beneficiary","type":"address"},{"internalType":"address","name":"holder","type":"address"},{"internalType":"string","name":"tokenId","type":"string"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"renounceRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"revokeRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"titleEscrowCreator","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"titleEscrowFactory","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 const TokenRegistryBytecode = "0x60806040523480156200001157600080fd5b5060405162001c9838038062001c988339818101604052810190620000379190620002c4565b838381600090816200004a9190620005e6565b5080600190816200005c9190620005e6565b5050506200007f6200007360201b60201c565b6200008a816200009260201b60201c565b50505050620007cc565b6000801b81565b6200009e8162000122565b620000e0576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401620000d79062000702565b60405180910390fd5b80600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60008073ffffffffffffffffffffffffffffffffffffffff16600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161415905090565b6000604051905090565b600080fd5b600080fd5b600080fd5b600080fd5b6000601f19601f8301169050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b620001d18262000186565b810181811067ffffffffffffffff82111715620001f357620001f262000197565b5b80604052505050565b60006200020862000168565b9050620002168282620001c6565b919050565b600067ffffffffffffffff8211156200023957620002386200019756";
 
-export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
+export const useTokenRegistryCreation = () => {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
@@ -30,11 +30,15 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
 
-      // Get current gas price
+      // Get current gas price and add 20% buffer
       const gasPrice = await provider.getGasPrice();
-      const gasLimit = 5000000; // Set a reasonable gas limit
+      const adjustedGasPrice = gasPrice.mul(120).div(100); // 20% increase
+      console.log('Using adjusted gas price:', adjustedGasPrice.toString());
 
-      // Deploy TitleEscrowCreator with explicit gas settings
+      // Lower gas limit for initial deployments
+      const initialGasLimit = 3000000;
+
+      // Deploy TitleEscrowCreator
       console.log('Deploying TitleEscrowCreator...');
       const titleEscrowCreatorFactory = new ContractFactory(
         TitleEscrowCreatorABI,
@@ -42,13 +46,13 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         signer
       );
       const titleEscrowCreator = await titleEscrowCreatorFactory.deploy({
-        gasLimit,
-        gasPrice
+        gasLimit: initialGasLimit,
+        gasPrice: adjustedGasPrice
       });
       await titleEscrowCreator.deployed();
       console.log('TitleEscrowCreator deployed at:', titleEscrowCreator.address);
 
-      // Deploy TitleEscrowFactory with explicit gas settings
+      // Deploy TitleEscrowFactory
       console.log('Deploying TitleEscrowFactory...');
       const titleEscrowFactoryFactory = new ContractFactory(
         TitleEscrowFactoryABI,
@@ -56,29 +60,35 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         signer
       );
       const titleEscrowFactory = await titleEscrowFactoryFactory.deploy({
-        gasLimit,
-        gasPrice
+        gasLimit: initialGasLimit,
+        gasPrice: adjustedGasPrice
       });
       await titleEscrowFactory.deployed();
       console.log('TitleEscrowFactory deployed at:', titleEscrowFactory.address);
 
-      // Deploy TokenRegistry with explicit gas settings
+      // Deploy TokenRegistry with increased gas limit
       console.log('Deploying TokenRegistry...');
       const tokenRegistryFactory = new ContractFactory(
         TokenRegistryABI,
         TokenRegistryBytecode,
         signer
       );
+
+      // Increase gas limit for TokenRegistry deployment
+      const tokenRegistryGasLimit = 4000000;
+      
       const tokenRegistry = await tokenRegistryFactory.deploy(
         name,
         symbol,
         titleEscrowCreator.address,
         titleEscrowFactory.address,
         {
-          gasLimit,
-          gasPrice
+          gasLimit: tokenRegistryGasLimit,
+          gasPrice: adjustedGasPrice
         }
       );
+      
+      console.log('Waiting for TokenRegistry deployment transaction...');
       await tokenRegistry.deployed();
       console.log('TokenRegistry deployed at:', tokenRegistry.address);
 
@@ -112,21 +122,23 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       console.log('Created Token Registry Document:', newRegistryDocument);
       
       setRegistryDocument(newRegistryDocument);
-      onRegistryCreated(newRegistryDocument);
       
       toast({
         title: "Token Registry Created",
-        description: "Your token registry has been deployed successfully. Please set up your DNS record.",
+        description: "Your token registry has been deployed successfully.",
       });
 
-    } catch (error) {
+      return newRegistryDocument;
+
+    } catch (error: any) {
       console.error('Error creating Token Registry:', error);
       
       toast({
         title: "Error Creating Token Registry",
-        description: error instanceof Error ? error.message : "Failed to create token registry",
+        description: error.message || "Failed to create token registry",
         variant: "destructive",
       });
+      return null;
     } finally {
       setIsCreating(false);
     }
