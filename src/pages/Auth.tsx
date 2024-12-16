@@ -13,7 +13,6 @@ const Auth = () => {
   useEffect(() => {
     console.log("Auth useEffect running - checking user session...");
     
-    // Check initial session
     const checkUser = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       console.log("Current session:", session);
@@ -34,33 +33,20 @@ const Auth = () => {
 
     checkUser();
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session);
       
       if (event === 'SIGNED_IN' && session) {
         console.log('User signed in, redirecting to dashboard...');
-        // Ensure we have a valid session before redirecting
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        if (currentSession && !error) {
-          navigate('/dashboard');
-          toast({
-            title: "Welcome back!",
-            description: "You have successfully signed in.",
-          });
-        } else {
-          console.error("Error getting session after sign in:", error);
-          toast({
-            title: "Authentication Error",
-            description: "There was an issue with your session. Please try signing in again.",
-            variant: "destructive",
-          });
-        }
+        navigate('/dashboard');
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
       }
 
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, staying on auth page');
-        // Clear any existing session
         await supabase.auth.signOut();
         toast({
           title: "Signed out",
