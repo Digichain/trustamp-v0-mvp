@@ -29,83 +29,67 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
   const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
   const { toast } = useToast();
 
-  const createTokenRegistry = async (walletAddress: string, name: string, symbol: string) => {
-    setIsCreating(true);
-    try {
-      console.log('Creating Token Registry with params:', { walletAddress, name, symbol });
+const createTokenRegistry = async (walletAddress: string, name: string, symbol: string) => {
+  setIsCreating(true);
+  try {
+    console.log('Creating Token Registry with params:', { walletAddress, name, symbol });
 
-      const { ethereum } = window as any;
-      if (!ethereum) throw new Error('MetaMask not found');
-      
-      const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
+    const { ethereum } = window as any;
+    if (!ethereum) throw new Error('MetaMask not found');
+    
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
 
-      // Get current gas price and add 20% buffer
-      const currentGasPrice = await provider.getGasPrice();
-      const adjustedGasPrice = currentGasPrice.mul(120).div(100);
-      console.log('Using adjusted gas price:', adjustedGasPrice.toString());
+    // Create contract factory
+    const factory = new ContractFactory(TokenRegistryABI, TokenRegistryBytecode, signer);
 
-      // Create contract factory
-      const factory = new ContractFactory(TokenRegistryABI, TokenRegistryBytecode, signer);
+    // Deploy contract without manual gas estimation
+    console.log('Deploying TokenRegistry...');
+    const tokenRegistry = await factory.deploy(name, symbol);
 
-      // Estimate gas for deployment
-      const estimatedGas = await factory.signer.estimateGas(
-        factory.getDeployTransaction(name, symbol, { gasPrice: adjustedGasPrice })
-      );
-      console.log('Estimated gas:', estimatedGas.toString());
+    // Wait for deployment with increased timeout
+    const deployedContract = await tokenRegistry.deployed();
+    console.log('TokenRegistry deployed at:', deployedContract.address);
 
-      // Add 20% buffer to estimated gas
-      const gasLimit = estimatedGas.mul(120).div(100);
-      console.log('Using gas limit with buffer:', gasLimit.toString());
-
-      console.log('Deploying TokenRegistry...');
-      const tokenRegistry = await factory.deploy(name, symbol, {
-        gasLimit,
-        gasPrice: adjustedGasPrice
-      });
-
-      // Wait for deployment with increased timeout
-      const deployedContract = await tokenRegistry.deployed();
-      console.log('TokenRegistry deployed at:', deployedContract.address);
-
-      // Create DNS record via Supabase
-      const { data, error } = await supabase.functions.invoke('oa-dns-records', {
-        body: {
-          contractAddress: deployedContract.address,
-          action: 'create',
-          type: 'token-registry'
-        }
-      });
-
-      if (error) throw error;
-      if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
-
-      // Construct new registry document
-      const newRegistryDocument: TokenRegistryDocument = {
+    // Create DNS record via Supabase
+    const { data, error } = await supabase.functions.invoke('oa-dns-records', {
+      body: {
         contractAddress: deployedContract.address,
-        name,
-        symbol,
-        dnsLocation: data.data.dnsLocation
-      };
+        action: 'create',
+        type: 'token-registry'
+      }
+    });
 
-      setRegistryDocument(newRegistryDocument);
-      onRegistryCreated(newRegistryDocument);
+    if (error) throw error;
+    if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
 
-      toast({
-        title: "Token Registry Created",
-        description: "Your token registry has been deployed successfully."
-      });
-    } catch (error: any) {
-      console.error('Error creating token registry:', error);
-      toast({
-        title: "Error",
-        description: `There was an issue creating the token registry: ${error.message}`,
-        variant: "destructive"
-      });
-    } finally {
-      setIsCreating(false);
-    }
-  };
+    // Construct new registry document
+    const newRegistryDocument: TokenRegistryDocument = {
+      contractAddress: deployedContract.address,
+      name,
+      symbol,
+      dnsLocation: data.data.dnsLocation
+    };
+
+    setRegistryDocument(newRegistryDocument);
+    onRegistryCreated(newRegistryDocument);
+
+    toast({
+      title: "Token Registry Created",
+      description: "Your token registry has been deployed successfully."
+    });
+  } catch (error: any) {
+    console.error('Error creating token registry:', error);
+    toast({
+      title: "Error",
+      description: `There was an issue creating the token registry: ${error.message}`,
+      variant: "destructive"
+    });
+  } finally {
+    setIsCreating(false);
+  }
+};
+
 
   return {
     isCreating,
