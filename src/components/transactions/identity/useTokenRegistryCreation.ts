@@ -24,36 +24,45 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
     try {
       console.log('Creating Token Registry with params:', { walletAddress, name, symbol });
       
-      // Get the Ethereum provider from MetaMask
       const { ethereum } = window as any;
       if (!ethereum) throw new Error('MetaMask not found');
       
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
 
-      // Deploy TitleEscrowCreator
+      // Get current gas price
+      const gasPrice = await provider.getGasPrice();
+      const gasLimit = 5000000; // Set a reasonable gas limit
+
+      // Deploy TitleEscrowCreator with explicit gas settings
       console.log('Deploying TitleEscrowCreator...');
       const titleEscrowCreatorFactory = new ContractFactory(
         TitleEscrowCreatorABI,
         TitleEscrowCreatorBytecode,
         signer
       );
-      const titleEscrowCreator = await titleEscrowCreatorFactory.deploy();
+      const titleEscrowCreator = await titleEscrowCreatorFactory.deploy({
+        gasLimit,
+        gasPrice
+      });
       await titleEscrowCreator.deployed();
       console.log('TitleEscrowCreator deployed at:', titleEscrowCreator.address);
 
-      // Deploy TitleEscrowFactory
+      // Deploy TitleEscrowFactory with explicit gas settings
       console.log('Deploying TitleEscrowFactory...');
       const titleEscrowFactoryFactory = new ContractFactory(
         TitleEscrowFactoryABI,
         TitleEscrowFactoryBytecode,
         signer
       );
-      const titleEscrowFactory = await titleEscrowFactoryFactory.deploy();
+      const titleEscrowFactory = await titleEscrowFactoryFactory.deploy({
+        gasLimit,
+        gasPrice
+      });
       await titleEscrowFactory.deployed();
       console.log('TitleEscrowFactory deployed at:', titleEscrowFactory.address);
 
-      // Deploy TokenRegistry
+      // Deploy TokenRegistry with explicit gas settings
       console.log('Deploying TokenRegistry...');
       const tokenRegistryFactory = new ContractFactory(
         TokenRegistryABI,
@@ -64,7 +73,11 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         name,
         symbol,
         titleEscrowCreator.address,
-        titleEscrowFactory.address
+        titleEscrowFactory.address,
+        {
+          gasLimit,
+          gasPrice
+        }
       );
       await tokenRegistry.deployed();
       console.log('TokenRegistry deployed at:', tokenRegistry.address);
