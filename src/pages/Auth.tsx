@@ -3,7 +3,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   console.log("Auth component rendering...");
@@ -14,20 +14,31 @@ const Auth = () => {
     console.log("Auth useEffect running - checking user session...");
     
     const checkUser = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      console.log("Current session:", session);
-      if (error) {
-        console.error("Session check error:", error);
-        toast({
-          title: "Authentication Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      if (session) {
-        console.log("User is logged in, redirecting to dashboard...");
-        navigate('/dashboard');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log("Current session:", session);
+        
+        if (error) {
+          console.error("Session check error:", error);
+          if (error.message.includes('refresh_token_not_found')) {
+            // Clear any stale session data
+            await supabase.auth.signOut();
+            console.log("Cleared stale session data");
+          }
+          toast({
+            title: "Authentication Error",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (session) {
+          console.log("User is logged in, redirecting to dashboard...");
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
       }
     };
 
@@ -47,11 +58,15 @@ const Auth = () => {
 
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, staying on auth page');
-        await supabase.auth.signOut();
         toast({
           title: "Signed out",
           description: "You have been signed out of your account.",
         });
+      }
+
+      // Handle token refresh errors
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
       }
     });
 
