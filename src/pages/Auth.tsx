@@ -19,6 +19,11 @@ const Auth = () => {
       console.log("Current session:", session);
       if (error) {
         console.error("Session check error:", error);
+        toast({
+          title: "Authentication Error",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
       if (session) {
@@ -61,10 +66,6 @@ const Auth = () => {
           title: "Signed out",
           description: "You have been signed out of your account.",
         });
-      }
-
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Session token refreshed');
       }
     });
 
