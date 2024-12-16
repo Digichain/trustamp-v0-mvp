@@ -13,7 +13,7 @@ interface TokenRegistryCreatorProps {
 }
 
 export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreatorProps) => {
-  const { walletAddress } = useWallet();
+  const { walletAddress, network } = useWallet();
   const [registryName, setRegistryName] = useState("");
   const [registrySymbol, setRegistrySymbol] = useState("");
   const { isCreating, registryDocument, createTokenRegistry } = useTokenRegistryCreation(onRegistryCreated);
@@ -29,7 +29,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
       <CardHeader>
         <CardTitle>Create Token Registry</CardTitle>
         <CardDescription>
-          Deploy a token registry contract for transferable documents
+          Deploy a token registry contract for document ownership
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -57,7 +57,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
 
         <Button 
           onClick={handleCreateRegistry} 
-          disabled={isCreating || !walletAddress || !registryName || !registrySymbol || registryDocument !== null}
+          disabled={isCreating || !walletAddress || !registryName || !registrySymbol || registryDocument !== null || network !== "Sepolia Testnet"}
           className="w-full"
         >
           {isCreating ? (
