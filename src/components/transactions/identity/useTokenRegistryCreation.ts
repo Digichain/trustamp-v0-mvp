@@ -32,12 +32,12 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       );
       console.log('Created contract factory');
 
-      // Deploy contract and let MetaMask handle gas estimation
+      // Deploy contract without specifying gas - let MetaMask handle it
       console.log('Deploying TokenRegistry...');
       const tokenRegistry = await factory.deploy(name, symbol);
-      console.log('Waiting for deployment...');
+      console.log('Contract deployment transaction sent, waiting for confirmation...');
       
-      // Wait for deployment
+      // Wait for deployment confirmation
       const deployedContract = await tokenRegistry.deployed();
       console.log('TokenRegistry deployed at:', deployedContract.address);
 
@@ -76,7 +76,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         description: `Failed to create token registry: ${error.message}`,
         variant: "destructive"
       });
-      throw error; // Re-throw to be handled by the component
+      throw error;
     } finally {
       setIsCreating(false);
     }

@@ -75,7 +75,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
 
         <Button 
           onClick={handleCreateRegistry} 
-          disabled={isCreating || !walletAddress || !registryName || !registrySymbol || network !== "Sepolia Testnet" || registryDocument !== null}
+          disabled={!walletAddress || !registryName || !registrySymbol || network !== "Sepolia Testnet" || registryDocument !== null || isCreating}
           className="w-full"
         >
           {isCreating ? (
