@@ -3,17 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { TokenRegistryDocument } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractFactory, ethers } from "ethers";
-import TokenRegistryArtifact from '../../../contracts/TokenRegistry.sol';
-
-// OpenAttestation TokenRegistry ABI - simplified to core ERC721 functions
-const TokenRegistryABI = [
-  "constructor(string memory _name, string memory _symbol)",
-  "function name() public view returns (string memory)",
-  "function symbol() public view returns (string memory)",
-  "function mint(address to, uint256 tokenId) public",
-  "function ownerOf(uint256 tokenId) public view returns (address)",
-  "function transferFrom(address from, address to, uint256 tokenId) public"
-];
+import TokenRegistryArtifact from '../../../contracts/TokenRegistry';
 
 export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
   const [isCreating, setIsCreating] = useState(false);
@@ -33,7 +23,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
 
       // Create contract factory with the compiled contract
       const factory = new ContractFactory(
-        TokenRegistryABI,
+        TokenRegistryArtifact.abi,
         TokenRegistryArtifact.bytecode,
         signer
       );
