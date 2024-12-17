@@ -137,58 +137,62 @@ export const TransferableBillOfLadingForm = () => {
     <form onSubmit={handleSubmit} className="space-y-8">
       <TokenRegistryCreator onRegistryCreated={setRegistryDocument} />
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Bill of Lading Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            {fields.map((field) => (
-              <div key={field.name}>
-                <Label className="block text-sm font-medium mb-1">
-                  {field.label}
-                </Label>
-                <Input
-                  value={formData[field.name as keyof typeof formData]}
-                  onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  placeholder={`Enter ${field.label}`}
-                  disabled={!registryDocument || isSubmitting}
-                />
+      {registryDocument && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Bill of Lading Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                {fields.map((field) => (
+                  <div key={field.name}>
+                    <Label className="block text-sm font-medium mb-1">
+                      {field.label}
+                    </Label>
+                    <Input
+                      value={formData[field.name as keyof typeof formData]}
+                      onChange={(e) => handleInputChange(field.name, e.target.value)}
+                      placeholder={`Enter ${field.label}`}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => navigate("/transactions")}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <PreviewButton 
+              onClick={() => setShowPreview(true)} 
+              disabled={isSubmitting} 
+            />
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Bill of Lading"}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="flex justify-end gap-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => navigate("/transactions")}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <PreviewButton 
-          onClick={() => setShowPreview(true)} 
-          disabled={!registryDocument || isSubmitting} 
-        />
-        <Button 
-          type="submit" 
-          disabled={!registryDocument || isSubmitting}
-        >
-          {isSubmitting ? "Creating..." : "Create Bill of Lading"}
-        </Button>
-      </div>
-
-      <PreviewDialog
-        title="Bill of Lading Preview"
-        isOpen={showPreview}
-        onOpenChange={setShowPreview}
-        onConfirm={() => handleSubmit()}
-      >
-        <BillOfLadingPreview data={formData} />
-      </PreviewDialog>
+          <PreviewDialog
+            title="Bill of Lading Preview"
+            isOpen={showPreview}
+            onOpenChange={setShowPreview}
+            onConfirm={() => handleSubmit()}
+          >
+            <BillOfLadingPreview data={formData} />
+          </PreviewDialog>
+        </>
+      )}
     </form>
   );
 };
