@@ -57,7 +57,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
 
         <Button 
           onClick={handleCreateRegistry} 
-          disabled={isCreating || !walletAddress || !registryName || !registrySymbol || registryDocument !== null || network !== "Sepolia Testnet"}
+          disabled={isCreating || !walletAddress || !registryName || !registrySymbol || network !== "Sepolia Testnet" || registryDocument !== null}
           className="w-full"
         >
           {isCreating ? (
@@ -65,6 +65,8 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Deploying Registry...
             </>
+          ) : registryDocument ? (
+            'Registry Deployed'
           ) : (
             'Deploy Token Registry'
           )}

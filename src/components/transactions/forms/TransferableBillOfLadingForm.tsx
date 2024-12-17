@@ -137,7 +137,7 @@ export const TransferableBillOfLadingForm = () => {
     <form onSubmit={handleSubmit} className="space-y-8">
       <TokenRegistryCreator onRegistryCreated={setRegistryDocument} />
       
-      <Card className={!registryDocument ? "opacity-50 pointer-events-none" : ""}>
+      <Card>
         <CardHeader>
           <CardTitle>Bill of Lading Details</CardTitle>
         </CardHeader>
