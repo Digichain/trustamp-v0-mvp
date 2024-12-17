@@ -18,9 +18,27 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
   const [registrySymbol, setRegistrySymbol] = useState("");
   const { isCreating, registryDocument, createTokenRegistry } = useTokenRegistryCreation(onRegistryCreated);
 
-  const handleCreateRegistry = () => {
-    if (walletAddress && registryName && registrySymbol) {
-      createTokenRegistry(walletAddress, registryName, registrySymbol);
+  const handleCreateRegistry = async () => {
+    if (!walletAddress) {
+      console.error("Wallet not connected");
+      return;
+    }
+    
+    if (!registryName || !registrySymbol) {
+      console.error("Registry name and symbol are required");
+      return;
+    }
+
+    if (network !== "Sepolia Testnet") {
+      console.error("Wrong network");
+      return;
+    }
+
+    try {
+      console.log("Creating token registry with params:", { walletAddress, registryName, registrySymbol });
+      await createTokenRegistry(walletAddress, registryName, registrySymbol);
+    } catch (error) {
+      console.error("Error creating token registry:", error);
     }
   };
 

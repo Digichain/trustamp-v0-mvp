@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { TokenRegistryDocument } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractFactory, ethers } from "ethers";
@@ -11,15 +11,18 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
   const { toast } = useToast();
 
   const createTokenRegistry = async (walletAddress: string, name: string, symbol: string) => {
+    console.log('Starting token registry creation with params:', { walletAddress, name, symbol });
     setIsCreating(true);
+    
     try {
-      console.log('Creating Token Registry with params:', { walletAddress, name, symbol });
-
       const { ethereum } = window as any;
-      if (!ethereum) throw new Error('MetaMask not found');
+      if (!ethereum) {
+        throw new Error('MetaMask not found');
+      }
       
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
+      console.log('Got signer from provider');
 
       // Create contract factory with the compiled contract
       const factory = new ContractFactory(
@@ -27,10 +30,12 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         TokenRegistryArtifact.bytecode,
         signer
       );
+      console.log('Created contract factory');
 
       // Deploy contract and let MetaMask handle gas estimation
       console.log('Deploying TokenRegistry...');
       const tokenRegistry = await factory.deploy(name, symbol);
+      console.log('Waiting for deployment...');
       
       // Wait for deployment
       const deployedContract = await tokenRegistry.deployed();
@@ -56,6 +61,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         dnsLocation: data.data.dnsLocation
       };
 
+      console.log('Setting registry document:', newRegistryDocument);
       setRegistryDocument(newRegistryDocument);
       onRegistryCreated(newRegistryDocument);
 
@@ -67,9 +73,10 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       console.error('Error creating token registry:', error);
       toast({
         title: "Error",
-        description: `There was an issue creating the token registry: ${error.message}`,
+        description: `Failed to create token registry: ${error.message}`,
         variant: "destructive"
       });
+      throw error; // Re-throw to be handled by the component
     } finally {
       setIsCreating(false);
     }
