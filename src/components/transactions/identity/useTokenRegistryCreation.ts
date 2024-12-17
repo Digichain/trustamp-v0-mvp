@@ -34,7 +34,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
 
       // Deploy contract without specifying gas - let MetaMask handle it
       console.log('Deploying TokenRegistry...');
-      const tokenRegistry = await factory.deploy(initialowner, name, symbol);
+      const tokenRegistry = await factory.deploy(walletAddress, name, symbol);
       console.log('Contract deployment transaction sent, waiting for confirmation...');
       
       // Wait for deployment confirmation
