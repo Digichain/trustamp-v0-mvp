@@ -24,6 +24,7 @@ export type Database = {
           field8: string | null
           field9: string | null
           id: string
+          raw_document: Json | null
           transaction_id: string
           updated_at: string | null
         }
@@ -41,6 +42,7 @@ export type Database = {
           field8?: string | null
           field9?: string | null
           id?: string
+          raw_document?: Json | null
           transaction_id: string
           updated_at?: string | null
         }
@@ -58,6 +60,7 @@ export type Database = {
           field8?: string | null
           field9?: string | null
           id?: string
+          raw_document?: Json | null
           transaction_id?: string
           updated_at?: string | null
         }

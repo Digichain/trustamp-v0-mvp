@@ -101,3 +101,65 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   
   return formattedDoc;
 };
+
+export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: any) => {
+  if (!didDocument) {
+    throw new Error("DID document is required to create a verifiable document");
+  }
+
+  console.log("Starting BOL document formatting with data:", bolData);
+  console.log("Using DID document:", didDocument);
+
+  // The base DID without #controller
+  const baseId = `did:ethr:${didDocument.ethereumAddress}`;
+  
+  // Generate document ID in the format (4 letters + 4 numbers)
+  const documentId = generateDocumentId();
+  console.log("Generated document ID:", documentId);
+
+  // Create document with explicit ordering based on schema
+  const formattedDoc = {
+    version: "https://schema.openattestation.com/2.0/schema.json" as const,
+    id: documentId,
+    $template: {
+      name: "BILL_OF_LADING",
+      type: "EMBEDDED_RENDERER",
+      url: "https://generic-templates.openattestation.com"
+    },
+    issuers: [{
+      id: baseId,
+      name: bolData.companyName || "",
+      revocation: {
+        type: "NONE"
+      },
+      identityProof: {
+        type: "DNS-DID",
+        location: "tempdns.trustamp.in",
+        key: `${baseId}#controller`
+      }
+    }],
+    network: {
+      chain: "sepolia",
+      chainId: "11155111"
+    },
+    billOfLadingDetails: {
+      blNumber: bolData.blNumber || "",
+      companyName: bolData.companyName || "",
+      field1: bolData.field1 || "",
+      field2: bolData.field2 || "",
+      field3: bolData.field3 || "",
+      field4: bolData.field4 || "",
+      field5: bolData.field5 || "",
+      field6: bolData.field6 || "",
+      field7: bolData.field7 || "",
+      field8: bolData.field8 || "",
+      field9: bolData.field9 || "",
+      tokenRegistry: bolData.tokenRegistry || ""
+    }
+  };
+
+  console.log("FORMATTED BOL DOCUMENT STRUCTURE:", JSON.stringify(formattedDoc, null, 2));
+  console.log("FORMATTED BOL DOCUMENT KEYS ORDER:", Object.keys(formattedDoc));
+  
+  return formattedDoc;
+};

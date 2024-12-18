@@ -11,6 +11,7 @@ import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
 import { TokenRegistryCreator, TokenRegistryDocument } from "../identity/TokenRegistryCreator";
 import { useWallet } from "@/contexts/WalletContext";
+import { formatBillOfLadingToOpenAttestation } from "@/utils/document-formatters";
 
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
@@ -80,26 +81,69 @@ export const TransferableBillOfLadingForm = () => {
         throw new Error("No user found");
       }
 
-      const { data, error } = await supabase
+      // Format the document according to OpenAttestation schema
+      const formattedDoc = formatBillOfLadingToOpenAttestation({
+        ...formData,
+        tokenRegistry: registryDocument.contractAddress
+      }, registryDocument);
+
+      console.log("Formatted document:", formattedDoc);
+
+      const { data: transactionData, error: transactionError } = await supabase
         .from("transactions")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
           amount: 0,
-          status: "pending",
+          status: "document_created",
           document_subtype: "transferable",
           title: "BILL_OF_LADING",
           transaction_type: "trade",
           user_id: user.id,
-          raw_document: {
-            ...formData,
-            tokenRegistry: registryDocument.contractAddress
-          }
+          raw_document: formattedDoc
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (transactionError) throw transactionError;
+
+      // Store raw document in storage
+      const fileName = `${transactionData.id}.json`;
+      const { error: uploadError } = await supabase.storage
+        .from('raw-documents')
+        .upload(fileName, JSON.stringify(formattedDoc, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Error uploading raw document:", uploadError);
+        throw uploadError;
+      }
+
+      // Create bill of lading document record
+      const { error: bolError } = await supabase
+        .from("bill_of_lading_documents")
+        .insert({
+          transaction_id: transactionData.id,
+          bl_number: formData.blNumber,
+          company_name: formData.companyName,
+          field1: formData.field1,
+          field2: formData.field2,
+          field3: formData.field3,
+          field4: formData.field4,
+          field5: formData.field5,
+          field6: formData.field6,
+          field7: formData.field7,
+          field8: formData.field8,
+          field9: formData.field9,
+          raw_document: formattedDoc
+        });
+
+      if (bolError) {
+        console.error("Error creating bill of lading document:", bolError);
+        throw bolError;
+      }
 
       toast({
         title: "Success",
