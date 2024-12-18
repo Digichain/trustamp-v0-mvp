@@ -18,16 +18,33 @@
     }
   ],
   "billOfLadingDetails": {
+    "scac": "MAEU",
     "blNumber": "BL123456789",
-    "companyName": "Demo Company",
-    "field1": "Sample Field 1",
-    "field2": "Sample Field 2",
-    "field3": "Sample Field 3",
-    "field4": "Sample Field 4",
-    "field5": "Sample Field 5",
-    "field6": "Sample Field 6",
-    "field7": "Sample Field 7",
-    "field8": "Sample Field 8",
-    "field9": "Sample Field 9"
+    "vessel": "MAERSK SINGAPORE",
+    "voyageNo": "V123",
+    "portOfLoading": "SINGAPORE",
+    "portOfDischarge": "ROTTERDAM",
+    "carrierName": "Maersk Line",
+    "packages": [
+      {
+        "description": "20' Standard Container",
+        "weight": "20000 KG",
+        "measurement": "33.2 CBM"
+      }
+    ],
+    "shipper": {
+      "name": "Shipper Company Pte Ltd",
+      "address": "123 Shipper Road, Singapore 123456"
+    },
+    "consignee": {
+      "name": "Consignee Company B.V.",
+      "address": "456 Consignee Street, Rotterdam, Netherlands"
+    },
+    "notifyParty": {
+      "name": "Notify Company N.V.",
+      "address": "789 Notify Avenue, Rotterdam, Netherlands"
+    },
+    "placeOfReceipt": "SINGAPORE",
+    "placeOfDelivery": "ROTTERDAM"
   }
 }

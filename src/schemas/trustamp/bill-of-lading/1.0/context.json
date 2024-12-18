@@ -5,16 +5,18 @@
     "schema": "http://schema.org/",
     "trustamp": "https://trustamp.com/schemas#",
     "billOfLading": "trustamp:billOfLading",
+    "scac": "trustamp:scac",
     "blNumber": "trustamp:blNumber",
-    "companyName": "schema:legalName",
-    "field1": "trustamp:field1",
-    "field2": "trustamp:field2",
-    "field3": "trustamp:field3",
-    "field4": "trustamp:field4",
-    "field5": "trustamp:field5",
-    "field6": "trustamp:field6",
-    "field7": "trustamp:field7",
-    "field8": "trustamp:field8",
-    "field9": "trustamp:field9"
+    "vessel": "trustamp:vessel",
+    "voyageNo": "trustamp:voyageNo",
+    "portOfLoading": "trustamp:portOfLoading",
+    "portOfDischarge": "trustamp:portOfDischarge",
+    "carrierName": "trustamp:carrierName",
+    "packages": "trustamp:packages",
+    "shipper": "schema:sender",
+    "consignee": "schema:recipient",
+    "notifyParty": "trustamp:notifyParty",
+    "placeOfReceipt": "trustamp:placeOfReceipt",
+    "placeOfDelivery": "trustamp:placeOfDelivery"
   }
 }

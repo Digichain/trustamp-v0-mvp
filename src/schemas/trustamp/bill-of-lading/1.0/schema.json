@@ -1,5 +1,5 @@
 {
-  "$id": "trustamp/bill-of-lading/1.0/schema.json",
+  "$id": "https://trustamp.com/schemas/bill-of-lading/1.0/schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
@@ -63,39 +63,85 @@
     },
     "billOfLadingDetails": {
       "type": "object",
-      "required": ["blNumber", "companyName"],
+      "required": ["scac", "blNumber"],
       "properties": {
+        "scac": {
+          "type": "string",
+          "description": "Standard Carrier Alpha Code"
+        },
         "blNumber": {
+          "type": "string",
+          "description": "Bill of Lading Number"
+        },
+        "vessel": {
           "type": "string"
         },
-        "companyName": {
+        "voyageNo": {
           "type": "string"
         },
-        "field1": {
+        "portOfLoading": {
           "type": "string"
         },
-        "field2": {
+        "portOfDischarge": {
           "type": "string"
         },
-        "field3": {
+        "carrierName": {
           "type": "string"
         },
-        "field4": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "weight": {
+                "type": "string"
+              },
+              "measurement": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "shipper": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            }
+          }
+        },
+        "consignee": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            }
+          }
+        },
+        "notifyParty": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            }
+          }
+        },
+        "placeOfReceipt": {
           "type": "string"
         },
-        "field5": {
-          "type": "string"
-        },
-        "field6": {
-          "type": "string"
-        },
-        "field7": {
-          "type": "string"
-        },
-        "field8": {
-          "type": "string"
-        },
-        "field9": {
+        "placeOfDelivery": {
           "type": "string"
         }
       }
