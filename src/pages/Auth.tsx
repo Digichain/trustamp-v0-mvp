@@ -79,11 +79,18 @@ const Auth = () => {
   return (
     <div className="container flex min-h-screen items-center justify-center">
       <div className="mx-auto w-full max-w-[400px] space-y-8 rounded-lg bg-card p-8 shadow-lg">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-card-foreground">Welcome to Trustamp</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Please sign in to continue
-          </p>
+        <div className="text-center space-y-6">
+          <img 
+            src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png" 
+            alt="TruStamp Logo" 
+            className="h-12 mx-auto"
+          />
+          <div>
+            <h2 className="text-3xl font-bold text-card-foreground">Welcome to Trustamp</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Please sign in to continue
+            </p>
+          </div>
         </div>
         <SupabaseAuth 
           supabaseClient={supabase}
