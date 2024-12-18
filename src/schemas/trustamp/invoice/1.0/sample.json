@@ -1,0 +1,67 @@
+{
+  "version": "https://schema.openattestation.com/2.0/schema.json",
+  "id": "WXYZ9876",
+  "$template": {
+    "name": "INVOICE",
+    "type": "EMBEDDED_RENDERER",
+    "url": "https://generic-templates.openattestation.com"
+  },
+  "issuers": [
+    {
+      "id": "did:ethr:0x1234567890123456789012345678901234567890",
+      "name": "Demo Invoice Issuer",
+      "revocation": {
+        "type": "NONE"
+      },
+      "identityProof": {
+        "type": "DNS-DID",
+        "location": "trustamp.com",
+        "key": "did:ethr:0x1234567890123456789012345678901234567890#controller"
+      }
+    }
+  ],
+  "recipient": {
+    "name": "John Doe",
+    "company": {
+      "name": "Demo Recipient Company",
+      "streetAddress": "123 Demo Street",
+      "city": "Demo City",
+      "postalCode": "12345",
+      "phoneNumber": "+1234567890"
+    }
+  },
+  "invoiceDetails": {
+    "invoiceNumber": "INV123456789",
+    "date": "2024-03-19",
+    "billFrom": {
+      "name": "Demo Seller Company",
+      "streetAddress": "456 Demo Avenue",
+      "city": "Demo City",
+      "postalCode": "54321",
+      "phoneNumber": "+9876543210"
+    },
+    "billTo": {
+      "company": {
+        "name": "Demo Buyer Company",
+        "streetAddress": "789 Demo Boulevard",
+        "city": "Demo City",
+        "postalCode": "67890",
+        "phoneNumber": "+1122334455"
+      },
+      "name": "Jane Smith",
+      "email": "jane.smith@demo.com"
+    }
+  },
+  "billableItems": [
+    {
+      "description": "Sample Product 1",
+      "quantity": 2,
+      "unitPrice": 100,
+      "amount": 200
+    }
+  ],
+  "subtotal": 200,
+  "tax": 10,
+  "taxTotal": 20,
+  "total": 220
+}

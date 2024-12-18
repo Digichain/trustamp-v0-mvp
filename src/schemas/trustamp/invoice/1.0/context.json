@@ -1,0 +1,31 @@
+{
+  "@context": {
+    "id": "@id",
+    "type": "@type",
+    "schema": "http://schema.org/",
+    "trustamp": "https://trustamp.com/schemas#",
+    "invoice": "trustamp:invoice",
+    "invoiceNumber": "schema:identifier",
+    "date": "schema:dateIssued",
+    "billFrom": {
+      "@id": "schema:seller",
+      "@type": "schema:Organization"
+    },
+    "billTo": {
+      "@id": "schema:customer",
+      "@type": "schema:Organization"
+    },
+    "billableItems": {
+      "@id": "schema:orderItem",
+      "@container": "@list"
+    },
+    "description": "schema:description",
+    "quantity": "schema:quantity",
+    "unitPrice": "schema:price",
+    "amount": "schema:totalPrice",
+    "subtotal": "schema:subtotalPrice",
+    "tax": "schema:taxRate",
+    "taxTotal": "schema:taxTotal",
+    "total": "schema:totalPrice"
+  }
+}

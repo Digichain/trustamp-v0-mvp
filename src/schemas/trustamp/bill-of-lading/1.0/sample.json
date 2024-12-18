@@ -1,0 +1,33 @@
+{
+  "version": "https://schema.openattestation.com/2.0/schema.json",
+  "id": "ABCD1234",
+  "$template": {
+    "name": "BILL_OF_LADING",
+    "type": "EMBEDDED_RENDERER",
+    "url": "https://generic-templates.openattestation.com"
+  },
+  "issuers": [
+    {
+      "id": "did:ethr:0x1234567890123456789012345678901234567890",
+      "name": "Demo Issuer",
+      "tokenRegistry": "0x1234567890123456789012345678901234567890",
+      "identityProof": {
+        "type": "DNS-TXT",
+        "location": "trustamp.com"
+      }
+    }
+  ],
+  "billOfLadingDetails": {
+    "blNumber": "BL123456789",
+    "companyName": "Demo Company",
+    "field1": "Sample Field 1",
+    "field2": "Sample Field 2",
+    "field3": "Sample Field 3",
+    "field4": "Sample Field 4",
+    "field5": "Sample Field 5",
+    "field6": "Sample Field 6",
+    "field7": "Sample Field 7",
+    "field8": "Sample Field 8",
+    "field9": "Sample Field 9"
+  }
+}

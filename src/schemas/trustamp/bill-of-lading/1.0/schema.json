@@ -1,0 +1,105 @@
+{
+  "$id": "trustamp/bill-of-lading/1.0/schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "https://schema.openattestation.com/2.0/schema.json"
+    },
+    "id": {
+      "type": "string"
+    },
+    "$template": {
+      "type": "object",
+      "required": ["name", "type", "url"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "const": "BILL_OF_LADING"
+        },
+        "type": {
+          "type": "string",
+          "const": "EMBEDDED_RENDERER"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "issuers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "tokenRegistry", "identityProof"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tokenRegistry": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "identityProof": {
+            "type": "object",
+            "required": ["type", "location"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["DNS-TXT"]
+              },
+              "location": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "billOfLadingDetails": {
+      "type": "object",
+      "required": ["blNumber", "companyName"],
+      "properties": {
+        "blNumber": {
+          "type": "string"
+        },
+        "companyName": {
+          "type": "string"
+        },
+        "field1": {
+          "type": "string"
+        },
+        "field2": {
+          "type": "string"
+        },
+        "field3": {
+          "type": "string"
+        },
+        "field4": {
+          "type": "string"
+        },
+        "field5": {
+          "type": "string"
+        },
+        "field6": {
+          "type": "string"
+        },
+        "field7": {
+          "type": "string"
+        },
+        "field8": {
+          "type": "string"
+        },
+        "field9": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": ["version", "id", "$template", "issuers", "billOfLadingDetails"]
+}
