@@ -75,6 +75,7 @@ export const useDocumentHandlers = () => {
         throw new Error("Please connect your wallet first");
       }
 
+      const isTransferable = transaction.document_subtype === 'transferable';
       console.log("Starting document signing/issuing process for transaction:", transaction.id);
       
       const wrappedFileName = `${transaction.id}_wrapped.json`;
@@ -92,12 +93,10 @@ export const useDocumentHandlers = () => {
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
 
-      const isTransferable = transaction.document_subtype === 'transferable';
       const { signedDocument, publicUrl } = await signAndStoreDocument(
         wrappedDoc,
         walletAddress,
-        transaction.id,
-        isTransferable
+        transaction.id
       );
 
       console.log("SIGNED/ISSUED DOCUMENT STRUCTURE:", JSON.stringify(signedDocument, null, 2));
