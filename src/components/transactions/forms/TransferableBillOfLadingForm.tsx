@@ -54,18 +54,18 @@ export const TransferableBillOfLadingForm = () => {
     packages: [{ description: "", weight: "", measurement: "" }]
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handlePartyChange = (party: string, field: string, value: string) => {
+  const handlePartyChange = (party: 'shipper' | 'consignee' | 'notifyParty', field: 'name' | 'address', value: string) => {
     setFormData(prev => ({
       ...prev,
       [party]: {
-        ...prev[party as keyof typeof prev],
+        ...prev[party],
         [field]: value
       }
     }));
