@@ -32,6 +32,12 @@ interface BillOfLadingPreviewProps {
 }
 
 export const BillOfLadingPreview = ({ data }: BillOfLadingPreviewProps) => {
+  const parties: Array<{ key: keyof BillOfLadingData; label: string }> = [
+    { key: 'shipper', label: 'Shipper' },
+    { key: 'consignee', label: 'Consignee' },
+    { key: 'notifyParty', label: 'Notify Party' }
+  ];
+
   return (
     <Card className="p-6 space-y-6 bg-white">
       <div className="border-b pb-4">
@@ -87,17 +93,16 @@ export const BillOfLadingPreview = ({ data }: BillOfLadingPreviewProps) => {
         <div>
           <h3 className="font-semibold mb-2">Parties</h3>
           <div className="space-y-4">
-            {['shipper', 'consignee', 'notifyParty'].map((party) => (
-              <div key={party} className="border-b pb-2">
-                <h4 className="font-medium capitalize mb-1">
-                  {party.replace(/([A-Z])/g, ' $1').trim()}
-                </h4>
-                <p>{data[party as keyof typeof data].name}</p>
-                <p className="text-sm text-gray-500">
-                  {data[party as keyof typeof data].address}
-                </p>
-              </div>
-            ))}
+            {parties.map(({ key, label }) => {
+              const party = data[key] as Party;
+              return (
+                <div key={key} className="border-b pb-2">
+                  <h4 className="font-medium mb-1">{label}</h4>
+                  <p>{party.name}</p>
+                  <p className="text-sm text-gray-500">{party.address}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
 

@@ -14,6 +14,22 @@ import { BillOfLadingLocations } from "./bill-of-lading/BillOfLadingLocations";
 import { BillOfLadingParties } from "./bill-of-lading/BillOfLadingParties";
 import { BillOfLadingPackages } from "./bill-of-lading/BillOfLadingPackages";
 
+interface FormData {
+  scac: string;
+  blNumber: string;
+  vessel: string;
+  voyageNo: string;
+  carrierName: string;
+  portOfLoading: string;
+  portOfDischarge: string;
+  placeOfReceipt: string;
+  placeOfDelivery: string;
+  shipper: { name: string; address: string };
+  consignee: { name: string; address: string };
+  notifyParty: { name: string; address: string };
+  packages: Array<{ description: string; weight: string; measurement: string }>;
+}
+
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,7 +38,7 @@ export const TransferableBillOfLadingForm = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     scac: "",
     blNumber: "",
     vessel: "",
@@ -143,19 +159,6 @@ export const TransferableBillOfLadingForm = () => {
 
       if (transactionError) throw transactionError;
 
-      const fileName = `${transactionData.id}.json`;
-      const { error: uploadError } = await supabase.storage
-        .from('raw-documents')
-        .upload(fileName, JSON.stringify(formattedDoc, null, 2), {
-          contentType: 'application/json',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error("Error uploading raw document:", uploadError);
-        throw uploadError;
-      }
-
       const { error: bolError } = await supabase
         .from("bill_of_lading_documents")
         .insert({
@@ -164,10 +167,7 @@ export const TransferableBillOfLadingForm = () => {
           raw_document: formattedDoc
         });
 
-      if (bolError) {
-        console.error("Error creating bill of lading document:", bolError);
-        throw bolError;
-      }
+      if (bolError) throw bolError;
 
       toast({
         title: "Success",
