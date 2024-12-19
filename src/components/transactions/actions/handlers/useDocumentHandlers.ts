@@ -98,7 +98,7 @@ export const useDocumentHandlers = () => {
       let finalDocument;
       let transactionHash;
 
-      if (isTransferable) {
+      if (isTransferable && wrappedDoc.data?.issuers?.[0]?.tokenRegistry) {
         // For transferable documents, mint token and add proof
         const { ethereum } = window as any;
         if (!ethereum) throw new Error("MetaMask not found");
@@ -107,7 +107,9 @@ export const useDocumentHandlers = () => {
         const signer = provider.getSigner();
         
         // Get the token registry contract
-        const registryAddress = wrappedDoc.issuers[0].tokenRegistry;
+        const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
+        console.log("Using token registry at address:", registryAddress);
+        
         const tokenRegistry = new ethers.Contract(
           registryAddress,
           TokenRegistryArtifact.abi,
@@ -118,8 +120,13 @@ export const useDocumentHandlers = () => {
         const documentHash = ethers.utils.keccak256(
           ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
         );
+        console.log("Document hash for minting:", documentHash);
+        
         const mintTx = await tokenRegistry.safeMint(walletAddress, documentHash);
+        console.log("Mint transaction sent:", mintTx.hash);
+        
         const receipt = await mintTx.wait();
+        console.log("Mint transaction confirmed:", receipt);
         
         transactionHash = receipt.transactionHash;
         
@@ -134,7 +141,7 @@ export const useDocumentHandlers = () => {
             signature: transactionHash
           }]
         };
-      } else {
+      } else if (!isTransferable) {
         // For verifiable documents, sign with wallet
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
@@ -151,6 +158,8 @@ export const useDocumentHandlers = () => {
             signature: signature
           }]
         };
+      } else {
+        throw new Error("Token registry address not found in document");
       }
 
       // Store final document
