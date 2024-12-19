@@ -24,7 +24,6 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const signer = provider.getSigner();
       console.log('Got signer from provider');
 
-      // Create contract factory with the compiled contract
       const factory = new ContractFactory(
         TokenRegistryArtifact.abi,
         TokenRegistryArtifact.bytecode,
@@ -32,16 +31,13 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       );
       console.log('Created contract factory');
 
-      // Deploy contract without specifying gas - let MetaMask handle it
       console.log('Deploying TokenRegistry...');
       const tokenRegistry = await factory.deploy(walletAddress, name, symbol);
       console.log('Contract deployment transaction sent, waiting for confirmation...');
       
-      // Wait for deployment confirmation
       const deployedContract = await tokenRegistry.deployed();
       console.log('TokenRegistry deployed at:', deployedContract.address);
 
-      // Create DNS record via Supabase
       const { data, error } = await supabase.functions.invoke('oa-dns-records', {
         body: {
           contractAddress: deployedContract.address,
@@ -53,7 +49,6 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       if (error) throw error;
       if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
 
-      // Construct new registry document with all required properties
       const newRegistryDocument: TokenRegistryDocument = {
         contractAddress: deployedContract.address,
         name,
@@ -66,26 +61,68 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       setRegistryDocument(newRegistryDocument);
       onRegistryCreated(newRegistryDocument);
 
-      toast({
-        title: "Token Registry Created",
-        description: "Your token registry has been deployed successfully."
-      });
     } catch (error: any) {
       console.error('Error creating token registry:', error);
-      toast({
-        title: "Error",
-        description: `Failed to create token registry: ${error.message}`,
-        variant: "destructive"
-      });
       throw error;
     } finally {
       setIsCreating(false);
     }
   };
 
+  const loadExistingRegistry = async (address: string) => {
+    try {
+      const { ethereum } = window as any;
+      if (!ethereum) {
+        throw new Error('MetaMask not found');
+      }
+      
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      console.log('Loading existing registry at address:', address);
+
+      const tokenRegistry = new ethers.Contract(
+        address,
+        TokenRegistryArtifact.abi,
+        provider
+      );
+
+      const [name, symbol] = await Promise.all([
+        tokenRegistry.name(),
+        tokenRegistry.symbol()
+      ]);
+
+      const { data, error } = await supabase.functions.invoke('oa-dns-records', {
+        body: {
+          contractAddress: address,
+          action: 'create',
+          type: 'token-registry'
+        }
+      });
+
+      if (error) throw error;
+      if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
+
+      const existingRegistryDocument: TokenRegistryDocument = {
+        contractAddress: address,
+        name,
+        symbol,
+        dnsLocation: data.data.dnsLocation,
+        ethereumAddress: await tokenRegistry.owner()
+      };
+
+      console.log('Setting existing registry document:', existingRegistryDocument);
+      setRegistryDocument(existingRegistryDocument);
+      onRegistryCreated(existingRegistryDocument);
+
+    } catch (error: any) {
+      console.error('Error loading existing registry:', error);
+      throw error;
+    }
+  };
+
   return {
     isCreating,
     registryDocument,
-    createTokenRegistry
+    createTokenRegistry,
+    loadExistingRegistry
   };
 };

@@ -19,6 +19,22 @@ export const useDocumentHandlers = () => {
         throw new Error("No raw document found");
       }
 
+      // First, store the raw document
+      const rawFileName = `${transaction.id}_raw.json`;
+      console.log("Storing raw document with filename:", rawFileName);
+      
+      const { error: rawUploadError } = await supabase.storage
+        .from('raw-documents')
+        .upload(rawFileName, JSON.stringify(transaction.raw_document, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (rawUploadError) {
+        console.error("Error uploading raw document:", rawUploadError);
+        throw rawUploadError;
+      }
+
       console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
 
       const wrappedDoc = wrapDocument(transaction.raw_document);
@@ -98,16 +114,14 @@ export const useDocumentHandlers = () => {
       let finalDocument;
       let transactionHash;
 
-      if (isTransferable && wrappedDoc.data?.issuers?.[0]?.tokenRegistry) {
-        // For transferable documents, mint token and add proof
+      if (isTransferable && wrappedDoc.issuers?.[0]?.tokenRegistry) {
         const { ethereum } = window as any;
         if (!ethereum) throw new Error("MetaMask not found");
         
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        // Get the token registry contract
-        const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
+        const registryAddress = wrappedDoc.issuers[0].tokenRegistry;
         console.log("Using token registry at address:", registryAddress);
         
         const tokenRegistry = new ethers.Contract(
@@ -116,7 +130,6 @@ export const useDocumentHandlers = () => {
           signer
         );
 
-        // Mint token with document hash as tokenId
         const documentHash = ethers.utils.keccak256(
           ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
         );
@@ -130,19 +143,17 @@ export const useDocumentHandlers = () => {
         
         transactionHash = receipt.transactionHash;
         
-        // Add proof to document
         finalDocument = {
           ...wrappedDoc,
           proof: [{
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: `did:ethr:${walletAddress}#controller`,
+            verificationMethod: walletAddress,
             signature: transactionHash
           }]
         };
       } else if (!isTransferable) {
-        // For verifiable documents, sign with wallet
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
@@ -154,7 +165,7 @@ export const useDocumentHandlers = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: `did:ethr:${walletAddress}#controller`,
+            verificationMethod: walletAddress,
             signature: signature
           }]
         };
@@ -162,7 +173,6 @@ export const useDocumentHandlers = () => {
         throw new Error("Token registry address not found in document");
       }
 
-      // Store final document
       const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
       const { error: uploadError } = await supabase.storage
         .from('signed-documents')
@@ -175,7 +185,6 @@ export const useDocumentHandlers = () => {
         throw uploadError;
       }
 
-      // Update transaction status
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
