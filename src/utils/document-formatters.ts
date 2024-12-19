@@ -121,7 +121,6 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, registryDocume
       url: "https://generic-templates.openattestation.com"
     },
     issuers: [{
-      id: `did:ethr:${registryDocument.contractAddress}`,
       name: bolData.carrierName || "",
       tokenRegistry: registryDocument.contractAddress,
       identityProof: {
