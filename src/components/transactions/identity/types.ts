@@ -11,4 +11,6 @@ export interface TokenRegistryDocument {
   name: string;
   symbol: string;
   dnsLocation: string;
+  ethereumAddress: string;
+  network?: string;
 }

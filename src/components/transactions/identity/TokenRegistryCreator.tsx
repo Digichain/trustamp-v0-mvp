@@ -52,9 +52,9 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
 
       const registryDocument: TokenRegistryDocument = {
         contractAddress: deployedContract.address,
-        network: "sepolia",
-        tokenName: "TrustampRegistry",
-        tokenSymbol: "TRUST",
+        name: "TrustampRegistry",
+        symbol: "TRUST",
+        dnsLocation: "trustamp.com",
         ethereumAddress: walletAddress || ""
       };
 
@@ -95,3 +95,5 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
     </div>
   );
 };
+
+export type { TokenRegistryDocument };
