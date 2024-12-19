@@ -2,7 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useTransactions } from "@/hooks/useTransactions";
 import { wrapDocument } from "@/utils/document-wrapper";
-import { signAndStoreDocument } from "@/utils/document-signer";
+import { ethers } from "ethers";
+import TokenRegistryArtifact from "@/contracts/TokenRegistry";
 import { useWallet } from "@/contexts/WalletContext";
 
 export const useDocumentHandlers = () => {
@@ -94,19 +95,69 @@ export const useDocumentHandlers = () => {
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
 
-      const { signedDocument, publicUrl } = await signAndStoreDocument(
-        wrappedDoc,
-        walletAddress,
-        transaction.id
-      );
+      let finalDocument;
+      let transactionHash;
 
-      console.log("SIGNED/ISSUED DOCUMENT STRUCTURE:", JSON.stringify(signedDocument, null, 2));
+      if (isTransferable) {
+        // For transferable documents, mint token and add proof
+        const { ethereum } = window as any;
+        if (!ethereum) throw new Error("MetaMask not found");
+        
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        
+        // Get the token registry contract
+        const registryAddress = wrappedDoc.issuers[0].tokenRegistry;
+        const tokenRegistry = new ethers.Contract(
+          registryAddress,
+          TokenRegistryArtifact.abi,
+          signer
+        );
 
-      // Store in signed-documents bucket regardless of type
+        // Mint token with document hash as tokenId
+        const documentHash = ethers.utils.keccak256(
+          ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
+        );
+        const mintTx = await tokenRegistry.safeMint(walletAddress, documentHash);
+        const receipt = await mintTx.wait();
+        
+        transactionHash = receipt.transactionHash;
+        
+        // Add proof to document
+        finalDocument = {
+          ...wrappedDoc,
+          proof: [{
+            type: "TokenRegistryMint",
+            created: new Date().toISOString(),
+            proofPurpose: "assertionMethod",
+            verificationMethod: `did:ethr:${walletAddress}#controller`,
+            signature: transactionHash
+          }]
+        };
+      } else {
+        // For verifiable documents, sign with wallet
+        const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+        const signer = provider.getSigner();
+        const signature = await signer.signMessage(messageBytes);
+        
+        finalDocument = {
+          ...wrappedDoc,
+          proof: [{
+            type: "OpenAttestationSignature2018",
+            created: new Date().toISOString(),
+            proofPurpose: "assertionMethod",
+            verificationMethod: `did:ethr:${walletAddress}#controller`,
+            signature: signature
+          }]
+        };
+      }
+
+      // Store final document
       const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
       const { error: uploadError } = await supabase.storage
         .from('signed-documents')
-        .upload(fileName, JSON.stringify(signedDocument, null, 2), {
+        .upload(fileName, JSON.stringify(finalDocument, null, 2), {
           contentType: 'application/json',
           upsert: true
         });
@@ -115,12 +166,13 @@ export const useDocumentHandlers = () => {
         throw uploadError;
       }
 
-      console.log("Updating transaction status to document_issued");
+      // Update transaction status
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
           status: 'document_issued',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          transaction_hash: transactionHash || null
         })
         .eq('id', transaction.id);
 

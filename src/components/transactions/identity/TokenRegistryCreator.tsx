@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { createTemporaryRegistryDocument } from "@/utils/temporary-registry-mock";
 import { useToast } from "@/components/ui/use-toast";
-
-export interface TokenRegistryDocument {
-  contractAddress: string;
-  network: string;
-  tokenName: string;
-  tokenSymbol: string;
-  ethereumAddress: string;
-}
+import { ethers } from "ethers";
+import TokenRegistryArtifact from "@/contracts/TokenRegistry";
+import { TokenRegistryDocument } from "./types";
+import { useWallet } from "@/contexts/WalletContext";
 
 interface TokenRegistryCreatorProps {
   onRegistryCreated: (document: TokenRegistryDocument) => void;
@@ -18,29 +13,62 @@ interface TokenRegistryCreatorProps {
 export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreatorProps) => {
   const [isDeploying, setIsDeploying] = useState(false);
   const { toast } = useToast();
+  const { walletAddress } = useWallet();
 
   const handleDeploy = async () => {
     try {
       setIsDeploying(true);
-      console.log("Creating temporary token registry simulation");
+      console.log("Starting token registry deployment");
       
-      // Create temporary mock registry
-      const mockRegistry = createTemporaryRegistryDocument();
+      const { ethereum } = window as any;
+      if (!ethereum) {
+        throw new Error('MetaMask not found');
+      }
       
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      console.log("Got signer from provider");
+
+      // Create contract factory with the compiled contract
+      const factory = new ethers.ContractFactory(
+        TokenRegistryArtifact.abi,
+        TokenRegistryArtifact.bytecode,
+        signer
+      );
+      console.log("Created contract factory");
+
+      // Deploy contract
+      console.log("Deploying TokenRegistry...");
+      const tokenRegistry = await factory.deploy(
+        walletAddress,
+        "TrustampRegistry",
+        "TRUST"
+      );
+      console.log("Contract deployment transaction sent, waiting for confirmation...");
       
-      onRegistryCreated(mockRegistry);
+      // Wait for deployment confirmation
+      const deployedContract = await tokenRegistry.deployed();
+      console.log("TokenRegistry deployed at:", deployedContract.address);
+
+      const registryDocument: TokenRegistryDocument = {
+        contractAddress: deployedContract.address,
+        network: "sepolia",
+        tokenName: "TrustampRegistry",
+        tokenSymbol: "TRUST",
+        ethereumAddress: walletAddress || ""
+      };
+
+      onRegistryCreated(registryDocument);
       
       toast({
         title: "Success",
-        description: "Temporary token registry created for testing",
+        description: "Token Registry deployed successfully",
       });
-    } catch (error) {
-      console.error("Error in temporary token registry creation:", error);
+    } catch (error: any) {
+      console.error("Error in token registry deployment:", error);
       toast({
         title: "Error",
-        description: "Failed to create temporary token registry",
+        description: "Failed to deploy token registry",
         variant: "destructive",
       });
     } finally {
@@ -54,14 +82,14 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
         <div>
           <h3 className="text-lg font-medium">Token Registry</h3>
           <p className="text-sm text-gray-500">
-            Deploy a token registry contract (Temporary Simulation)
+            Deploy a token registry contract for transferable documents
           </p>
         </div>
         <Button 
           onClick={handleDeploy}
           disabled={isDeploying}
         >
-          {isDeploying ? "Creating..." : "Create Token Registry"}
+          {isDeploying ? "Deploying..." : "Deploy Token Registry"}
         </Button>
       </div>
     </div>
