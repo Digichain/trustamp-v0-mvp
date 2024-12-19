@@ -53,12 +53,13 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       if (error) throw error;
       if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
 
-      // Construct new registry document
+      // Construct new registry document with all required properties
       const newRegistryDocument: TokenRegistryDocument = {
         contractAddress: deployedContract.address,
         name,
         symbol,
-        dnsLocation: data.data.dnsLocation
+        dnsLocation: data.data.dnsLocation,
+        ethereumAddress: walletAddress
       };
 
       console.log('Setting registry document:', newRegistryDocument);
