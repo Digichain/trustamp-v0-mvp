@@ -129,7 +129,7 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       revocation: {
         type: "NONE"
       },
-      tokenRegistry: mockAddress,
+      tokenRegistry: bolData.tokenRegistry || "",
       identityProof: {
         type: "DNS-DID",
         location: "tempdns.trustamp.in"        
@@ -153,8 +153,7 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       notifyParty: bolData.notifyParty || { name: "", address: "" },
       placeOfReceipt: bolData.placeOfReceipt || "",
       placeOfDelivery: bolData.placeOfDelivery || "",
-      tokenRegistry: bolData.tokenRegistry || ""
-    }
+      }
   };
 
   console.log("FORMATTED BOL DOCUMENT STRUCTURE:", JSON.stringify(formattedDoc, null, 2));
