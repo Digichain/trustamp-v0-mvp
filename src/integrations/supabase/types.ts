@@ -12,72 +12,72 @@ export type Database = {
       bill_of_lading_documents: {
         Row: {
           bl_number: string | null
-          blnumber: string | null
-          carriername: string | null
+          blNumber: string | null
+          carrierName: string | null
           company_name: string | null
           consignee: Json | null
           created_at: string | null
           id: string
           links: Json | null
-          notifyparty: Json | null
+          notifyParty: Json | null
           packages: Json | null
-          placeofdelivery: string | null
-          placeofreceipt: string | null
-          portofdischarge: string | null
-          portofloading: string | null
+          placeOfDelivery: string | null
+          placeOfReceipt: string | null
+          portOfDischarge: string | null
+          portOfLoading: string | null
           raw_document: Json | null
           scac: string | null
           shipper: Json | null
           transaction_id: string
           updated_at: string | null
           vessel: string | null
-          voyageno: string | null
+          voyageNo: string | null
         }
         Insert: {
           bl_number?: string | null
-          blnumber?: string | null
-          carriername?: string | null
+          blNumber?: string | null
+          carrierName?: string | null
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
           id?: string
           links?: Json | null
-          notifyparty?: Json | null
+          notifyParty?: Json | null
           packages?: Json | null
-          placeofdelivery?: string | null
-          placeofreceipt?: string | null
-          portofdischarge?: string | null
-          portofloading?: string | null
+          placeOfDelivery?: string | null
+          placeOfReceipt?: string | null
+          portOfDischarge?: string | null
+          portOfLoading?: string | null
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
           transaction_id: string
           updated_at?: string | null
           vessel?: string | null
-          voyageno?: string | null
+          voyageNo?: string | null
         }
         Update: {
           bl_number?: string | null
-          blnumber?: string | null
-          carriername?: string | null
+          blNumber?: string | null
+          carrierName?: string | null
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
           id?: string
           links?: Json | null
-          notifyparty?: Json | null
+          notifyParty?: Json | null
           packages?: Json | null
-          placeofdelivery?: string | null
-          placeofreceipt?: string | null
-          portofdischarge?: string | null
-          portofloading?: string | null
+          placeOfDelivery?: string | null
+          placeOfReceipt?: string | null
+          portOfDischarge?: string | null
+          portOfLoading?: string | null
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
           transaction_id?: string
           updated_at?: string | null
           vessel?: string | null
-          voyageno?: string | null
+          voyageNo?: string | null
         }
         Relationships: [
           {

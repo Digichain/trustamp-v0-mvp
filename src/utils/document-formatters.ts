@@ -1,10 +1,8 @@
 export const generateDocumentId = () => {
-  // Generate 4 random uppercase letters
   const letters = Array.from({ length: 4 }, () => 
     String.fromCharCode(65 + Math.floor(Math.random() * 26))
   ).join('');
   
-  // Generate 4 random numbers
   const numbers = Array.from({ length: 4 }, () => 
     Math.floor(Math.random() * 10)
   ).join('');
@@ -102,19 +100,18 @@ export const formatInvoiceToOpenAttestation = (invoiceData: any, didDocument: an
   return formattedDoc;
 };
 
-export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: any) => {
-  if (!didDocument) {
-    throw new Error("DID document is required to create a verifiable document");
+export const formatBillOfLadingToOpenAttestation = (bolData: any, registryDocument: any) => {
+  if (!registryDocument) {
+    throw new Error("Token Registry document is required to create a transferable document");
   }
 
   console.log("Starting BOL document formatting with data:", bolData);
-  console.log("Using DID document:", didDocument);
+  console.log("Using Registry document:", registryDocument);
 
-  const baseId = `did:ethr:${didDocument.ethereumAddress}`;
   const documentId = generateDocumentId();
-  
   console.log("Generated document ID:", documentId);
 
+  // Create document with explicit ordering based on schema
   const formattedDoc = {
     version: "https://schema.openattestation.com/2.0/schema.json" as const,
     id: documentId,
@@ -124,15 +121,12 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       url: "https://generic-templates.openattestation.com"
     },
     issuers: [{
-      id: baseId,
+      id: `did:ethr:${registryDocument.contractAddress}`,
       name: bolData.carrierName || "",
-      revocation: {
-        type: "NONE"
-      },
-      tokenRegistry: bolData.tokenRegistry || "",
+      tokenRegistry: registryDocument.contractAddress,
       identityProof: {
-        type: "DNS-DID",
-        location: "tempdns.trustamp.in"        
+        type: "DNS-TXT",
+        location: "tempdns.trustamp.in"
       }
     }],
     network: {
@@ -152,8 +146,8 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       consignee: bolData.consignee || { name: "", address: "" },
       notifyParty: bolData.notifyParty || { name: "", address: "" },
       placeOfReceipt: bolData.placeOfReceipt || "",
-      placeOfDelivery: bolData.placeOfDelivery || "",
-      }
+      placeOfDelivery: bolData.placeOfDelivery || ""
+    }
   };
 
   console.log("FORMATTED BOL DOCUMENT STRUCTURE:", JSON.stringify(formattedDoc, null, 2));

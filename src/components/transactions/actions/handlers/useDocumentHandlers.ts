@@ -19,18 +19,10 @@ export const useDocumentHandlers = () => {
       }
 
       console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
-      console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(transaction.raw_document));
-      console.log("RAW DOCUMENT DATA KEYS ORDER:", Object.keys(transaction.raw_document.data || {}));
 
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
-      console.log("WRAPPED DOCUMENT KEYS ORDER:", Object.keys(wrappedDoc));
-      console.log("WRAPPED DOCUMENT DATA KEYS ORDER:", Object.keys(wrappedDoc.data || {}));
 
-      const merkleRoot = wrappedDoc.signature.merkleRoot;
-      console.log("Generated merkle root:", merkleRoot);
-
-      // Use transaction ID for file naming
       const fileName = `${transaction.id}_wrapped.json`;
       console.log("Creating wrapped document with filename:", fileName);
 
@@ -83,9 +75,8 @@ export const useDocumentHandlers = () => {
         throw new Error("Please connect your wallet first");
       }
 
-      console.log("Starting document signing process for transaction:", transaction.id);
+      console.log("Starting document signing/issuing process for transaction:", transaction.id);
       
-      // Use transaction ID for file operations
       const wrappedFileName = `${transaction.id}_wrapped.json`;
       console.log("Attempting to fetch wrapped document:", wrappedFileName);
       
@@ -100,18 +91,29 @@ export const useDocumentHandlers = () => {
 
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
-      console.log("WRAPPED DOCUMENT KEYS ORDER:", Object.keys(wrappedDoc));
-      console.log("WRAPPED DOCUMENT DATA KEYS ORDER:", Object.keys(wrappedDoc.data || {}));
 
+      const isTransferable = transaction.document_subtype === 'transferable';
       const { signedDocument, publicUrl } = await signAndStoreDocument(
         wrappedDoc,
         walletAddress,
-        transaction.id
+        transaction.id,
+        isTransferable
       );
 
-      console.log("SIGNED DOCUMENT STRUCTURE:", JSON.stringify(signedDocument, null, 2));
-      console.log("SIGNED DOCUMENT KEYS ORDER:", Object.keys(signedDocument));
-      console.log("SIGNED DOCUMENT DATA KEYS ORDER:", Object.keys(signedDocument.data || {}));
+      console.log("SIGNED/ISSUED DOCUMENT STRUCTURE:", JSON.stringify(signedDocument, null, 2));
+
+      // Store in signed-documents bucket regardless of type
+      const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
+      const { error: uploadError } = await supabase.storage
+        .from('signed-documents')
+        .upload(fileName, JSON.stringify(signedDocument, null, 2), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
 
       console.log("Updating transaction status to document_issued");
       const { error: updateError } = await supabase
@@ -123,7 +125,6 @@ export const useDocumentHandlers = () => {
         .eq('id', transaction.id);
 
       if (updateError) {
-        console.error("Error updating transaction status:", updateError);
         throw updateError;
       }
 
@@ -131,13 +132,13 @@ export const useDocumentHandlers = () => {
 
       toast({
         title: "Success",
-        description: "Document signed successfully",
+        description: `Document ${isTransferable ? 'issued' : 'signed'} successfully`,
       });
     } catch (error: any) {
-      console.error("Error signing document:", error);
+      console.error("Error signing/issuing document:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to sign document",
+        description: error.message || `Failed to ${isTransferable ? 'issue' : 'sign'} document`,
         variant: "destructive",
       });
     }
@@ -145,11 +146,11 @@ export const useDocumentHandlers = () => {
 
   const handleDownloadSignedDocument = async (transaction: any) => {
     try {
-      // Use transaction ID for file operations
-      const signedFileName = `${transaction.id}_signed.json`;
+      const isTransferable = transaction.document_subtype === 'transferable';
+      const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
       const { data, error } = await supabase.storage
         .from('signed-documents')
-        .download(signedFileName);
+        .download(fileName);
 
       if (error) {
         throw error;
@@ -159,7 +160,7 @@ export const useDocumentHandlers = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = signedFileName;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -170,10 +171,10 @@ export const useDocumentHandlers = () => {
         description: "Document downloaded successfully",
       });
     } catch (error: any) {
-      console.error("Error downloading signed document:", error);
+      console.error("Error downloading document:", error);
       toast({
         title: "Error",
-        description: "Failed to download signed document",
+        description: "Failed to download document",
         variant: "destructive",
       });
     }

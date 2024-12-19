@@ -5,6 +5,7 @@ import {
   Eye,
   FileSignature,
   Download,
+  Send
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,6 +33,8 @@ export const TransactionActions = ({
     handleDownloadSignedDocument,
   } = useDocumentHandlers();
 
+  const isTransferable = transaction.document_subtype === 'transferable';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,13 +52,17 @@ export const TransactionActions = ({
           Wrap Document
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleSignDocument(transaction)}>
-          <FileSignature className="mr-2 h-4 w-4" />
-          Sign Document
+          {isTransferable ? (
+            <Send className="mr-2 h-4 w-4" />
+          ) : (
+            <FileSignature className="mr-2 h-4 w-4" />
+          )}
+          {isTransferable ? 'Issue Document' : 'Sign Document'}
         </DropdownMenuItem>
         {transaction.status === 'document_issued' && (
           <DropdownMenuItem onClick={() => handleDownloadSignedDocument(transaction)}>
             <Download className="mr-2 h-4 w-4" />
-            Download Signed Document
+            Download {isTransferable ? 'Issued' : 'Signed'} Document
           </DropdownMenuItem>
         )}
         <DropdownMenuItem 
