@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { transferableBillOfLadingSchema } from "@/schemas/transferable-bill-of-lading";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
@@ -12,32 +9,72 @@ import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
 import { TokenRegistryCreator, TokenRegistryDocument } from "../identity/TokenRegistryCreator";
 import { useWallet } from "@/contexts/WalletContext";
 import { formatBillOfLadingToOpenAttestation } from "@/utils/document-formatters";
+import { BillOfLadingBasicInfo } from "./bill-of-lading/BillOfLadingBasicInfo";
+import { BillOfLadingLocations } from "./bill-of-lading/BillOfLadingLocations";
+import { BillOfLadingParties } from "./bill-of-lading/BillOfLadingParties";
+import { BillOfLadingPackages } from "./bill-of-lading/BillOfLadingPackages";
 
 export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isWalletConnected, network } = useWallet();
   const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
-  const [formData, setFormData] = useState({
-    blNumber: "",
-    companyName: "",
-    field1: "",
-    field2: "",
-    field3: "",
-    field4: "",
-    field5: "",
-    field6: "",
-    field7: "",
-    field8: "",
-    field9: "",
-  });
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    scac: "",
+    blNumber: "",
+    vessel: "",
+    voyageNo: "",
+    carrierName: "",
+    portOfLoading: "",
+    portOfDischarge: "",
+    placeOfReceipt: "",
+    placeOfDelivery: "",
+    shipper: { name: "", address: "" },
+    consignee: { name: "", address: "" },
+    notifyParty: { name: "", address: "" },
+    packages: [{ description: "", weight: "", measurement: "" }]
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handlePartyChange = (party: string, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [party]: {
+        ...prev[party as keyof typeof prev],
+        [field]: value
+      }
+    }));
+  };
+
+  const handlePackageChange = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      packages: prev.packages.map((pkg, i) => 
+        i === index ? { ...pkg, [field]: value } : pkg
+      )
+    }));
+  };
+
+  const handleAddPackage = () => {
+    setFormData(prev => ({
+      ...prev,
+      packages: [...prev.packages, { description: "", weight: "", measurement: "" }]
+    }));
+  };
+
+  const handleRemovePackage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      packages: prev.packages.filter((_, i) => i !== index)
     }));
   };
 
@@ -81,7 +118,6 @@ export const TransferableBillOfLadingForm = () => {
         throw new Error("No user found");
       }
 
-      // Format the document according to OpenAttestation schema
       const formattedDoc = formatBillOfLadingToOpenAttestation({
         ...formData,
         tokenRegistry: registryDocument.contractAddress
@@ -107,7 +143,6 @@ export const TransferableBillOfLadingForm = () => {
 
       if (transactionError) throw transactionError;
 
-      // Store raw document in storage
       const fileName = `${transactionData.id}.json`;
       const { error: uploadError } = await supabase.storage
         .from('raw-documents')
@@ -121,22 +156,11 @@ export const TransferableBillOfLadingForm = () => {
         throw uploadError;
       }
 
-      // Create bill of lading document record
       const { error: bolError } = await supabase
         .from("bill_of_lading_documents")
         .insert({
           transaction_id: transactionData.id,
-          bl_number: formData.blNumber,
-          company_name: formData.companyName,
-          field1: formData.field1,
-          field2: formData.field2,
-          field3: formData.field3,
-          field4: formData.field4,
-          field5: formData.field5,
-          field6: formData.field6,
-          field7: formData.field7,
-          field8: formData.field8,
-          field9: formData.field9,
+          ...formData,
           raw_document: formattedDoc
         });
 
@@ -163,20 +187,6 @@ export const TransferableBillOfLadingForm = () => {
     }
   };
 
-  const fields = [
-    { name: "blNumber", label: "BL Number" },
-    { name: "companyName", label: "Company Name" },
-    { name: "field1", label: "Field 1" },
-    { name: "field2", label: "Field 2" },
-    { name: "field3", label: "Field 3" },
-    { name: "field4", label: "Field 4" },
-    { name: "field5", label: "Field 5" },
-    { name: "field6", label: "Field 6" },
-    { name: "field7", label: "Field 7" },
-    { name: "field8", label: "Field 8" },
-    { name: "field9", label: "Field 9" },
-  ];
-
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <TokenRegistryCreator onRegistryCreated={setRegistryDocument} />
@@ -185,24 +195,55 @@ export const TransferableBillOfLadingForm = () => {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Bill of Lading Details</CardTitle>
+              <CardTitle>Basic Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                {fields.map((field) => (
-                  <div key={field.name}>
-                    <Label className="block text-sm font-medium mb-1">
-                      {field.label}
-                    </Label>
-                    <Input
-                      value={formData[field.name as keyof typeof formData]}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      placeholder={`Enter ${field.label}`}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                ))}
-              </div>
+            <CardContent>
+              <BillOfLadingBasicInfo
+                formData={formData}
+                onInputChange={handleInputChange}
+                isSubmitting={isSubmitting}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Locations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BillOfLadingLocations
+                formData={formData}
+                onInputChange={handleInputChange}
+                isSubmitting={isSubmitting}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Parties</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BillOfLadingParties
+                formData={formData}
+                onPartyChange={handlePartyChange}
+                isSubmitting={isSubmitting}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Packages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BillOfLadingPackages
+                packages={formData.packages}
+                onPackageChange={handlePackageChange}
+                onAddPackage={handleAddPackage}
+                onRemovePackage={handleRemovePackage}
+                isSubmitting={isSubmitting}
+              />
             </CardContent>
           </Card>
 

@@ -110,14 +110,11 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
   console.log("Starting BOL document formatting with data:", bolData);
   console.log("Using DID document:", didDocument);
 
-  // The base DID without #controller
   const baseId = `did:ethr:${didDocument.ethereumAddress}`;
-  
-  // Generate document ID in the format (4 letters + 4 numbers)
   const documentId = generateDocumentId();
+  
   console.log("Generated document ID:", documentId);
 
-  // Create document with explicit ordering based on schema
   const formattedDoc = {
     version: "https://schema.openattestation.com/2.0/schema.json" as const,
     id: documentId,
@@ -128,7 +125,7 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
     },
     issuers: [{
       id: baseId,
-      name: bolData.companyName || "",
+      name: bolData.carrierName || "",
       revocation: {
         type: "NONE"
       },
@@ -143,17 +140,19 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       chainId: "11155111"
     },
     billOfLadingDetails: {
+      scac: bolData.scac || "",
       blNumber: bolData.blNumber || "",
-      companyName: bolData.companyName || "",
-      field1: bolData.field1 || "",
-      field2: bolData.field2 || "",
-      field3: bolData.field3 || "",
-      field4: bolData.field4 || "",
-      field5: bolData.field5 || "",
-      field6: bolData.field6 || "",
-      field7: bolData.field7 || "",
-      field8: bolData.field8 || "",
-      field9: bolData.field9 || "",
+      vessel: bolData.vessel || "",
+      voyageNo: bolData.voyageNo || "",
+      portOfLoading: bolData.portOfLoading || "",
+      portOfDischarge: bolData.portOfDischarge || "",
+      carrierName: bolData.carrierName || "",
+      packages: bolData.packages || [],
+      shipper: bolData.shipper || { name: "", address: "" },
+      consignee: bolData.consignee || { name: "", address: "" },
+      notifyParty: bolData.notifyParty || { name: "", address: "" },
+      placeOfReceipt: bolData.placeOfReceipt || "",
+      placeOfDelivery: bolData.placeOfDelivery || "",
       tokenRegistry: bolData.tokenRegistry || ""
     }
   };
