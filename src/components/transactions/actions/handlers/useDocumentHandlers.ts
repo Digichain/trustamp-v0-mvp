@@ -77,6 +77,7 @@ export const useDocumentHandlers = () => {
 
       const isTransferable = transaction.document_subtype === 'transferable';
       console.log("Starting document signing/issuing process for transaction:", transaction.id);
+      console.log("Document is transferable:", isTransferable);
       
       const wrappedFileName = `${transaction.id}_wrapped.json`;
       console.log("Attempting to fetch wrapped document:", wrappedFileName);
@@ -137,7 +138,7 @@ export const useDocumentHandlers = () => {
       console.error("Error signing/issuing document:", error);
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isTransferable ? 'issue' : 'sign'} document`,
+        description: error.message || `Failed to ${transaction.document_subtype === 'transferable' ? 'issue' : 'sign'} document`,
         variant: "destructive",
       });
     }
