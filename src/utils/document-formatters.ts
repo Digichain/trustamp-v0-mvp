@@ -129,10 +129,10 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, didDocument: a
       revocation: {
         type: "NONE"
       },
+      tokenRegistry: mockAddress,
       identityProof: {
         type: "DNS-DID",
-        location: "tempdns.trustamp.in",
-        key: `${baseId}#controller`
+        location: "tempdns.trustamp.in"        
       }
     }],
     network: {
