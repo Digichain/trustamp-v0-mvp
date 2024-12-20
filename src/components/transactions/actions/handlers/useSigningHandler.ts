@@ -66,6 +66,7 @@ export const useSigningHandler = () => {
         const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
         console.log("Using token registry at address:", registryAddress);
         
+        // Create contract instance with the correct ABI
         const tokenRegistry = new ethers.Contract(
           registryAddress,
           TokenRegistryArtifact.abi,
@@ -79,8 +80,8 @@ export const useSigningHandler = () => {
         const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
         console.log("Document hash for minting:", tokenId);
         
-        // Mint token with the document hash as tokenId
-        const mintTx = await tokenRegistry.mint(walletAddress, tokenId);
+        // Call _safeMint directly since it's the underlying function
+        const mintTx = await tokenRegistry._safeMint(walletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
