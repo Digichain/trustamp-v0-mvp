@@ -34,15 +34,21 @@ export const useSigningHandler = () => {
           .from('wrapped-documents')
           .download(wrappedFileName);
 
-        if (fetchError) {
-          console.log("Wrapped document not found, wrapping now...");
+        if (fetchError || !wrappedDocData) {
+          console.log("Wrapped document not found or error, wrapping now...");
           wrappedDoc = await handleWrapDocument(transaction);
         } else {
-          wrappedDoc = JSON.parse(await wrappedDocData.text());
+          const text = await wrappedDocData.text();
+          console.log("Retrieved wrapped document text:", text);
+          wrappedDoc = JSON.parse(text);
         }
       } catch (error) {
-        console.log("Error fetching wrapped document, wrapping now...");
+        console.log("Error fetching wrapped document, wrapping now...", error);
         wrappedDoc = await handleWrapDocument(transaction);
+      }
+
+      if (!wrappedDoc) {
+        throw new Error("Failed to get or create wrapped document");
       }
 
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
