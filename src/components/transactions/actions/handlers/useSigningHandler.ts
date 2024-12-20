@@ -63,9 +63,17 @@ export const useSigningHandler = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
+        // Log the entire issuers array and token registry value
+        console.log("Issuers data:", wrappedDoc.data.issuers);
         const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
+        console.log("Raw registry address:", registryAddress);
+
+        if (!registryAddress) {
+          throw new Error("Token registry address is missing");
+        }
+
         if (!ethers.utils.isAddress(registryAddress)) {
-          throw new Error("Invalid token registry address");
+          throw new Error(`Invalid token registry address: ${registryAddress}`);
         }
 
         console.log("Using token registry at address:", registryAddress);
