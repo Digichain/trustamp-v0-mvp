@@ -47,16 +47,6 @@ export const useSigningHandler = () => {
 
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
 
-      // Ensure we have the token registry address for transferable documents
-      if (isTransferable) {
-        const tokenRegistryAddress = wrappedDoc.data?.issuers?.[0]?.tokenRegistry;
-        if (!tokenRegistryAddress) {
-          console.error("Token registry address not found in document:", wrappedDoc);
-          throw new Error("Token registry address not found in document");
-        }
-        console.log("Found token registry address:", tokenRegistryAddress);
-      }
-
       let finalDocument;
       let transactionHash;
 
@@ -112,7 +102,6 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            // Use direct wallet address instead of ENS
             verificationMethod: walletAddress,
             signature: signature
           }]
