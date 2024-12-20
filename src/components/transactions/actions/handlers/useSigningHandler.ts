@@ -100,6 +100,7 @@ export const useSigningHandler = () => {
           }]
         };
       } else {
+        // For non-transferable documents, sign directly with the wallet
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
@@ -111,6 +112,7 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
+            // Use direct wallet address instead of ENS
             verificationMethod: walletAddress,
             signature: signature
           }]
