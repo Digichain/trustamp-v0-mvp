@@ -73,7 +73,6 @@ export const useSigningHandler = () => {
         }
 
         // Extract the actual Ethereum address from the OpenAttestation format
-        // The format is like "uuid:string:0xAddress", so we split by ":" and take the last part
         const registryAddress = rawRegistryAddress.split(":").pop();
         console.log("Extracted registry address:", registryAddress);
 
@@ -94,6 +93,9 @@ export const useSigningHandler = () => {
         const documentHash = ethers.utils.keccak256(
           ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
         );
+        console.log("Raw document hash:", documentHash);
+        
+        // Ensure the hash has 0x prefix
         const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
         console.log("Document hash for minting:", tokenId);
         
@@ -116,7 +118,17 @@ export const useSigningHandler = () => {
           proof: [transactionHash]
         };
       } else {
-        const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
+        // For non-transferable documents, sign the merkle root
+        const merkleRoot = wrappedDoc.signature.merkleRoot;
+        console.log("Merkle root to sign:", merkleRoot);
+        
+        // Ensure merkleRoot has 0x prefix for proper byte conversion
+        const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+        console.log("Prefixed merkle root:", prefixedMerkleRoot);
+        
+        const messageBytes = ethers.utils.arrayify(prefixedMerkleRoot);
+        console.log("Message bytes:", messageBytes);
+        
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
         const signature = await signer.signMessage(messageBytes);
