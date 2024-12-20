@@ -6,6 +6,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { useTokenRegistryCreation } from "./useTokenRegistryCreation";
 import { TokenRegistryDocument } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TokenRegistryCreatorProps {
   onRegistryCreated: (document: TokenRegistryDocument) => void;
@@ -155,14 +156,18 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
         </Tabs>
 
         {registryDocument && (
-          <div className="p-4 bg-gray-50 rounded-md">
-            <h4 className="font-medium mb-2">Registry Details</h4>
-            <div className="text-sm space-y-1">
-              <p><span className="font-medium">Address:</span> {registryDocument.contractAddress}</p>
-              <p><span className="font-medium">Name:</span> {registryDocument.name}</p>
-              <p><span className="font-medium">Symbol:</span> {registryDocument.symbol}</p>
-            </div>
-          </div>
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Registry Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p><span className="font-medium">Address:</span> {registryDocument.contractAddress}</p>
+                <p><span className="font-medium">Name:</span> {registryDocument.name}</p>
+                <p><span className="font-medium">Symbol:</span> {registryDocument.symbol}</p>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

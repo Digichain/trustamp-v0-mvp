@@ -1,15 +1,16 @@
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useTransactions } from "@/hooks/useTransactions";
 import { wrapDocument } from "@/utils/document-wrapper";
 import { ethers } from "ethers";
 import TokenRegistryArtifact from "@/contracts/TokenRegistry";
 import { useWallet } from "@/contexts/WalletContext";
+import { useDocumentStorage } from "./useDocumentStorage";
 
 export const useDocumentHandlers = () => {
   const { toast } = useToast();
   const { invalidateTransactions } = useTransactions();
   const { walletAddress } = useWallet();
+  const { storeRawDocument, storeWrappedDocument, storeSignedDocument } = useDocumentStorage();
 
   const handleWrapDocument = async (transaction: any) => {
     try {
@@ -19,43 +20,17 @@ export const useDocumentHandlers = () => {
         throw new Error("No raw document found");
       }
 
-      // First, store the raw document
-      const rawFileName = `${transaction.id}_raw.json`;
-      console.log("Storing raw document with filename:", rawFileName);
-      
-      const { error: rawUploadError } = await supabase.storage
-        .from('raw-documents')
-        .upload(rawFileName, JSON.stringify(transaction.raw_document, null, 2), {
-          contentType: 'application/json',
-          upsert: true
-        });
-
-      if (rawUploadError) {
-        console.error("Error uploading raw document:", rawUploadError);
-        throw rawUploadError;
-      }
-
+      // Store the raw document first
+      await storeRawDocument(transaction.id, transaction.raw_document);
       console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
 
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
 
-      const fileName = `${transaction.id}_wrapped.json`;
-      console.log("Creating wrapped document with filename:", fileName);
+      // Store the wrapped document
+      await storeWrappedDocument(transaction.id, wrappedDoc);
 
-      const { error: uploadError } = await supabase.storage
-        .from('wrapped-documents')
-        .upload(fileName, JSON.stringify(wrappedDoc, null, 2), {
-          contentType: 'application/json',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error("Error uploading wrapped document:", uploadError);
-        throw uploadError;
-      }
-
-      console.log("Updating transaction status to document_wrapped");
+      // Update transaction status
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
@@ -111,17 +86,27 @@ export const useDocumentHandlers = () => {
       const wrappedDoc = JSON.parse(await wrappedDocData.text());
       console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
 
+      // Ensure we have the token registry address for transferable documents
+      if (isTransferable) {
+        const tokenRegistryAddress = wrappedDoc.data?.issuers?.[0]?.tokenRegistry;
+        if (!tokenRegistryAddress) {
+          console.error("Token registry address not found in document:", wrappedDoc);
+          throw new Error("Token registry address not found in document");
+        }
+        console.log("Found token registry address:", tokenRegistryAddress);
+      }
+
       let finalDocument;
       let transactionHash;
 
-      if (isTransferable && wrappedDoc.issuers?.[0]?.tokenRegistry) {
+      if (isTransferable && wrappedDoc.data?.issuers?.[0]?.tokenRegistry) {
         const { ethereum } = window as any;
         if (!ethereum) throw new Error("MetaMask not found");
         
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        const registryAddress = wrappedDoc.issuers[0].tokenRegistry;
+        const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
         console.log("Using token registry at address:", registryAddress);
         
         const tokenRegistry = new ethers.Contract(
@@ -153,7 +138,7 @@ export const useDocumentHandlers = () => {
             signature: transactionHash
           }]
         };
-      } else if (!isTransferable) {
+      } else {
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
@@ -169,22 +154,12 @@ export const useDocumentHandlers = () => {
             signature: signature
           }]
         };
-      } else {
-        throw new Error("Token registry address not found in document");
       }
 
-      const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
-      const { error: uploadError } = await supabase.storage
-        .from('signed-documents')
-        .upload(fileName, JSON.stringify(finalDocument, null, 2), {
-          contentType: 'application/json',
-          upsert: true
-        });
+      // Store the signed document
+      await storeSignedDocument(transaction.id, finalDocument);
 
-      if (uploadError) {
-        throw uploadError;
-      }
-
+      // Update transaction status
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
@@ -214,45 +189,8 @@ export const useDocumentHandlers = () => {
     }
   };
 
-  const handleDownloadSignedDocument = async (transaction: any) => {
-    try {
-      const isTransferable = transaction.document_subtype === 'transferable';
-      const fileName = `${transaction.id}_${isTransferable ? 'issued' : 'signed'}.json`;
-      const { data, error } = await supabase.storage
-        .from('signed-documents')
-        .download(fileName);
-
-      if (error) {
-        throw error;
-      }
-
-      const blob = new Blob([await data.text()], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: "Success",
-        description: "Document downloaded successfully",
-      });
-    } catch (error: any) {
-      console.error("Error downloading document:", error);
-      toast({
-        title: "Error",
-        description: "Failed to download document",
-        variant: "destructive",
-      });
-    }
-  };
-
   return {
     handleWrapDocument,
-    handleSignDocument,
-    handleDownloadSignedDocument,
+    handleSignDocument
   };
 };

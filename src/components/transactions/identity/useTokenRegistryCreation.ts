@@ -85,9 +85,10 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         provider
       );
 
-      const [name, symbol] = await Promise.all([
+      const [name, symbol, owner] = await Promise.all([
         tokenRegistry.name(),
-        tokenRegistry.symbol()
+        tokenRegistry.symbol(),
+        tokenRegistry.owner()
       ]);
 
       const { data, error } = await supabase.functions.invoke('oa-dns-records', {
@@ -106,7 +107,7 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
         name,
         symbol,
         dnsLocation: data.data.dnsLocation,
-        ethereumAddress: await tokenRegistry.owner()
+        ethereumAddress: owner
       };
 
       console.log('Setting existing registry document:', existingRegistryDocument);
