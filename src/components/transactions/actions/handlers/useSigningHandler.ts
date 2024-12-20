@@ -72,12 +72,11 @@ export const useSigningHandler = () => {
           throw new Error("Token registry address is missing");
         }
 
-        // Extract the actual Ethereum address from the OpenAttestation format
         const registryAddress = rawRegistryAddress.split(":").pop();
         console.log("Extracted registry address:", registryAddress);
 
         if (!registryAddress || !ethers.utils.isAddress(registryAddress)) {
-          throw new Error(`Invalid token registry address after extraction: ${registryAddress}`);
+          throw new Error(`Invalid token registry address: ${registryAddress}`);
         }
 
         console.log("Using token registry at address:", registryAddress);
@@ -89,33 +88,28 @@ export const useSigningHandler = () => {
           signer
         );
 
-        // Calculate document hash and ensure 0x prefix
-        const documentHash = ethers.utils.keccak256(
-          ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
-        );
-        console.log("Raw document hash:", documentHash);
-        
-        // Ensure the hash has 0x prefix
-        const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
-        console.log("Document hash for minting:", tokenId);
-        
-        if (!ethers.utils.isAddress(walletAddress)) {
-          throw new Error("Invalid wallet address");
-        }
+        // Use the merkleRoot from the wrapped document as tokenId
+        const merkleRoot = wrappedDoc.signature.merkleRoot;
+        console.log("Using merkle root as token ID:", merkleRoot);
 
-        // Call safeMint function
-        console.log("Calling safeMint with params:", { to: walletAddress, tokenId });
-        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
+        // Call safeMint function with merkleRoot as tokenId
+        console.log("Calling safeMint with params:", { to: walletAddress, tokenId: merkleRoot });
+        const mintTx = await tokenRegistry.safeMint(walletAddress, merkleRoot);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
         console.log("Mint transaction confirmed:", receipt);
         
-        transactionHash = receipt.transactionHash;
+        // Remove '0x' prefix from transaction hash for the proof
+        transactionHash = receipt.transactionHash.replace('0x', '');
         
+        // Keep the same wrapped document structure, just add the proof
         finalDocument = {
           ...wrappedDoc,
-          proof: [transactionHash]
+          signature: {
+            ...wrappedDoc.signature,
+            proof: [transactionHash]
+          }
         };
       } else {
         // For non-transferable documents, sign the merkle root
