@@ -85,12 +85,11 @@ export const useSigningHandler = () => {
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress,
+            verificationMethod: `${walletAddress}#key-1`,
             signature: transactionHash
           }]
         };
       } else {
-        // For non-transferable documents, sign directly with the wallet
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
         const provider = new ethers.providers.Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
@@ -102,7 +101,7 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress,
+            verificationMethod: `${walletAddress}#key-1`,
             signature: signature
           }]
         };
