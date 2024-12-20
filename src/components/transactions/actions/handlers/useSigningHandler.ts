@@ -113,13 +113,7 @@ export const useSigningHandler = () => {
         
         finalDocument = {
           ...wrappedDoc,
-          proof: [{
-            type: "TokenRegistryMint",
-            created: new Date().toISOString(),
-            proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress,
-            signature: transactionHash
-          }]
+          proof: [transactionHash]
         };
       } else {
         const messageBytes = ethers.utils.arrayify(wrappedDoc.signature.merkleRoot);
