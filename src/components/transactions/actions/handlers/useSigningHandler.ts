@@ -80,8 +80,8 @@ export const useSigningHandler = () => {
         const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
         console.log("Document hash for minting:", tokenId);
         
-        // Call _safeMint directly since it's the underlying function
-        const mintTx = await tokenRegistry._safeMint(walletAddress, tokenId);
+        // Call safeMint (public function) instead of _safeMint
+        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
