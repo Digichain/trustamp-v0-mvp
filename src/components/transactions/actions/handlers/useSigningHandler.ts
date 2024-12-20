@@ -66,7 +66,7 @@ export const useSigningHandler = () => {
         const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
         console.log("Using token registry at address:", registryAddress);
         
-        // Create contract instance with the correct ABI
+        // Create contract instance
         const tokenRegistry = new ethers.Contract(
           registryAddress,
           TokenRegistryArtifact.abi,
@@ -80,7 +80,8 @@ export const useSigningHandler = () => {
         const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
         console.log("Document hash for minting:", tokenId);
         
-        // Call safeMint (public function) instead of _safeMint
+        // Call safeMint function
+        console.log("Calling safeMint with params:", { to: walletAddress, tokenId });
         const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
@@ -95,7 +96,7 @@ export const useSigningHandler = () => {
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress,
+            verificationMethod: walletAddress, // Removed ENS-related formatting
             signature: transactionHash
           }]
         };
@@ -111,7 +112,7 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress,
+            verificationMethod: walletAddress, // Removed ENS-related formatting
             signature: signature
           }]
         };
