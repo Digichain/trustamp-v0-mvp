@@ -64,21 +64,15 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
-
-        // Ensure tokenRegistry address is a valid Ethereum address (resolve ENS if necessary)
-        const resolvedRegistryAddress = ethers.utils.isAddress(registryAddress) 
-          ? registryAddress 
-          : await provider.resolveName(registryAddress);
-
-        if (!resolvedRegistryAddress) {
+        if (!ethers.utils.isAddress(registryAddress)) {
           throw new Error("Invalid token registry address");
         }
 
-        console.log("Using token registry at address:", resolvedRegistryAddress);
+        console.log("Using token registry at address:", registryAddress);
         
         // Create contract instance
         const tokenRegistry = new ethers.Contract(
-          resolvedRegistryAddress,
+          registryAddress,
           TokenRegistryArtifact.abi,
           signer
         );
@@ -90,19 +84,13 @@ export const useSigningHandler = () => {
         const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
         console.log("Document hash for minting:", tokenId);
         
-        // Call safeMint function
-        console.log("Calling safeMint with params:", { to: walletAddress, tokenId });
-
-        // Ensure walletAddress is a valid Ethereum address
-        const resolvedWalletAddress = ethers.utils.isAddress(walletAddress) 
-          ? walletAddress 
-          : await provider.resolveName(walletAddress);
-
-        if (!resolvedWalletAddress) {
+        if (!ethers.utils.isAddress(walletAddress)) {
           throw new Error("Invalid wallet address");
         }
 
-        const mintTx = await tokenRegistry.safeMint(resolvedWalletAddress, tokenId);
+        // Call safeMint function
+        console.log("Calling safeMint with params:", { to: walletAddress, tokenId });
+        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
@@ -116,7 +104,7 @@ export const useSigningHandler = () => {
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: resolvedWalletAddress, // Removed ENS-related formatting
+            verificationMethod: walletAddress,
             signature: transactionHash
           }]
         };
@@ -132,7 +120,7 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress, // Removed ENS-related formatting
+            verificationMethod: walletAddress,
             signature: signature
           }]
         };
