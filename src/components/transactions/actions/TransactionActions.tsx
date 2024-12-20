@@ -30,7 +30,7 @@ export const TransactionActions = ({
   const {
     handleWrapDocument,
     handleSignDocument,
-    handleDownloadSignedDocument,
+    handleDownloadSignedDocument
   } = useDocumentHandlers();
 
   const isTransferable = transaction.document_subtype === 'transferable';
