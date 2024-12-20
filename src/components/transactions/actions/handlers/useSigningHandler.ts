@@ -72,12 +72,15 @@ export const useSigningHandler = () => {
           signer
         );
 
+        // Calculate document hash and ensure 0x prefix
         const documentHash = ethers.utils.keccak256(
           ethers.utils.toUtf8Bytes(JSON.stringify(wrappedDoc))
         );
-        console.log("Document hash for minting:", documentHash);
+        const tokenId = documentHash.startsWith('0x') ? documentHash : `0x${documentHash}`;
+        console.log("Document hash for minting:", tokenId);
         
-        const mintTx = await tokenRegistry.safeMint(walletAddress, documentHash);
+        // Mint token with the document hash as tokenId
+        const mintTx = await tokenRegistry.mint(walletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
