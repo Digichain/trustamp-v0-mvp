@@ -85,7 +85,7 @@ export const useSigningHandler = () => {
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: `${walletAddress}#key-1`,
+            verificationMethod: `${walletAddress}#controller`,
             signature: transactionHash
           }]
         };
@@ -101,7 +101,7 @@ export const useSigningHandler = () => {
             type: "OpenAttestationSignature2018",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: `${walletAddress}#key-1`,
+            verificationMethod: `${walletAddress}#controller`,
             signature: signature
           }]
         };
