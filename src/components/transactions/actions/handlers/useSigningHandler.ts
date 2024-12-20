@@ -65,15 +65,20 @@ export const useSigningHandler = () => {
         
         // Log the entire issuers array and token registry value
         console.log("Issuers data:", wrappedDoc.data.issuers);
-        const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
-        console.log("Raw registry address:", registryAddress);
+        const rawRegistryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
+        console.log("Raw registry address:", rawRegistryAddress);
 
-        if (!registryAddress) {
+        if (!rawRegistryAddress) {
           throw new Error("Token registry address is missing");
         }
 
-        if (!ethers.utils.isAddress(registryAddress)) {
-          throw new Error(`Invalid token registry address: ${registryAddress}`);
+        // Extract the actual Ethereum address from the OpenAttestation format
+        // The format is like "uuid:string:0xAddress", so we split by ":" and take the last part
+        const registryAddress = rawRegistryAddress.split(":").pop();
+        console.log("Extracted registry address:", registryAddress);
+
+        if (!registryAddress || !ethers.utils.isAddress(registryAddress)) {
+          throw new Error(`Invalid token registry address after extraction: ${registryAddress}`);
         }
 
         console.log("Using token registry at address:", registryAddress);
