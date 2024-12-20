@@ -64,11 +64,21 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         const registryAddress = wrappedDoc.data.issuers[0].tokenRegistry;
-        console.log("Using token registry at address:", registryAddress);
+
+        // Ensure tokenRegistry address is a valid Ethereum address (resolve ENS if necessary)
+        const resolvedRegistryAddress = ethers.utils.isAddress(registryAddress) 
+          ? registryAddress 
+          : await provider.resolveName(registryAddress);
+
+        if (!resolvedRegistryAddress) {
+          throw new Error("Invalid token registry address");
+        }
+
+        console.log("Using token registry at address:", resolvedRegistryAddress);
         
         // Create contract instance
         const tokenRegistry = new ethers.Contract(
-          registryAddress,
+          resolvedRegistryAddress,
           TokenRegistryArtifact.abi,
           signer
         );
@@ -82,7 +92,17 @@ export const useSigningHandler = () => {
         
         // Call safeMint function
         console.log("Calling safeMint with params:", { to: walletAddress, tokenId });
-        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
+
+        // Ensure walletAddress is a valid Ethereum address
+        const resolvedWalletAddress = ethers.utils.isAddress(walletAddress) 
+          ? walletAddress 
+          : await provider.resolveName(walletAddress);
+
+        if (!resolvedWalletAddress) {
+          throw new Error("Invalid wallet address");
+        }
+
+        const mintTx = await tokenRegistry.safeMint(resolvedWalletAddress, tokenId);
         console.log("Mint transaction sent:", mintTx.hash);
         
         const receipt = await mintTx.wait();
@@ -96,7 +116,7 @@ export const useSigningHandler = () => {
             type: "TokenRegistryMint",
             created: new Date().toISOString(),
             proofPurpose: "assertionMethod",
-            verificationMethod: walletAddress, // Removed ENS-related formatting
+            verificationMethod: resolvedWalletAddress, // Removed ENS-related formatting
             signature: transactionHash
           }]
         };
