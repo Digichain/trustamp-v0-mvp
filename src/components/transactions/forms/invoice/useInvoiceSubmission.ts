@@ -46,9 +46,6 @@ export const useInvoiceSubmission = () => {
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
-          amount: typeof formData.total === 'object' ? 
-            parseFloat(formData.total[""] || 0) : 
-            parseFloat(formData.total || 0),
           status: "document_created",
           document_subtype: "verifiable",
           title: "INVOICE",
