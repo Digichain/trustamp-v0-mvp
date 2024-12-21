@@ -16,13 +16,16 @@ export const useWrappingHandler = () => {
       if (!transaction.raw_document) {
         throw new Error("No raw document found");
       }
-
+      // Store the raw document first
+      await storeRawDocument(transaction.id, transaction.raw_document);
+      console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
+      
       // Use the shared document wrapper utility
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
 
       // Store the wrapped document
-      await storeWrappedDocument(transaction.id, wrappedDoc);
+      await storeWrappedDocument(transaction.id, transaction.wrapped_document);
       console.log("Wrapped document stored successfully");
 
       // Update transaction status in database
@@ -53,7 +56,7 @@ export const useWrappingHandler = () => {
         description: "Document wrapped successfully",
       });
 
-      return wrappedDoc;
+      return transaction.wrapped_document;
     } catch (error: any) {
       console.error("Error wrapping document:", error);
       toast({
