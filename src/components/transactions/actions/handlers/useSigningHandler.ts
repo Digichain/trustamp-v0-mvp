@@ -22,7 +22,6 @@ export const useSigningHandler = () => {
       console.log("Starting document signing/issuing process for transaction:", transaction.id);
       console.log("Document is transferable:", isTransferable);
       
-      // Try to fetch wrapped document
       const wrappedFileName = `${transaction.id}_wrapped.json`;
       console.log("Attempting to fetch wrapped document:", wrappedFileName);
       

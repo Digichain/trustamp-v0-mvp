@@ -33,6 +33,7 @@ export const TransactionActions = ({
     handleDownloadDocument
   } = useDocumentHandlers();
 
+  // Move these checks to the top level
   const isTransferable = transaction.document_subtype === 'transferable';
   const canWrap = transaction.status === 'document_created';
   const canSign = transaction.status === 'document_wrapped';
