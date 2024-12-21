@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,15 @@ import { TransactionActions } from "./actions/TransactionActions";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useDocumentData } from "@/hooks/useDocumentData";
 import { useToast } from "@/components/ui/use-toast";
+
+interface Transaction {
+  id: string;
+  transaction_hash?: string;
+  document_subtype?: string;
+  title?: string;
+  status: string;
+  created_at?: string;
+}
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -52,14 +61,14 @@ const getStatusDisplay = (status: string) => {
 
 export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [documentData, setDocumentData] = useState<any>(null);
   const { toast } = useToast();
   
   const { transactions, isLoading, invalidateTransactions } = useTransactions();
   const { fetchDocumentData, handleDelete } = useDocumentData();
 
-  const handlePreviewClick = async (transaction: any) => {
+  const handlePreviewClick = async (transaction: Transaction) => {
     try {
       const docData = await fetchDocumentData(transaction);
       if (!docData) {
@@ -83,7 +92,7 @@ export const TransactionsTable = () => {
     }
   };
 
-  const onDelete = async (transaction: any) => {
+  const onDelete = async (transaction: Transaction) => {
     console.log("Starting delete process for transaction:", transaction.id);
     const success = await handleDelete(transaction);
     if (success) {
@@ -106,6 +115,40 @@ export const TransactionsTable = () => {
     }
   };
 
+  const transactionRows = useMemo(() => {
+    if (!transactions) return null;
+
+    return transactions.map((tx) => (
+      <TableRow key={tx.id}>
+        <TableCell className="font-mono">
+          {tx.transaction_hash ? 
+            `${tx.transaction_hash.slice(0, 10)}...${tx.transaction_hash.slice(-8)}` :
+            '-'
+          }
+        </TableCell>
+        <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
+        <TableCell>{tx.title || '-'}</TableCell>
+        <TableCell>
+          <span className={getStatusColor(tx.status)}>
+            {getStatusDisplay(tx.status)}
+          </span>
+        </TableCell>
+        <TableCell>
+          {formatDistanceToNow(new Date(tx.created_at || ""), {
+            addSuffix: true,
+          })}
+        </TableCell>
+        <TableCell className="text-right">
+          <TransactionActions
+            transaction={tx}
+            onPreviewClick={() => handlePreviewClick(tx)}
+            onDelete={() => onDelete(tx)}
+          />
+        </TableCell>
+      </TableRow>
+    ));
+  }, [transactions]);
+
   return (
     <>
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -121,35 +164,7 @@ export const TransactionsTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions?.map((tx) => (
-              <TableRow key={tx.id}>
-                <TableCell className="font-mono">
-                  {tx.transaction_hash ? 
-                    `${tx.transaction_hash.slice(0, 10)}...${tx.transaction_hash.slice(-8)}` :
-                    '-'
-                  }
-                </TableCell>
-                <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
-                <TableCell>{tx.title || '-'}</TableCell>
-                <TableCell>
-                  <span className={getStatusColor(tx.status)}>
-                    {getStatusDisplay(tx.status)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {formatDistanceToNow(new Date(tx.created_at || ""), {
-                    addSuffix: true,
-                  })}
-                </TableCell>
-                <TableCell className="text-right">
-                  <TransactionActions
-                    transaction={tx}
-                    onPreviewClick={() => handlePreviewClick(tx)}
-                    onDelete={() => onDelete(tx)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {transactionRows}
             {(!transactions || transactions.length === 0) && (
               <TableRow>
                 <TableCell
