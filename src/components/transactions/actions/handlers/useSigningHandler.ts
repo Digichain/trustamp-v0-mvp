@@ -18,6 +18,7 @@ export const useSigningHandler = () => {
         throw new Error("Please connect your wallet first");
       }
 
+      // Define isTransferable at the start of the function
       const isTransferable = transaction.document_subtype === 'transferable';
       console.log("Starting document signing/issuing process for transaction:", transaction.id);
       console.log("Document is transferable:", isTransferable);
