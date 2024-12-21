@@ -147,46 +147,49 @@ export type Database = {
       }
       transactions: {
         Row: {
-          amount: number
           created_at: string | null
           document_subtype: string | null
           id: string
           network: string
           raw_document: Json | null
+          signed_document: Json | null
           status: string
           title: string | null
           transaction_hash: string
           transaction_type: string
           updated_at: string | null
           user_id: string
+          wrapped_document: Json | null
         }
         Insert: {
-          amount: number
           created_at?: string | null
           document_subtype?: string | null
           id?: string
           network: string
           raw_document?: Json | null
+          signed_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash: string
           transaction_type: string
           updated_at?: string | null
           user_id: string
+          wrapped_document?: Json | null
         }
         Update: {
-          amount?: number
           created_at?: string | null
           document_subtype?: string | null
           id?: string
           network?: string
           raw_document?: Json | null
+          signed_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash?: string
           transaction_type?: string
           updated_at?: string | null
           user_id?: string
+          wrapped_document?: Json | null
         }
         Relationships: []
       }
