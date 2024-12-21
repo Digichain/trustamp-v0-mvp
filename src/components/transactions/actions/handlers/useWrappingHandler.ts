@@ -27,7 +27,7 @@ export const useWrappingHandler = () => {
       // Store the wrapped document
       await storeWrappedDocument(transaction.id, wrappedDoc);
 
-      // Update transaction status
+      // Update transaction status with explicit values
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
@@ -41,6 +41,7 @@ export const useWrappingHandler = () => {
         throw updateError;
       }
 
+      console.log("Transaction status updated to document_wrapped");
       await invalidateTransactions();
       console.log("Cache invalidated, UI should update");
 
