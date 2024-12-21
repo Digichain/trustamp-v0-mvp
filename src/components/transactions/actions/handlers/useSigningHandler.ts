@@ -41,13 +41,13 @@ export const useSigningHandler = () => {
   const handleSignDocument = async (transaction: Transaction) => {
     let finalDocument: any;
     let transactionHash: string | null = null;
+    const isTransferable = transaction.document_subtype === "transferable";
 
     try {
       if (!walletAddress) {
         throw new Error("Please connect your wallet first");
       }
 
-      const isTransferable = transaction.document_subtype === "transferable";
       console.log("Starting document signing/issuing process for transaction:", transaction.id);
       console.log("Document is transferable:", isTransferable);
 
