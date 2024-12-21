@@ -1,18 +1,16 @@
 import { useToast } from "@/components/ui/use-toast";
 import { useTransactions } from "@/hooks/useTransactions";
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 import TokenRegistryArtifact from "@/contracts/TokenRegistry";
 import { useWallet } from "@/contexts/WalletContext";
 import { useDocumentStorage } from "./useDocumentStorage";
 import { supabase } from "@/integrations/supabase/client";
-import { useWrappingHandler } from "./useWrappingHandler";
 
 export const useSigningHandler = () => {
   const { toast } = useToast();
   const { invalidateTransactions } = useTransactions();
   const { walletAddress } = useWallet();
   const { storeSignedDocument } = useDocumentStorage();
-  const { handleWrapDocument } = useWrappingHandler();
 
   const handleSignDocument = async (transaction: any) => {
     try {
@@ -35,23 +33,21 @@ export const useSigningHandler = () => {
           .download(wrappedFileName);
 
         if (fetchError || !wrappedDocData) {
-          console.log("Wrapped document not found or error, wrapping now...");
-          wrappedDoc = await handleWrapDocument(transaction);
-        } else {
-          const text = await wrappedDocData.text();
-          console.log("Retrieved wrapped document text:", text);
-          wrappedDoc = JSON.parse(text);
+          console.log("Wrapped document not found or error:", fetchError);
+          throw new Error("Failed to get wrapped document");
         }
+
+        const text = await wrappedDocData.text();
+        console.log("Retrieved wrapped document text:", text);
+        wrappedDoc = JSON.parse(text);
       } catch (error) {
-        console.log("Error fetching wrapped document, wrapping now...", error);
-        wrappedDoc = await handleWrapDocument(transaction);
+        console.error("Error fetching wrapped document:", error);
+        throw new Error("Failed to get wrapped document");
       }
 
       if (!wrappedDoc) {
-        throw new Error("Failed to get or create wrapped document");
+        throw new Error("Failed to get wrapped document");
       }
-
-      console.log("WRAPPED DOCUMENT BEFORE SIGNING:", JSON.stringify(wrappedDoc, null, 2));
 
       let finalDocument;
       let transactionHash;
@@ -79,8 +75,6 @@ export const useSigningHandler = () => {
           throw new Error(`Invalid token registry address: ${registryAddress}`);
         }
 
-        console.log("Using token registry at address:", registryAddress);
-        
         // Create contract instance
         const tokenRegistry = new ethers.Contract(
           registryAddress,
@@ -143,14 +137,18 @@ export const useSigningHandler = () => {
       await storeSignedDocument(transaction.id, finalDocument);
 
       // Update transaction status
+      const newStatus = isTransferable ? 'document_issued' : 'document_signed';
+      console.log(`Updating transaction status to ${newStatus}`);
+      
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
-          status: 'document_issued',
+          status: newStatus,
           updated_at: new Date().toISOString(),
-          transaction_hash: transactionHash || null
+          transaction_hash: transactionHash ? `0x${transactionHash}` : null
         })
-        .eq('id', transaction.id);
+        .eq('id', transaction.id)
+        .select();
 
       if (updateError) {
         throw updateError;
@@ -166,7 +164,7 @@ export const useSigningHandler = () => {
       console.error("Error signing/issuing document:", error);
       toast({
         title: "Error",
-        description: error.message || `Failed to ${transaction.document_subtype === 'transferable' ? 'issue' : 'sign'} document`,
+        description: error.message || `Failed to ${isTransferable ? 'issue' : 'sign'} document`,
         variant: "destructive",
       });
       throw error;

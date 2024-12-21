@@ -50,8 +50,6 @@ const getStatusDisplay = (status: string) => {
   }
 };
 
-// ... keep existing code (rest of the imports and component setup)
-
 export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
