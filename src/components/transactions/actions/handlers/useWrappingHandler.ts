@@ -26,22 +26,28 @@ export const useWrappingHandler = () => {
 
       // Store the wrapped document
       await storeWrappedDocument(transaction.id, wrappedDoc);
+      console.log("Wrapped document stored successfully");
 
-      // Update transaction status with explicit values
-      const { error: updateError } = await supabase
+      // Update transaction status in database
+      console.log("Updating transaction status to document_wrapped");
+      const { data: updateData, error: updateError } = await supabase
         .from('transactions')
         .update({ 
           status: 'document_wrapped',
           updated_at: new Date().toISOString()
         })
-        .eq('id', transaction.id);
+        .eq('id', transaction.id)
+        .select();
 
       if (updateError) {
         console.error("Error updating transaction status:", updateError);
         throw updateError;
       }
 
-      console.log("Transaction status updated to document_wrapped");
+      console.log("Transaction status updated successfully:", updateData);
+
+      // Force cache invalidation
+      console.log("Invalidating transactions cache");
       await invalidateTransactions();
       console.log("Cache invalidated, UI should update");
 

@@ -36,12 +36,15 @@ export const useTransactions = () => {
       console.log("Fetched transactions:", data);
       return data;
     },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const invalidateTransactions = async () => {
     console.log("Invalidating transactions cache...");
     await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-    console.log("Transactions cache invalidated");
+    await queryClient.refetchQueries({ queryKey: ["transactions"] });
+    console.log("Transactions cache invalidated and refetched");
   };
 
   return {
