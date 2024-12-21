@@ -2,11 +2,19 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
+// Define the type for a transaction
+interface Transaction {
+  id: string;
+  user_id: string;
+  created_at: string;
+  // Add other transaction fields as needed
+}
+
 export const useTransactions = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: transactions, isLoading } = useQuery({
+  const { data: transactions, isLoading } = useQuery<Transaction[], Error>({
     queryKey: ["transactions"],
     queryFn: async () => {
       console.log("Fetching transactions...");
@@ -40,6 +48,7 @@ export const useTransactions = () => {
     refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
+  // Function to invalidate and refetch the transactions query
   const invalidateTransactions = async () => {
     console.log("Invalidating transactions cache...");
     await queryClient.invalidateQueries({ queryKey: ["transactions"] });
