@@ -15,9 +15,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useDocumentHandlers } from "./handlers/useDocumentHandlers";
+import { useMemo } from "react";
+
+interface Transaction {
+  document_subtype: string;
+  status: string;
+}
 
 interface TransactionActionsProps {
-  transaction: any;
+  transaction: Transaction;
   onPreviewClick: () => void;
   onDelete: () => void;
 }
@@ -33,11 +39,11 @@ export const TransactionActions = ({
     handleDownloadDocument
   } = useDocumentHandlers();
 
-  // Move these checks to the top level
-  const isTransferable = transaction.document_subtype === 'transferable';
-  const canWrap = transaction.status === 'document_created';
-  const canSign = transaction.status === 'document_wrapped';
-  const canDownload = ['document_created', 'document_wrapped', 'document_signed', 'document_issued'].includes(transaction.status);
+  // Memoize computed values
+  const isTransferable = useMemo(() => transaction.document_subtype === 'transferable', [transaction]);
+  const canWrap = useMemo(() => transaction.status === 'document_created', [transaction]);
+  const canSign = useMemo(() => transaction.status === 'document_wrapped', [transaction]);
+  const canDownload = useMemo(() => ['document_created', 'document_wrapped', 'document_signed', 'document_issued'].includes(transaction.status), [transaction]);
 
   return (
     <DropdownMenu>
