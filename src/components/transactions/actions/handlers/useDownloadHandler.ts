@@ -7,7 +7,7 @@ export const useDownloadHandler = () => {
   const handleDownloadDocument = async (transaction: any) => {
     try {
       let bucketName = 'raw-documents';
-      let fileName = `${transaction.id}.json`;
+      let fileName = `${transaction.id}_raw.json`;
 
       // Determine which version to download based on status
       switch (transaction.status) {
