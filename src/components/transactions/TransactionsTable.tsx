@@ -18,16 +18,39 @@ import { useToast } from "@/components/ui/use-toast";
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
-    case "completed":
+    case "document_created":
+      return "text-blue-600";
+    case "document_wrapped":
+      return "text-purple-600";
+    case "document_signed":
+      return "text-orange-600";
+    case "document_issued":
       return "text-green-600";
-    case "pending":
-      return "text-yellow-600";
     case "failed":
       return "text-red-600";
     default:
       return "text-gray-600";
   }
 };
+
+const getStatusDisplay = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "document_created":
+      return "Created";
+    case "document_wrapped":
+      return "Wrapped";
+    case "document_signed":
+      return "Signed";
+    case "document_issued":
+      return "Issued";
+    case "failed":
+      return "Failed";
+    default:
+      return status;
+  }
+};
+
+// ... keep existing code (rest of the imports and component setup)
 
 export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -85,16 +108,6 @@ export const TransactionsTable = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-        <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-        <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -113,13 +126,17 @@ export const TransactionsTable = () => {
             {transactions?.map((tx) => (
               <TableRow key={tx.id}>
                 <TableCell className="font-mono">
-                  {tx.transaction_hash.slice(0, 10)}...
-                  {tx.transaction_hash.slice(-8)}
+                  {tx.transaction_hash ? 
+                    `${tx.transaction_hash.slice(0, 10)}...${tx.transaction_hash.slice(-8)}` :
+                    '-'
+                  }
                 </TableCell>
                 <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
                 <TableCell>{tx.title || '-'}</TableCell>
                 <TableCell>
-                  <span className={getStatusColor(tx.status)}>{tx.status}</span>
+                  <span className={getStatusColor(tx.status)}>
+                    {getStatusDisplay(tx.status)}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {formatDistanceToNow(new Date(tx.created_at || ""), {

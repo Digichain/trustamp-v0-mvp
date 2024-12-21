@@ -4,12 +4,29 @@ import { supabase } from "@/integrations/supabase/client";
 export const useDownloadHandler = () => {
   const { toast } = useToast();
 
-  const handleDownloadSignedDocument = async (transaction: any) => {
+  const handleDownloadDocument = async (transaction: any) => {
     try {
-      const signedFileName = `${transaction.id}_signed.json`;
+      let bucketName = 'raw-documents';
+      let fileName = `${transaction.id}_raw.json`;
+
+      // Determine which version to download based on status
+      switch (transaction.status) {
+        case 'document_wrapped':
+          bucketName = 'wrapped-documents';
+          fileName = `${transaction.id}_wrapped.json`;
+          break;
+        case 'document_signed':
+        case 'document_issued':
+          bucketName = 'signed-documents';
+          fileName = `${transaction.id}_signed.json`;
+          break;
+      }
+
+      console.log(`Downloading ${fileName} from ${bucketName}`);
+
       const { data, error } = await supabase.storage
-        .from('signed-documents')
-        .download(signedFileName);
+        .from(bucketName)
+        .download(fileName);
 
       if (error) {
         throw error;
@@ -22,7 +39,7 @@ export const useDownloadHandler = () => {
       // Create a temporary link and trigger download
       const link = document.createElement('a');
       link.href = url;
-      link.download = signedFileName;
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -33,16 +50,16 @@ export const useDownloadHandler = () => {
         description: "Document downloaded successfully",
       });
     } catch (error: any) {
-      console.error("Error downloading signed document:", error);
+      console.error("Error downloading document:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to download signed document",
+        description: error.message || "Failed to download document",
         variant: "destructive",
       });
     }
   };
 
   return {
-    handleDownloadSignedDocument
+    handleDownloadDocument
   };
 };

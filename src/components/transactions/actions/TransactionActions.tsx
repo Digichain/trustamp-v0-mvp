@@ -30,10 +30,13 @@ export const TransactionActions = ({
   const {
     handleWrapDocument,
     handleSignDocument,
-    handleDownloadSignedDocument
+    handleDownloadDocument
   } = useDocumentHandlers();
 
   const isTransferable = transaction.document_subtype === 'transferable';
+  const canWrap = transaction.status === 'document_created';
+  const canSign = transaction.status === 'document_wrapped';
+  const canDownload = ['document_created', 'document_wrapped', 'document_signed', 'document_issued'].includes(transaction.status);
 
   return (
     <DropdownMenu>
@@ -47,22 +50,26 @@ export const TransactionActions = ({
           <Eye className="mr-2 h-4 w-4" />
           Preview Document
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleWrapDocument(transaction)}>
-          <Package className="mr-2 h-4 w-4" />
-          Wrap Document
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleSignDocument(transaction)}>
-          {isTransferable ? (
-            <Send className="mr-2 h-4 w-4" />
-          ) : (
-            <FileSignature className="mr-2 h-4 w-4" />
-          )}
-          {isTransferable ? 'Issue Document' : 'Sign Document'}
-        </DropdownMenuItem>
-        {transaction.status === 'document_issued' && (
-          <DropdownMenuItem onClick={() => handleDownloadSignedDocument(transaction)}>
+        {canWrap && (
+          <DropdownMenuItem onClick={() => handleWrapDocument(transaction)}>
+            <Package className="mr-2 h-4 w-4" />
+            Wrap Document
+          </DropdownMenuItem>
+        )}
+        {canSign && (
+          <DropdownMenuItem onClick={() => handleSignDocument(transaction)}>
+            {isTransferable ? (
+              <Send className="mr-2 h-4 w-4" />
+            ) : (
+              <FileSignature className="mr-2 h-4 w-4" />
+            )}
+            {isTransferable ? 'Issue Document' : 'Sign Document'}
+          </DropdownMenuItem>
+        )}
+        {canDownload && (
+          <DropdownMenuItem onClick={() => handleDownloadDocument(transaction)}>
             <Download className="mr-2 h-4 w-4" />
-            Download {isTransferable ? 'Issued' : 'Signed'} Document
+            Download Document
           </DropdownMenuItem>
         )}
         <DropdownMenuItem 
