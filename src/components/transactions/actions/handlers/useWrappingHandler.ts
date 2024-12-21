@@ -21,6 +21,7 @@ export const useWrappingHandler = () => {
       await storeRawDocument(transaction.id, transaction.raw_document);
       console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
 
+      // Use the shared document wrapper utility
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
 
