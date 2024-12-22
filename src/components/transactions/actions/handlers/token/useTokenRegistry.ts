@@ -13,8 +13,10 @@ export const useTokenRegistry = () => {
   const checkTokenExists = async (tokenRegistry: any, tokenId: ethers.BigNumber) => {
     console.log("Checking if token exists:", tokenId.toString());
     try {
-      // Use OpenAttestation's token registry to check existence
-      const exists = await tokenRegistry.exists(tokenId);
+      // Use balanceOf to check if any address owns this token
+      const zeroAddress = "0x0000000000000000000000000000000000000000";
+      const balance = await tokenRegistry["balanceOf(address)"](zeroAddress);
+      const exists = !balance.isZero();
       console.log("Token exists:", exists);
       return exists;
     } catch (error) {
