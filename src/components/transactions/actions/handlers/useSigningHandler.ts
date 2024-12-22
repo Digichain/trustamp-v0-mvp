@@ -20,6 +20,7 @@ export const useSigningHandler = () => {
 
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
+    console.log("Full wrapped document:", JSON.stringify(transaction.wrapped_document, null, 2));
     const isTransferable = transaction.document_subtype === 'transferable';
     
     try {
@@ -42,7 +43,9 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address from wrapped document
-        const tokenRegistryData = transaction.wrapped_document.data.tokenRegistry;
+        const tokenRegistryData = transaction.wrapped_document.data.issuers[0].tokenRegistry;
+        console.log("Token registry data found:", tokenRegistryData);
+        
         let tokenRegistryAddress;
 
         // Check if tokenRegistry is in format "tokenRegistry: address"
@@ -55,7 +58,7 @@ export const useSigningHandler = () => {
         console.log("Token registry address extracted:", tokenRegistryAddress);
 
         if (!tokenRegistryAddress || !ethers.utils.isAddress(tokenRegistryAddress)) {
-          throw new Error("Invalid token registry address found in document");
+          throw new Error("Invalid token registry address found in document. Address: " + tokenRegistryAddress);
         }
 
         const tokenRegistry = new ethers.Contract(
