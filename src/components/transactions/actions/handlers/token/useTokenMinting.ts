@@ -39,10 +39,19 @@ export const useTokenMinting = () => {
         console.log("Estimated gas for minting:", gasEstimate.toString());
       } catch (error: any) {
         console.error("Gas estimation failed:", error);
-        if (error.message.includes("execution reverted")) {
-          throw new Error("MINT_FAILED");
+        
+        // Check if token already exists
+        try {
+          const owner = await tokenRegistry.ownerOf(tokenId);
+          console.error("Token already exists with owner:", owner);
+          throw new Error("TOKEN_ALREADY_EXISTS");
+        } catch (ownerError: any) {
+          if (ownerError.message.includes("nonexistent token")) {
+            console.error("Token does not exist, but minting failed for another reason");
+          }
         }
-        throw error;
+        
+        throw new Error("MINT_FAILED");
       }
 
       // Add 20% buffer to gas estimate
@@ -69,8 +78,10 @@ export const useTokenMinting = () => {
       let errorMessage = "Failed to mint token";
       if (error.message === "MINTER_ROLE_REQUIRED") {
         errorMessage = "Account does not have permission to mint tokens";
+      } else if (error.message === "TOKEN_ALREADY_EXISTS") {
+        errorMessage = "Token has already been minted";
       } else if (error.message === "MINT_FAILED") {
-        errorMessage = "Token minting failed - the token may already exist";
+        errorMessage = "Token minting failed - please check your wallet and try again";
       } else if (error.message.includes("gas required exceeds allowance")) {
         errorMessage = "Transaction requires more gas than available";
       } else if (error.message.includes("does not support ERC721")) {
