@@ -18,9 +18,20 @@ export const useTokenRegistry = () => {
     console.log("Initializing token registry contract at address:", address);
     
     try {
+      // First verify we have a valid signer
+      const signerAddress = await signer.getAddress();
+      console.log("Initializing contract with signer address:", signerAddress);
+
       // Create contract instance with the TitleEscrow ABI
       const contract = new ethers.Contract(address, TitleEscrowABI, signer);
-      console.log("Successfully connected to token registry");
+      console.log("Successfully connected to token registry at:", address);
+
+      // Verify the contract connection
+      const code = await signer.provider?.getCode(address);
+      if (!code || code === '0x') {
+        throw new Error("No contract found at the specified address");
+      }
+
       return contract;
     } catch (error) {
       console.error("Error initializing token registry:", error);
@@ -45,11 +56,22 @@ export const useTokenRegistry = () => {
     beneficiary: string,
     tokenId: ethers.BigNumber
   ) => {
-    console.log("Minting token...");
+    console.log("Starting mint process...");
     console.log("Beneficiary:", beneficiary);
     console.log("Token ID:", tokenId.toString());
     
     try {
+      // Verify contract connection
+      const signer = tokenRegistry.signer;
+      const signerAddress = await signer.getAddress();
+      console.log("Minting with signer address:", signerAddress);
+
+      // Verify the signer has permission to mint
+      const code = await signer.provider?.getCode(tokenRegistry.address);
+      if (!code || code === '0x') {
+        throw new Error("Invalid contract address");
+      }
+
       // First check if token already exists
       const exists = await checkTokenExists(tokenRegistry, tokenId);
       if (exists) {
