@@ -77,11 +77,13 @@ export const useSigningHandler = () => {
         // Verify ownership
         await verifyTokenOwnership(tokenRegistry, tokenId, walletAddress);
 
-        // Create proof
+        // Create proof with all required properties
         const proof = [{
-          type: "OpenAttestationMintable",
-          method: "TOKEN_REGISTRY",
-          value: normalizedAddress,
+          type: "OpenAttestationSignature2018",
+          created: new Date().toISOString(),
+          proofPurpose: "assertionMethod",
+          verificationMethod: `did:ethr:${normalizedAddress}#controller`,
+          signature: formattedMerkleRoot,
           tokenRegistry: normalizedAddress
         }];
 
