@@ -6,12 +6,18 @@ import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { useTokenRegistry } from "./token/useTokenRegistry";
 import { useAddressValidation } from "./token/useAddressValidation";
+import { Contract } from "ethers";
 
 interface Transaction {
   id: string;
   document_subtype?: string;
   status: string;
   wrapped_document: any;
+}
+
+// Define the interface for the token registry contract
+interface TokenRegistryContract extends Contract {
+  mint(to: string, tokenId: any): Promise<any>;
 }
 
 export const useSigningHandler = () => {
@@ -66,9 +72,9 @@ export const useSigningHandler = () => {
         const normalizedAddress = normalizeTokenRegistryAddress(rawTokenRegistryAddress);
         console.log("Normalized token registry address:", normalizedAddress);
         
-        // Initialize contract
+        // Initialize contract with the correct type
         console.log("Initializing token registry contract...");
-        const tokenRegistry = await initializeContract(normalizedAddress, signer);
+        const tokenRegistry = await initializeContract(normalizedAddress, signer) as TokenRegistryContract;
         console.log("Token registry contract initialized");
 
         // Get merkle root and format for token ID
