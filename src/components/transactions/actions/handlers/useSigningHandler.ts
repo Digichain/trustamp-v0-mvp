@@ -50,8 +50,11 @@ export const useSigningHandler = () => {
 
         // Get document store address from the document
         const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
+        console.log("Retrieved document store address:", documentStoreAddress);
+        
         if (!documentStoreAddress) {
-          throw new Error("Document store address not found in document");
+          console.error("Document store address not found in wrapped document:", transaction.wrapped_document);
+          throw new Error("Document store address not found in document. Please ensure the document was created with a valid document store.");
         }
 
         // Initialize document store contract
@@ -60,6 +63,8 @@ export const useSigningHandler = () => {
 
         // Get merkle root and issue document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        console.log("Using merkle root for issuance:", merkleRoot);
+        
         const txHash = await issueDocument(documentStore, merkleRoot);
         console.log("Document issued with transaction hash:", txHash);
 
