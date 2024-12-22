@@ -16,13 +16,20 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useDocumentData } from "@/hooks/useDocumentData";
 import { useToast } from "@/components/ui/use-toast";
 
+// Define a more complete Transaction interface based on our database schema
 interface Transaction {
   id: string;
-  transaction_hash: string;
-  document_subtype: string;
-  title: string;
+  user_id: string;
+  transaction_hash: string | null;
+  network: string;
   status: string;
+  transaction_type: string;
+  document_subtype: string | null;
+  title: string | null;
   created_at: string;
+  raw_document: any | null;
+  wrapped_document: any | null;
+  signed_document: any | null;
 }
 
 const getStatusColor = (status: string) => {
@@ -118,7 +125,7 @@ export const TransactionsTable = () => {
   const transactionRows = useMemo(() => {
     if (!transactions) return null;
 
-    return transactions.map((tx) => (
+    return transactions.map((tx: Transaction) => (
       <TableRow key={tx.id}>
         <TableCell className="font-mono">
           {tx.transaction_hash ? 
@@ -134,7 +141,7 @@ export const TransactionsTable = () => {
           </span>
         </TableCell>
         <TableCell>
-          {formatDistanceToNow(new Date(tx.created_at || ""), {
+          {formatDistanceToNow(new Date(tx.created_at), {
             addSuffix: true,
           })}
         </TableCell>

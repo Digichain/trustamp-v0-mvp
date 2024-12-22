@@ -19,8 +19,14 @@ import { useMemo } from "react";
 
 interface Transaction {
   id: string;
-  document_subtype?: string;
+  document_subtype?: string | null;
   status: string;
+  transaction_hash: string | null;
+  network: string;
+  transaction_type: string;
+  raw_document: any | null;
+  wrapped_document: any | null;
+  signed_document: any | null;
 }
 
 interface TransactionActionsProps {
