@@ -1,38 +1,36 @@
-import { Type, Static } from '@sinclair/typebox';
+import { Static, Boolean, String, Literal, Record, Union, Partial } from "runtypes";
+
+export const RecordTypesT = Literal("openatts");
+export const BlockchainNetworkT = Literal("ethereum");
+
+export const EthereumAddressT = String.withConstraint((maybeAddress: string) => {
+  return /0x[a-fA-F0-9]{40}/.test(maybeAddress) || `${maybeAddress} is not a valid ethereum address`;
+});
 
 export enum EthereumNetworks {
   mainnet = "1",
   sepolia = "11155111"
 }
 
-export const OpenAttestationDNSTextRecordT = Type.Object({
-  type: Type.String(),
-  net: Type.String(),
-  netId: Type.String(),
-  addr: Type.String(),
-});
+export const EthereumNetworkIdT = Union(
+  Literal(EthereumNetworks.mainnet),
+  Literal(EthereumNetworks.sepolia)
+);
 
+export const OpenAttestationDNSTextRecordT = Record({
+  type: RecordTypesT,
+  net: BlockchainNetworkT,
+  netId: EthereumNetworkIdT,
+  addr: EthereumAddressT,
+}).And(
+  Partial({
+    dnssec: Boolean,
+  })
+);
+
+export type BlockchainNetwork = Static<typeof BlockchainNetworkT>;
+export type EthereumAddress = Static<typeof EthereumAddressT>;
 export type OpenAttestationDNSTextRecord = Static<typeof OpenAttestationDNSTextRecordT>;
-
-export const RecordTypesT = Type.Union([
-  Type.Object({
-    type: Type.Literal('DOCUMENT_STORE'),
-    addr: Type.String(),
-  }),
-  Type.Object({
-    type: Type.Literal('TOKEN_REGISTRY'),
-    addr: Type.String(),
-  }),
-  Type.Object({
-    type: Type.Literal('DNS-TXT'),
-    value: Type.String(),
-  }),
-  Type.Object({
-    type: Type.Literal('DID'),
-    addr: Type.String(),
-  }),
-]);
-
 export type RecordTypes = Static<typeof RecordTypesT>;
 
 export const formatDNSTxtRecord = (address: string): string => {
