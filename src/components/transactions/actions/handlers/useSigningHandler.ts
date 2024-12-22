@@ -42,8 +42,12 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address with detailed validation
+        console.log("Wrapped document data structure:", JSON.stringify(transaction.wrapped_document.data, null, 2));
+        console.log("Issuers array:", JSON.stringify(transaction.wrapped_document.data.issuers, null, 2));
+        
         const rawTokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
         console.log("Raw token registry address from document:", rawTokenRegistryAddress);
+        console.log("Type of token registry address:", typeof rawTokenRegistryAddress);
         
         if (!rawTokenRegistryAddress) {
           console.error("No token registry address found in issuer");
@@ -53,10 +57,13 @@ export const useSigningHandler = () => {
         // Remove any whitespace and convert to lowercase for consistency
         const cleanAddress = rawTokenRegistryAddress.toString().trim().toLowerCase();
         console.log("Cleaned token registry address:", cleanAddress);
+        console.log("Length of cleaned address:", cleanAddress.length);
+        console.log("Hex representation:", Buffer.from(cleanAddress).toString('hex'));
 
         // Ensure the address has the 0x prefix
         const prefixedAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
         console.log("Prefixed token registry address:", prefixedAddress);
+        console.log("Length of prefixed address:", prefixedAddress.length);
 
         // Validate the address format using ethers utility
         if (!ethers.utils.isAddress(prefixedAddress)) {
