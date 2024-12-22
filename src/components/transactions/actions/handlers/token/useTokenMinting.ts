@@ -14,7 +14,15 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Check minter role again just before minting
+      // Verify ERC721 support before proceeding
+      const ERC721_INTERFACE_ID = "0x80ac58cd";
+      const supportsERC721 = await tokenRegistry.supportsInterface(ERC721_INTERFACE_ID);
+      
+      if (!supportsERC721) {
+        throw new Error("Contract does not support ERC721 interface");
+      }
+
+      // Check minter role
       const minterRole = await tokenRegistry.MINTER_ROLE();
       const signer = tokenRegistry.signer;
       const signerAddress = await signer.getAddress();
@@ -65,6 +73,8 @@ export const useTokenMinting = () => {
         errorMessage = "Token minting failed - the token may already exist";
       } else if (error.message.includes("gas required exceeds allowance")) {
         errorMessage = "Transaction requires more gas than available";
+      } else if (error.message.includes("does not support ERC721")) {
+        errorMessage = "Invalid token registry contract - ERC721 interface not supported";
       }
 
       toast({
