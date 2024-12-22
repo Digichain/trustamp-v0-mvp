@@ -43,9 +43,24 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address from wrapped document
+        if (!transaction.wrapped_document.issuers) {
+          console.error("No issuers array found in wrapped document");
+          throw new Error("Invalid document structure: missing issuers array");
+        }
+
+        if (!transaction.wrapped_document.issuers[0]) {
+          console.error("No issuer found in issuers array");
+          throw new Error("Invalid document structure: empty issuers array");
+        }
+
         const tokenRegistryData = transaction.wrapped_document.issuers[0].tokenRegistry;
         console.log("Token registry data found:", tokenRegistryData);
         
+        if (!tokenRegistryData) {
+          console.error("No token registry data found in issuer");
+          throw new Error("Invalid document structure: missing token registry data");
+        }
+
         let tokenRegistryAddress;
 
         // Handle OpenAttestation salted string format
