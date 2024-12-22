@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
-// TitleEscrow ABI - only including the methods we need
 const TitleEscrowABI = [
   "function safeMint(address to, uint256 tokenId) public",
   "function exists(uint256 tokenId) public view returns (bool)",
@@ -10,7 +9,11 @@ const TitleEscrowABI = [
   "function transferFrom(address from, address to, uint256 tokenId) public",
   "function safeTransferFrom(address from, address to, uint256 tokenId) public",
   "function owner() public view returns (address)",
-  "function hasRole(bytes32 role, address account) public view returns (bool)"
+  "function hasRole(bytes32 role, address account) public view returns (bool)",
+  "function MINTER_ROLE() public view returns (bytes32)",
+  "function DEFAULT_ADMIN_ROLE() public view returns (bytes32)",
+  "function grantRole(bytes32 role, address account) public",
+  "function supportsInterface(bytes4 interfaceId) public view returns (bool)"
 ];
 
 export const useTokenRegistry = () => {
@@ -39,7 +42,8 @@ export const useTokenRegistry = () => {
       console.log("Contract owner:", contractOwner);
       
       // Check if signer has minting role
-      const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
+      const MINTER_ROLE = await contract.MINTER_ROLE();
+      console.log("MINTER_ROLE hash:", MINTER_ROLE);
       const hasMintRole = await contract.hasRole(MINTER_ROLE, signerAddress);
       console.log("Signer has minting role:", hasMintRole);
 
@@ -87,8 +91,11 @@ export const useTokenRegistry = () => {
         throw new Error("Invalid contract address");
       }
 
+      // Get MINTER_ROLE directly from contract
+      const MINTER_ROLE = await tokenRegistry.MINTER_ROLE();
+      console.log("MINTER_ROLE hash:", MINTER_ROLE);
+      
       // Verify minting permissions again before proceeding
-      const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
       const hasMintRole = await tokenRegistry.hasRole(MINTER_ROLE, signerAddress);
       const isOwner = (await tokenRegistry.owner()).toLowerCase() === signerAddress.toLowerCase();
       
