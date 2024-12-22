@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { TradeTrustToken__factory } from "@govtechsg/token-registry";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry";
 import { useToast } from "@/components/ui/use-toast";
 
 export const useTokenRegistry = () => {
@@ -9,10 +9,10 @@ export const useTokenRegistry = () => {
     console.log("Initializing token registry contract at address:", address);
     
     try {
-      // Use TradeTrust's factory to connect to the registry and cast to unknown first
-      const connectedRegistry = TradeTrustToken__factory.connect(address, signer as any);
+      // Use TradeTrust's factory to connect to the registry
+      const connectedRegistry = await TradeTrustERC721Factory.connect(address, signer);
       console.log("Successfully connected to token registry");
-      return connectedRegistry as unknown as ethers.Contract;
+      return connectedRegistry;
     } catch (error) {
       console.error("Error initializing token registry:", error);
       throw error;
