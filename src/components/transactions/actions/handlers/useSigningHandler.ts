@@ -94,7 +94,13 @@ export const useSigningHandler = () => {
         console.log("Using merkle root as token ID:", merkleRoot);
 
         // Convert merkle root to BigNumber for token ID
-        const tokenId = ethers.BigNumber.from(merkleRoot);
+        // First ensure it's a proper hex string with 0x prefix
+        const formattedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+        // Convert hex string to decimal string
+        const decimalValue = ethers.BigNumber.from(formattedMerkleRoot).toString();
+        // Create final BigNumber from decimal string
+        const tokenId = ethers.BigNumber.from(decimalValue);
+        
         console.log("Converted merkle root to token ID:", tokenId.toString());
 
         // Mint token using safeMint
