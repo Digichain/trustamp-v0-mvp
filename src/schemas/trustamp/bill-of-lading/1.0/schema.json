@@ -32,16 +32,12 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "tokenRegistry", "identityProof"],
+        "required": ["name", "documentStore", "identityProof"],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uri"
-          },
           "name": {
             "type": "string"
           },
-          "tokenRegistry": {
+          "documentStore": {
             "type": "string",
             "pattern": "^0x[a-fA-F0-9]{40}$"
           },

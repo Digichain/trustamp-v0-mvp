@@ -33,9 +33,13 @@ export type EthereumAddress = Static<typeof EthereumAddressT>;
 export type OpenAttestationDNSTextRecord = Static<typeof OpenAttestationDNSTextRecordT>;
 export type RecordTypes = Static<typeof RecordTypesT>;
 
-export const formatDNSTxtRecord = (address: string): string => {
-  // Format the record as a string following DNS TXT record format
-  // The format should be: openatts net=ethereum netId=11155111 addr=0x1234...
-  // Ensure address is lowercase for consistency
-  return `openatts net=ethereum netId=${EthereumNetworks.sepolia} addr=${address.toLowerCase()}`;
+export const formatDNSTxtRecord = (documentStoreAddress: string): string => {
+  // Format the record as a string following OpenAttestation DNS TXT record format for Document Store
+  // The format should be: openatts net=ethereum netId=11155111 addr=0x1234... type=DNS-TXT
+  return `openatts net=ethereum netId=${EthereumNetworks.sepolia} addr=${documentStoreAddress.toLowerCase()}`;
+};
+
+// Helper function to validate Document Store address format
+export const isValidDocumentStoreAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
 };

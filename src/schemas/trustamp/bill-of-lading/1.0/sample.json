@@ -8,12 +8,11 @@
   },
   "issuers": [
     {
-      "id": "did:ethr:0x1234567890123456789012345678901234567890",
       "name": "Demo Issuer",
-      "tokenRegistry": "0x1234567890123456789012345678901234567890",
+      "documentStore": "0xBBb55Bd1D709955241CAaCb327A765e2b6D69c8b",
       "identityProof": {
         "type": "DNS-TXT",
-        "location": "trustamp.com"
+        "location": "broad-tomato-ferret.sandbox.openattestation.com"
       }
     }
   ],
