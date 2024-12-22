@@ -57,12 +57,12 @@ export const useSigningHandler = () => {
         if (typeof tokenRegistryData === 'string') {
           // Remove the salt prefix if it exists (format: "uuid:string:address")
           const parts = tokenRegistryData.split(':');
-          tokenRegistryAddress = parts[parts.length - 1];
+          tokenRegistryAddress = parts[parts.length - 1].toLowerCase(); // Convert to lowercase
         } else {
-          tokenRegistryAddress = tokenRegistryData;
+          tokenRegistryAddress = tokenRegistryData.toLowerCase(); // Convert to lowercase
         }
 
-        console.log("Token registry address extracted:", tokenRegistryAddress);
+        console.log("Token registry address extracted and normalized:", tokenRegistryAddress);
 
         if (!tokenRegistryAddress || !ethers.utils.isAddress(tokenRegistryAddress)) {
           throw new Error("Invalid token registry address found in document. Address: " + tokenRegistryAddress);
@@ -84,9 +84,9 @@ export const useSigningHandler = () => {
         
         console.log("Converted merkle root to token ID:", tokenId.toString());
 
-        // Mint token using safeMint
+        // Mint token using safeMint with lowercase wallet address
         console.log("Attempting to mint token with ID:", tokenId.toString());
-        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
+        const mintTx = await tokenRegistry.safeMint(walletAddress.toLowerCase(), tokenId);
         console.log("Token minted, transaction:", mintTx.hash);
         await mintTx.wait();
         console.log("Transaction confirmed");
@@ -109,7 +109,7 @@ export const useSigningHandler = () => {
         console.log("Signing verifiable document using DID method");
         const result = await signAndStoreDocument(
           transaction.wrapped_document,
-          walletAddress,
+          walletAddress.toLowerCase(), // Convert to lowercase
           transaction.id
         );
         signedDocument = result.signedDocument;
