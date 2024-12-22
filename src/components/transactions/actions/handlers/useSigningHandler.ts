@@ -37,12 +37,11 @@ export const useSigningHandler = () => {
 
       if (isTransferable) {
         console.log("Signing transferable document using token registry");
-        // Get token registry instance
         const { ethereum } = window as any;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        // Extract token registry address from wrapped document
+        // Extract and validate token registry address
         const tokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
         console.log("Token registry address from document:", tokenRegistryAddress);
         
@@ -51,13 +50,14 @@ export const useSigningHandler = () => {
           throw new Error("Invalid document structure: missing token registry address");
         }
 
-        // Ensure address is lowercase for consistency
-        const normalizedAddress = tokenRegistryAddress.toLowerCase();
-        console.log("Normalized token registry address:", normalizedAddress);
-
-        if (!ethers.utils.isAddress(normalizedAddress)) {
-          throw new Error("Invalid token registry address");
+        // Validate Ethereum address format
+        if (!ethers.utils.isAddress(tokenRegistryAddress)) {
+          throw new Error("Invalid token registry address format");
         }
+
+        // Normalize address to checksum format for contract interaction
+        const normalizedAddress = ethers.utils.getAddress(tokenRegistryAddress);
+        console.log("Normalized token registry address:", normalizedAddress);
 
         const tokenRegistry = new ethers.Contract(
           normalizedAddress,
@@ -76,7 +76,7 @@ export const useSigningHandler = () => {
 
         // Mint token
         console.log("Minting token...");
-        const mintTx = await tokenRegistry.safeMint(walletAddress.toLowerCase(), tokenId);
+        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Mint transaction hash:", mintTx.hash);
         
         // Wait for confirmation
@@ -85,7 +85,7 @@ export const useSigningHandler = () => {
 
         // Verify token was minted
         const tokenOwner = await tokenRegistry.ownerOf(tokenId);
-        console.log("Token owner after minting:", tokenOwner.toLowerCase());
+        console.log("Token owner after minting:", tokenOwner);
         
         if (tokenOwner.toLowerCase() !== walletAddress.toLowerCase()) {
           throw new Error("Token minting verification failed - owner mismatch");
