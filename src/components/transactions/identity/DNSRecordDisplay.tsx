@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Copy, AlertCircle } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { formatDNSTxtRecord } from "@/utils/dns-record-types";
 
 interface DNSRecordDisplayProps {
@@ -13,7 +13,8 @@ export const DNSRecordDisplay = ({ dnsLocation, contractAddress }: DNSRecordDisp
   const { toast } = useToast();
 
   const handleCopyDnsRecord = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     const dnsRecord = formatDNSTxtRecord(contractAddress);
     navigator.clipboard.writeText(dnsRecord);
     toast({

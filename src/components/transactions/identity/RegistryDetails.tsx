@@ -6,8 +6,13 @@ interface RegistryDetailsProps {
 }
 
 export const RegistryDetails = ({ registry }: RegistryDetailsProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <Card className="mt-4">
+    <Card className="mt-4" onClick={handleClick}>
       <CardHeader>
         <CardTitle>Registry Details</CardTitle>
       </CardHeader>

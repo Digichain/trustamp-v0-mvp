@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useWallet } from "@/contexts/WalletContext";
 import { useTokenRegistryCreation } from "./useTokenRegistryCreation";
 import { TokenRegistryDocument } from "./types";
@@ -23,7 +23,10 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
   const { walletAddress } = useWallet();
   const { registryDocument, createTokenRegistry, loadExistingRegistry } = useTokenRegistryCreation(onRegistryCreated);
 
-  const handleDeploy = async () => {
+  const handleDeploy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!name || !symbol) {
       toast({
         title: "Missing Information",
@@ -52,7 +55,10 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
     }
   };
 
-  const handleLoadExisting = async () => {
+  const handleLoadExisting = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!existingAddress) {
       toast({
         title: "Missing Information",
@@ -81,8 +87,13 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (value: string) => void) => {
+    e.stopPropagation();
+    setter(e.target.value);
+  };
+
   return (
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4 mb-8" onClick={(e) => e.stopPropagation()}>
       <div className="flex flex-col gap-4">
         <h3 className="text-lg font-medium">Token Registry</h3>
         <p className="text-sm text-gray-500">
@@ -105,7 +116,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
                   id="registryName"
                   placeholder="Enter registry name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => handleInputChange(e, setName)}
                   disabled={isDeploying}
                 />
               </div>
@@ -117,7 +128,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
                   id="registrySymbol"
                   placeholder="Enter registry symbol"
                   value={symbol}
-                  onChange={(e) => setSymbol(e.target.value)}
+                  onChange={(e) => handleInputChange(e, setSymbol)}
                   disabled={isDeploying}
                 />
               </div>
@@ -141,7 +152,7 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
                   id="existingAddress"
                   placeholder="Enter existing registry address"
                   value={existingAddress}
-                  onChange={(e) => setExistingAddress(e.target.value)}
+                  onChange={(e) => handleInputChange(e, setExistingAddress)}
                   disabled={isLoading}
                 />
               </div>
