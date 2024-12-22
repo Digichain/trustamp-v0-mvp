@@ -18,11 +18,11 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface Transaction {
   id: string;
-  transaction_hash?: string;
-  document_subtype?: string;
-  title?: string;
+  transaction_hash: string;
+  document_subtype: string;
+  title: string;
   status: string;
-  created_at?: string;
+  created_at: string;
 }
 
 const getStatusColor = (status: string) => {
