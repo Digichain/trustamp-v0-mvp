@@ -1,21 +1,25 @@
-import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
-import { ethers } from "ethers";
+import { Contract } from "ethers";
 import { useToast } from "@/hooks/use-toast";
+
+// Define the interface for the token registry contract
+interface TokenRegistryContract extends Contract {
+  mint(to: string, tokenId: any): Promise<any>;
+}
 
 export const useTokenMinting = () => {
   const { toast } = useToast();
 
   const mintToken = async (
-    tokenRegistry: TitleEscrow,
+    tokenRegistry: TokenRegistryContract,
     beneficiary: string,
-    tokenId: ethers.BigNumber
+    tokenId: any
   ) => {
     console.log("Starting mint process...");
     console.log("Beneficiary:", beneficiary);
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Call mint function directly without string signature
+      // Call mint function directly
       const tx = await tokenRegistry.mint(beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
