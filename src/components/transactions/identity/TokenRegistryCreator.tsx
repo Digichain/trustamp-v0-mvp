@@ -7,6 +7,9 @@ import { useTokenRegistryCreation } from "./useTokenRegistryCreation";
 import { TokenRegistryDocument } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Copy, AlertCircle } from "lucide-react";
+import { formatDNSTxtRecord } from "@/utils/dns-record-types";
 
 interface TokenRegistryCreatorProps {
   onRegistryCreated: (document: TokenRegistryDocument) => void;
@@ -78,6 +81,14 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCopyDnsRecord = (dnsRecord: string) => {
+    navigator.clipboard.writeText(dnsRecord);
+    toast({
+      title: "Copied",
+      description: "DNS TXT record copied to clipboard",
+    });
   };
 
   return (
@@ -156,18 +167,43 @@ export const TokenRegistryCreator = ({ onRegistryCreated }: TokenRegistryCreator
         </Tabs>
 
         {registryDocument && (
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle>Registry Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p><span className="font-medium">Address:</span> {registryDocument.contractAddress}</p>
-                <p><span className="font-medium">Name:</span> {registryDocument.name}</p>
-                <p><span className="font-medium">Symbol:</span> {registryDocument.symbol}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Registry Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p><span className="font-medium">Address:</span> {registryDocument.contractAddress}</p>
+                  <p><span className="font-medium">Name:</span> {registryDocument.name}</p>
+                  <p><span className="font-medium">Symbol:</span> {registryDocument.symbol}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>DNS Configuration Required</AlertTitle>
+              <AlertDescription className="mt-2">
+                <p className="mb-2">
+                  To enable document verification, add the following TXT record to your DNS configuration at <code className="bg-gray-100 px-1 rounded">{registryDocument.dnsLocation}</code>:
+                </p>
+                <div className="bg-gray-100 p-3 rounded-md relative group">
+                  <code className="text-sm break-all">
+                    {formatDNSTxtRecord(registryDocument.contractAddress)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleCopyDnsRecord(formatDNSTxtRecord(registryDocument.contractAddress))}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </>
         )}
       </div>
     </div>
