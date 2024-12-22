@@ -11,10 +11,10 @@ export const useTokenRegistry = () => {
     console.log("Initializing token registry contract at address:", address);
     
     try {
-      // Use TradeTrust's factory to connect to the registry
+      // Use TradeTrust's factory to connect to the registry and cast to unknown first
       const connectedRegistry = TradeTrustToken__factory.connect(address, signer as any);
       console.log("Successfully connected to token registry");
-      return connectedRegistry as ethers.Contract;
+      return connectedRegistry as unknown as ethers.Contract;
     } catch (error) {
       console.error("Error initializing token registry:", error);
       throw error;
