@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import { v5Contracts } from "@trustvc/trustvc";
-import TokenRegistryArtifact from '@/contracts/TokenRegistry';
 
 const { TradeTrustToken__factory } = v5Contracts;
 
@@ -13,9 +12,9 @@ export const useTokenRegistry = () => {
     
     try {
       // Use TradeTrust's factory to connect to the registry
-      const connectedRegistry = TradeTrustToken__factory.connect(address, signer);
+      const connectedRegistry = TradeTrustToken__factory.connect(address, signer as any);
       console.log("Successfully connected to token registry");
-      return connectedRegistry;
+      return connectedRegistry as ethers.Contract;
     } catch (error) {
       console.error("Error initializing token registry:", error);
       throw error;
@@ -51,10 +50,8 @@ export const useTokenRegistry = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Following TradeTrust's approach, we mint to both owner and holder (same address in this case)
       const mintRemarks = "Document minted via TrustAmp";
       
-      // Use the mint function with owner, holder, tokenId, and remarks
       const tx = await contract.mint(
         to, // owner
         to, // holder (same as owner in this case)
@@ -67,7 +64,7 @@ export const useTokenRegistry = () => {
       
       console.log("Mint transaction submitted:", tx.hash);
       
-      const receipt = await tx.wait(2); // Wait for 2 block confirmations
+      const receipt = await tx.wait(2);
       console.log("Transaction confirmed:", receipt);
       return receipt;
     } catch (error: any) {

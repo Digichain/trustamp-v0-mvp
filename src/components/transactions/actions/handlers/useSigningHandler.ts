@@ -77,20 +77,21 @@ export const useSigningHandler = () => {
         // Verify ownership
         await verifyTokenOwnership(tokenRegistry, tokenId, walletAddress);
 
-        // Create proof following OpenAttestation v2 format for transferable documents
-        const proof = [{
-          type: "OpenAttestationSignature2018",
-          created: new Date().toISOString(),
-          proofPurpose: "assertionMethod",
-          verificationMethod: `did:ethr:${normalizedAddress}`,
-          signature: formattedMerkleRoot,
-          tokenRegistry: normalizedAddress,
-          mintedOnTokenRegistry: true
-        }];
-
+        // Update signature with proof for transferable documents
         signedDocument = {
           ...transaction.wrapped_document,
-          proof
+          signature: {
+            ...transaction.wrapped_document.signature,
+            proof: {
+              type: "OpenAttestationSignature2018",
+              created: new Date().toISOString(),
+              proofPurpose: "assertionMethod",
+              verificationMethod: `did:ethr:${normalizedAddress}`,
+              signature: formattedMerkleRoot,
+              tokenRegistry: normalizedAddress,
+              mintedOnTokenRegistry: true
+            }
+          }
         };
         signedStatus = "document_issued";
 
