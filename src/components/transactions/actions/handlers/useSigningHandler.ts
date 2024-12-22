@@ -42,9 +42,20 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address from wrapped document
-        const tokenRegistryAddress = transaction.wrapped_document.data.tokenRegistry;
-        if (!tokenRegistryAddress) {
-          throw new Error("Token registry address not found in document");
+        const tokenRegistryData = transaction.wrapped_document.data.tokenRegistry;
+        let tokenRegistryAddress;
+
+        // Check if tokenRegistry is in format "tokenRegistry: address"
+        if (typeof tokenRegistryData === 'string' && tokenRegistryData.includes(': ')) {
+          tokenRegistryAddress = tokenRegistryData.split(': ')[1].trim();
+        } else {
+          tokenRegistryAddress = tokenRegistryData;
+        }
+
+        console.log("Token registry address extracted:", tokenRegistryAddress);
+
+        if (!tokenRegistryAddress || !ethers.utils.isAddress(tokenRegistryAddress)) {
+          throw new Error("Invalid token registry address found in document");
         }
 
         const tokenRegistry = new ethers.Contract(
