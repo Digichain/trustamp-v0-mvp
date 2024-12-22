@@ -1,13 +1,13 @@
 import { useToast } from "@/components/ui/use-toast";
 import { useTransactions } from "@/hooks/useTransactions";
-import { wrapDocument } from "@/utils/document-wrapper";
+import { wrapDocument } from "@govtechsg/open-attestation";
 import { useDocumentStorage } from "./useDocumentStorage";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useWrappingHandler = () => {
   const { toast } = useToast();
   const { invalidateTransactions } = useTransactions();
-  const { storeRawDocument, storeWrappedDocument } = useDocumentStorage();
+  const { storeWrappedDocument } = useDocumentStorage();
 
   const handleWrapDocument = async (transaction: any) => {
     try {
@@ -16,16 +16,14 @@ export const useWrappingHandler = () => {
       if (!transaction.raw_document) {
         throw new Error("No raw document found");
       }
-      // Store the raw document first
-      await storeRawDocument(transaction.id, transaction.raw_document);
+
+      // Use OpenAttestation's wrap function directly
       console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
-      
-      // Use the shared document wrapper utility
       const wrappedDoc = wrapDocument(transaction.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
 
       // Store the wrapped document
-      await storeWrappedDocument(transaction.id, transaction.wrapped_document);
+      await storeWrappedDocument(transaction.id, wrappedDoc);
       console.log("Wrapped document stored successfully");
 
       // Update transaction status in database
@@ -34,6 +32,7 @@ export const useWrappingHandler = () => {
         .from('transactions')
         .update({ 
           status: 'document_wrapped',
+          wrapped_document: wrappedDoc,
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.id)
@@ -46,7 +45,7 @@ export const useWrappingHandler = () => {
 
       console.log("Transaction status updated successfully:", updateData);
 
-      // Force cache invalidation
+      // Force cache invalidation to update UI
       console.log("Invalidating transactions cache");
       await invalidateTransactions();
       console.log("Cache invalidated, UI should update");
@@ -56,7 +55,7 @@ export const useWrappingHandler = () => {
         description: "Document wrapped successfully",
       });
 
-      return transaction.wrapped_document;
+      return wrappedDoc;
     } catch (error: any) {
       console.error("Error wrapping document:", error);
       toast({
