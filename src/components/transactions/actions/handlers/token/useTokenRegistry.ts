@@ -8,12 +8,12 @@ const TitleEscrowABI = [
   "function approve(address to, uint256 tokenId) public",
   "function transferFrom(address from, address to, uint256 tokenId) public",
   "function safeTransferFrom(address from, address to, uint256 tokenId) public",
-  "function owner() public view returns (address)",
   "function hasRole(bytes32 role, address account) public view returns (bool)",
   "function MINTER_ROLE() public view returns (bytes32)",
   "function DEFAULT_ADMIN_ROLE() public view returns (bytes32)",
   "function grantRole(bytes32 role, address account) public",
-  "function supportsInterface(bytes4 interfaceId) public view returns (bool)"
+  "function supportsInterface(bytes4 interfaceId) public view returns (bool)",
+  "function getRoleAdmin(bytes32 role) public view returns (bytes32)"
 ];
 
 export const useTokenRegistry = () => {
@@ -27,7 +27,7 @@ export const useTokenRegistry = () => {
       const signerAddress = await signer.getAddress();
       console.log("Initializing contract with signer address:", signerAddress);
 
-      // Create contract instance with the TitleEscrow ABI
+      // Create contract instance
       const contract = new ethers.Contract(address, TitleEscrowABI, signer);
       console.log("Successfully connected to token registry at:", address);
 
@@ -37,17 +37,19 @@ export const useTokenRegistry = () => {
         throw new Error("No contract found at the specified address");
       }
 
-      // Verify contract ownership/permissions
-      const contractOwner = await contract.owner();
-      console.log("Contract owner:", contractOwner);
-      
-      // Check if signer has minting role
+      // Get roles directly from contract
       const MINTER_ROLE = await contract.MINTER_ROLE();
+      const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
       console.log("MINTER_ROLE hash:", MINTER_ROLE);
-      const hasMintRole = await contract.hasRole(MINTER_ROLE, signerAddress);
-      console.log("Signer has minting role:", hasMintRole);
+      console.log("DEFAULT_ADMIN_ROLE hash:", DEFAULT_ADMIN_ROLE);
 
-      if (!hasMintRole && contractOwner.toLowerCase() !== signerAddress.toLowerCase()) {
+      // Check roles
+      const hasMintRole = await contract.hasRole(MINTER_ROLE, signerAddress);
+      const hasAdminRole = await contract.hasRole(DEFAULT_ADMIN_ROLE, signerAddress);
+      console.log("Signer has minting role:", hasMintRole);
+      console.log("Signer has admin role:", hasAdminRole);
+
+      if (!hasMintRole && !hasAdminRole) {
         throw new Error("Signer does not have permission to mint tokens");
       }
 
@@ -80,36 +82,36 @@ export const useTokenRegistry = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Verify contract connection
       const signer = tokenRegistry.signer;
       const signerAddress = await signer.getAddress();
       console.log("Minting with signer address:", signerAddress);
 
-      // Verify the signer has permission to mint
+      // Verify contract connection
       const code = await signer.provider?.getCode(tokenRegistry.address);
       if (!code || code === '0x') {
         throw new Error("Invalid contract address");
       }
 
-      // Get MINTER_ROLE directly from contract
+      // Get roles directly from contract
       const MINTER_ROLE = await tokenRegistry.MINTER_ROLE();
+      const DEFAULT_ADMIN_ROLE = await tokenRegistry.DEFAULT_ADMIN_ROLE();
       console.log("MINTER_ROLE hash:", MINTER_ROLE);
       
-      // Verify minting permissions again before proceeding
+      // Verify minting permissions
       const hasMintRole = await tokenRegistry.hasRole(MINTER_ROLE, signerAddress);
-      const isOwner = (await tokenRegistry.owner()).toLowerCase() === signerAddress.toLowerCase();
+      const hasAdminRole = await tokenRegistry.hasRole(DEFAULT_ADMIN_ROLE, signerAddress);
       
-      if (!hasMintRole && !isOwner) {
+      if (!hasMintRole && !hasAdminRole) {
         throw new Error("Signer does not have permission to mint tokens");
       }
 
-      // First check if token already exists
+      // Check if token already exists
       const exists = await checkTokenExists(tokenRegistry, tokenId);
       if (exists) {
         throw new Error("Token already exists");
       }
 
-      // Mint the token using safeMint
+      // Mint the token
       console.log("Calling safeMint with parameters:", {
         to: beneficiary,
         tokenId: tokenId.toString(),
@@ -117,7 +119,7 @@ export const useTokenRegistry = () => {
       });
 
       const tx = await tokenRegistry.safeMint(beneficiary, tokenId, {
-        gasLimit: 500000 // Add explicit gas limit
+        gasLimit: 500000
       });
       console.log("Mint transaction sent:", tx.hash);
       
@@ -130,7 +132,6 @@ export const useTokenRegistry = () => {
       });
     } catch (error: any) {
       console.error("Error minting token:", error);
-      // Log detailed error information
       if (error.transaction) {
         console.error("Transaction details:", {
           from: error.transaction.from,

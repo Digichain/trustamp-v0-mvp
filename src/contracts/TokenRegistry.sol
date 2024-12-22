@@ -5,15 +5,15 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenRegistry is ERC721, AccessControl, Ownable {
+contract TokenRegistry is ERC721, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant ADMIN_ROLE = DEFAULT_ADMIN_ROLE;
 
-    constructor(address initialOwner, string memory name, string memory symbol) 
+    constructor(string memory name, string memory symbol) 
         ERC721(name, symbol)
-        Ownable(initialOwner)
     {
-        _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
-        _grantRole(MINTER_ROLE, initialOwner);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(MINTER_ROLE, msg.sender);
     }
 
     function safeMint(address to, uint256 tokenId) public onlyRole(MINTER_ROLE) {
@@ -24,7 +24,6 @@ contract TokenRegistry is ERC721, AccessControl, Ownable {
         return _exists(tokenId);
     }
 
-    // Override required by Solidity for multiple inheritance
     function supportsInterface(bytes4 interfaceId)
         public
         view
