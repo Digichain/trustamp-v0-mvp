@@ -8,7 +8,9 @@ const TitleEscrowABI = [
   "function ownerOf(uint256 tokenId) public view returns (address)",
   "function approve(address to, uint256 tokenId) public",
   "function transferFrom(address from, address to, uint256 tokenId) public",
-  "function safeTransferFrom(address from, address to, uint256 tokenId) public"
+  "function safeTransferFrom(address from, address to, uint256 tokenId) public",
+  "function owner() public view returns (address)",
+  "function hasRole(bytes32 role, address account) public view returns (bool)"
 ];
 
 export const useTokenRegistry = () => {
@@ -30,6 +32,19 @@ export const useTokenRegistry = () => {
       const code = await signer.provider?.getCode(address);
       if (!code || code === '0x') {
         throw new Error("No contract found at the specified address");
+      }
+
+      // Verify contract ownership/permissions
+      const contractOwner = await contract.owner();
+      console.log("Contract owner:", contractOwner);
+      
+      // Check if signer has minting role
+      const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
+      const hasMintRole = await contract.hasRole(MINTER_ROLE, signerAddress);
+      console.log("Signer has minting role:", hasMintRole);
+
+      if (!hasMintRole && contractOwner.toLowerCase() !== signerAddress.toLowerCase()) {
+        throw new Error("Signer does not have permission to mint tokens");
       }
 
       return contract;
@@ -70,6 +85,15 @@ export const useTokenRegistry = () => {
       const code = await signer.provider?.getCode(tokenRegistry.address);
       if (!code || code === '0x') {
         throw new Error("Invalid contract address");
+      }
+
+      // Verify minting permissions again before proceeding
+      const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
+      const hasMintRole = await tokenRegistry.hasRole(MINTER_ROLE, signerAddress);
+      const isOwner = (await tokenRegistry.owner()).toLowerCase() === signerAddress.toLowerCase();
+      
+      if (!hasMintRole && !isOwner) {
+        throw new Error("Signer does not have permission to mint tokens");
       }
 
       // First check if token already exists
