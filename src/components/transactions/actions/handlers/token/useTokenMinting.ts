@@ -1,5 +1,5 @@
 import { Contract } from "ethers";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 export const useTokenMinting = () => {
   const { toast } = useToast();
@@ -14,14 +14,33 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Estimate gas first to check if transaction will fail
-      const gasEstimate = await tokenRegistry.estimateGas.mint(beneficiary, tokenId);
-      console.log("Estimated gas for minting:", gasEstimate.toString());
+      // Check minter role again just before minting
+      const minterRole = await tokenRegistry.MINTER_ROLE();
+      const signer = tokenRegistry.signer;
+      const signerAddress = await signer.getAddress();
+      const hasMinterRole = await tokenRegistry.hasRole(minterRole, signerAddress);
+
+      if (!hasMinterRole) {
+        throw new Error("MINTER_ROLE_REQUIRED");
+      }
+
+      // Estimate gas with a try/catch to get more specific error messages
+      let gasEstimate;
+      try {
+        gasEstimate = await tokenRegistry.estimateGas.mint(beneficiary, tokenId);
+        console.log("Estimated gas for minting:", gasEstimate.toString());
+      } catch (error: any) {
+        console.error("Gas estimation failed:", error);
+        if (error.message.includes("execution reverted")) {
+          throw new Error("MINT_FAILED");
+        }
+        throw error;
+      }
 
       // Add 20% buffer to gas estimate
       const gasLimit = gasEstimate.mul(120).div(100);
       
-      // Call mint with explicit gas limit
+      // Send transaction with explicit gas limit
       const tx = await tokenRegistry.mint(beneficiary, tokenId, {
         gasLimit: gasLimit
       });
@@ -39,13 +58,13 @@ export const useTokenMinting = () => {
     } catch (error: any) {
       console.error("Error minting token:", error);
       
-      let errorMessage = "Failed to mint token. ";
-      if (error.message.includes("execution reverted")) {
-        errorMessage += "Transaction was reverted - check contract permissions.";
+      let errorMessage = "Failed to mint token";
+      if (error.message === "MINTER_ROLE_REQUIRED") {
+        errorMessage = "Account does not have permission to mint tokens";
+      } else if (error.message === "MINT_FAILED") {
+        errorMessage = "Token minting failed - the token may already exist";
       } else if (error.message.includes("gas required exceeds allowance")) {
-        errorMessage += "Insufficient gas provided.";
-      } else {
-        errorMessage += error.message;
+        errorMessage = "Transaction requires more gas than available";
       }
 
       toast({
