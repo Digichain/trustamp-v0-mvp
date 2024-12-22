@@ -94,19 +94,19 @@ export const useSigningHandler = () => {
         console.log("Transaction confirmed, receipt:", receipt);
 
         // Create proof with transaction hash and proper format
-        const proof = {
+        const proof = [{
           type: "OpenAttestationMintable",
           method: "TOKEN_REGISTRY",
           value: mintTx.hash,
           salt: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
           tokenRegistry: tokenRegistryAddress.toLowerCase()
-        };
+        }];
 
         console.log("Created proof:", proof);
 
         signedDocument = {
           ...transaction.wrapped_document,
-          proof: [proof]
+          proof
         };
         signedStatus = "document_issued";
 
