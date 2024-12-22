@@ -6,9 +6,11 @@ export const useDocumentStorage = () => {
     console.log("Raw document content:", JSON.stringify(rawDocument, null, 2));
 
     const fileName = `${transactionId}_raw.json`;
+    const documentContent = JSON.stringify(rawDocument, null, 2);
+    
     const { error: uploadError } = await supabase.storage
       .from('raw-documents')
-      .upload(fileName, JSON.stringify(rawDocument, null, 2), {
+      .upload(fileName, documentContent, {
         contentType: 'application/json',
         upsert: true
       });
@@ -25,9 +27,11 @@ export const useDocumentStorage = () => {
     console.log("Storing wrapped document for transaction:", transactionId);
     
     const fileName = `${transactionId}_wrapped.json`;
+    const documentContent = JSON.stringify(wrappedDocument, null, 2);
+    
     const { error: uploadError } = await supabase.storage
       .from('wrapped-documents')
-      .upload(fileName, JSON.stringify(wrappedDocument, null, 2), {
+      .upload(fileName, documentContent, {
         contentType: 'application/json',
         upsert: true
       });
@@ -44,9 +48,11 @@ export const useDocumentStorage = () => {
     console.log("Storing signed document for transaction:", transactionId);
     
     const fileName = `${transactionId}_signed.json`;
+    const documentContent = JSON.stringify(signedDocument, null, 2);
+    
     const { error: uploadError } = await supabase.storage
       .from('signed-documents')
-      .upload(fileName, JSON.stringify(signedDocument, null, 2), {
+      .upload(fileName, documentContent, {
         contentType: 'application/json',
         upsert: true
       });
