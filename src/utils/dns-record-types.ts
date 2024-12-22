@@ -46,13 +46,7 @@ export type OpenAttestationDNSTextRecord = Static<typeof OpenAttestationDNSTextR
 export type RecordTypes = Static<typeof RecordTypesT>;
 
 export const formatDNSTxtRecord = (address: string): string => {
-  const record: OpenAttestationDNSTextRecord = {
-    type: "openatts",
-    net: "ethereum",
-    netId: EthereumNetworks.sepolia,
-    addr: address,
-  };
-
   // Format the record as a string following DNS TXT record format
-  return `type=${record.type} net=${record.net} netId=${record.netId} addr=${record.addr}`;
+  // The format should be: openatts net=ethereum netId=11155111 addr=0x1234...
+  return `openatts net=ethereum netId=${EthereumNetworks.sepolia} addr=${address}`;
 };

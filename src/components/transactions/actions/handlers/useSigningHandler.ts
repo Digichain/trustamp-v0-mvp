@@ -43,22 +43,7 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address from wrapped document
-        if (!transaction.wrapped_document.data) {
-          console.error("No data object found in wrapped document");
-          throw new Error("Invalid document structure: missing data object");
-        }
-
-        if (!transaction.wrapped_document.data.issuers) {
-          console.error("No issuers array found in wrapped document data");
-          throw new Error("Invalid document structure: missing issuers array in data");
-        }
-
-        if (!transaction.wrapped_document.data.issuers[0]) {
-          console.error("No issuer found in issuers array");
-          throw new Error("Invalid document structure: empty issuers array");
-        }
-
-        const tokenRegistryData = transaction.wrapped_document.data.issuers[0].tokenRegistry;
+        const tokenRegistryData = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
         console.log("Token registry data found:", tokenRegistryData);
         
         if (!tokenRegistryData) {
@@ -94,12 +79,8 @@ export const useSigningHandler = () => {
         console.log("Using merkle root as token ID:", merkleRoot);
 
         // Convert merkle root to BigNumber for token ID
-        // First ensure it's a proper hex string with 0x prefix
         const formattedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-        // Convert hex string to decimal string
-        const decimalValue = ethers.BigNumber.from(formattedMerkleRoot).toString();
-        // Create final BigNumber from decimal string
-        const tokenId = ethers.BigNumber.from(decimalValue);
+        const tokenId = ethers.BigNumber.from(formattedMerkleRoot);
         
         console.log("Converted merkle root to token ID:", tokenId.toString());
 
@@ -108,6 +89,7 @@ export const useSigningHandler = () => {
         const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Token minted, transaction:", mintTx.hash);
         await mintTx.wait();
+        console.log("Transaction confirmed");
 
         // Create proof with transaction hash
         const proof = {
