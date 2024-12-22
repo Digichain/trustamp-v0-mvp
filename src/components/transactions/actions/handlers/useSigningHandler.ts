@@ -72,6 +72,8 @@ export const useSigningHandler = () => {
         const normalizedAddress = ethers.utils.getAddress(prefixedAddress);
         console.log("Final normalized token registry address:", normalizedAddress);
 
+        // Initialize contract with proper error handling
+        console.log("Initializing token registry contract...");
         const tokenRegistry = new ethers.Contract(
           normalizedAddress,
           TokenRegistryArtifact.abi,
@@ -87,21 +89,49 @@ export const useSigningHandler = () => {
         const tokenId = ethers.BigNumber.from(formattedMerkleRoot);
         console.log("Token ID for minting:", tokenId.toString());
 
-        // Mint token
+        // Check if token already exists
+        console.log("Checking if token already exists...");
+        try {
+          const existingOwner = await tokenRegistry.ownerOf(tokenId);
+          console.log("Token already exists, owned by:", existingOwner);
+          throw new Error("Document has already been minted");
+        } catch (error: any) {
+          // ERC721 throws when token doesn't exist, which is what we want
+          if (!error.message.includes("owner query for nonexistent token")) {
+            throw error;
+          }
+          console.log("Token does not exist yet, proceeding with mint...");
+        }
+
+        // Mint token with higher gas limit to ensure transaction success
         console.log("Minting token...");
-        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
+        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId, {
+          gasLimit: 500000 // Increase gas limit to ensure transaction success
+        });
         console.log("Mint transaction hash:", mintTx.hash);
         
-        // Wait for confirmation
-        const receipt = await mintTx.wait();
+        // Wait for confirmation with more blocks
+        console.log("Waiting for transaction confirmation...");
+        const receipt = await mintTx.wait(2); // Wait for 2 block confirmations
         console.log("Transaction confirmed, receipt:", receipt);
 
-        // Verify token was minted
-        const tokenOwner = await tokenRegistry.ownerOf(tokenId);
-        console.log("Token owner after minting:", tokenOwner);
-        
-        if (tokenOwner.toLowerCase() !== walletAddress.toLowerCase()) {
-          throw new Error("Token minting verification failed - owner mismatch");
+        // Verify token was minted with retries
+        console.log("Verifying token ownership...");
+        let retries = 3;
+        let tokenOwner;
+        while (retries > 0) {
+          try {
+            tokenOwner = await tokenRegistry.ownerOf(tokenId);
+            console.log("Token owner after minting:", tokenOwner);
+            if (tokenOwner.toLowerCase() === walletAddress.toLowerCase()) {
+              break;
+            }
+            throw new Error("Owner mismatch");
+          } catch (error) {
+            if (retries === 1) throw error;
+            retries--;
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between retries
+          }
         }
 
         // Create proof with proper format for OpenAttestation verification
