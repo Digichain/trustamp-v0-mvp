@@ -1,4 +1,4 @@
-import { TitleEscrowFactory } from "@govtechsg/token-registry";
+import { TitleEscrowFactory } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 

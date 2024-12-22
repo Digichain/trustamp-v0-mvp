@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { TokenRegistryDocument } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractFactory, ethers } from "ethers";
-import TokenRegistryArtifact from '../../../contracts/TokenRegistry';
+import { TokenRegistryFactory } from "@govtechsg/token-registry/dist/contracts";
 
 export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
   const [isCreating, setIsCreating] = useState(false);
@@ -24,12 +24,9 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const signer = provider.getSigner();
       console.log('Got signer from provider');
 
-      const factory = new ContractFactory(
-        TokenRegistryArtifact.abi,
-        TokenRegistryArtifact.bytecode,
-        signer
-      );
-      console.log('Created contract factory');
+      // Use OpenAttestation's TokenRegistryFactory
+      const factory = new TokenRegistryFactory(signer);
+      console.log('Created TokenRegistryFactory');
 
       console.log('Deploying TokenRegistry...');
       const tokenRegistry = await factory.deploy(walletAddress, name, symbol);
@@ -79,11 +76,9 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const provider = new ethers.providers.Web3Provider(ethereum);
       console.log('Loading existing registry at address:', address);
 
-      const tokenRegistry = new ethers.Contract(
-        address,
-        TokenRegistryArtifact.abi,
-        provider
-      );
+      // Use OpenAttestation's TokenRegistryFactory to connect to existing contract
+      const factory = new TokenRegistryFactory(provider);
+      const tokenRegistry = factory.attach(address);
 
       const [name, symbol, owner] = await Promise.all([
         tokenRegistry.name(),
