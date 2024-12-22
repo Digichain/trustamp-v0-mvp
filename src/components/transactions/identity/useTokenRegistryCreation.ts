@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { TokenRegistryDocument } from "./types";
 import { supabase } from "@/integrations/supabase/client";
-import { ContractFactory, ethers } from "ethers";
-import { TokenRegistryFactory } from "@govtechsg/token-registry/dist/contracts";
+import { ethers } from "ethers";
+import { TitleEscrow__factory } from "@govtechsg/token-registry/dist/contracts";
 
 export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
   const [isCreating, setIsCreating] = useState(false);
@@ -24,16 +24,16 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const signer = provider.getSigner();
       console.log('Got signer from provider');
 
-      // Use OpenAttestation's TokenRegistryFactory
-      const factory = new TokenRegistryFactory(signer);
-      console.log('Created TokenRegistryFactory');
+      // Deploy new TitleEscrow contract
+      const factory = new TitleEscrow__factory(signer);
+      console.log('Created TitleEscrow factory');
 
-      console.log('Deploying TokenRegistry...');
-      const tokenRegistry = await factory.deploy(walletAddress, name, symbol);
+      console.log('Deploying TitleEscrow...');
+      const titleEscrow = await factory.deploy(name, symbol);
       console.log('Contract deployment transaction sent, waiting for confirmation...');
       
-      const deployedContract = await tokenRegistry.deployed();
-      console.log('TokenRegistry deployed at:', deployedContract.address);
+      const deployedContract = await titleEscrow.deployed();
+      console.log('TitleEscrow deployed at:', deployedContract.address);
 
       const { data, error } = await supabase.functions.invoke('oa-dns-records', {
         body: {
@@ -76,14 +76,12 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const provider = new ethers.providers.Web3Provider(ethereum);
       console.log('Loading existing registry at address:', address);
 
-      // Use OpenAttestation's TokenRegistryFactory to connect to existing contract
-      const factory = new TokenRegistryFactory(provider);
-      const tokenRegistry = factory.attach(address);
+      const titleEscrow = TitleEscrow__factory.connect(address, provider);
 
       const [name, symbol, owner] = await Promise.all([
-        tokenRegistry.name(),
-        tokenRegistry.symbol(),
-        tokenRegistry.owner()
+        titleEscrow.name(),
+        titleEscrow.symbol(),
+        titleEscrow.owner()
       ]);
 
       const { data, error } = await supabase.functions.invoke('oa-dns-records', {

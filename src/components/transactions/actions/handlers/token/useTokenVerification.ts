@@ -1,4 +1,4 @@
-import { TitleEscrowFactory } from "@govtechsg/token-registry/dist/contracts";
+import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -6,7 +6,7 @@ export const useTokenVerification = () => {
   const { toast } = useToast();
 
   const verifyTokenOwnership = async (
-    tokenRegistry: TitleEscrowFactory,
+    tokenRegistry: TitleEscrow,
     tokenId: ethers.BigNumber,
     expectedOwner: string
   ) => {

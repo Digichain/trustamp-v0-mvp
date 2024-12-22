@@ -1,4 +1,4 @@
-import { TitleEscrowFactory } from "@govtechsg/token-registry/dist/contracts";
+import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -6,7 +6,7 @@ export const useTokenMinting = () => {
   const { toast } = useToast();
 
   const mintToken = async (
-    tokenRegistry: TitleEscrowFactory,
+    tokenRegistry: TitleEscrow,
     beneficiary: string,
     tokenId: ethers.BigNumber
   ) => {
@@ -16,7 +16,7 @@ export const useTokenMinting = () => {
     
     try {
       // Mint token using OpenAttestation's token registry
-      const tx = await tokenRegistry.mint(beneficiary, tokenId);
+      const tx = await tokenRegistry.safeMint(beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
