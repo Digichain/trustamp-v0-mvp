@@ -51,9 +51,13 @@ export const TransactionActions = ({
   const canSign = useMemo(() => transaction.status === 'document_wrapped', [transaction]);
   const canDownload = useMemo(() => ['document_created', 'document_wrapped', 'document_signed', 'document_issued'].includes(transaction.status), [transaction]);
 
-  console.log("Transaction status:", transaction.status);
-  console.log("Can sign:", canSign);
-  console.log("Is transferable:", isTransferable);
+  console.log("Transaction details:", {
+    id: transaction.id,
+    status: transaction.status,
+    canSign,
+    isTransferable,
+    hasWrappedDoc: !!transaction.wrapped_document
+  });
 
   return (
     <DropdownMenu>

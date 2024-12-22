@@ -1,9 +1,8 @@
 import { useToast } from "@/components/ui/use-toast";
 import { useTransactions } from "@/hooks/useTransactions";
-import { wrapDocument, WrappedDocument } from "@govtechsg/open-attestation";
+import { wrapDocument } from "@govtechsg/open-attestation";
 import { useDocumentStorage } from "./useDocumentStorage";
 import { supabase } from "@/integrations/supabase/client";
-import { Json } from "@/integrations/supabase/types";
 
 export const useWrappingHandler = () => {
   const { toast } = useToast();
@@ -27,27 +26,26 @@ export const useWrappingHandler = () => {
       await storeWrappedDocument(transaction.id, wrappedDoc);
       console.log("Wrapped document stored successfully");
 
-      // Convert WrappedDocument to Json type for database storage
-      const wrappedDocJson = JSON.parse(JSON.stringify(wrappedDoc)) as Json;
+      // Convert wrapped document to JSON for database storage
+      const wrappedDocJson = JSON.parse(JSON.stringify(wrappedDoc));
 
       // Update transaction status in database
       console.log("Updating transaction status to document_wrapped");
-      const { data: updateData, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('transactions')
         .update({ 
           status: 'document_wrapped',
           wrapped_document: wrappedDocJson,
           updated_at: new Date().toISOString()
         })
-        .eq('id', transaction.id)
-        .select();
+        .eq('id', transaction.id);
 
       if (updateError) {
         console.error("Error updating transaction status:", updateError);
         throw updateError;
       }
 
-      console.log("Transaction status updated successfully:", updateData);
+      console.log("Transaction status updated successfully");
 
       // Force cache invalidation to update UI
       console.log("Invalidating transactions cache");
