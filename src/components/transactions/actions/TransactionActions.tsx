@@ -51,6 +51,10 @@ export const TransactionActions = ({
   const canSign = useMemo(() => transaction.status === 'document_wrapped', [transaction]);
   const canDownload = useMemo(() => ['document_created', 'document_wrapped', 'document_signed', 'document_issued'].includes(transaction.status), [transaction]);
 
+  console.log("Transaction status:", transaction.status);
+  console.log("Can sign:", canSign);
+  console.log("Is transferable:", isTransferable);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -63,24 +67,30 @@ export const TransactionActions = ({
           <Eye className="mr-2 h-4 w-4" />
           Preview Document
         </DropdownMenuItem>
+        
         {canWrap && (
           <DropdownMenuItem onClick={() => handleWrapDocument(transaction)}>
             <Package className="mr-2 h-4 w-4" />
             Wrap Document
           </DropdownMenuItem>
         )}
-        {canSign && (
-          <DropdownMenuItem onClick={() => handleSignDocument(transaction)}>
-            <FileSignature className="mr-2 h-4 w-4" />
-            {isTransferable ? 'Issue Document' : 'Sign Document'}
-          </DropdownMenuItem>
-        )}
+
+        <DropdownMenuItem 
+          onClick={() => handleSignDocument(transaction)}
+          disabled={!canSign}
+          className={!canSign ? "opacity-50 cursor-not-allowed" : ""}
+        >
+          <FileSignature className="mr-2 h-4 w-4" />
+          {isTransferable ? 'Issue Document' : 'Sign Document'}
+        </DropdownMenuItem>
+
         {canDownload && (
           <DropdownMenuItem onClick={() => handleDownloadDocument(transaction)}>
             <Download className="mr-2 h-4 w-4" />
             Download Document
           </DropdownMenuItem>
         )}
+        
         <DropdownMenuItem 
           onClick={onDelete}
           className="text-red-600 focus:text-red-600"
