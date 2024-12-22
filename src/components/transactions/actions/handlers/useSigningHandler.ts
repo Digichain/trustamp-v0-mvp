@@ -51,7 +51,7 @@ export const useSigningHandler = () => {
           throw new Error("Invalid document structure: missing token registry address");
         }
 
-        // Ensure address is lowercase and valid
+        // Ensure address is lowercase for consistency
         const normalizedAddress = tokenRegistryAddress.toLowerCase();
         console.log("Normalized token registry address:", normalizedAddress);
 
