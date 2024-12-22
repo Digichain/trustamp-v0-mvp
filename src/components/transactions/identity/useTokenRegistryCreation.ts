@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { TokenRegistryDocument } from "./types";
-import { supabase } from "@/integrations/supabase/client";
-import { ethers } from "ethers";
 import { TitleEscrow__factory } from "@govtechsg/token-registry/dist/contracts";
+import { ethers } from "ethers";
 
-export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryDocument) => void) => {
+export const useTokenRegistryCreation = (onRegistryCreated: (doc: any) => void) => {
   const [isCreating, setIsCreating] = useState(false);
-  const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
+  const [registryDocument, setRegistryDocument] = useState<any | null>(null);
   const { toast } = useToast();
 
   const createTokenRegistry = async (walletAddress: string, name: string, symbol: string) => {
@@ -24,33 +22,21 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       const signer = provider.getSigner();
       console.log('Got signer from provider');
 
-      // Deploy new TitleEscrow contract
+      // Deploy new TitleEscrow contract using the factory
       const factory = new TitleEscrow__factory(signer);
       console.log('Created TitleEscrow factory');
 
       console.log('Deploying TitleEscrow...');
-      const titleEscrow = await factory.deploy(name, symbol);
+      const titleEscrow = await factory.deploy();
       console.log('Contract deployment transaction sent, waiting for confirmation...');
       
       const deployedContract = await titleEscrow.deployed();
       console.log('TitleEscrow deployed at:', deployedContract.address);
 
-      const { data, error } = await supabase.functions.invoke('oa-dns-records', {
-        body: {
-          contractAddress: deployedContract.address,
-          action: 'create',
-          type: 'token-registry'
-        }
-      });
-
-      if (error) throw error;
-      if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
-
-      const newRegistryDocument: TokenRegistryDocument = {
+      const newRegistryDocument = {
         contractAddress: deployedContract.address,
         name,
         symbol,
-        dnsLocation: data.data.dnsLocation,
         ethereumAddress: walletAddress
       };
 
@@ -77,29 +63,12 @@ export const useTokenRegistryCreation = (onRegistryCreated: (doc: TokenRegistryD
       console.log('Loading existing registry at address:', address);
 
       const titleEscrow = TitleEscrow__factory.connect(address, provider);
+      const owner = await titleEscrow.beneficiary();
 
-      const [name, symbol, owner] = await Promise.all([
-        titleEscrow.name(),
-        titleEscrow.symbol(),
-        titleEscrow.owner()
-      ]);
-
-      const { data, error } = await supabase.functions.invoke('oa-dns-records', {
-        body: {
-          contractAddress: address,
-          action: 'create',
-          type: 'token-registry'
-        }
-      });
-
-      if (error) throw error;
-      if (!data?.data?.dnsLocation) throw new Error('DNS location not returned from API');
-
-      const existingRegistryDocument: TokenRegistryDocument = {
+      const existingRegistryDocument = {
         contractAddress: address,
-        name,
-        symbol,
-        dnsLocation: data.data.dnsLocation,
+        name: "Title Escrow",
+        symbol: "TE",
         ethereumAddress: owner
       };
 

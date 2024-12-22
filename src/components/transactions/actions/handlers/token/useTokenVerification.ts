@@ -1,6 +1,6 @@
 import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const useTokenVerification = () => {
   const { toast } = useToast();
@@ -15,10 +15,11 @@ export const useTokenVerification = () => {
     console.log("Expected owner:", expectedOwner);
     
     try {
-      const currentOwner = await tokenRegistry.ownerOf(tokenId);
-      console.log("Current owner:", currentOwner);
+      // Use balanceOf and getApproved to verify ownership
+      const balance = await tokenRegistry.balanceOf(expectedOwner);
+      const isApproved = await tokenRegistry.getApproved(tokenId);
       
-      if (currentOwner.toLowerCase() !== expectedOwner.toLowerCase()) {
+      if (balance.isZero() || isApproved.toLowerCase() !== expectedOwner.toLowerCase()) {
         throw new Error("Token ownership verification failed");
       }
       

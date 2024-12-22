@@ -1,6 +1,6 @@
 import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const useTokenMinting = () => {
   const { toast } = useToast();
@@ -15,8 +15,8 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Mint token using OpenAttestation's token registry
-      const tx = await tokenRegistry.safeMint(beneficiary, tokenId);
+      // Use mint instead of safeMint as per OpenAttestation's TitleEscrow contract
+      const tx = await tokenRegistry.mint(beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
