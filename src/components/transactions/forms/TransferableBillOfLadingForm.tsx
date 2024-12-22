@@ -146,7 +146,6 @@ export const TransferableBillOfLadingForm = () => {
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
-          amount: 0,
           status: "document_created",
           document_subtype: "transferable",
           title: "BILL_OF_LADING",
