@@ -122,8 +122,7 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, registryDocume
     },
     issuers: [{
       name: bolData.carrierName || "",
-      tokenRegistry: registryDocument.contractAddress,
-      documentStore: registryDocument.documentStoreAddress, // Add document store address here
+      documentStore: registryDocument.contractAddress, // Changed from tokenRegistry to documentStore
       identityProof: {
         type: "DNS-TXT",
         location: "tempdns.trustamp.in"
