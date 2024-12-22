@@ -2,11 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenRegistry is ERC721 {
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
+contract TokenRegistry is ERC721, Ownable {
+    constructor(address initialOwner, string memory name, string memory symbol) 
+        ERC721(name, symbol)
+        Ownable(initialOwner)
+    {}
 
-    function mint(address to, uint256 tokenId) public {
+    function safeMint(address to, uint256 tokenId) public onlyOwner {
         _safeMint(to, tokenId);
     }
 }

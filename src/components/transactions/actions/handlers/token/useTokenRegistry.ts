@@ -3,13 +3,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 // TitleEscrow ABI - only including the methods we need
 const TitleEscrowABI = [
-  "function transferTo(address newBeneficiary, address newHolder)",
-  "function mint(address beneficiary, uint256 tokenId)",
-  "function exists(uint256 tokenId) view returns (bool)",
-  "function ownerOf(uint256 tokenId) view returns (address)",
-  "function connect(address account) returns (Contract)",
-  "function approve(address to, uint256 tokenId)",
-  "function transferFrom(address from, address to, uint256 tokenId)"
+  "function mint(address to, uint256 tokenId) public",
+  "function exists(uint256 tokenId) public view returns (bool)",
+  "function ownerOf(uint256 tokenId) public view returns (address)",
+  "function approve(address to, uint256 tokenId) public",
+  "function transferFrom(address from, address to, uint256 tokenId) public",
+  "function safeTransferFrom(address from, address to, uint256 tokenId) public"
 ];
 
 export const useTokenRegistry = () => {
@@ -51,7 +50,16 @@ export const useTokenRegistry = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      const tx = await tokenRegistry.mint(beneficiary, tokenId);
+      // First check if token already exists
+      const exists = await checkTokenExists(tokenRegistry, tokenId);
+      if (exists) {
+        throw new Error("Token already exists");
+      }
+
+      // Mint the token
+      const tx = await tokenRegistry.mint(beneficiary, tokenId, {
+        gasLimit: 500000 // Add explicit gas limit
+      });
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
