@@ -17,14 +17,27 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing document store contract at address:", address);
       
-      // Create provider with Sepolia network configuration
-      const provider = new ethers.providers.Web3Provider(window.ethereum, {
-        name: 'sepolia',
-        chainId: 11155111
-      });
+      // Create base provider
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      
+      // Get the network
+      const network = await provider.getNetwork();
+      console.log("Connected to network:", network.name);
+      
+      // Ensure we're on Sepolia
+      if (network.chainId !== 11155111) {
+        throw new Error("Please connect to Sepolia network");
+      }
+      
+      // Create contract instance with explicit provider configuration
+      const contract = new ethers.Contract(
+        address,
+        DOCUMENT_STORE_ABI,
+        provider.getSigner()
+      );
       
       console.log("Document store contract instance created");
-      return new ethers.Contract(address, DOCUMENT_STORE_ABI, provider.getSigner());
+      return contract;
     } catch (error: any) {
       console.error("Error initializing document store:", error);
       toast({
@@ -43,6 +56,7 @@ export const useDocumentStore = () => {
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       
+      // Call issue function directly without any name resolution
       const tx = await contract.issue(prefixedMerkleRoot);
       console.log("Issue transaction sent:", tx.hash);
       
