@@ -6,19 +6,13 @@ import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { useTokenRegistry } from "./token/useTokenRegistry";
 import { useAddressValidation } from "./token/useAddressValidation";
-import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
+import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 
 interface Transaction {
   id: string;
   document_subtype?: string;
   status: string;
   wrapped_document: any;
-}
-
-// Define the interface for the token registry contract that includes both TitleEscrow and mint functionality
-interface TokenRegistryContract extends Omit<TitleEscrow, keyof ethers.Contract>, ethers.Contract {
-  mint(to: string, tokenId: ethers.BigNumber): Promise<ethers.ContractTransaction>;
-  ownerOf(tokenId: ethers.BigNumber): Promise<string>;
 }
 
 export const useSigningHandler = () => {
@@ -73,9 +67,9 @@ export const useSigningHandler = () => {
         const normalizedAddress = normalizeTokenRegistryAddress(rawTokenRegistryAddress);
         console.log("Normalized token registry address:", normalizedAddress);
         
-        // Initialize contract with the correct type
+        // Initialize contract with TradeTrust factory
         console.log("Initializing token registry contract...");
-        const tokenRegistry = await initializeContract(normalizedAddress, signer) as unknown as TokenRegistryContract;
+        const tokenRegistry = await initializeContract(normalizedAddress, signer);
         console.log("Token registry contract initialized");
 
         // Get merkle root and format for token ID
@@ -86,20 +80,20 @@ export const useSigningHandler = () => {
 
         // Check if token exists
         console.log("Checking if token already exists...");
-        const exists = await checkTokenExists(tokenRegistry as unknown as TitleEscrow, tokenId);
+        const exists = await checkTokenExists(tokenRegistry, tokenId);
         if (exists) {
           console.error("Token already exists for this document");
           throw new Error("Document has already been minted");
         }
 
-        // Mint token
+        // Mint token using TradeTrust factory
         console.log("Minting token...");
         await mintToken(tokenRegistry, walletAddress, tokenId);
         console.log("Token minted successfully");
         
         // Verify ownership
         console.log("Verifying token ownership...");
-        await verifyTokenOwnership(tokenRegistry as unknown as TitleEscrow, tokenId, walletAddress);
+        await verifyTokenOwnership(tokenRegistry, tokenId, walletAddress);
         console.log("Token ownership verified");
 
         // Update signature with proof for transferable documents

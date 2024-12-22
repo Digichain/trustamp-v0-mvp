@@ -1,4 +1,4 @@
-import { TitleEscrow__factory } from "@govtechsg/token-registry/dist/contracts";
+import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -13,8 +13,8 @@ export const useTokenRegistryContract = () => {
       const signerAddress = await signer.getAddress();
       console.log("Initializing contract with signer address:", signerAddress);
 
-      // Use OpenAttestation's factory to get the contract instance
-      const tokenRegistry = TitleEscrow__factory.connect(address, signer);
+      // Use TradeTrust's factory to get the contract instance
+      const tokenRegistry = TradeTrustErc721Factory.connect(address, signer);
       console.log("Successfully connected to token registry at:", address);
 
       return tokenRegistry;

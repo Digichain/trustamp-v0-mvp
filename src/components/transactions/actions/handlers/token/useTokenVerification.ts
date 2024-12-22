@@ -1,4 +1,4 @@
-import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
+import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 
@@ -6,7 +6,7 @@ export const useTokenVerification = () => {
   const { toast } = useToast();
 
   const verifyTokenOwnership = async (
-    tokenRegistry: TitleEscrow,
+    tokenRegistry: TradeTrustErc721Factory,
     tokenId: ethers.BigNumber,
     expectedOwner: string
   ) => {
@@ -15,11 +15,9 @@ export const useTokenVerification = () => {
     console.log("Expected owner:", expectedOwner);
     
     try {
-      // Use the correct methods from TitleEscrow contract with explicit function signatures
-      const balance = await tokenRegistry["balanceOf(address)"](expectedOwner);
-      const approved = await tokenRegistry["getApproved(uint256)"](tokenId);
+      const owner = await tokenRegistry.ownerOf(tokenId);
       
-      if (balance.isZero() || approved.toLowerCase() !== expectedOwner.toLowerCase()) {
+      if (owner.toLowerCase() !== expectedOwner.toLowerCase()) {
         throw new Error("Token ownership verification failed");
       }
       
