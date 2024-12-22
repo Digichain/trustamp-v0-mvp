@@ -6,7 +6,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { useTokenRegistry } from "./token/useTokenRegistry";
 import { useAddressValidation } from "./token/useAddressValidation";
-import { Contract } from "ethers";
+import { TitleEscrow } from "@govtechsg/token-registry/dist/contracts";
 
 interface Transaction {
   id: string;
@@ -15,9 +15,10 @@ interface Transaction {
   wrapped_document: any;
 }
 
-// Define the interface for the token registry contract
-interface TokenRegistryContract extends Contract {
-  mint(to: string, tokenId: any): Promise<any>;
+// Define the interface for the token registry contract that includes both TitleEscrow and mint functionality
+interface TokenRegistryContract extends Omit<TitleEscrow, keyof ethers.Contract>, ethers.Contract {
+  mint(to: string, tokenId: ethers.BigNumber): Promise<ethers.ContractTransaction>;
+  ownerOf(tokenId: ethers.BigNumber): Promise<string>;
 }
 
 export const useSigningHandler = () => {
@@ -74,7 +75,7 @@ export const useSigningHandler = () => {
         
         // Initialize contract with the correct type
         console.log("Initializing token registry contract...");
-        const tokenRegistry = await initializeContract(normalizedAddress, signer) as TokenRegistryContract;
+        const tokenRegistry = await initializeContract(normalizedAddress, signer) as unknown as TokenRegistryContract;
         console.log("Token registry contract initialized");
 
         // Get merkle root and format for token ID
@@ -85,7 +86,7 @@ export const useSigningHandler = () => {
 
         // Check if token exists
         console.log("Checking if token already exists...");
-        const exists = await checkTokenExists(tokenRegistry, tokenId);
+        const exists = await checkTokenExists(tokenRegistry as TitleEscrow, tokenId);
         if (exists) {
           console.error("Token already exists for this document");
           throw new Error("Document has already been minted");
@@ -98,7 +99,7 @@ export const useSigningHandler = () => {
         
         // Verify ownership
         console.log("Verifying token ownership...");
-        await verifyTokenOwnership(tokenRegistry, tokenId, walletAddress);
+        await verifyTokenOwnership(tokenRegistry as TitleEscrow, tokenId, walletAddress);
         console.log("Token ownership verified");
 
         // Update signature with proof for transferable documents
