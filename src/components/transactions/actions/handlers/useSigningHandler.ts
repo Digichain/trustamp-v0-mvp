@@ -41,23 +41,32 @@ export const useSigningHandler = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        // Extract and validate token registry address
-        const tokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
-        console.log("Token registry address from document:", tokenRegistryAddress);
+        // Extract token registry address
+        const rawTokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
+        console.log("Raw token registry address from document:", rawTokenRegistryAddress);
         
-        if (!tokenRegistryAddress) {
+        if (!rawTokenRegistryAddress) {
           console.error("No token registry address found in issuer");
           throw new Error("Invalid document structure: missing token registry address");
         }
 
-        // Validate Ethereum address format
-        if (!ethers.utils.isAddress(tokenRegistryAddress)) {
+        // Clean and validate the address
+        const cleanAddress = rawTokenRegistryAddress.trim().toLowerCase();
+        console.log("Cleaned token registry address:", cleanAddress);
+
+        // Add 0x prefix if missing
+        const prefixedAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+        console.log("Prefixed token registry address:", prefixedAddress);
+
+        // Validate the address format
+        if (!ethers.utils.isAddress(prefixedAddress)) {
+          console.error("Invalid token registry address format:", prefixedAddress);
           throw new Error("Invalid token registry address format");
         }
 
-        // Normalize address to checksum format for contract interaction
-        const normalizedAddress = ethers.utils.getAddress(tokenRegistryAddress);
-        console.log("Normalized token registry address:", normalizedAddress);
+        // Convert to checksum address
+        const normalizedAddress = ethers.utils.getAddress(prefixedAddress);
+        console.log("Final normalized token registry address:", normalizedAddress);
 
         const tokenRegistry = new ethers.Contract(
           normalizedAddress,
