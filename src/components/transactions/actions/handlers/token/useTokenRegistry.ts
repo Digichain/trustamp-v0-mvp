@@ -3,7 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 // TitleEscrow ABI - only including the methods we need
 const TitleEscrowABI = [
-  "function mint(address to, uint256 tokenId) public",
+  "function safeMint(address to, uint256 tokenId) public",
   "function exists(uint256 tokenId) public view returns (bool)",
   "function ownerOf(uint256 tokenId) public view returns (address)",
   "function approve(address to, uint256 tokenId) public",
@@ -56,8 +56,14 @@ export const useTokenRegistry = () => {
         throw new Error("Token already exists");
       }
 
-      // Mint the token
-      const tx = await tokenRegistry.mint(beneficiary, tokenId, {
+      // Mint the token using safeMint
+      console.log("Calling safeMint with parameters:", {
+        to: beneficiary,
+        tokenId: tokenId.toString(),
+        gasLimit: 500000
+      });
+
+      const tx = await tokenRegistry.safeMint(beneficiary, tokenId, {
         gasLimit: 500000 // Add explicit gas limit
       });
       console.log("Mint transaction sent:", tx.hash);
@@ -71,6 +77,14 @@ export const useTokenRegistry = () => {
       });
     } catch (error: any) {
       console.error("Error minting token:", error);
+      // Log detailed error information
+      if (error.transaction) {
+        console.error("Transaction details:", {
+          from: error.transaction.from,
+          to: error.transaction.to,
+          data: error.transaction.data,
+        });
+      }
       throw new Error(error.message || "Failed to mint token");
     }
   };
