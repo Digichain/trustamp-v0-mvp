@@ -1,6 +1,16 @@
 import { ethers } from "ethers";
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry/contracts/TradeTrustERC721Factory";
 import { useToast } from "@/components/ui/use-toast";
+
+// TitleEscrow ABI - only including the methods we need
+const TitleEscrowABI = [
+  "function transferTo(address newBeneficiary, address newHolder)",
+  "function mint(address beneficiary, uint256 tokenId)",
+  "function exists(uint256 tokenId) view returns (bool)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function connect(address account) returns (Contract)",
+  "function approve(address to, uint256 tokenId)",
+  "function transferFrom(address from, address to, uint256 tokenId)"
+];
 
 export const useTokenRegistry = () => {
   const { toast } = useToast();
@@ -9,10 +19,10 @@ export const useTokenRegistry = () => {
     console.log("Initializing token registry contract at address:", address);
     
     try {
-      // Use TradeTrust's factory to connect to the registry
-      const connectedRegistry = await TradeTrustERC721Factory.connect(address, signer);
+      // Create contract instance with the TitleEscrow ABI
+      const contract = new ethers.Contract(address, TitleEscrowABI, signer);
       console.log("Successfully connected to token registry");
-      return connectedRegistry;
+      return contract;
     } catch (error) {
       console.error("Error initializing token registry:", error);
       throw error;
