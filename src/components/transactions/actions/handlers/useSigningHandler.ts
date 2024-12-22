@@ -86,7 +86,7 @@ export const useSigningHandler = () => {
 
         // Check if token exists
         console.log("Checking if token already exists...");
-        const exists = await checkTokenExists(tokenRegistry as TitleEscrow, tokenId);
+        const exists = await checkTokenExists(tokenRegistry as unknown as TitleEscrow, tokenId);
         if (exists) {
           console.error("Token already exists for this document");
           throw new Error("Document has already been minted");
@@ -99,7 +99,7 @@ export const useSigningHandler = () => {
         
         // Verify ownership
         console.log("Verifying token ownership...");
-        await verifyTokenOwnership(tokenRegistry as TitleEscrow, tokenId, walletAddress);
+        await verifyTokenOwnership(tokenRegistry as unknown as TitleEscrow, tokenId, walletAddress);
         console.log("Token ownership verified");
 
         // Update signature with proof for transferable documents
