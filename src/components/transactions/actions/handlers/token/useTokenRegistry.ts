@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { TradeTrustERC721Factory } from "@govtechsg/token-registry/contracts";
+import { TradeTrustERC721Factory } from "@govtechsg/token-registry/contracts/TradeTrustERC721Factory";
 import { useToast } from "@/components/ui/use-toast";
 
 export const useTokenRegistry = () => {
