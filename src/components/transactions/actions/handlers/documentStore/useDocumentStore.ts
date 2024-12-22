@@ -17,12 +17,10 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing document store contract at address:", address);
       
-      // Create provider with ENS resolution disabled
-      const provider = new ethers.providers.Web3Provider(window.ethereum, {
-        ensAddress: null // Disable ENS resolution
-      });
+      // Create provider without ENS support
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       
-      // Create contract instance with the ENS-disabled provider
+      // Create contract instance
       const documentStore = new ethers.Contract(
         address, 
         DOCUMENT_STORE_ABI, 
