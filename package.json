@@ -49,7 +49,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.47.3",
     "@tanstack/react-query": "^5.56.2",
-    "@trustvc/trustvc": "^1.0.2",
+    "@trustvc/trustvc": "^1.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "buffer": "^6.0.3",

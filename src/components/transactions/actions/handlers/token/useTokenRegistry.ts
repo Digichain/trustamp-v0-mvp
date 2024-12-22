@@ -1,5 +1,8 @@
 import { ethers } from 'ethers';
+import { v5Contracts } from "@trustvc/trustvc";
 import TokenRegistryArtifact from '@/contracts/TokenRegistry';
+
+const { TradeTrustToken__factory } = v5Contracts;
 
 export const useTokenRegistry = () => {
   const initializeContract = async (
@@ -7,7 +10,16 @@ export const useTokenRegistry = () => {
     signer: ethers.Signer
   ): Promise<ethers.Contract> => {
     console.log("Initializing token registry contract at address:", address);
-    return new ethers.Contract(address, TokenRegistryArtifact.abi, signer);
+    
+    try {
+      // Use TradeTrust's factory to connect to the registry
+      const connectedRegistry = TradeTrustToken__factory.connect(address, signer);
+      console.log("Successfully connected to token registry");
+      return connectedRegistry;
+    } catch (error) {
+      console.error("Error initializing token registry:", error);
+      throw error;
+    }
   };
 
   const checkTokenExists = async (
@@ -20,12 +32,10 @@ export const useTokenRegistry = () => {
       console.log("Token already exists, owned by:", owner);
       return true;
     } catch (error: any) {
-      // Check specifically for the ERC721NonexistentToken error
       if (error.errorName === "ERC721NonexistentToken") {
         console.log("Token does not exist yet (confirmed by ERC721NonexistentToken error)");
         return false;
       }
-      // For any other error, we should throw it
       console.error("Unexpected error in checkTokenExists:", error);
       throw error;
     }
@@ -41,10 +51,20 @@ export const useTokenRegistry = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Increase gas limit for safety
-      const tx = await contract.safeMint(to, tokenId, {
-        gasLimit: 1000000 // Increased from 500000
-      });
+      // Following TradeTrust's approach, we mint to both owner and holder (same address in this case)
+      const mintRemarks = "Document minted via TrustAmp";
+      
+      // Use the mint function with owner, holder, tokenId, and remarks
+      const tx = await contract.mint(
+        to, // owner
+        to, // holder (same as owner in this case)
+        tokenId,
+        mintRemarks,
+        {
+          gasLimit: 1000000
+        }
+      );
+      
       console.log("Mint transaction submitted:", tx.hash);
       
       const receipt = await tx.wait(2); // Wait for 2 block confirmations
@@ -53,12 +73,10 @@ export const useTokenRegistry = () => {
     } catch (error: any) {
       console.error("Error in mint transaction:", error);
       
-      // Handle specific error cases
       if (error.message.includes("execution reverted")) {
         throw new Error("Token minting failed - contract execution reverted. Please check your wallet has sufficient funds and try again.");
       }
       
-      // If it's a more specific error, include it in the message
       const errorMessage = error.errorName 
         ? `Token minting failed - ${error.errorName}. Please try again.`
         : "Token minting failed - unexpected error. Please try again.";
@@ -78,8 +96,7 @@ export const useTokenRegistry = () => {
     console.log("Token ID:", tokenId.toString());
 
     let retries = maxRetries;
-    let lastError = null;
-
+    
     while (retries > 0) {
       try {
         const owner = await contract.ownerOf(tokenId);
@@ -91,10 +108,8 @@ export const useTokenRegistry = () => {
         }
         throw new Error("Owner mismatch");
       } catch (error: any) {
-        lastError = error;
         console.log(`Verification attempt failed (${retries} retries left):`, error.message);
         
-        // If the token doesn't exist, no point in retrying
         if (error.errorName === "ERC721NonexistentToken") {
           throw new Error("Token ownership verification failed - token does not exist");
         }
