@@ -1,64 +1,60 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-// Define the type for a transaction
 interface Transaction {
   id: string;
-  user_id: string;
-  created_at: string;
-  // Add other transaction fields as needed
+  document_subtype?: string;
+  status: string;
 }
 
-export const useTransactions = () => {
+export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: transactions, isLoading } = useQuery<Transaction[], Error>({
-    queryKey: ["transactions"],
-    queryFn: async () => {
-      console.log("Fetching transactions...");
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.error("No authenticated session found");
-        return [];
-      }
-
+  const handleSignDocument = async (transaction: Transaction) => {
+    console.log("Starting document signing process for:", transaction.id);
+    const isTransferable = transaction.document_subtype === 'transferable';
+    
+    try {
       const { data, error } = await supabase
         .from("transactions")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
+        .update({ status: isTransferable ? "document_issued" : "document_signed" })
+        .eq("id", transaction.id)
+        .select()
+        .single();
 
       if (error) {
-        console.error("Error fetching transactions:", error);
+        console.error("Error signing document:", error);
         toast({
           title: "Error",
-          description: "Failed to fetch transactions",
+          description: "Failed to sign document",
           variant: "destructive",
         });
-        throw error;
+        return false;
       }
 
-      console.log("Fetched transactions:", data);
-      return data;
-    },
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-  });
-
-  // Function to invalidate and refetch the transactions query
-  const invalidateTransactions = async () => {
-    console.log("Invalidating transactions cache...");
-    await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-    await queryClient.refetchQueries({ queryKey: ["transactions"] });
-    console.log("Transactions cache invalidated and refetched");
+      console.log("Document signed successfully:", data);
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      
+      toast({
+        title: "Success",
+        description: isTransferable ? "Document issued successfully" : "Document signed successfully",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error in handleSignDocument:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   return {
-    transactions,
-    isLoading,
-    invalidateTransactions,
+    handleSignDocument,
   };
 };

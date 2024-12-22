@@ -18,7 +18,8 @@ import { useDocumentHandlers } from "./handlers/useDocumentHandlers";
 import { useMemo } from "react";
 
 interface Transaction {
-  document_subtype: string;
+  id: string;
+  document_subtype?: string;
   status: string;
 }
 
