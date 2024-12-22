@@ -15,8 +15,8 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Call mint with explicit function signature
-      const tx = await tokenRegistry["mint(address,uint256)"](beneficiary, tokenId);
+      // Call mint function directly without string signature
+      const tx = await tokenRegistry.mint(beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
