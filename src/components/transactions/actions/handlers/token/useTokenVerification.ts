@@ -15,11 +15,11 @@ export const useTokenVerification = () => {
     console.log("Expected owner:", expectedOwner);
     
     try {
-      // Use balanceOf and getApproved to verify ownership
-      const balance = await tokenRegistry.balanceOf(expectedOwner);
-      const isApproved = await tokenRegistry.getApproved(tokenId);
+      // Use the correct methods from TitleEscrow contract with explicit function signatures
+      const balance = await tokenRegistry["balanceOf(address)"](expectedOwner);
+      const approved = await tokenRegistry["getApproved(uint256)"](tokenId);
       
-      if (balance.isZero() || isApproved.toLowerCase() !== expectedOwner.toLowerCase()) {
+      if (balance.isZero() || approved.toLowerCase() !== expectedOwner.toLowerCase()) {
         throw new Error("Token ownership verification failed");
       }
       

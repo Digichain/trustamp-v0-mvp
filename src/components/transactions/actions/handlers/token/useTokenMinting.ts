@@ -15,8 +15,8 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Use mint instead of safeMint as per OpenAttestation's TitleEscrow contract
-      const tx = await tokenRegistry.mint(beneficiary, tokenId);
+      // Use the correct method from TitleEscrow contract
+      const tx = await tokenRegistry["mint(address,uint256)"](beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
