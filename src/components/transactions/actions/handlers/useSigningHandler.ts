@@ -93,12 +93,19 @@ export const useSigningHandler = () => {
         const receipt = await mintTx.wait();
         console.log("Transaction confirmed, receipt:", receipt);
 
+        // Verify token was minted
+        const tokenOwner = await tokenRegistry.ownerOf(tokenId);
+        console.log("Token owner after minting:", tokenOwner.toLowerCase());
+        
+        if (tokenOwner.toLowerCase() !== walletAddress.toLowerCase()) {
+          throw new Error("Token minting verification failed - owner mismatch");
+        }
+
         // Create proof with transaction hash and proper format
         const proof = [{
           type: "OpenAttestationMintable",
           method: "TOKEN_REGISTRY",
           value: mintTx.hash,
-          salt: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
           tokenRegistry: tokenRegistryAddress.toLowerCase()
         }];
 
