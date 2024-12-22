@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PreviewDialog, PreviewButton } from "../previews/PreviewDialog";
 import { BillOfLadingPreview } from "../previews/BillOfLadingPreview";
-import { TokenRegistryCreator, TokenRegistryDocument } from "../identity/TokenRegistryCreator";
+import { DocumentStoreCreator, DocumentStoreInfo } from "../identity/DocumentStoreCreator";
 import { useWallet } from "@/contexts/WalletContext";
 import { formatBillOfLadingToOpenAttestation } from "@/utils/document-formatters";
 import { BillOfLadingBasicInfo } from "./bill-of-lading/BillOfLadingBasicInfo";
@@ -34,7 +34,7 @@ export const TransferableBillOfLadingForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isWalletConnected, network } = useWallet();
-  const [registryDocument, setRegistryDocument] = useState<TokenRegistryDocument | null>(null);
+  const [documentStore, setDocumentStore] = useState<DocumentStoreInfo | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -117,10 +117,10 @@ export const TransferableBillOfLadingForm = () => {
       return;
     }
 
-    if (!registryDocument?.contractAddress) {
+    if (!documentStore?.contractAddress) {
       toast({
-        title: "Token Registry Required",
-        description: "Please deploy a token registry first",
+        title: "Document Store Required",
+        description: "Please deploy a document store first",
         variant: "destructive",
       });
       return;
@@ -136,8 +136,8 @@ export const TransferableBillOfLadingForm = () => {
 
       const formattedDoc = formatBillOfLadingToOpenAttestation({
         ...formData,
-        tokenRegistry: registryDocument.contractAddress
-      }, registryDocument);
+        documentStore: documentStore.contractAddress
+      }, documentStore);
 
       console.log("Formatted document:", formattedDoc);
 
@@ -188,9 +188,9 @@ export const TransferableBillOfLadingForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <TokenRegistryCreator onRegistryCreated={setRegistryDocument} />
+      <DocumentStoreCreator onStoreCreated={setDocumentStore} />
       
-      {registryDocument && (
+      {documentStore && (
         <>
           <Card>
             <CardHeader>

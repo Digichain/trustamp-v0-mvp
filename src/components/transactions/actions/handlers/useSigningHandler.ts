@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signAndStoreDocument } from "@/utils/document-signer";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
-import { useTokenRegistry } from "./token/useTokenRegistry";
-import { useAddressValidation } from "./token/useAddressValidation";
+import { useDocumentStore } from "./documentStore/useDocumentStore";
 
 interface Transaction {
   id: string;
@@ -18,13 +17,7 @@ export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { walletAddress } = useWallet();
-  const { 
-    initializeContract, 
-    checkTokenExists, 
-    mintToken, 
-    verifyTokenOwnership 
-  } = useTokenRegistry();
-  const { normalizeTokenRegistryAddress } = useAddressValidation();
+  const { initializeContract, issueDocument } = useDocumentStore();
 
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
@@ -45,7 +38,7 @@ export const useSigningHandler = () => {
       let signedStatus;
 
       if (isTransferable) {
-        console.log("Signing transferable document using token registry");
+        console.log("Signing transferable document using document store");
         const { ethereum } = window as any;
         if (!ethereum) {
           throw new Error("MetaMask not installed");
@@ -54,48 +47,23 @@ export const useSigningHandler = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         console.log("Got signer from provider");
-        
-        // Extract and validate token registry address
-        const rawTokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
-        if (!rawTokenRegistryAddress) {
-          console.error("Missing token registry address in document");
-          throw new Error("Invalid document structure: missing token registry address");
+
+        // Get document store address from the document
+        const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
+        if (!documentStoreAddress) {
+          throw new Error("Document store address not found in document");
         }
 
-        // Normalize the address
-        const normalizedAddress = normalizeTokenRegistryAddress(rawTokenRegistryAddress);
-        console.log("Normalized token registry address:", normalizedAddress);
-        
-        // Initialize contract
-        console.log("Initializing token registry contract...");
-        const tokenRegistry = await initializeContract(normalizedAddress, signer);
-        console.log("Token registry contract initialized");
+        // Initialize document store contract
+        const documentStore = await initializeContract(documentStoreAddress, signer);
+        console.log("Document store contract initialized");
 
-        // Get merkle root and format for token ID
+        // Get merkle root and issue document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
-        const formattedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-        const tokenId = ethers.BigNumber.from(formattedMerkleRoot);
-        console.log("Token ID created from merkle root:", tokenId.toString());
+        const txHash = await issueDocument(documentStore, merkleRoot);
+        console.log("Document issued with transaction hash:", txHash);
 
-        // Check if token exists
-        console.log("Checking if token already exists...");
-        const exists = await checkTokenExists(tokenRegistry, tokenId);
-        if (exists) {
-          console.error("Token already exists for this document");
-          throw new Error("Document has already been minted");
-        }
-
-        // Mint token
-        console.log("Minting token...");
-        await mintToken(tokenRegistry, walletAddress, tokenId);
-        console.log("Token minted successfully");
-        
-        // Verify ownership
-        console.log("Verifying token ownership...");
-        await verifyTokenOwnership(tokenRegistry, tokenId, walletAddress);
-        console.log("Token ownership verified");
-
-        // Update signature with proof for transferable documents
+        // Update signature with proof
         signedDocument = {
           ...transaction.wrapped_document,
           signature: {
@@ -104,10 +72,8 @@ export const useSigningHandler = () => {
               type: "OpenAttestationSignature2018",
               created: new Date().toISOString(),
               proofPurpose: "assertionMethod",
-              verificationMethod: `did:ethr:${normalizedAddress}`,
-              signature: formattedMerkleRoot,
-              tokenRegistry: normalizedAddress,
-              mintedOnTokenRegistry: true
+              verificationMethod: documentStoreAddress,
+              signature: merkleRoot
             }
           }
         };
