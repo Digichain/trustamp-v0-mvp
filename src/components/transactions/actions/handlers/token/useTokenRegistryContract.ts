@@ -25,23 +25,32 @@ export const useTokenRegistryContract = () => {
       const signerAddress = await signer.getAddress();
       console.log("Signer address:", signerAddress);
 
-      // Create contract instance
-      const tokenRegistry = new ethers.Contract(address, TOKEN_REGISTRY_ABI, signer);
-      console.log("Contract instance created");
+      // Create contract instance with read-only provider first for interface checks
+      const provider = signer.provider;
+      if (!provider) {
+        throw new Error("No provider available");
+      }
+      
+      const readOnlyContract = new ethers.Contract(address, TOKEN_REGISTRY_ABI, provider);
+      console.log("Read-only contract instance created for interface checks");
 
       // Check ERC165 interface support first
       const ERC165_INTERFACE_ID = "0x01ffc9a7";
-      console.log("Checking ERC165 interface support...");
+      console.log("Checking ERC165 interface support using read-only contract...");
       
       try {
-        const supportsERC165 = await tokenRegistry.supportsInterface(ERC165_INTERFACE_ID);
+        const supportsERC165 = await readOnlyContract.supportsInterface(ERC165_INTERFACE_ID);
         console.log("ERC165 interface support check result:", supportsERC165);
         
         if (!supportsERC165) {
+          console.error("Contract explicitly does not support ERC165");
           throw new Error("Contract does not support ERC165 interface");
         }
       } catch (error: any) {
         console.error("Error checking ERC165 interface:", error);
+        if (error.message.includes("call revert exception")) {
+          throw new Error("Contract call failed - verify the contract address is correct");
+        }
         throw new Error("Failed to verify ERC165 interface support");
       }
 
@@ -50,16 +59,21 @@ export const useTokenRegistryContract = () => {
       console.log("Checking ERC721 interface support...");
       
       try {
-        const supportsERC721 = await tokenRegistry.supportsInterface(ERC721_INTERFACE_ID);
+        const supportsERC721 = await readOnlyContract.supportsInterface(ERC721_INTERFACE_ID);
         console.log("ERC721 interface support check result:", supportsERC721);
         
         if (!supportsERC721) {
+          console.error("Contract explicitly does not support ERC721");
           throw new Error("Contract does not support ERC721 interface");
         }
       } catch (error: any) {
         console.error("Error checking ERC721 interface:", error);
         throw new Error("Failed to verify ERC721 interface support");
       }
+
+      // Create contract instance with signer for transactions
+      const tokenRegistry = new ethers.Contract(address, TOKEN_REGISTRY_ABI, signer);
+      console.log("Contract instance with signer created successfully");
 
       // Check roles
       try {
@@ -86,7 +100,9 @@ export const useTokenRegistryContract = () => {
       console.error("Error initializing token registry:", error);
       let errorMessage = "Failed to initialize token registry";
       
-      if (error.message.includes("does not support ERC165")) {
+      if (error.message.includes("verify the contract address is correct")) {
+        errorMessage = "Invalid contract address or network error";
+      } else if (error.message.includes("does not support ERC165")) {
         errorMessage = "Invalid token registry contract - ERC165 interface not supported";
       } else if (error.message.includes("does not support ERC721")) {
         errorMessage = "Invalid token registry contract - ERC721 interface not supported";
