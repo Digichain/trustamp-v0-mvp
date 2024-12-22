@@ -43,7 +43,7 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         
         // Extract token registry address from wrapped document
-        const tokenRegistryData = transaction.wrapped_document.data.issuers[0].tokenRegistry;
+        const tokenRegistryData = transaction.wrapped_document.issuers[0].tokenRegistry;
         console.log("Token registry data found:", tokenRegistryData);
         
         let tokenRegistryAddress;
@@ -73,8 +73,13 @@ export const useSigningHandler = () => {
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
         console.log("Using merkle root as token ID:", merkleRoot);
 
-        // Mint token and set issuer as owner
-        const mintTx = await tokenRegistry.mint(merkleRoot);
+        // Convert merkle root to BigNumber for token ID
+        const tokenId = ethers.BigNumber.from(merkleRoot);
+        console.log("Converted merkle root to token ID:", tokenId.toString());
+
+        // Mint token using safeMint
+        console.log("Attempting to mint token with ID:", tokenId.toString());
+        const mintTx = await tokenRegistry.safeMint(walletAddress, tokenId);
         console.log("Token minted, transaction:", mintTx.hash);
         await mintTx.wait();
 
