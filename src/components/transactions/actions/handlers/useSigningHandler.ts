@@ -42,54 +42,44 @@ export const useSigningHandler = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        // Extract token registry address from wrapped document and ensure lowercase
-        const tokenRegistryData = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
-        console.log("Token registry data found:", tokenRegistryData);
+        // Extract token registry address from wrapped document
+        const tokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
+        console.log("Token registry address from document:", tokenRegistryAddress);
         
-        if (!tokenRegistryData) {
-          console.error("No token registry data found in issuer");
-          throw new Error("Invalid document structure: missing token registry data");
+        if (!tokenRegistryAddress) {
+          console.error("No token registry address found in issuer");
+          throw new Error("Invalid document structure: missing token registry address");
         }
 
-        let tokenRegistryAddress;
+        // Ensure address is lowercase and valid
+        const normalizedAddress = tokenRegistryAddress.toLowerCase();
+        console.log("Normalized token registry address:", normalizedAddress);
 
-        // Handle OpenAttestation salted string format
-        if (typeof tokenRegistryData === 'string') {
-          // Remove the salt prefix if it exists (format: "uuid:string:address")
-          const parts = tokenRegistryData.split(':');
-          tokenRegistryAddress = parts[parts.length - 1].toLowerCase();
-        } else {
-          tokenRegistryAddress = tokenRegistryData.toLowerCase();
-        }
-
-        console.log("Token registry address extracted and normalized:", tokenRegistryAddress);
-
-        if (!tokenRegistryAddress || !ethers.utils.isAddress(tokenRegistryAddress)) {
-          throw new Error("Invalid token registry address found in document. Address: " + tokenRegistryAddress);
+        if (!ethers.utils.isAddress(normalizedAddress)) {
+          throw new Error("Invalid token registry address");
         }
 
         const tokenRegistry = new ethers.Contract(
-          tokenRegistryAddress,
+          normalizedAddress,
           TokenRegistryArtifact.abi,
           signer
         );
 
-        // Use merkle root as token ID
+        // Get merkle root and ensure 0x prefix
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
-        console.log("Using merkle root as token ID:", merkleRoot);
+        const formattedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+        console.log("Formatted merkle root:", formattedMerkleRoot);
 
         // Convert merkle root to BigNumber for token ID
-        const formattedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
         const tokenId = ethers.BigNumber.from(formattedMerkleRoot);
-        
-        console.log("Converted merkle root to token ID:", tokenId.toString());
+        console.log("Token ID for minting:", tokenId.toString());
 
-        // Mint token using safeMint with lowercase wallet address
-        console.log("Attempting to mint token with ID:", tokenId.toString());
+        // Mint token
+        console.log("Minting token...");
         const mintTx = await tokenRegistry.safeMint(walletAddress.toLowerCase(), tokenId);
-        console.log("Token minted, transaction:", mintTx.hash);
+        console.log("Mint transaction hash:", mintTx.hash);
         
-        // Wait for transaction confirmation
+        // Wait for confirmation
         const receipt = await mintTx.wait();
         console.log("Transaction confirmed, receipt:", receipt);
 
@@ -101,12 +91,12 @@ export const useSigningHandler = () => {
           throw new Error("Token minting verification failed - owner mismatch");
         }
 
-        // Create proof with transaction hash and proper format
+        // Create proof with proper format for OpenAttestation verification
         const proof = [{
           type: "OpenAttestationMintable",
           method: "TOKEN_REGISTRY",
-          value: mintTx.hash,
-          tokenRegistry: tokenRegistryAddress.toLowerCase()
+          value: normalizedAddress,
+          tokenRegistry: normalizedAddress
         }];
 
         console.log("Created proof:", proof);
