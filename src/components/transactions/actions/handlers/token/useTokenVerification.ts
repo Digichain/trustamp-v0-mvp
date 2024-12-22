@@ -1,13 +1,12 @@
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
-import { ethers } from "ethers";
+import { Contract } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 
 export const useTokenVerification = () => {
   const { toast } = useToast();
 
   const verifyTokenOwnership = async (
-    tokenRegistry: TradeTrustErc721Factory,
-    tokenId: ethers.BigNumber,
+    tokenRegistry: Contract,
+    tokenId: any,
     expectedOwner: string
   ) => {
     console.log("Verifying token ownership...");

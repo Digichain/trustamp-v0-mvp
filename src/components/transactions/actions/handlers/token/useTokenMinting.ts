@@ -1,12 +1,11 @@
 import { Contract } from "ethers";
 import { useToast } from "@/hooks/use-toast";
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 
 export const useTokenMinting = () => {
   const { toast } = useToast();
 
   const mintToken = async (
-    tokenRegistry: TradeTrustErc721Factory,
+    tokenRegistry: Contract,
     beneficiary: string,
     tokenId: any
   ) => {
@@ -15,7 +14,7 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Call mint function directly using TradeTrust's factory
+      // Call mint function directly on the contract instance
       const tx = await tokenRegistry.mint(beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       

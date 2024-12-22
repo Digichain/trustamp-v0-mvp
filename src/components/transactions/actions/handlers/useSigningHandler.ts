@@ -6,7 +6,6 @@ import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { useTokenRegistry } from "./token/useTokenRegistry";
 import { useAddressValidation } from "./token/useAddressValidation";
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 
 interface Transaction {
   id: string;
@@ -67,7 +66,7 @@ export const useSigningHandler = () => {
         const normalizedAddress = normalizeTokenRegistryAddress(rawTokenRegistryAddress);
         console.log("Normalized token registry address:", normalizedAddress);
         
-        // Initialize contract with TradeTrust factory
+        // Initialize contract
         console.log("Initializing token registry contract...");
         const tokenRegistry = await initializeContract(normalizedAddress, signer);
         console.log("Token registry contract initialized");
@@ -86,7 +85,7 @@ export const useSigningHandler = () => {
           throw new Error("Document has already been minted");
         }
 
-        // Mint token using TradeTrust factory
+        // Mint token
         console.log("Minting token...");
         await mintToken(tokenRegistry, walletAddress, tokenId);
         console.log("Token minted successfully");

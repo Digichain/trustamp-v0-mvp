@@ -1,6 +1,12 @@
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
+
+// Import TradeTrust's token registry ABI
+const TOKEN_REGISTRY_ABI = [
+  "function mint(address beneficiary, uint256 tokenId) external",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function transferFrom(address from, address to, uint256 tokenId) external"
+];
 
 export const useTokenRegistryContract = () => {
   const { toast } = useToast();
@@ -13,8 +19,8 @@ export const useTokenRegistryContract = () => {
       const signerAddress = await signer.getAddress();
       console.log("Initializing contract with signer address:", signerAddress);
 
-      // Use TradeTrust's factory to get the contract instance
-      const tokenRegistry = TradeTrustErc721Factory.connect(address, signer);
+      // Create contract instance with minimal ABI
+      const tokenRegistry = new ethers.Contract(address, TOKEN_REGISTRY_ABI, signer);
       console.log("Successfully connected to token registry at:", address);
 
       return tokenRegistry;

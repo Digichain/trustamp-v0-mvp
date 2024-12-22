@@ -3,7 +3,13 @@ import { useTokenRegistryContract } from "./useTokenRegistryContract";
 import { useTokenMinting } from "./useTokenMinting";
 import { useTokenVerification } from "./useTokenVerification";
 import { useToast } from "@/components/ui/use-toast";
-import { TradeTrustErc721Factory } from "@govtechsg/token-registry/dist/contracts";
+
+// Import TradeTrust's token registry ABI
+const TOKEN_REGISTRY_ABI = [
+  "function mint(address beneficiary, uint256 tokenId) external",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function transferFrom(address from, address to, uint256 tokenId) external"
+];
 
 export const useTokenRegistry = () => {
   const { toast } = useToast();
@@ -11,7 +17,7 @@ export const useTokenRegistry = () => {
   const { mintToken } = useTokenMinting();
   const { verifyTokenOwnership } = useTokenVerification();
 
-  const checkTokenExists = async (tokenRegistry: TradeTrustErc721Factory, tokenId: ethers.BigNumber) => {
+  const checkTokenExists = async (tokenRegistry: ethers.Contract, tokenId: ethers.BigNumber) => {
     console.log("Checking if token exists:", tokenId.toString());
     try {
       try {
