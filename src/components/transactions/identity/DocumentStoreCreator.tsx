@@ -35,9 +35,9 @@ export const DocumentStoreCreator = ({ onStoreCreated }: DocumentStoreCreatorPro
 
       // Document Store Contract Bytecode and ABI
       const documentStoreFactory = new ethers.ContractFactory(
-        ["function issue(bytes32 document) public"], // Basic ABI for demonstration
-        "0x608060405234801561001057600080fd5b50610..." // Contract bytecode would go here
-        signer
+        ["function issue(bytes32 document) public"], // ABI
+        "0x608060405234801561001057600080fd5b50610...", // Contract bytecode
+        signer // Signer instance
       );
 
       const documentStore = await documentStoreFactory.deploy();
