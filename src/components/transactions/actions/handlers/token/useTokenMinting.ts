@@ -14,8 +14,17 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Call mint function directly on the contract instance
-      const tx = await tokenRegistry.mint(beneficiary, tokenId);
+      // Estimate gas first to check if transaction will fail
+      const gasEstimate = await tokenRegistry.estimateGas.mint(beneficiary, tokenId);
+      console.log("Estimated gas for minting:", gasEstimate.toString());
+
+      // Add 20% buffer to gas estimate
+      const gasLimit = gasEstimate.mul(120).div(100);
+      
+      // Call mint with explicit gas limit
+      const tx = await tokenRegistry.mint(beneficiary, tokenId, {
+        gasLimit: gasLimit
+      });
       console.log("Mint transaction sent:", tx.hash);
       
       const receipt = await tx.wait();
@@ -29,13 +38,22 @@ export const useTokenMinting = () => {
       return true;
     } catch (error: any) {
       console.error("Error minting token:", error);
-      if (error.transaction) {
-        console.error("Transaction details:", {
-          from: error.transaction.from,
-          to: error.transaction.to,
-          data: error.transaction.data,
-        });
+      
+      let errorMessage = "Failed to mint token. ";
+      if (error.message.includes("execution reverted")) {
+        errorMessage += "Transaction was reverted - check contract permissions.";
+      } else if (error.message.includes("gas required exceeds allowance")) {
+        errorMessage += "Insufficient gas provided.";
+      } else {
+        errorMessage += error.message;
       }
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
       throw error;
     }
   };

@@ -4,13 +4,6 @@ import { useTokenMinting } from "./useTokenMinting";
 import { useTokenVerification } from "./useTokenVerification";
 import { useToast } from "@/components/ui/use-toast";
 
-// Import TradeTrust's token registry ABI
-const TOKEN_REGISTRY_ABI = [
-  "function mint(address beneficiary, uint256 tokenId) external",
-  "function ownerOf(uint256 tokenId) external view returns (address)",
-  "function transferFrom(address from, address to, uint256 tokenId) external"
-];
-
 export const useTokenRegistry = () => {
   const { toast } = useToast();
   const { initializeContract } = useTokenRegistryContract();
@@ -24,13 +17,20 @@ export const useTokenRegistry = () => {
         const owner = await tokenRegistry.ownerOf(tokenId);
         console.log("Token exists with owner:", owner);
         return true;
-      } catch (error) {
-        // If ownerOf throws, token doesn't exist
-        console.log("Token does not exist");
-        return false;
+      } catch (error: any) {
+        if (error.message.includes("nonexistent token")) {
+          console.log("Token does not exist");
+          return false;
+        }
+        throw error;
       }
     } catch (error) {
       console.error("Error checking token existence:", error);
+      toast({
+        title: "Error",
+        description: "Failed to check token existence",
+        variant: "destructive",
+      });
       throw error;
     }
   };
