@@ -48,9 +48,11 @@ export const useSigningHandler = () => {
         
         let tokenRegistryAddress;
 
-        // Check if tokenRegistry is in format "tokenRegistry: address"
-        if (typeof tokenRegistryData === 'string' && tokenRegistryData.includes(': ')) {
-          tokenRegistryAddress = tokenRegistryData.split(': ')[1].trim();
+        // Handle OpenAttestation salted string format
+        if (typeof tokenRegistryData === 'string') {
+          // Remove the salt prefix if it exists (format: "uuid:string:address")
+          const parts = tokenRegistryData.split(':');
+          tokenRegistryAddress = parts[parts.length - 1];
         } else {
           tokenRegistryAddress = tokenRegistryData;
         }
