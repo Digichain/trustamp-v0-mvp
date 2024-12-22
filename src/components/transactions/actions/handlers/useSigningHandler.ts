@@ -47,23 +47,20 @@ export const useSigningHandler = () => {
         
         const rawTokenRegistryAddress = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
         console.log("Raw token registry address from document:", rawTokenRegistryAddress);
-        console.log("Type of token registry address:", typeof rawTokenRegistryAddress);
         
         if (!rawTokenRegistryAddress) {
           console.error("No token registry address found in issuer");
           throw new Error("Invalid document structure: missing token registry address");
         }
 
-        // Remove any whitespace and convert to lowercase for consistency
-        const cleanAddress = rawTokenRegistryAddress.toString().trim().toLowerCase();
-        console.log("Cleaned token registry address:", cleanAddress);
-        console.log("Length of cleaned address:", cleanAddress.length);
-        console.log("Hex representation:", Buffer.from(cleanAddress).toString('hex'));
+        // Extract the actual address from the end of the string (after the last ':')
+        const addressParts = rawTokenRegistryAddress.toString().split(':');
+        const actualAddress = addressParts[addressParts.length - 1].trim();
+        console.log("Extracted actual address:", actualAddress);
 
-        // Ensure the address has the 0x prefix
-        const prefixedAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+        // Ensure the address has the 0x prefix and is properly formatted
+        const prefixedAddress = actualAddress.startsWith('0x') ? actualAddress : `0x${actualAddress}`;
         console.log("Prefixed token registry address:", prefixedAddress);
-        console.log("Length of prefixed address:", prefixedAddress.length);
 
         // Validate the address format using ethers utility
         if (!ethers.utils.isAddress(prefixedAddress)) {
@@ -74,12 +71,6 @@ export const useSigningHandler = () => {
         // Convert to checksum address for contract interaction
         const normalizedAddress = ethers.utils.getAddress(prefixedAddress);
         console.log("Final normalized token registry address:", normalizedAddress);
-
-        // Validate the normalized address again as a safety check
-        if (!ethers.utils.isAddress(normalizedAddress)) {
-          console.error("Normalized address validation failed:", normalizedAddress);
-          throw new Error("Address normalization failed");
-        }
 
         const tokenRegistry = new ethers.Contract(
           normalizedAddress,
