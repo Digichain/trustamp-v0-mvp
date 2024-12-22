@@ -42,7 +42,7 @@ export const useSigningHandler = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         
-        // Extract token registry address from wrapped document
+        // Extract token registry address from wrapped document and ensure lowercase
         const tokenRegistryData = transaction.wrapped_document.data.issuers[0]?.tokenRegistry;
         console.log("Token registry data found:", tokenRegistryData);
         
@@ -57,9 +57,9 @@ export const useSigningHandler = () => {
         if (typeof tokenRegistryData === 'string') {
           // Remove the salt prefix if it exists (format: "uuid:string:address")
           const parts = tokenRegistryData.split(':');
-          tokenRegistryAddress = parts[parts.length - 1].toLowerCase(); // Convert to lowercase
+          tokenRegistryAddress = parts[parts.length - 1].toLowerCase();
         } else {
-          tokenRegistryAddress = tokenRegistryData.toLowerCase(); // Convert to lowercase
+          tokenRegistryAddress = tokenRegistryData.toLowerCase();
         }
 
         console.log("Token registry address extracted and normalized:", tokenRegistryAddress);
@@ -88,16 +88,21 @@ export const useSigningHandler = () => {
         console.log("Attempting to mint token with ID:", tokenId.toString());
         const mintTx = await tokenRegistry.safeMint(walletAddress.toLowerCase(), tokenId);
         console.log("Token minted, transaction:", mintTx.hash);
-        await mintTx.wait();
-        console.log("Transaction confirmed");
+        
+        // Wait for transaction confirmation
+        const receipt = await mintTx.wait();
+        console.log("Transaction confirmed, receipt:", receipt);
 
-        // Create proof with transaction hash
+        // Create proof with transaction hash and proper format
         const proof = {
           type: "OpenAttestationMintable",
           method: "TOKEN_REGISTRY",
           value: mintTx.hash,
-          salt: ethers.utils.hexlify(ethers.utils.randomBytes(32))
+          salt: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
+          tokenRegistry: tokenRegistryAddress.toLowerCase()
         };
+
+        console.log("Created proof:", proof);
 
         signedDocument = {
           ...transaction.wrapped_document,
@@ -109,7 +114,7 @@ export const useSigningHandler = () => {
         console.log("Signing verifiable document using DID method");
         const result = await signAndStoreDocument(
           transaction.wrapped_document,
-          walletAddress.toLowerCase(), // Convert to lowercase
+          walletAddress.toLowerCase(),
           transaction.id
         );
         signedDocument = result.signedDocument;
