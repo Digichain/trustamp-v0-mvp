@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { ethers } from "ethers";
 import { DNSRecordDisplay } from "./DNSRecordDisplay";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Document Store ABI - includes all necessary functions
 const DOCUMENT_STORE_ABI = [
@@ -37,6 +39,7 @@ interface DocumentStoreCreatorProps {
 export const DocumentStoreCreator = ({ onStoreCreated }: DocumentStoreCreatorProps) => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [documentStore, setDocumentStore] = useState<DocumentStoreInfo | null>(null);
+  const [manualAddress, setManualAddress] = useState("");
   const { toast } = useToast();
 
   const deployDocumentStore = async () => {
@@ -70,7 +73,7 @@ export const DocumentStoreCreator = ({ onStoreCreated }: DocumentStoreCreatorPro
       const storeInfo = {
         contractAddress: documentStore.address,
         network: network.name,
-        dnsLocation: "broad-tomato-ferret.sandbox.openattestation.com" // This would typically be configurable
+        dnsLocation: "tempdns.trustamp.in"
       };
 
       setDocumentStore(storeInfo);
@@ -92,21 +95,79 @@ export const DocumentStoreCreator = ({ onStoreCreated }: DocumentStoreCreatorPro
     }
   };
 
+  const handleManualAddress = async () => {
+    try {
+      if (!manualAddress) {
+        throw new Error("Please enter a Document Store address");
+      }
+
+      if (!ethers.utils.isAddress(manualAddress)) {
+        throw new Error("Invalid Ethereum address format");
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const network = await provider.getNetwork();
+
+      const storeInfo = {
+        contractAddress: manualAddress,
+        network: network.name,
+        dnsLocation: "tempdns.trustamp.in"
+      };
+
+      setDocumentStore(storeInfo);
+      onStoreCreated(storeInfo);
+
+      toast({
+        title: "Success",
+        description: "Document Store address set successfully",
+      });
+    } catch (error: any) {
+      console.error("Error setting document store address:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set Document Store address",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Document Store</CardTitle>
         <CardDescription>
-          Deploy a new Document Store contract to issue and verify documents
+          Deploy a new Document Store contract or use an existing one
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button
-          onClick={deployDocumentStore}
-          disabled={isDeploying}
-        >
-          {isDeploying ? "Deploying..." : "Deploy Document Store"}
-        </Button>
+        <Tabs defaultValue="deploy">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="deploy">Deploy New</TabsTrigger>
+            <TabsTrigger value="existing">Use Existing</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="deploy">
+            <Button
+              onClick={deployDocumentStore}
+              disabled={isDeploying}
+            >
+              {isDeploying ? "Deploying..." : "Deploy Document Store"}
+            </Button>
+          </TabsContent>
+          
+          <TabsContent value="existing" className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter Document Store address"
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+              />
+              <Button onClick={handleManualAddress}>
+                Set Address
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {documentStore && (
           <DNSRecordDisplay
