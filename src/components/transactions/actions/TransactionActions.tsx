@@ -5,7 +5,6 @@ import {
   Eye,
   FileSignature,
   Download,
-  Send
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -72,11 +71,7 @@ export const TransactionActions = ({
         )}
         {canSign && (
           <DropdownMenuItem onClick={() => handleSignDocument(transaction)}>
-            {isTransferable ? (
-              <Send className="mr-2 h-4 w-4" />
-            ) : (
-              <FileSignature className="mr-2 h-4 w-4" />
-            )}
+            <FileSignature className="mr-2 h-4 w-4" />
             {isTransferable ? 'Issue Document' : 'Sign Document'}
           </DropdownMenuItem>
         )}

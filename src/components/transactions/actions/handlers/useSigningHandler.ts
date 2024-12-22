@@ -1,40 +1,108 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { signAndStoreDocument } from "@/utils/document-signer";
+import { useWallet } from "@/contexts/WalletContext";
+import { ethers } from 'ethers';
+import TokenRegistryArtifact from '@/contracts/TokenRegistry';
 
 interface Transaction {
   id: string;
   document_subtype?: string;
   status: string;
+  wrapped_document: any;
 }
 
 export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { walletAddress } = useWallet();
 
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
     const isTransferable = transaction.document_subtype === 'transferable';
     
     try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .update({ status: isTransferable ? "document_issued" : "document_signed" })
-        .eq("id", transaction.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error signing document:", error);
-        toast({
-          title: "Error",
-          description: "Failed to sign document",
-          variant: "destructive",
-        });
-        return false;
+      if (!transaction.wrapped_document) {
+        throw new Error("No wrapped document found to sign");
       }
 
-      console.log("Document signed successfully:", data);
+      if (!walletAddress) {
+        throw new Error("Wallet not connected");
+      }
+
+      let signedDocument;
+      let signedStatus;
+
+      if (isTransferable) {
+        console.log("Signing transferable document using token registry");
+        // Get token registry instance
+        const { ethereum } = window as any;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        
+        // Extract token registry address from wrapped document
+        const tokenRegistryAddress = transaction.wrapped_document.data.tokenRegistry;
+        if (!tokenRegistryAddress) {
+          throw new Error("Token registry address not found in document");
+        }
+
+        const tokenRegistry = new ethers.Contract(
+          tokenRegistryAddress,
+          TokenRegistryArtifact.abi,
+          signer
+        );
+
+        // Use merkle root as token ID
+        const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        console.log("Using merkle root as token ID:", merkleRoot);
+
+        // Mint token and set issuer as owner
+        const mintTx = await tokenRegistry.mint(merkleRoot);
+        console.log("Token minted, transaction:", mintTx.hash);
+        await mintTx.wait();
+
+        // Create proof with transaction hash
+        const proof = {
+          type: "OpenAttestationMintable",
+          method: "TOKEN_REGISTRY",
+          value: mintTx.hash,
+          salt: ethers.utils.hexlify(ethers.utils.randomBytes(32))
+        };
+
+        signedDocument = {
+          ...transaction.wrapped_document,
+          proof: [proof]
+        };
+        signedStatus = "document_issued";
+
+      } else {
+        console.log("Signing verifiable document using DID method");
+        const result = await signAndStoreDocument(
+          transaction.wrapped_document,
+          walletAddress,
+          transaction.id
+        );
+        signedDocument = result.signedDocument;
+        signedStatus = "document_signed";
+      }
+
+      // Update transaction in database
+      const { error: updateError } = await supabase
+        .from("transactions")
+        .update({ 
+          status: signedStatus,
+          signed_document: signedDocument,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", transaction.id);
+
+      if (updateError) {
+        console.error("Error updating transaction:", updateError);
+        throw updateError;
+      }
+
+      console.log("Document signed successfully");
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       
       toast({
@@ -43,11 +111,11 @@ export const useSigningHandler = () => {
       });
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in handleSignDocument:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
       return false;
