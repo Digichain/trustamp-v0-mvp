@@ -15,7 +15,7 @@ export const useTokenMinting = () => {
     console.log("Token ID:", tokenId.toString());
     
     try {
-      // Use the correct method from TitleEscrow contract
+      // Call mint with explicit function signature
       const tx = await tokenRegistry["mint(address,uint256)"](beneficiary, tokenId);
       console.log("Mint transaction sent:", tx.hash);
       
