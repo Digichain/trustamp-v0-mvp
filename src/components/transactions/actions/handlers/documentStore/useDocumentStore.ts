@@ -17,18 +17,14 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing document store contract at address:", address);
       
-      // Create provider without ENS support
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      
-      // Create contract instance
-      const documentStore = new ethers.Contract(
-        address, 
-        DOCUMENT_STORE_ABI, 
-        provider.getSigner()
-      );
+      // Create provider with Sepolia network configuration
+      const provider = new ethers.providers.Web3Provider(window.ethereum, {
+        name: 'sepolia',
+        chainId: 11155111
+      });
       
       console.log("Document store contract instance created");
-      return documentStore;
+      return new ethers.Contract(address, DOCUMENT_STORE_ABI, provider.getSigner());
     } catch (error: any) {
       console.error("Error initializing document store:", error);
       toast({
