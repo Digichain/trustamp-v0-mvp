@@ -3,12 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
-
-// Simple ABI for document store - we only need issue function
-const DOCUMENT_STORE_ABI = [
-  "function issue(bytes32 document) external",
-  "function isIssued(bytes32 document) public view returns (bool)"
-];
+import { DOCUMENT_STORE_ABI } from "./documentStore/constants";
 
 export const useSigningHandler = () => {
   const { toast } = useToast();
