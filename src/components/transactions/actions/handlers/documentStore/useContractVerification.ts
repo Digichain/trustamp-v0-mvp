@@ -20,38 +20,54 @@ export const useContractVerification = () => {
   ) => {
     console.log("Starting Document Store interface verification");
     try {
-      // First verify basic metadata functions
+      // Check if contract is initialized by trying to call owner()
+      console.log("Checking if contract is initialized...");
+      try {
+        const owner = await contract.owner();
+        console.log("Contract owner:", owner);
+      } catch (error: any) {
+        console.error("Failed to call owner() function:", error);
+        if (error.code === 'CALL_EXCEPTION') {
+          // Contract might need initialization
+          console.log("Contract might need initialization, attempting to initialize...");
+          try {
+            const tx = await contract.initialize("DocumentStore", signerAddress);
+            await tx.wait();
+            console.log("Contract initialized successfully");
+          } catch (initError: any) {
+            console.error("Failed to initialize contract:", initError);
+            throw new Error(
+              "Contract initialization failed. It might be already initialized or not an upgradeable DocumentStore contract."
+            );
+          }
+        } else {
+          throw error;
+        }
+      }
+
+      // Now verify the basic metadata functions
       console.log("Checking contract metadata...");
-      
-      // Try to get the contract name
       try {
         const name = await contract.name();
         console.log("Contract name successfully retrieved:", name);
       } catch (error: any) {
         console.error("Failed to call name() function:", error);
-        if (error.code === 'CALL_EXCEPTION') {
-          throw new Error(
-            "The contract at this address does not implement the name() function. This suggests it's not a valid DocumentStore contract."
-          );
-        }
-        throw error;
+        throw new Error(
+          "The contract does not implement the name() function even after initialization. This suggests it's not a valid DocumentStore contract."
+        );
       }
 
-      // Try to get the contract version
       try {
         const version = await contract.version();
         console.log("Contract version successfully retrieved:", version);
       } catch (error: any) {
         console.error("Failed to call version() function:", error);
-        if (error.code === 'CALL_EXCEPTION') {
-          throw new Error(
-            "The contract at this address does not implement the version() function. This suggests it's not a valid DocumentStore contract."
-          );
-        }
-        throw error;
+        throw new Error(
+          "The contract does not implement the version() function. This suggests it's not a valid DocumentStore contract."
+        );
       }
 
-      // Then check if the signer has the ISSUER_ROLE
+      // Check if the signer has the ISSUER_ROLE
       console.log("Checking ISSUER_ROLE for address:", signerAddress);
       try {
         const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
@@ -64,15 +80,12 @@ export const useContractVerification = () => {
         }
       } catch (error: any) {
         console.error("Failed to check ISSUER_ROLE:", error);
-        if (error.code === 'CALL_EXCEPTION') {
-          throw new Error(
-            "The contract at this address does not implement the hasRole() function. This suggests it's not a valid DocumentStore contract."
-          );
-        }
-        throw error;
+        throw new Error(
+          "The contract does not implement the hasRole() function. This suggests it's not a valid DocumentStore contract."
+        );
       }
 
-      // Verify document management functions exist by calling view functions
+      // Verify document management functions
       console.log("Checking isIssued function...");
       try {
         const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
@@ -80,12 +93,9 @@ export const useContractVerification = () => {
         console.log("isIssued function verified successfully");
       } catch (error: any) {
         console.error("Failed to call isIssued() function:", error);
-        if (error.code === 'CALL_EXCEPTION') {
-          throw new Error(
-            "The contract at this address does not implement the isIssued() function. This suggests it's not a valid DocumentStore contract."
-          );
-        }
-        throw error;
+        throw new Error(
+          "The contract does not implement the isIssued() function. This suggests it's not a valid DocumentStore contract."
+        );
       }
 
       console.log("Document Store interface verification successful");
@@ -96,14 +106,6 @@ export const useContractVerification = () => {
         code: error.code,
         method: error.method,
       });
-
-      // Check for specific error types
-      if (error.code === "CALL_EXCEPTION") {
-        throw new Error(
-          "Contract exists but does not implement the Document Store interface correctly. " +
-          "Specific error: " + error.message
-        );
-      }
 
       throw error;
     }
