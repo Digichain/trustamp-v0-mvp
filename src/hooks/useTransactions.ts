@@ -14,7 +14,7 @@ export const useTransactions = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: transactions, isLoading } = useQuery<Transaction[], Error>({
+  const { data: transactions, isLoading, error } = useQuery({
     queryKey: ["transactions"],
     queryFn: async () => {
       console.log("Fetching transactions...");
@@ -22,30 +22,38 @@ export const useTransactions = () => {
       
       if (!session) {
         console.error("No authenticated session found");
-        return [];
+        throw new Error("Authentication required");
       }
 
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
+      console.log("Session found, user ID:", session.user.id);
 
-      if (error) {
-        console.error("Error fetching transactions:", error);
+      try {
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Supabase error fetching transactions:", error);
+          throw error;
+        }
+
+        console.log("Successfully fetched transactions:", data?.length || 0, "records");
+        return data || [];
+      } catch (error: any) {
+        console.error("Error in transaction fetch:", error);
         toast({
           title: "Error",
-          description: "Failed to fetch transactions",
+          description: "Failed to fetch transactions. Please try again.",
           variant: "destructive",
         });
         throw error;
       }
-
-      console.log("Fetched transactions:", data);
-      return data;
     },
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    retry: 2,
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: true,
   });
 
   // Function to invalidate and refetch the transactions query
@@ -56,9 +64,20 @@ export const useTransactions = () => {
     console.log("Transactions cache invalidated and refetched");
   };
 
+  // If there's an error, show toast
+  if (error) {
+    console.error("Query error in useTransactions:", error);
+    toast({
+      title: "Error",
+      description: "Failed to load transactions. Please refresh the page.",
+      variant: "destructive",
+    });
+  }
+
   return {
     transactions,
     isLoading,
+    error,
     invalidateTransactions,
   };
 };
