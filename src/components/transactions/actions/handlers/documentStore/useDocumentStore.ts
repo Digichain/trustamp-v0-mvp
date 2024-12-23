@@ -59,7 +59,7 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing Document Store contract with address:", address);
 
-      // Create provider
+      // Get provider from signer
       const provider = signer.provider;
       if (!provider) {
         throw new Error("No provider available");
