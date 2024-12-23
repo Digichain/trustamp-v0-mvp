@@ -58,15 +58,21 @@ export const useSigningHandler = () => {
         const checksummedAddress = ethers.utils.getAddress(prefixedAddress);
         console.log("Final checksummed address:", checksummedAddress);
 
-        // Get merkle root from wrapped document and ensure it has 0x prefix
+        // Get merkle root from wrapped document and format it properly
         const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
         if (!rawMerkleRoot) {
           throw new Error("Merkle root not found in wrapped document");
         }
-        
-        // Ensure merkle root has 0x prefix for proper bytes conversion
-        const merkleRoot = rawMerkleRoot.startsWith('0x') ? rawMerkleRoot : `0x${rawMerkleRoot}`;
-        console.log("Formatted merkle root:", merkleRoot);
+
+        // Clean up the merkle root string and ensure it's the correct length
+        const cleanMerkleRoot = rawMerkleRoot.replace('0x', '').trim();
+        if (cleanMerkleRoot.length !== 64) {
+          throw new Error(`Invalid merkle root length: ${cleanMerkleRoot.length} chars (expected 64)`);
+        }
+
+        // Convert the merkle root to bytes32
+        const merkleRootBytes = ethers.utils.hexZeroPad(`0x${cleanMerkleRoot}`, 32);
+        console.log("Formatted merkle root bytes:", merkleRootBytes);
 
         // Initialize contract with minimal ABI
         const contract = new ethers.Contract(
@@ -76,14 +82,14 @@ export const useSigningHandler = () => {
         );
 
         // Check if already issued
-        const isAlreadyIssued = await contract.isIssued(merkleRoot);
+        const isAlreadyIssued = await contract.isIssued(merkleRootBytes);
         if (isAlreadyIssued) {
           throw new Error("Document has already been issued");
         }
 
-        // Issue document by calling issue() with merkle root
+        // Issue document by calling issue() with merkle root bytes
         console.log("Issuing document to store:", checksummedAddress);
-        const tx = await contract.issue(merkleRoot);
+        const tx = await contract.issue(merkleRootBytes);
         console.log("Waiting for transaction confirmation...");
         await tx.wait();
         console.log("Document issued successfully");
