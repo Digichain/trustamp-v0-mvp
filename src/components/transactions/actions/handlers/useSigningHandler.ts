@@ -58,6 +58,13 @@ export const useSigningHandler = () => {
         const checksummedAddress = ethers.utils.getAddress(prefixedAddress);
         console.log("Final checksummed address:", checksummedAddress);
 
+        // Initialize contract with complete ABI
+        const contract = new ethers.Contract(
+          checksummedAddress,
+          DOCUMENT_STORE_ABI,
+          signer
+        );
+
         // Get merkle root from wrapped document and format it properly
         const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
         if (!rawMerkleRoot) {
@@ -74,18 +81,10 @@ export const useSigningHandler = () => {
         const merkleRootBytes = ethers.utils.hexZeroPad(`0x${cleanMerkleRoot}`, 32);
         console.log("Formatted merkle root bytes:", merkleRootBytes);
 
-        // Initialize contract with minimal ABI
-        const contract = new ethers.Contract(
-          checksummedAddress,
-          DOCUMENT_STORE_ABI,
-          signer
-        );
-
-        // Get the ISSUER_ROLE bytes32 value from the contract
+        // Check if the user has the ISSUER_ROLE
         console.log("Checking ISSUER_ROLE for address:", walletAddress);
         console.log("Using ISSUER_ROLE value:", ISSUER_ROLE);
         
-        // Check if the user has the ISSUER_ROLE
         const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, walletAddress);
         console.log("Has ISSUER_ROLE:", hasIssuerRole);
 
@@ -99,9 +98,11 @@ export const useSigningHandler = () => {
           throw new Error("Document has already been issued");
         }
 
-        // Issue document by calling issue() with merkle root bytes
-        console.log("Issuing document to store:", checksummedAddress);
+        // Issue document
+        console.log("Issuing document with merkle root:", merkleRootBytes);
         const tx = await contract.issue(merkleRootBytes);
+        console.log("Transaction sent:", tx.hash);
+        
         console.log("Waiting for transaction confirmation...");
         await tx.wait();
         console.log("Document issued successfully");

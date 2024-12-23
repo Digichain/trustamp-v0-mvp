@@ -1,14 +1,26 @@
 import { ethers } from "ethers";
 
-// Simple ABI with just the functions we need for issuing
+// Complete ABI with role management functions
 export const DOCUMENT_STORE_ABI = [
+  // Document management
   "function issue(bytes32 document) external",
   "function isIssued(bytes32 document) public view returns (bool)",
+  "function revoke(bytes32 document) external",
+  "function isRevoked(bytes32 document) public view returns (bool)",
+  
+  // Role management
   "function hasRole(bytes32 role, address account) external view returns (bool)",
-  "function ISSUER_ROLE() external view returns (bytes32)"
+  "function getRoleAdmin(bytes32 role) external view returns (bytes32)",
+  "function grantRole(bytes32 role, address account) external",
+  "function revokeRole(bytes32 role, address account) external",
+  
+  // Standard role identifiers
+  "function DEFAULT_ADMIN_ROLE() external pure returns (bytes32)",
+  "function ISSUER_ROLE() external pure returns (bytes32)"
 ];
 
-// Role constants - using keccak256 hash of "ISSUER_ROLE" string
+// Role constants
+export const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero; // 0x00
 export const ISSUER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ISSUER_ROLE"));
 
 // Basic bytecode for deployment verification
