@@ -7,9 +7,11 @@ export const useContractVerification = () => {
     console.log("Verifying contract code at address:", address);
     const code = await provider.getCode(address);
     console.log("Contract code length:", code.length);
+    
     if (code === "0x") {
       throw new Error("No contract code found at the provided address");
     }
+    
     console.log("Contract code found at address");
     return true;
   };
@@ -19,9 +21,10 @@ export const useContractVerification = () => {
     signerAddress: string
   ) => {
     console.log("Starting Document Store interface verification");
+    
     try {
-      // Check basic metadata functions
-      console.log("Checking contract metadata...");
+      // Check name() function
+      console.log("Checking name() function...");
       try {
         const name = await contract.name();
         console.log("Contract name successfully retrieved:", name);
@@ -32,6 +35,8 @@ export const useContractVerification = () => {
         );
       }
 
+      // Check version() function
+      console.log("Checking version() function...");
       try {
         const version = await contract.version();
         console.log("Contract version successfully retrieved:", version);
@@ -60,7 +65,7 @@ export const useContractVerification = () => {
         );
       }
 
-      // Verify document management functions
+      // Verify isIssued function
       console.log("Checking isIssued function...");
       try {
         const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
@@ -81,7 +86,6 @@ export const useContractVerification = () => {
         code: error.code,
         method: error.method,
       });
-
       throw error;
     }
   };
