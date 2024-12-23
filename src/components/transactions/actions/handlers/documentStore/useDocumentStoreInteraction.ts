@@ -45,15 +45,6 @@ export const useDocumentStoreInteraction = () => {
       const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
       console.log("Formatted merkle root:", formattedMerkleRoot);
 
-      // Check ownership
-      const owner = await contract.owner();
-      console.log("Contract owner:", owner);
-      console.log("Current signer:", toAddress);
-
-      if (owner.toLowerCase() !== toAddress.toLowerCase()) {
-        throw new Error("Only the contract owner can mint documents");
-      }
-
       // Mint the document with explicit gas limit
       const tx = await contract.safeMint(toAddress, formattedMerkleRoot, {
         gasLimit: 500000
