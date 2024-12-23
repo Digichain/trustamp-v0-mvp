@@ -38,12 +38,18 @@ export const useSigningHandler = () => {
           throw new Error("Document store address not found in wrapped document");
         }
 
+        console.log("Using document store address:", documentStoreAddress);
+
         // Get merkle root from wrapped document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
         console.log("Merkle root to be issued:", merkleRoot);
 
-        // Initialize contract with minimal ABI
-        const contract = new ethers.Contract(documentStoreAddress, DOCUMENT_STORE_ABI, signer);
+        // Initialize contract with minimal ABI, using the address directly without ENS resolution
+        const contract = new ethers.Contract(
+          documentStoreAddress,
+          DOCUMENT_STORE_ABI,
+          signer
+        );
 
         // Check if already issued
         const isAlreadyIssued = await contract.isIssued(merkleRoot);
