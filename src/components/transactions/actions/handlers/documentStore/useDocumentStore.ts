@@ -60,7 +60,10 @@ export const useDocumentStore = () => {
       console.log("Initializing Document Store contract with address:", address);
 
       // Create provider
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = signer.provider;
+      if (!provider) {
+        throw new Error("No provider available");
+      }
 
       // Get the network for logging purposes
       const network = await provider.getNetwork();
@@ -69,10 +72,10 @@ export const useDocumentStore = () => {
       // Verify contract exists at address
       await verifyContractCode(provider, address);
 
-      // Create contract instance
+      // Create contract instance without ENS resolution
       console.log("Creating contract instance");
       const contract = new ethers.Contract(
-        address,
+        ethers.utils.getAddress(address), // Normalize the address format
         DOCUMENT_STORE_ABI,
         signer
       ) as DocumentStoreContract;
