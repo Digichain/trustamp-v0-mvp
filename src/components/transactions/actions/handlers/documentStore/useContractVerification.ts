@@ -20,7 +20,14 @@ export const useContractVerification = () => {
   ) => {
     console.log("Starting Document Store interface verification");
     try {
-      // Check if the signer has the ISSUER_ROLE
+      // First verify basic metadata functions
+      console.log("Checking contract metadata...");
+      const name = await contract.name();
+      const version = await contract.version();
+      console.log("Contract name:", name);
+      console.log("Contract version:", version);
+
+      // Then check if the signer has the ISSUER_ROLE
       console.log("Checking ISSUER_ROLE for address:", signerAddress);
       const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
       console.log("Has ISSUER_ROLE:", hasIssuerRole);
@@ -31,14 +38,7 @@ export const useContractVerification = () => {
         );
       }
 
-      // Verify basic functionality
-      console.log("Checking contract metadata...");
-      const name = await contract.name();
-      const version = await contract.version();
-      console.log("Contract name:", name);
-      console.log("Contract version:", version);
-
-      // Verify document management functions
+      // Verify document management functions exist by calling view functions
       console.log("Checking isIssued function...");
       const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
       await contract.isIssued(dummyDoc);
@@ -52,6 +52,7 @@ export const useContractVerification = () => {
         method: error.method,
       });
 
+      // Check for specific error types
       if (error.code === "CALL_EXCEPTION") {
         throw new Error(
           "Contract exists but does not implement the Document Store interface correctly. Please verify the contract address and network."

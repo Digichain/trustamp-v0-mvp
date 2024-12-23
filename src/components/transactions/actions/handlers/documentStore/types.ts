@@ -10,6 +10,7 @@ export interface DocumentStoreContract extends ethers.Contract {
   revoke(document: string): Promise<ethers.ContractTransaction>;
   grantRole(role: string, account: string): Promise<ethers.ContractTransaction>;
   revokeRole(role: string, account: string): Promise<ethers.ContractTransaction>;
+  initialize(name: string, owner: string): Promise<ethers.ContractTransaction>;
 }
 
 export interface DocumentStoreInfo {
