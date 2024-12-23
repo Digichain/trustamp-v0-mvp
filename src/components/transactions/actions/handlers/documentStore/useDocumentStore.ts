@@ -1,8 +1,14 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
-// Document Store ABI with required functions
+// Updated ABI to include role-based functions
 const DOCUMENT_STORE_ABI = [
+  // Access Control Functions
+  "function hasRole(bytes32 role, address account) public view returns (bool)",
+  "function getRoleAdmin(bytes32 role) public view returns (bytes32)",
+  "function grantRole(bytes32 role, address account)",
+  "function revokeRole(bytes32 role, address account)",
+  // Document Store Functions
   "function issue(bytes32 document)",
   "function bulkIssue(bytes32[] documents)",
   "function getIssuedBlock(bytes32 document) public view returns (uint256)",
@@ -10,11 +16,11 @@ const DOCUMENT_STORE_ABI = [
   "function revoke(bytes32 document)",
   "function bulkRevoke(bytes32[] documents)",
   "function isRevoked(bytes32 document) public view returns (bool)",
-  "function isOwner(address addr) public view returns (bool)",
-  "function transferOwnership(address newOwner)",
-  "function renounceOwnership()",
-  "function owner() public view returns (address)"
 ];
+
+// Role constants from the contract
+const ISSUER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ISSUER_ROLE"));
+const REVOKER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("REVOKER_ROLE"));
 
 export const useDocumentStore = () => {
   const { toast } = useToast();
@@ -43,15 +49,19 @@ export const useDocumentStore = () => {
     return true;
   };
 
-  const verifyDocumentStoreInterface = async (contract: ethers.Contract) => {
+  const verifyDocumentStoreInterface = async (contract: ethers.Contract, signerAddress: string) => {
     console.log("Starting Document Store interface verification");
     try {
-      // First check if we can get the owner - this is a basic check
-      console.log("Checking owner function...");
-      const owner = await contract.owner();
-      console.log("Contract owner address:", owner);
+      // Check if the signer has the ISSUER_ROLE
+      console.log("Checking ISSUER_ROLE for address:", signerAddress);
+      const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
+      console.log("Has ISSUER_ROLE:", hasIssuerRole);
 
-      // Try to check if a dummy document is issued - this verifies the isIssued function
+      if (!hasIssuerRole) {
+        throw new Error("Connected wallet does not have ISSUER_ROLE. Please ensure you have the correct permissions.");
+      }
+
+      // Verify basic functionality
       console.log("Checking isIssued function...");
       const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
       await contract.isIssued(dummyDoc);
@@ -66,10 +76,10 @@ export const useDocumentStore = () => {
       });
       
       if (error.code === 'CALL_EXCEPTION') {
-        throw new Error("Contract exists but does not implement the Document Store interface. Please verify the contract address and network.");
+        throw new Error("Contract exists but does not implement the Document Store interface correctly. Please verify the contract address and network.");
       }
       
-      throw new Error(`Contract verification failed: ${error.message}`);
+      throw error;
     }
   };
 
@@ -101,9 +111,12 @@ export const useDocumentStore = () => {
         DOCUMENT_STORE_ABI,
         signer
       );
+
+      // Get signer address for role verification
+      const signerAddress = await signer.getAddress();
       
-      // Verify it's a Document Store contract
-      await verifyDocumentStoreInterface(contract);
+      // Verify it's a Document Store contract and check roles
+      await verifyDocumentStoreInterface(contract, signerAddress);
       
       console.log("Document store contract initialized successfully");
       return contract;
