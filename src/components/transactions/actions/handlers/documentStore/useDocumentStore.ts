@@ -13,9 +13,29 @@ const DOCUMENT_STORE_ABI = [
 export const useDocumentStore = () => {
   const { toast } = useToast();
 
+  const extractAddress = (rawAddress: string): string => {
+    // If the address contains a colon, it's in OpenAttestation format
+    if (rawAddress.includes(':')) {
+      // Extract everything after "string:"
+      const matches = rawAddress.match(/:string:(.+)$/);
+      if (matches && matches[1]) {
+        return matches[1];
+      }
+      throw new Error("Invalid address format in document");
+    }
+    return rawAddress;
+  };
+
   const initializeContract = async (address: string, signer: ethers.Signer) => {
     try {
-      console.log("Initializing document store contract at address:", address);
+      console.log("Raw document store address:", address);
+      
+      // Extract and normalize the Ethereum address
+      const cleanAddress = extractAddress(address);
+      console.log("Extracted clean address:", cleanAddress);
+      
+      const normalizedAddress = ethers.utils.getAddress(cleanAddress);
+      console.log("Normalized address:", normalizedAddress);
       
       // Create provider without ENS resolution
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -24,9 +44,9 @@ export const useDocumentStore = () => {
       const network = await provider.getNetwork();
       console.log("Connected to network:", network.name, "chainId:", network.chainId);
       
-      // Create contract instance with explicit address (no ENS resolution)
+      // Create contract instance with explicit address
       const contract = new ethers.Contract(
-        ethers.utils.getAddress(address), // Normalize the address format
+        normalizedAddress,
         DOCUMENT_STORE_ABI,
         provider.getSigner()
       );
