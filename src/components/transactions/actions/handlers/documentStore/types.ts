@@ -4,8 +4,6 @@ export interface DocumentStoreContract extends ethers.Contract {
   // Basic contract functions
   name(): Promise<string>;
   version(): Promise<string>;
-  owner(): Promise<string>;
-  initialize(name: string, owner: string): Promise<ethers.ContractTransaction>;
   
   // Document management functions
   issue(document: string): Promise<ethers.ContractTransaction>;

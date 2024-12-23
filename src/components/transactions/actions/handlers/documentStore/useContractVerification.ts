@@ -20,32 +20,7 @@ export const useContractVerification = () => {
   ) => {
     console.log("Starting Document Store interface verification");
     try {
-      // Check if contract is initialized by trying to call owner()
-      console.log("Checking if contract is initialized...");
-      try {
-        const owner = await contract.owner();
-        console.log("Contract owner:", owner);
-      } catch (error: any) {
-        console.error("Failed to call owner() function:", error);
-        if (error.code === 'CALL_EXCEPTION') {
-          // Contract might need initialization
-          console.log("Contract might need initialization, attempting to initialize...");
-          try {
-            const tx = await contract.initialize("DocumentStore", signerAddress);
-            await tx.wait();
-            console.log("Contract initialized successfully");
-          } catch (initError: any) {
-            console.error("Failed to initialize contract:", initError);
-            throw new Error(
-              "Contract initialization failed. It might be already initialized or not an upgradeable DocumentStore contract."
-            );
-          }
-        } else {
-          throw error;
-        }
-      }
-
-      // Now verify the basic metadata functions
+      // Check basic metadata functions
       console.log("Checking contract metadata...");
       try {
         const name = await contract.name();
@@ -53,7 +28,7 @@ export const useContractVerification = () => {
       } catch (error: any) {
         console.error("Failed to call name() function:", error);
         throw new Error(
-          "The contract does not implement the name() function even after initialization. This suggests it's not a valid DocumentStore contract."
+          "The contract does not implement the name() function. This suggests it's not a valid DocumentStore contract."
         );
       }
 
