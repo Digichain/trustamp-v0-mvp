@@ -20,9 +20,11 @@ export const useDocumentStore = () => {
   const { toast } = useToast();
 
   const extractAddress = (rawAddress: string): string => {
+    console.log("Extracting address from:", rawAddress);
     if (rawAddress.includes(':')) {
       const matches = rawAddress.match(/:string:(.+)$/);
       if (matches && matches[1]) {
+        console.log("Extracted address:", matches[1]);
         return matches[1];
       }
       throw new Error("Invalid address format in document");
@@ -33,6 +35,7 @@ export const useDocumentStore = () => {
   const verifyContractCode = async (provider: ethers.providers.Provider, address: string) => {
     console.log("Verifying contract code at address:", address);
     const code = await provider.getCode(address);
+    console.log("Contract code length:", code.length);
     if (code === "0x") {
       throw new Error("No contract code found at the provided address");
     }
@@ -41,27 +44,38 @@ export const useDocumentStore = () => {
   };
 
   const verifyDocumentStoreInterface = async (contract: ethers.Contract) => {
-    console.log("Verifying Document Store interface");
+    console.log("Starting Document Store interface verification");
     try {
-      // Check for required functions
+      // First check if we can get the owner - this is a basic check
+      console.log("Checking owner function...");
       const owner = await contract.owner();
-      console.log("Contract owner:", owner);
-      
-      // Try to call isIssued with a dummy value to verify interface
+      console.log("Contract owner address:", owner);
+
+      // Try to check if a dummy document is issued - this verifies the isIssued function
+      console.log("Checking isIssued function...");
       const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
       await contract.isIssued(dummyDoc);
       
-      console.log("Document Store interface verified");
+      console.log("Document Store interface verification successful");
       return true;
-    } catch (error) {
-      console.error("Interface verification failed:", error);
-      throw new Error("Contract does not implement the Document Store interface correctly");
+    } catch (error: any) {
+      console.error("Interface verification error details:", {
+        message: error.message,
+        code: error.code,
+        method: error.method,
+      });
+      
+      if (error.code === 'CALL_EXCEPTION') {
+        throw new Error("Contract exists but does not implement the Document Store interface. Please verify the contract address and network.");
+      }
+      
+      throw new Error(`Contract verification failed: ${error.message}`);
     }
   };
 
   const initializeContract = async (address: string, signer: ethers.Signer) => {
     try {
-      console.log("Raw document store address:", address);
+      console.log("Initializing Document Store contract with address:", address);
       
       // Extract and normalize the Ethereum address
       const cleanAddress = extractAddress(address);
@@ -81,10 +95,11 @@ export const useDocumentStore = () => {
       await verifyContractCode(provider, normalizedAddress);
       
       // Create contract instance
+      console.log("Creating contract instance with ABI:", DOCUMENT_STORE_ABI);
       const contract = new ethers.Contract(
         normalizedAddress,
         DOCUMENT_STORE_ABI,
-        provider.getSigner()
+        signer
       );
       
       // Verify it's a Document Store contract
@@ -109,12 +124,10 @@ export const useDocumentStore = () => {
       
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-      
-      // Verify contract is still accessible
-      await verifyDocumentStoreInterface(contract);
+      console.log("Prefixed merkle root:", prefixedMerkleRoot);
       
       // Call issue function
-      console.log("Calling issue function with merkle root:", prefixedMerkleRoot);
+      console.log("Calling issue function...");
       const tx = await contract.issue(prefixedMerkleRoot);
       console.log("Issue transaction sent:", tx.hash);
       
@@ -125,14 +138,17 @@ export const useDocumentStore = () => {
     } catch (error: any) {
       console.error("Error issuing document:", error);
       
-      // Check for specific error types
-      if (error.code === -32000) {
-        throw new Error("Contract execution failed. Please ensure you have the correct permissions and are on the right network.");
+      if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+        throw new Error("Failed to estimate gas. The contract might not be callable or you might not have the right permissions.");
+      }
+      
+      if (error.code === 'INSUFFICIENT_FUNDS') {
+        throw new Error("Insufficient funds to execute the transaction. Please ensure you have enough ETH.");
       }
       
       toast({
         title: "Issue Error",
-        description: "Failed to issue document. Please check the console for details.",
+        description: error.message || "Failed to issue document",
         variant: "destructive",
       });
       throw error;
