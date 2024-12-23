@@ -13,12 +13,10 @@ export const useDocumentStoreInteraction = () => {
         throw new Error('MetaMask not found');
       }
 
-      // Use Sepolia provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       console.log('Got signer from provider');
 
-      // Create contract instance
       const contract = new ethers.Contract(contractAddress, DOCUMENT_STORE_ABI, signer);
       console.log('Created contract instance');
       
@@ -34,20 +32,13 @@ export const useDocumentStoreInteraction = () => {
       console.log("Starting document minting process...");
       console.log("Contract address:", contractAddress);
       console.log("To address:", toAddress);
-      console.log("Original merkle root:", merkleRoot);
+      console.log("Raw merkle root:", merkleRoot);
 
       const contract = await getContract(contractAddress);
-      
-      // Format merkle root to bytes32
-      const merkleRootBytes = ethers.utils.toUtf8Bytes(merkleRoot);
-      console.log("Merkle root as bytes:", merkleRootBytes);
-      
-      const merkleRootHex = ethers.utils.hexlify(merkleRootBytes);
-      console.log("Merkle root as hex:", merkleRootHex);
-      
-      // Ensure it's exactly 32 bytes
-      const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
-      console.log("Final formatted merkle root:", formattedMerkleRoot);
+
+      // Format merkle root to bytes32 using formatBytes32String
+      const formattedMerkleRoot = ethers.utils.formatBytes32String(merkleRoot);
+      console.log("Formatted merkle root:", formattedMerkleRoot);
 
       // Check ownership
       const owner = await contract.owner();
@@ -78,7 +69,8 @@ export const useDocumentStoreInteraction = () => {
   const checkMerkleRoot = async (contractAddress: string, merkleRoot: string) => {
     try {
       const contract = await getContract(contractAddress);
-      const isIssued = await contract.isMerkleRootIssued(merkleRoot);
+      const formattedMerkleRoot = ethers.utils.formatBytes32String(merkleRoot);
+      const isIssued = await contract.isMerkleRootIssued(formattedMerkleRoot);
       return isIssued;
     } catch (error) {
       console.error("Error checking merkle root:", error);
