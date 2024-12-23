@@ -31,6 +31,29 @@ export const useSigningHandler = () => {
     return ethers.utils.getAddress(address);
   };
 
+  const validateAndFormatMerkleRoot = (merkleRoot: string): string => {
+    // Remove any UUID prefix if present (format: uuid:string:merkleRoot)
+    const cleanMerkleRoot = merkleRoot.split(':').pop() || merkleRoot;
+    
+    // Ensure the merkle root is a valid hex string
+    if (!/^(0x)?[0-9a-fA-F]{64}$/.test(cleanMerkleRoot)) {
+      throw new Error("Invalid merkle root format");
+    }
+
+    // Add 0x prefix if not present
+    const prefixedMerkleRoot = cleanMerkleRoot.startsWith('0x') ? cleanMerkleRoot : `0x${cleanMerkleRoot}`;
+    
+    // Validate that it can be converted to bytes32
+    try {
+      ethers.utils.arrayify(prefixedMerkleRoot);
+    } catch (error) {
+      console.error("Error converting merkle root to bytes32:", error);
+      throw new Error("Invalid merkle root format for bytes32 conversion");
+    }
+
+    return prefixedMerkleRoot;
+  };
+
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
     const isTransferable = transaction.document_subtype === 'transferable';
@@ -77,12 +100,14 @@ export const useSigningHandler = () => {
         const documentStore = await initializeDocumentStore(signer, documentStoreAddress);
         console.log("Document store contract initialized");
 
-        // Get merkle root and ensure it has 0x prefix
-        const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
-        const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-        console.log("Using merkle root for issuance:", prefixedMerkleRoot);
+        // Get merkle root and format it properly
+        const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        console.log("Raw merkle root:", rawMerkleRoot);
         
-        const txHash = await issueDocument(signer, documentStoreAddress, prefixedMerkleRoot);
+        const formattedMerkleRoot = validateAndFormatMerkleRoot(rawMerkleRoot);
+        console.log("Formatted merkle root for issuance:", formattedMerkleRoot);
+        
+        const txHash = await issueDocument(signer, documentStoreAddress, formattedMerkleRoot);
         console.log("Document issued with transaction hash:", txHash);
 
         // Update signature with proof
@@ -95,7 +120,7 @@ export const useSigningHandler = () => {
               created: new Date().toISOString(),
               proofPurpose: "assertionMethod",
               verificationMethod: documentStoreAddress,
-              signature: merkleRoot
+              signature: formattedMerkleRoot
             }
           }
         };
