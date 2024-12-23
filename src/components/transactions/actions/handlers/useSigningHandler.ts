@@ -58,12 +58,15 @@ export const useSigningHandler = () => {
         const checksummedAddress = ethers.utils.getAddress(prefixedAddress);
         console.log("Final checksummed address:", checksummedAddress);
 
-        // Get merkle root from wrapped document
-        const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
-        if (!merkleRoot) {
+        // Get merkle root from wrapped document and ensure it has 0x prefix
+        const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        if (!rawMerkleRoot) {
           throw new Error("Merkle root not found in wrapped document");
         }
-        console.log("Merkle root to be issued:", merkleRoot);
+        
+        // Ensure merkle root has 0x prefix for proper bytes conversion
+        const merkleRoot = rawMerkleRoot.startsWith('0x') ? rawMerkleRoot : `0x${rawMerkleRoot}`;
+        console.log("Formatted merkle root:", merkleRoot);
 
         // Initialize contract with minimal ABI
         const contract = new ethers.Contract(
