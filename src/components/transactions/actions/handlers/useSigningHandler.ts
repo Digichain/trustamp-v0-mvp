@@ -5,6 +5,7 @@ import { signAndStoreDocument } from "@/utils/document-signer";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { useDocumentStore } from "./documentStore/useDocumentStore";
+import { useContractVerification } from "./documentStore/useContractVerification";
 
 interface Transaction {
   id: string;
@@ -18,32 +19,26 @@ export const useSigningHandler = () => {
   const queryClient = useQueryClient();
   const { walletAddress } = useWallet();
   const { initializeDocumentStore, issueDocument } = useDocumentStore();
+  const { verifyContractCode, verifyDocumentStoreInterface } = useContractVerification();
 
   const extractEthereumAddress = (input: string): string => {
-    // Match the last occurrence of 0x followed by 40 hex characters
     const matches = input.match(/0x[a-fA-F0-9]{40}/g);
     if (!matches || matches.length === 0) {
       throw new Error("No valid Ethereum address found in input");
     }
-    // Get the last match (in case there are multiple addresses)
     const address = matches[matches.length - 1];
-    // Normalize the address
     return ethers.utils.getAddress(address);
   };
 
   const validateAndFormatMerkleRoot = (merkleRoot: string): string => {
-    // Remove any UUID prefix if present (format: uuid:string:merkleRoot)
     const cleanMerkleRoot = merkleRoot.split(':').pop() || merkleRoot;
     
-    // Ensure the merkle root is a valid hex string
     if (!/^(0x)?[0-9a-fA-F]{64}$/.test(cleanMerkleRoot)) {
       throw new Error("Invalid merkle root format");
     }
 
-    // Add 0x prefix if not present
     const prefixedMerkleRoot = cleanMerkleRoot.startsWith('0x') ? cleanMerkleRoot : `0x${cleanMerkleRoot}`;
     
-    // Validate that it can be converted to bytes32
     try {
       ethers.utils.arrayify(prefixedMerkleRoot);
     } catch (error) {
@@ -83,7 +78,6 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         console.log("Got signer from provider");
 
-        // Get document store address from the document and normalize it
         const rawDocumentStore = transaction.wrapped_document.data.issuers[0]?.documentStore;
         console.log("Raw document store address:", rawDocumentStore);
         
@@ -92,15 +86,19 @@ export const useSigningHandler = () => {
           throw new Error("Document store address not found in document. Please ensure the document was created with a valid document store.");
         }
 
-        // Extract and normalize the Ethereum address
         const documentStoreAddress = extractEthereumAddress(rawDocumentStore);
         console.log("Normalized document store address:", documentStoreAddress);
 
-        // Initialize document store contract with normalized address
+        // Verify contract exists and implements correct interface
+        await verifyContractCode(provider, documentStoreAddress);
+        console.log("Contract code verification passed");
+
         const documentStore = await initializeDocumentStore(signer, documentStoreAddress);
         console.log("Document store contract initialized");
 
-        // Get merkle root and format it properly
+        await verifyDocumentStoreInterface(documentStore, await signer.getAddress());
+        console.log("Contract interface verification passed");
+
         const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
         console.log("Raw merkle root:", rawMerkleRoot);
         
@@ -110,7 +108,6 @@ export const useSigningHandler = () => {
         const txHash = await issueDocument(signer, documentStoreAddress, formattedMerkleRoot);
         console.log("Document issued with transaction hash:", txHash);
 
-        // Update signature with proof
         signedDocument = {
           ...transaction.wrapped_document,
           signature: {
