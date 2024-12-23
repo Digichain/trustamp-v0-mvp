@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { DocumentStoreContract } from "./types";
-import { ISSUER_ROLE } from "./constants";
 
 export const useContractVerification = () => {
   const verifyContractCode = async (provider: ethers.providers.Provider, address: string) => {
@@ -23,32 +22,33 @@ export const useContractVerification = () => {
     console.log("Starting Document Store interface verification");
     
     try {
-      // Check if the signer has ISSUER_ROLE
-      console.log("Checking ISSUER_ROLE for address:", signerAddress);
+      // Check if the signer is the owner of the contract
+      console.log("Checking ownership for address:", signerAddress);
       try {
-        const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
-        console.log("Has ISSUER_ROLE:", hasIssuerRole);
+        const owner = await contract.owner();
+        console.log("Contract owner:", owner);
+        console.log("Signer address:", signerAddress);
 
-        if (!hasIssuerRole) {
+        if (owner.toLowerCase() !== signerAddress.toLowerCase()) {
           throw new Error(
-            "Connected wallet does not have ISSUER_ROLE. Please ensure you have the correct permissions."
+            "Connected wallet is not the owner of the contract. Please ensure you have the correct permissions."
           );
         }
       } catch (error: any) {
-        console.error("Failed to check ISSUER_ROLE:", error);
+        console.error("Failed to check ownership:", error);
         throw new Error(
-          "Failed to verify issuer role. Please ensure the contract address is correct and you have the right permissions."
+          "Failed to verify contract ownership. Please ensure the contract address is correct and you have the right permissions."
         );
       }
 
-      // Verify isIssued function
-      console.log("Checking isIssued function...");
+      // Verify isMerkleRootIssued function
+      console.log("Checking isMerkleRootIssued function...");
       try {
-        const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
-        await contract.isIssued(dummyDoc);
-        console.log("isIssued function verified successfully");
+        const dummyRoot = ethers.utils.hexZeroPad("0x00", 32);
+        await contract.isMerkleRootIssued(dummyRoot);
+        console.log("isMerkleRootIssued function verified successfully");
       } catch (error: any) {
-        console.error("Failed to call isIssued() function:", error);
+        console.error("Failed to call isMerkleRootIssued() function:", error);
         throw new Error(
           "Failed to verify document store functions. Please ensure the contract address is correct."
         );
