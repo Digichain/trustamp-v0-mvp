@@ -8,7 +8,7 @@ export interface DocumentStoreContract extends ethers.Contract {
   // Document management functions
   issue(document: string): Promise<ethers.ContractTransaction>;
   bulkIssue(documents: string[]): Promise<ethers.ContractTransaction>;
-  getIssuedBlock(document: string): Promise<number>;
+  getIssuedBlock(document: string): Promise<ethers.BigNumber>;
   isIssued(document: string): Promise<boolean>;
   revoke(document: string): Promise<ethers.ContractTransaction>;
   bulkRevoke(documents: string[]): Promise<ethers.ContractTransaction>;
