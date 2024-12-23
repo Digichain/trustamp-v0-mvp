@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
-import { DOCUMENT_STORE_ABI, ISSUER_ROLE } from "./constants";
+import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE, ISSUER_ROLE } from "./constants";
 import { useContractVerification } from "./useContractVerification";
 import { DocumentStoreContract, DocumentStoreInfo } from "./types";
 
@@ -8,17 +8,48 @@ export const useDocumentStore = () => {
   const { toast } = useToast();
   const { verifyContractCode, verifyDocumentStoreInterface } = useContractVerification();
 
-  const extractAddress = (rawAddress: string): string => {
-    console.log("Extracting address from:", rawAddress);
-    if (rawAddress.includes(":")) {
-      const matches = rawAddress.match(/:string:(.+)$/);
-      if (matches && matches[1]) {
-        console.log("Extracted address:", matches[1]);
-        return matches[1];
-      }
-      throw new Error("Invalid address format in document");
+  const deployDocumentStore = async (
+    signer: ethers.Signer,
+    name: string
+  ): Promise<DocumentStoreContract> => {
+    try {
+      console.log("Starting document store deployment with name:", name);
+
+      // Create contract factory
+      const factory = new ethers.ContractFactory(
+        DOCUMENT_STORE_ABI,
+        DOCUMENT_STORE_BYTECODE,
+        signer
+      );
+
+      // Deploy contract
+      console.log("Deploying document store contract...");
+      const signerAddress = await signer.getAddress();
+      const contract = await factory.deploy(name, signerAddress);
+      console.log("Waiting for deployment transaction...");
+      
+      // Wait for deployment to complete
+      await contract.deployed();
+      console.log("Document store deployed at:", contract.address);
+
+      // Verify the contract implements the correct interface
+      await verifyDocumentStoreInterface(contract as DocumentStoreContract, signerAddress);
+
+      toast({
+        title: "Success",
+        description: "Document Store deployed successfully",
+      });
+
+      return contract as DocumentStoreContract;
+    } catch (error: any) {
+      console.error("Error deploying document store:", error);
+      toast({
+        title: "Deployment Error",
+        description: error.message || "Failed to deploy document store",
+        variant: "destructive",
+      });
+      throw error;
     }
-    return rawAddress;
   };
 
   const initializeContract = async (
@@ -28,13 +59,6 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing Document Store contract with address:", address);
 
-      // Extract and normalize the Ethereum address
-      const cleanAddress = extractAddress(address);
-      console.log("Extracted clean address:", cleanAddress);
-
-      const normalizedAddress = ethers.utils.getAddress(cleanAddress);
-      console.log("Normalized address:", normalizedAddress);
-
       // Create provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -43,12 +67,12 @@ export const useDocumentStore = () => {
       console.log("Connected to network:", network.name, "chainId:", network.chainId);
 
       // Verify contract exists at address
-      await verifyContractCode(provider, normalizedAddress);
+      await verifyContractCode(provider, address);
 
       // Create contract instance
       console.log("Creating contract instance");
       const contract = new ethers.Contract(
-        normalizedAddress,
+        address,
         DOCUMENT_STORE_ABI,
         signer
       ) as DocumentStoreContract;
@@ -105,6 +129,11 @@ export const useDocumentStore = () => {
         throw new Error("Document issuance verification failed");
       }
 
+      toast({
+        title: "Success",
+        description: "Document issued successfully",
+      });
+
       return tx.hash;
     } catch (error: any) {
       console.error("Error issuing document:", error);
@@ -118,6 +147,7 @@ export const useDocumentStore = () => {
   };
 
   return {
+    deployDocumentStore,
     initializeContract,
     issueDocument,
   };

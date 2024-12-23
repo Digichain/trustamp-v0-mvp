@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { DocumentStoreContract } from "./types";
+import { ISSUER_ROLE } from "./constants";
 
 export const useContractVerification = () => {
   const verifyContractCode = async (provider: ethers.providers.Provider, address: string) => {
@@ -20,9 +21,6 @@ export const useContractVerification = () => {
     console.log("Starting Document Store interface verification");
     try {
       // Check if the signer has the ISSUER_ROLE
-      const ISSUER_ROLE = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes("ISSUER_ROLE")
-      );
       console.log("Checking ISSUER_ROLE for address:", signerAddress);
       const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
       console.log("Has ISSUER_ROLE:", hasIssuerRole);
