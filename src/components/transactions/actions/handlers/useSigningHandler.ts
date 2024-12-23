@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
 import { DOCUMENT_STORE_ABI } from "./documentStore/constants";
+import { signAndStoreDocument } from "@/utils/document-signer";
 
 export const useSigningHandler = () => {
   const { toast } = useToast();
