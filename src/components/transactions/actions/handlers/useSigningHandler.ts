@@ -71,21 +71,14 @@ export const useSigningHandler = () => {
           throw new Error("Merkle root not found in wrapped document");
         }
 
-        // Clean up the merkle root string and ensure it's the correct length
-        const cleanMerkleRoot = rawMerkleRoot.replace('0x', '').padStart(64, '0');
-        console.log("Cleaned merkle root:", cleanMerkleRoot);
-        
-        // Convert the merkle root to bytes32
-        const merkleRootBytes = ethers.utils.hexZeroPad(`0x${cleanMerkleRoot}`, 32);
-        console.log("Formatted merkle root bytes:", merkleRootBytes);
-
-        // Check if merkle root is already issued
-        const isAlreadyIssued = await contract.isMerkleRootIssued(merkleRootBytes);
-        console.log("Is merkle root already issued?", isAlreadyIssued);
-        
-        if (isAlreadyIssued) {
-          throw new Error("Document has already been issued");
-        }
+        // Format merkle root to bytes32
+        const merkleRoot = ethers.utils.hexZeroPad(
+          ethers.utils.hexlify(
+            ethers.utils.toUtf8Bytes(rawMerkleRoot)
+          ),
+          32
+        );
+        console.log("Formatted merkle root:", merkleRoot);
 
         // Get the owner of the contract
         const contractOwner = await contract.owner();
@@ -99,10 +92,10 @@ export const useSigningHandler = () => {
         // Issue document using safeMint
         console.log("Minting document with parameters:", {
           to: walletAddress,
-          merkleRoot: merkleRootBytes
+          merkleRoot: merkleRoot
         });
         
-        const tx = await contract.safeMint(walletAddress, merkleRootBytes);
+        const tx = await contract.safeMint(walletAddress, merkleRoot);
         console.log("Transaction sent:", tx.hash);
         
         console.log("Waiting for transaction confirmation...");
