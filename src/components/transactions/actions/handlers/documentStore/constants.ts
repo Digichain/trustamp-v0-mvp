@@ -4,10 +4,11 @@ import { ethers } from "ethers";
 export const DOCUMENT_STORE_ABI = [
   "function issue(bytes32 document) external",
   "function isIssued(bytes32 document) public view returns (bool)",
-  "function hasRole(bytes32 role, address account) external view returns (bool)"
+  "function hasRole(bytes32 role, address account) external view returns (bool)",
+  "function ISSUER_ROLE() external view returns (bytes32)"
 ];
 
-// Role constants
+// Role constants - using keccak256 hash of "ISSUER_ROLE" string
 export const ISSUER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ISSUER_ROLE"));
 
 // Basic bytecode for deployment verification

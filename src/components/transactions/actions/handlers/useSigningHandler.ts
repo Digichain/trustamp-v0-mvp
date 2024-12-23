@@ -81,9 +81,12 @@ export const useSigningHandler = () => {
           signer
         );
 
+        // Get the ISSUER_ROLE bytes32 value from the contract
+        console.log("Checking ISSUER_ROLE for address:", walletAddress);
+        console.log("Using ISSUER_ROLE value:", ISSUER_ROLE);
+        
         // Check if the user has the ISSUER_ROLE
         const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, walletAddress);
-        console.log("Checking ISSUER_ROLE for address:", walletAddress);
         console.log("Has ISSUER_ROLE:", hasIssuerRole);
 
         if (!hasIssuerRole) {
