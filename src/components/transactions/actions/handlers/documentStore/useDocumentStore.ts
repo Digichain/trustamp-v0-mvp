@@ -17,21 +17,16 @@ export const useDocumentStore = () => {
     try {
       console.log("Initializing document store contract at address:", address);
       
-      // Create base provider
+      // Create provider without ENS resolution
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       
-      // Get the network
+      // Get the network for logging purposes
       const network = await provider.getNetwork();
-      console.log("Connected to network:", network.name);
+      console.log("Connected to network:", network.name, "chainId:", network.chainId);
       
-      // Ensure we're on Sepolia
-      if (network.chainId !== 11155111) {
-        throw new Error("Please connect to Sepolia network");
-      }
-      
-      // Create contract instance with explicit provider configuration
+      // Create contract instance with explicit address (no ENS resolution)
       const contract = new ethers.Contract(
-        address,
+        ethers.utils.getAddress(address), // Normalize the address format
         DOCUMENT_STORE_ABI,
         provider.getSigner()
       );
@@ -56,7 +51,7 @@ export const useDocumentStore = () => {
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       
-      // Call issue function directly without any name resolution
+      // Call issue function with direct address
       const tx = await contract.issue(prefixedMerkleRoot);
       console.log("Issue transaction sent:", tx.hash);
       
