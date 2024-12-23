@@ -51,13 +51,22 @@ export const useDocumentStore = () => {
         provider.getSigner()
       );
       
+      // Verify contract exists by calling a view function
+      try {
+        await contract.owner();
+        console.log("Contract verified at address:", normalizedAddress);
+      } catch (error) {
+        console.error("Contract verification failed:", error);
+        throw new Error("No valid Document Store contract found at the provided address. Please ensure the contract is deployed and you're on the correct network.");
+      }
+      
       console.log("Document store contract instance created");
       return contract;
     } catch (error: any) {
       console.error("Error initializing document store:", error);
       toast({
         title: "Contract Error",
-        description: "Failed to initialize document store contract",
+        description: error.message || "Failed to initialize document store contract",
         variant: "destructive",
       });
       throw error;
@@ -71,19 +80,35 @@ export const useDocumentStore = () => {
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       
+      // Verify contract is ready by checking owner
+      try {
+        const owner = await contract.owner();
+        console.log("Contract owner verified:", owner);
+      } catch (error) {
+        console.error("Contract verification failed:", error);
+        throw new Error("Contract is not accessible. Please check your network connection and wallet settings.");
+      }
+      
       // Call issue function with direct address
+      console.log("Calling issue function with merkle root:", prefixedMerkleRoot);
       const tx = await contract.issue(prefixedMerkleRoot);
       console.log("Issue transaction sent:", tx.hash);
       
-      await tx.wait();
-      console.log("Document issued successfully");
+      const receipt = await tx.wait();
+      console.log("Transaction confirmed in block:", receipt.blockNumber);
       
       return tx.hash;
     } catch (error: any) {
       console.error("Error issuing document:", error);
+      
+      // Check for specific error types
+      if (error.code === -32000) {
+        throw new Error("Contract execution failed. Please ensure you have the correct permissions and are on the right network.");
+      }
+      
       toast({
         title: "Issue Error",
-        description: "Failed to issue document",
+        description: "Failed to issue document. Please check the console for details.",
         variant: "destructive",
       });
       throw error;
