@@ -19,6 +19,18 @@ export const useSigningHandler = () => {
   const { walletAddress } = useWallet();
   const { initializeDocumentStore, issueDocument } = useDocumentStore();
 
+  const extractEthereumAddress = (input: string): string => {
+    // Match the last occurrence of 0x followed by 40 hex characters
+    const matches = input.match(/0x[a-fA-F0-9]{40}/g);
+    if (!matches || matches.length === 0) {
+      throw new Error("No valid Ethereum address found in input");
+    }
+    // Get the last match (in case there are multiple addresses)
+    const address = matches[matches.length - 1];
+    // Normalize the address
+    return ethers.utils.getAddress(address);
+  };
+
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
     const isTransferable = transaction.document_subtype === 'transferable';
@@ -48,16 +60,20 @@ export const useSigningHandler = () => {
         const signer = provider.getSigner();
         console.log("Got signer from provider");
 
-        // Get document store address from the document
-        const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
-        console.log("Retrieved document store address:", documentStoreAddress);
+        // Get document store address from the document and normalize it
+        const rawDocumentStore = transaction.wrapped_document.data.issuers[0]?.documentStore;
+        console.log("Raw document store address:", rawDocumentStore);
         
-        if (!documentStoreAddress) {
+        if (!rawDocumentStore) {
           console.error("Document store address not found in wrapped document:", transaction.wrapped_document);
           throw new Error("Document store address not found in document. Please ensure the document was created with a valid document store.");
         }
 
-        // Initialize document store contract
+        // Extract and normalize the Ethereum address
+        const documentStoreAddress = extractEthereumAddress(rawDocumentStore);
+        console.log("Normalized document store address:", documentStoreAddress);
+
+        // Initialize document store contract with normalized address
         const documentStore = await initializeDocumentStore(signer, documentStoreAddress);
         console.log("Document store contract initialized");
 
