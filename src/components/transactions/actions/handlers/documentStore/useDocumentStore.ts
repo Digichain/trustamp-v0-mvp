@@ -3,10 +3,16 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Document Store ABI with required functions
 const DOCUMENT_STORE_ABI = [
-  "function issue(bytes32 document) public",
-  "function issued(bytes32 document) public view returns (bool)",
-  "function revoke(bytes32 document) public",
-  "function revoked(bytes32 document) public view returns (bool)",
+  "function issue(bytes32 document)",
+  "function bulkIssue(bytes32[] documents)",
+  "function getIssuedBlock(bytes32 document) public view returns (uint256)",
+  "function isIssued(bytes32 document) public view returns (bool)",
+  "function revoke(bytes32 document)",
+  "function bulkRevoke(bytes32[] documents)",
+  "function isRevoked(bytes32 document) public view returns (bool)",
+  "function isOwner(address addr) public view returns (bool)",
+  "function transferOwnership(address newOwner)",
+  "function renounceOwnership()",
   "function owner() public view returns (address)"
 ];
 
@@ -14,9 +20,7 @@ export const useDocumentStore = () => {
   const { toast } = useToast();
 
   const extractAddress = (rawAddress: string): string => {
-    // If the address contains a colon, it's in OpenAttestation format
     if (rawAddress.includes(':')) {
-      // Extract everything after "string:"
       const matches = rawAddress.match(/:string:(.+)$/);
       if (matches && matches[1]) {
         return matches[1];
@@ -24,6 +28,35 @@ export const useDocumentStore = () => {
       throw new Error("Invalid address format in document");
     }
     return rawAddress;
+  };
+
+  const verifyContractCode = async (provider: ethers.providers.Provider, address: string) => {
+    console.log("Verifying contract code at address:", address);
+    const code = await provider.getCode(address);
+    if (code === "0x") {
+      throw new Error("No contract code found at the provided address");
+    }
+    console.log("Contract code found at address");
+    return true;
+  };
+
+  const verifyDocumentStoreInterface = async (contract: ethers.Contract) => {
+    console.log("Verifying Document Store interface");
+    try {
+      // Check for required functions
+      const owner = await contract.owner();
+      console.log("Contract owner:", owner);
+      
+      // Try to call isIssued with a dummy value to verify interface
+      const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
+      await contract.isIssued(dummyDoc);
+      
+      console.log("Document Store interface verified");
+      return true;
+    } catch (error) {
+      console.error("Interface verification failed:", error);
+      throw new Error("Contract does not implement the Document Store interface correctly");
+    }
   };
 
   const initializeContract = async (address: string, signer: ethers.Signer) => {
@@ -37,30 +70,27 @@ export const useDocumentStore = () => {
       const normalizedAddress = ethers.utils.getAddress(cleanAddress);
       console.log("Normalized address:", normalizedAddress);
       
-      // Create provider without ENS resolution
+      // Create provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       
       // Get the network for logging purposes
       const network = await provider.getNetwork();
       console.log("Connected to network:", network.name, "chainId:", network.chainId);
       
-      // Create contract instance with explicit address
+      // Verify contract exists at address
+      await verifyContractCode(provider, normalizedAddress);
+      
+      // Create contract instance
       const contract = new ethers.Contract(
         normalizedAddress,
         DOCUMENT_STORE_ABI,
         provider.getSigner()
       );
       
-      // Verify contract exists by calling a view function
-      try {
-        await contract.owner();
-        console.log("Contract verified at address:", normalizedAddress);
-      } catch (error) {
-        console.error("Contract verification failed:", error);
-        throw new Error("No valid Document Store contract found at the provided address. Please ensure the contract is deployed and you're on the correct network.");
-      }
+      // Verify it's a Document Store contract
+      await verifyDocumentStoreInterface(contract);
       
-      console.log("Document store contract instance created");
+      console.log("Document store contract initialized successfully");
       return contract;
     } catch (error: any) {
       console.error("Error initializing document store:", error);
@@ -80,16 +110,10 @@ export const useDocumentStore = () => {
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       
-      // Verify contract is ready by checking owner
-      try {
-        const owner = await contract.owner();
-        console.log("Contract owner verified:", owner);
-      } catch (error) {
-        console.error("Contract verification failed:", error);
-        throw new Error("Contract is not accessible. Please check your network connection and wallet settings.");
-      }
+      // Verify contract is still accessible
+      await verifyDocumentStoreInterface(contract);
       
-      // Call issue function with direct address
+      // Call issue function
       console.log("Calling issue function with merkle root:", prefixedMerkleRoot);
       const tx = await contract.issue(prefixedMerkleRoot);
       console.log("Issue transaction sent:", tx.hash);
@@ -122,7 +146,7 @@ export const useDocumentStore = () => {
       // Ensure merkleRoot has 0x prefix
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       
-      const isIssued = await contract.issued(prefixedMerkleRoot);
+      const isIssued = await contract.isIssued(prefixedMerkleRoot);
       console.log("Document issuance status:", isIssued);
       
       return isIssued;
