@@ -38,15 +38,23 @@ export const useSigningHandler = () => {
           throw new Error("Document store address not found in wrapped document");
         }
 
+        // Validate the address format
+        if (!ethers.utils.isAddress(documentStoreAddress)) {
+          throw new Error("Invalid document store address format");
+        }
+
         console.log("Using document store address:", documentStoreAddress);
 
         // Get merkle root from wrapped document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
         console.log("Merkle root to be issued:", merkleRoot);
 
-        // Initialize contract with minimal ABI, using the address directly without ENS resolution
+        // Initialize contract with minimal ABI, using checksummed address
+        const checksummedAddress = ethers.utils.getAddress(documentStoreAddress);
+        console.log("Using checksummed address:", checksummedAddress);
+        
         const contract = new ethers.Contract(
-          documentStoreAddress,
+          checksummedAddress,
           DOCUMENT_STORE_ABI,
           signer
         );
@@ -58,7 +66,7 @@ export const useSigningHandler = () => {
         }
 
         // Issue document by calling issue() with merkle root
-        console.log("Issuing document to store:", documentStoreAddress);
+        console.log("Issuing document to store:", checksummedAddress);
         const tx = await contract.issue(merkleRoot);
         console.log("Waiting for transaction confirmation...");
         await tx.wait();
