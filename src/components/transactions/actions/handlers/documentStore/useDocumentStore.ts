@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 
-// Updated ABI to include role-based functions
+// Updated ABI to include both Access Control and Document Store functions
 const DOCUMENT_STORE_ABI = [
   // Access Control Functions
   "function hasRole(bytes32 role, address account) public view returns (bool)",
@@ -10,12 +10,17 @@ const DOCUMENT_STORE_ABI = [
   "function revokeRole(bytes32 role, address account)",
   // Document Store Functions
   "function issue(bytes32 document)",
-  "function bulkIssue(bytes32[] documents)",
-  "function getIssuedBlock(bytes32 document) public view returns (uint256)",
   "function isIssued(bytes32 document) public view returns (bool)",
+  "function getIssuedBlock(bytes32 document) public view returns (uint256)",
+  "function isIssuedBefore(bytes32 document, uint256 blockNumber) public view returns (bool)",
   "function revoke(bytes32 document)",
-  "function bulkRevoke(bytes32[] documents)",
   "function isRevoked(bytes32 document) public view returns (bool)",
+  "function isRevokedBefore(bytes32 document, uint256 blockNumber) public view returns (bool)",
+  "function name() public view returns (string)",
+  "function version() public view returns (string)",
+  // Events
+  "event DocumentIssued(bytes32 indexed document)",
+  "event DocumentRevoked(bytes32 indexed document)"
 ];
 
 // Role constants from the contract
@@ -62,6 +67,13 @@ export const useDocumentStore = () => {
       }
 
       // Verify basic functionality
+      console.log("Checking contract metadata...");
+      const name = await contract.name();
+      const version = await contract.version();
+      console.log("Contract name:", name);
+      console.log("Contract version:", version);
+
+      // Verify document management functions
       console.log("Checking isIssued function...");
       const dummyDoc = ethers.utils.hexZeroPad("0x00", 32);
       await contract.isIssued(dummyDoc);
@@ -139,6 +151,12 @@ export const useDocumentStore = () => {
       const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       console.log("Prefixed merkle root:", prefixedMerkleRoot);
       
+      // Check if document is already issued
+      const isAlreadyIssued = await contract.isIssued(prefixedMerkleRoot);
+      if (isAlreadyIssued) {
+        throw new Error("Document has already been issued");
+      }
+      
       // Call issue function
       console.log("Calling issue function...");
       const tx = await contract.issue(prefixedMerkleRoot);
@@ -146,6 +164,12 @@ export const useDocumentStore = () => {
       
       const receipt = await tx.wait();
       console.log("Transaction confirmed in block:", receipt.blockNumber);
+      
+      // Verify document was issued
+      const isIssued = await contract.isIssued(prefixedMerkleRoot);
+      if (!isIssued) {
+        throw new Error("Document issuance verification failed");
+      }
       
       return tx.hash;
     } catch (error: any) {
@@ -177,6 +201,11 @@ export const useDocumentStore = () => {
       
       const isIssued = await contract.isIssued(prefixedMerkleRoot);
       console.log("Document issuance status:", isIssued);
+      
+      if (isIssued) {
+        const issuedBlock = await contract.getIssuedBlock(prefixedMerkleRoot);
+        console.log("Document was issued in block:", issuedBlock.toString());
+      }
       
       return isIssued;
     } catch (error: any) {
