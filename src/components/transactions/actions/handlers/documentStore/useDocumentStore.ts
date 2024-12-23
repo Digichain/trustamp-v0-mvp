@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
-import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE } from './constants';
+import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE } from './contracts';
 import { DocumentStoreContract } from './types';
 
 export const useDocumentStore = () => {

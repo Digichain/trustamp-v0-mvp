@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
-import { DOCUMENT_STORE_ABI } from "./constants";
+import { DOCUMENT_STORE_ABI } from "./contracts";
 
 export const useDocumentStoreInteraction = () => {
   const { toast } = useToast();
@@ -32,37 +32,21 @@ export const useDocumentStoreInteraction = () => {
       console.log("Starting document minting process...");
       console.log("Contract address:", contractAddress);
       console.log("To address:", toAddress);
-      console.log("Raw merkle root:", merkleRoot);
+      console.log("Merkle root:", merkleRoot);
 
       const contract = await getContract(contractAddress);
 
-      // Validate merkle root format
-      if (!merkleRoot || merkleRoot.length !== 66) { // 0x + 64 hex chars
-        console.error("Invalid merkle root format:", merkleRoot);
-        throw new Error("Invalid merkle root format");
-      }
-
-      // Ensure merkle root is properly formatted
-      const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-      console.log("Merkle root in hex format:", merkleRootHex);
-
-      // Validate the merkle root is a valid hex string
-      if (!ethers.utils.isHexString(merkleRootHex)) {
-        console.error("Invalid hex string for merkle root:", merkleRootHex);
-        throw new Error("Invalid merkle root hex format");
-      }
-
       // Check if document is already minted
-      const isIssued = await contract.isIssued(merkleRootHex);
+      const isIssued = await contract.isMerkleRootIssued(merkleRoot);
       if (isIssued) {
-        console.error("Document already minted for merkle root:", merkleRootHex);
+        console.error("Document already minted for merkle root:", merkleRoot);
         throw new Error("Document has already been minted");
       }
 
-      console.log("Attempting to mint document with merkle root:", merkleRootHex);
+      console.log("Attempting to mint document with merkle root:", merkleRoot);
 
       // Mint the document with higher gas limit to ensure completion
-      const tx = await contract.safeMint(toAddress, merkleRootHex, {
+      const tx = await contract.safeMint(toAddress, merkleRoot, {
         gasLimit: 1000000 // Increased gas limit
       });
       console.log("Minting transaction sent:", tx.hash);
@@ -93,13 +77,7 @@ export const useDocumentStoreInteraction = () => {
   const checkMerkleRoot = async (contractAddress: string, merkleRoot: string) => {
     try {
       const contract = await getContract(contractAddress);
-      const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-      
-      if (!ethers.utils.isHexString(merkleRootHex)) {
-        throw new Error("Invalid merkle root format");
-      }
-      
-      const isIssued = await contract.isIssued(merkleRootHex);
+      const isIssued = await contract.isMerkleRootIssued(merkleRoot);
       return isIssued;
     } catch (error) {
       console.error("Error checking merkle root:", error);
