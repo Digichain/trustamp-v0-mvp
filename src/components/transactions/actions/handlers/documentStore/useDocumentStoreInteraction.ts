@@ -10,13 +10,19 @@ export const useDocumentStoreInteraction = () => {
       console.log("Getting contract instance for address:", contractAddress);
       
       if (!window.ethereum) {
-        throw new Error("MetaMask not installed");
+        throw new Error('MetaMask not found');
       }
 
+      // Use Sepolia provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
+      console.log('Got signer from provider');
+
+      // Create contract instance
+      const contract = new ethers.Contract(contractAddress, DOCUMENT_STORE_ABI, signer);
+      console.log('Created contract instance');
       
-      return new ethers.Contract(contractAddress, DOCUMENT_STORE_ABI, signer);
+      return contract;
     } catch (error) {
       console.error("Error getting contract instance:", error);
       throw error;
@@ -28,7 +34,7 @@ export const useDocumentStoreInteraction = () => {
       console.log("Starting document minting process...");
       console.log("Contract address:", contractAddress);
       console.log("To address:", toAddress);
-      console.log("Merkle root:", merkleRoot);
+      console.log("Original merkle root:", merkleRoot);
 
       const contract = await getContract(contractAddress);
       
@@ -52,7 +58,7 @@ export const useDocumentStoreInteraction = () => {
         throw new Error("Only the contract owner can mint documents");
       }
 
-      // Mint the document
+      // Mint the document with explicit gas limit
       const tx = await contract.safeMint(toAddress, formattedMerkleRoot, {
         gasLimit: 500000
       });
