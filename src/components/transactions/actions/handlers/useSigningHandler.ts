@@ -2,14 +2,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useWallet } from "@/contexts/WalletContext";
-import { ethers } from 'ethers';
-import { DOCUMENT_STORE_ABI } from "./documentStore/constants";
 import { signAndStoreDocument } from "@/utils/document-signer";
+import { useDocumentStoreInteraction } from "./documentStore/useDocumentStoreInteraction";
 
 export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { walletAddress } = useWallet();
+  const { mintDocument } = useDocumentStoreInteraction();
 
   const handleSignDocument = async (transaction: any) => {
     console.log("Starting document signing process for:", transaction.id);
@@ -26,12 +26,7 @@ export const useSigningHandler = () => {
 
       if (isTransferable) {
         console.log("Handling transferable document issuance");
-        const { ethereum } = window as any;
-        if (!ethereum) throw new Error("MetaMask not installed");
-
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-
+        
         // Get document store address from wrapped document
         const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
         if (!documentStoreAddress) {
@@ -48,65 +43,20 @@ export const useSigningHandler = () => {
         const prefixedAddress = actualAddress.startsWith('0x') ? actualAddress : `0x${actualAddress}`;
         console.log("Prefixed address:", prefixedAddress);
 
-        // Validate the address format
-        if (!ethers.utils.isAddress(prefixedAddress)) {
-          console.error("Invalid address format:", prefixedAddress);
-          throw new Error(`Invalid document store address format: ${prefixedAddress}`);
-        }
-
-        // Convert to checksum address
-        const checksummedAddress = ethers.utils.getAddress(prefixedAddress);
-        console.log("Final checksummed address:", checksummedAddress);
-
-        // Initialize contract with complete ABI
-        const contract = new ethers.Contract(
-          checksummedAddress,
-          DOCUMENT_STORE_ABI,
-          signer
-        );
-
-        // Get merkle root from wrapped document and format it properly
+        // Get merkle root from wrapped document
         const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
         if (!rawMerkleRoot) {
           throw new Error("Merkle root not found in wrapped document");
         }
 
-        console.log("Raw merkle root:", rawMerkleRoot);
+        // Mint the document
+        const receipt = await mintDocument(
+          prefixedAddress,
+          walletAddress,
+          rawMerkleRoot
+        );
 
-        // Convert the merkle root to bytes32 format
-        const merkleRootBytes = ethers.utils.toUtf8Bytes(rawMerkleRoot);
-        console.log("Merkle root as bytes:", merkleRootBytes);
-        
-        const merkleRootHex = ethers.utils.hexlify(merkleRootBytes);
-        console.log("Merkle root as hex:", merkleRootHex);
-        
-        // Ensure it's exactly 32 bytes
-        const merkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
-        console.log("Final formatted merkle root:", merkleRoot);
-
-        // Get the owner of the contract
-        const contractOwner = await contract.owner();
-        console.log("Contract owner:", contractOwner);
-        console.log("Current signer:", walletAddress);
-
-        if (contractOwner.toLowerCase() !== walletAddress.toLowerCase()) {
-          throw new Error("Only the contract owner can issue documents");
-        }
-
-        // Issue document using safeMint
-        console.log("Minting document with parameters:", {
-          to: walletAddress,
-          merkleRoot: merkleRoot
-        });
-        
-        const tx = await contract.safeMint(walletAddress, merkleRoot, {
-          gasLimit: 500000 // Add explicit gas limit
-        });
-        console.log("Transaction sent:", tx.hash);
-        
-        console.log("Waiting for transaction confirmation...");
-        await tx.wait();
-        console.log("Document issued successfully");
+        console.log("Document minted successfully:", receipt);
 
         // Update transaction status
         const { error: updateError } = await supabase
