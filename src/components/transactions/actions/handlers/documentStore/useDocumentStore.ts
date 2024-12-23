@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
-import { DocumentStoreABI, DocumentStoreBytecode } from './constants';
+import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE } from './constants';
 
 export const useDocumentStore = () => {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -23,8 +23,8 @@ export const useDocumentStore = () => {
 
       // Create contract factory
       const factory = new ethers.ContractFactory(
-        DocumentStoreABI,
-        DocumentStoreBytecode,
+        DOCUMENT_STORE_ABI,
+        DOCUMENT_STORE_BYTECODE,
         signer
       );
 
@@ -67,7 +67,7 @@ export const useDocumentStore = () => {
       // Create contract instance
       const contract = new ethers.Contract(
         ethers.utils.getAddress(address),
-        DocumentStoreABI,
+        DOCUMENT_STORE_ABI,
         signer
       );
 

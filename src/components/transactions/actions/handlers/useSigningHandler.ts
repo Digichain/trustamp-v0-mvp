@@ -17,7 +17,7 @@ export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { walletAddress } = useWallet();
-  const { initializeContract, issueDocument } = useDocumentStore();
+  const { initializeDocumentStore, issueDocument } = useDocumentStore();
 
   const handleSignDocument = async (transaction: Transaction) => {
     console.log("Starting document signing process for:", transaction.id);
@@ -58,14 +58,14 @@ export const useSigningHandler = () => {
         }
 
         // Initialize document store contract
-        const documentStore = await initializeContract(documentStoreAddress, signer);
+        const documentStore = await initializeDocumentStore(signer, documentStoreAddress);
         console.log("Document store contract initialized");
 
         // Get merkle root and issue document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
         console.log("Using merkle root for issuance:", merkleRoot);
         
-        const txHash = await issueDocument(documentStore, merkleRoot);
+        const txHash = await issueDocument(signer, documentStoreAddress, merkleRoot);
         console.log("Document issued with transaction hash:", txHash);
 
         // Update signature with proof
