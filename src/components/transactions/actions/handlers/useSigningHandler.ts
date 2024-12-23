@@ -39,15 +39,24 @@ export const useSigningHandler = () => {
           throw new Error("Document store address not found in wrapped document");
         }
 
-        // Clean and validate the address
-        const cleanAddress = documentStoreAddress.toLowerCase().trim();
-        console.log("Cleaned document store address:", cleanAddress);
+        // Extract the actual address from the end of the string (after the last ':')
+        const addressParts = documentStoreAddress.toString().split(':');
+        const actualAddress = addressParts[addressParts.length - 1].trim();
+        console.log("Extracted actual address:", actualAddress);
+
+        // Ensure the address has the 0x prefix
+        const prefixedAddress = actualAddress.startsWith('0x') ? actualAddress : `0x${actualAddress}`;
+        console.log("Prefixed address:", prefixedAddress);
 
         // Validate the address format
-        if (!ethers.utils.isAddress(cleanAddress)) {
-          console.error("Invalid address format:", cleanAddress);
-          throw new Error(`Invalid document store address format: ${cleanAddress}`);
+        if (!ethers.utils.isAddress(prefixedAddress)) {
+          console.error("Invalid address format:", prefixedAddress);
+          throw new Error(`Invalid token registry address format: ${prefixedAddress}`);
         }
+
+        // Convert to checksum address
+        const checksummedAddress = ethers.utils.getAddress(prefixedAddress);
+        console.log("Final checksummed address:", checksummedAddress);
 
         // Get merkle root from wrapped document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
@@ -56,10 +65,7 @@ export const useSigningHandler = () => {
         }
         console.log("Merkle root to be issued:", merkleRoot);
 
-        // Initialize contract with minimal ABI, using checksummed address
-        const checksummedAddress = ethers.utils.getAddress(cleanAddress);
-        console.log("Using checksummed address:", checksummedAddress);
-        
+        // Initialize contract with minimal ABI
         const contract = new ethers.Contract(
           checksummedAddress,
           DOCUMENT_STORE_ABI,
