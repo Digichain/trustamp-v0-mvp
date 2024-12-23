@@ -3,7 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
-import { DOCUMENT_STORE_ABI } from "./documentStore/constants";
+import { DOCUMENT_STORE_ABI, ISSUER_ROLE } from "./documentStore/constants";
 import { signAndStoreDocument } from "@/utils/document-signer";
 
 export const useSigningHandler = () => {
@@ -80,6 +80,15 @@ export const useSigningHandler = () => {
           DOCUMENT_STORE_ABI,
           signer
         );
+
+        // Check if the user has the ISSUER_ROLE
+        const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, walletAddress);
+        console.log("Checking ISSUER_ROLE for address:", walletAddress);
+        console.log("Has ISSUER_ROLE:", hasIssuerRole);
+
+        if (!hasIssuerRole) {
+          throw new Error("You don't have permission to issue documents. ISSUER_ROLE required.");
+        }
 
         // Check if already issued
         const isAlreadyIssued = await contract.isIssued(merkleRootBytes);
