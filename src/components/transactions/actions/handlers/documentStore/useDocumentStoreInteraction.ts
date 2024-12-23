@@ -36,8 +36,13 @@ export const useDocumentStoreInteraction = () => {
 
       const contract = await getContract(contractAddress);
 
-      // Format merkle root to bytes32 using formatBytes32String
-      const formattedMerkleRoot = ethers.utils.formatBytes32String(merkleRoot);
+      // Convert merkle root to bytes32
+      // First ensure the merkle root is in the correct hex format
+      const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+      console.log("Merkle root in hex format:", merkleRootHex);
+
+      // Pad to 32 bytes if needed
+      const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
       console.log("Formatted merkle root:", formattedMerkleRoot);
 
       // Check ownership
@@ -69,7 +74,8 @@ export const useDocumentStoreInteraction = () => {
   const checkMerkleRoot = async (contractAddress: string, merkleRoot: string) => {
     try {
       const contract = await getContract(contractAddress);
-      const formattedMerkleRoot = ethers.utils.formatBytes32String(merkleRoot);
+      const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+      const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
       const isIssued = await contract.isMerkleRootIssued(formattedMerkleRoot);
       return isIssued;
     } catch (error) {
