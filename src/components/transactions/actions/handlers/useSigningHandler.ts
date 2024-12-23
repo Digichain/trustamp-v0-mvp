@@ -77,11 +77,12 @@ export const useSigningHandler = () => {
         const documentStore = await initializeDocumentStore(signer, documentStoreAddress);
         console.log("Document store contract initialized");
 
-        // Get merkle root and issue document
+        // Get merkle root and ensure it has 0x prefix
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
-        console.log("Using merkle root for issuance:", merkleRoot);
+        const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+        console.log("Using merkle root for issuance:", prefixedMerkleRoot);
         
-        const txHash = await issueDocument(signer, documentStoreAddress, merkleRoot);
+        const txHash = await issueDocument(signer, documentStoreAddress, prefixedMerkleRoot);
         console.log("Document issued with transaction hash:", txHash);
 
         // Update signature with proof
