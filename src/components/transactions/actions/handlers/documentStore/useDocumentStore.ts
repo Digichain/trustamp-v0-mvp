@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
 import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE } from './constants';
+import { DocumentStoreContract } from './types';
 
 export const useDocumentStore = () => {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -32,7 +33,7 @@ export const useDocumentStore = () => {
       const contract = await factory.deploy(name, signerAddress);
       console.log("Waiting for deployment transaction...");
       
-      const deployedContract = await contract.deployed();
+      const deployedContract = await contract.deployed() as DocumentStoreContract;
       console.log("Document store deployed at:", deployedContract.address);
 
       toast({
@@ -55,7 +56,7 @@ export const useDocumentStore = () => {
     }
   };
 
-  const initializeDocumentStore = async (signer: ethers.Signer, address: string) => {
+  const initializeDocumentStore = async (signer: ethers.Signer, address: string): Promise<DocumentStoreContract> => {
     console.log("Initializing Document Store contract with address:", address);
 
     try {
@@ -64,12 +65,12 @@ export const useDocumentStore = () => {
         throw new Error("No provider available");
       }
 
-      // Create contract instance
+      // Create contract instance with explicit typing
       const contract = new ethers.Contract(
         ethers.utils.getAddress(address),
         DOCUMENT_STORE_ABI,
         signer
-      );
+      ) as DocumentStoreContract;
 
       console.log("Document store contract initialized");
       return contract;
