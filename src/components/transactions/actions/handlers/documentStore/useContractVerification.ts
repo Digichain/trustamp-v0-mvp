@@ -23,31 +23,7 @@ export const useContractVerification = () => {
     console.log("Starting Document Store interface verification");
     
     try {
-      // Check name() function
-      console.log("Checking name() function...");
-      try {
-        const name = await contract.name();
-        console.log("Contract name successfully retrieved:", name);
-      } catch (error: any) {
-        console.error("Failed to call name() function:", error);
-        throw new Error(
-          "The contract does not implement the name() function. This suggests it's not a valid DocumentStore contract."
-        );
-      }
-
-      // Check version() function
-      console.log("Checking version() function...");
-      try {
-        const version = await contract.version();
-        console.log("Contract version successfully retrieved:", version);
-      } catch (error: any) {
-        console.error("Failed to call version() function:", error);
-        throw new Error(
-          "The contract does not implement the version() function. This suggests it's not a valid DocumentStore contract."
-        );
-      }
-
-      // Check if the signer has the ISSUER_ROLE
+      // Check if the signer has ISSUER_ROLE
       console.log("Checking ISSUER_ROLE for address:", signerAddress);
       try {
         const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, signerAddress);
@@ -61,7 +37,7 @@ export const useContractVerification = () => {
       } catch (error: any) {
         console.error("Failed to check ISSUER_ROLE:", error);
         throw new Error(
-          "The contract does not implement the hasRole() function. This suggests it's not a valid DocumentStore contract."
+          "Failed to verify issuer role. Please ensure the contract address is correct and you have the right permissions."
         );
       }
 
@@ -74,7 +50,7 @@ export const useContractVerification = () => {
       } catch (error: any) {
         console.error("Failed to call isIssued() function:", error);
         throw new Error(
-          "The contract does not implement the isIssued() function. This suggests it's not a valid DocumentStore contract."
+          "Failed to verify document store functions. Please ensure the contract address is correct."
         );
       }
 
