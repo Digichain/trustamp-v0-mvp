@@ -35,22 +35,29 @@ export const useSigningHandler = () => {
         // Get document store address from wrapped document
         const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
         if (!documentStoreAddress) {
+          console.error("Document store address missing from wrapped document:", transaction.wrapped_document);
           throw new Error("Document store address not found in wrapped document");
         }
 
-        // Validate the address format
-        if (!ethers.utils.isAddress(documentStoreAddress)) {
-          throw new Error("Invalid document store address format");
-        }
+        // Clean and validate the address
+        const cleanAddress = documentStoreAddress.toLowerCase().trim();
+        console.log("Cleaned document store address:", cleanAddress);
 
-        console.log("Using document store address:", documentStoreAddress);
+        // Validate the address format
+        if (!ethers.utils.isAddress(cleanAddress)) {
+          console.error("Invalid address format:", cleanAddress);
+          throw new Error(`Invalid document store address format: ${cleanAddress}`);
+        }
 
         // Get merkle root from wrapped document
         const merkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        if (!merkleRoot) {
+          throw new Error("Merkle root not found in wrapped document");
+        }
         console.log("Merkle root to be issued:", merkleRoot);
 
         // Initialize contract with minimal ABI, using checksummed address
-        const checksummedAddress = ethers.utils.getAddress(documentStoreAddress);
+        const checksummedAddress = ethers.utils.getAddress(cleanAddress);
         console.log("Using checksummed address:", checksummedAddress);
         
         const contract = new ethers.Contract(
