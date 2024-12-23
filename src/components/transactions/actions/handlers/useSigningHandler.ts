@@ -73,15 +73,16 @@ export const useSigningHandler = () => {
 
         console.log("Raw merkle root:", rawMerkleRoot);
 
-        // Convert the merkle root to a proper bytes32 format
-        // First ensure it's a hex string of correct length
-        const merkleRootHex = ethers.utils.hexlify(
-          ethers.utils.toUtf8Bytes(rawMerkleRoot)
-        ).slice(0, 66); // Ensure it's not longer than 32 bytes (64 hex chars + '0x')
+        // Convert the merkle root to bytes32 format
+        const merkleRootBytes = ethers.utils.toUtf8Bytes(rawMerkleRoot);
+        console.log("Merkle root as bytes:", merkleRootBytes);
         
-        // Pad to 32 bytes
+        const merkleRootHex = ethers.utils.hexlify(merkleRootBytes);
+        console.log("Merkle root as hex:", merkleRootHex);
+        
+        // Ensure it's exactly 32 bytes
         const merkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
-        console.log("Formatted merkle root:", merkleRoot);
+        console.log("Final formatted merkle root:", merkleRoot);
 
         // Get the owner of the contract
         const contractOwner = await contract.owner();
@@ -98,7 +99,9 @@ export const useSigningHandler = () => {
           merkleRoot: merkleRoot
         });
         
-        const tx = await contract.safeMint(walletAddress, merkleRoot);
+        const tx = await contract.safeMint(walletAddress, merkleRoot, {
+          gasLimit: 500000 // Add explicit gas limit
+        });
         console.log("Transaction sent:", tx.hash);
         
         console.log("Waiting for transaction confirmation...");
