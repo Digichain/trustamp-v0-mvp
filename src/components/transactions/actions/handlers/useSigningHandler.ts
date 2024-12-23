@@ -3,7 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useWallet } from "@/contexts/WalletContext";
 import { ethers } from 'ethers';
-import { DOCUMENT_STORE_ABI, ISSUER_ROLE } from "./documentStore/constants";
+import { DOCUMENT_STORE_ABI } from "./documentStore/constants";
 import { signAndStoreDocument } from "@/utils/document-signer";
 
 export const useSigningHandler = () => {
@@ -51,7 +51,7 @@ export const useSigningHandler = () => {
         // Validate the address format
         if (!ethers.utils.isAddress(prefixedAddress)) {
           console.error("Invalid address format:", prefixedAddress);
-          throw new Error(`Invalid token registry address format: ${prefixedAddress}`);
+          throw new Error(`Invalid document store address format: ${prefixedAddress}`);
         }
 
         // Convert to checksum address
@@ -81,26 +81,15 @@ export const useSigningHandler = () => {
         const merkleRootBytes = ethers.utils.hexZeroPad(`0x${cleanMerkleRoot}`, 32);
         console.log("Formatted merkle root bytes:", merkleRootBytes);
 
-        // Check if the user has the ISSUER_ROLE
-        console.log("Checking ISSUER_ROLE for address:", walletAddress);
-        console.log("Using ISSUER_ROLE value:", ISSUER_ROLE);
-        
-        const hasIssuerRole = await contract.hasRole(ISSUER_ROLE, walletAddress);
-        console.log("Has ISSUER_ROLE:", hasIssuerRole);
-
-        if (!hasIssuerRole) {
-          throw new Error("You don't have permission to issue documents. ISSUER_ROLE required.");
-        }
-
-        // Check if already issued
-        const isAlreadyIssued = await contract.isIssued(merkleRootBytes);
+        // Check if merkle root is already issued
+        const isAlreadyIssued = await contract.isMerkleRootIssued(merkleRootBytes);
         if (isAlreadyIssued) {
           throw new Error("Document has already been issued");
         }
 
-        // Issue document
-        console.log("Issuing document with merkle root:", merkleRootBytes);
-        const tx = await contract.issue(merkleRootBytes);
+        // Issue document using safeMint
+        console.log("Minting document with merkle root:", merkleRootBytes);
+        const tx = await contract.safeMint(walletAddress, merkleRootBytes);
         console.log("Transaction sent:", tx.hash);
         
         console.log("Waiting for transaction confirmation...");
