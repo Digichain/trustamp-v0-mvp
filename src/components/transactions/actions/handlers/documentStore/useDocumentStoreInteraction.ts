@@ -36,29 +36,57 @@ export const useDocumentStoreInteraction = () => {
 
       const contract = await getContract(contractAddress);
 
-      // Convert merkle root to bytes32
-      // First ensure the merkle root is in the correct hex format
+      // Validate merkle root format
+      if (!merkleRoot || merkleRoot.length !== 66) { // 0x + 64 hex chars
+        console.error("Invalid merkle root format:", merkleRoot);
+        throw new Error("Invalid merkle root format");
+      }
+
+      // Ensure merkle root is properly formatted
       const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
       console.log("Merkle root in hex format:", merkleRootHex);
 
-      // Pad to 32 bytes if needed
-      const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
-      console.log("Formatted merkle root:", formattedMerkleRoot);
+      // Validate the merkle root is a valid hex string
+      if (!ethers.utils.isHexString(merkleRootHex)) {
+        console.error("Invalid hex string for merkle root:", merkleRootHex);
+        throw new Error("Invalid merkle root hex format");
+      }
 
-      // Mint the document with explicit gas limit
-      const tx = await contract.safeMint(toAddress, formattedMerkleRoot, {
-        gasLimit: 500000
+      // Check if document is already minted
+      const isIssued = await contract.isIssued(merkleRootHex);
+      if (isIssued) {
+        console.error("Document already minted for merkle root:", merkleRootHex);
+        throw new Error("Document has already been minted");
+      }
+
+      console.log("Attempting to mint document with merkle root:", merkleRootHex);
+
+      // Mint the document with higher gas limit to ensure completion
+      const tx = await contract.safeMint(toAddress, merkleRootHex, {
+        gasLimit: 1000000 // Increased gas limit
       });
       console.log("Minting transaction sent:", tx.hash);
 
-      // Wait for confirmation
-      const receipt = await tx.wait();
+      // Wait for confirmation with more blocks
+      const receipt = await tx.wait(2); // Wait for 2 block confirmations
       console.log("Minting confirmed in block:", receipt.blockNumber);
 
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed during execution");
+      }
+
       return receipt;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error minting document:", error);
-      throw error;
+      
+      // Provide more specific error messages based on the error type
+      if (error.message.includes("gas")) {
+        throw new Error("Transaction failed due to gas estimation. Please try with a higher gas limit.");
+      } else if (error.message.includes("rejected")) {
+        throw new Error("Transaction was rejected by the user");
+      } else {
+        throw new Error(error.message || "Failed to mint document");
+      }
     }
   };
 
@@ -66,8 +94,12 @@ export const useDocumentStoreInteraction = () => {
     try {
       const contract = await getContract(contractAddress);
       const merkleRootHex = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
-      const formattedMerkleRoot = ethers.utils.hexZeroPad(merkleRootHex, 32);
-      const isIssued = await contract.isMerkleRootIssued(formattedMerkleRoot);
+      
+      if (!ethers.utils.isHexString(merkleRootHex)) {
+        throw new Error("Invalid merkle root format");
+      }
+      
+      const isIssued = await contract.isIssued(merkleRootHex);
       return isIssued;
     } catch (error) {
       console.error("Error checking merkle root:", error);
