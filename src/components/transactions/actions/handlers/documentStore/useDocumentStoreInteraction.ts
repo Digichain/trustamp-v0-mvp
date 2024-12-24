@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { DOCUMENT_STORE_ABI } from "./contracts/DocumentStoreConstants";
+import { verifyDocumentStore } from "./contracts/DocumentStoreVerification";
 
 export const useDocumentStoreInteraction = () => {
   const getContract = async (contractAddress: string) => {
@@ -26,9 +27,14 @@ export const useDocumentStoreInteraction = () => {
     return await tx.wait();
   };
 
+  const verifyContract = async (contractAddress: string, name: string, owner: string) => {
+    return await verifyDocumentStore(contractAddress, name, owner);
+  };
+
   return {
     getContract,
     issueDocument,
-    revokeDocument
+    revokeDocument,
+    verifyContract
   };
 };

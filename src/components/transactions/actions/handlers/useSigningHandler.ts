@@ -9,7 +9,7 @@ export const useSigningHandler = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { walletAddress } = useWallet();
-  const { mintDocument } = useDocumentStoreInteraction();
+  const { issueDocument } = useDocumentStoreInteraction();
 
   const handleSignDocument = async (transaction: any) => {
     console.log("Starting document signing process for:", transaction.id);
@@ -49,14 +49,13 @@ export const useSigningHandler = () => {
           throw new Error("Merkle root not found in wrapped document");
         }
 
-        // Mint the document
-        const receipt = await mintDocument(
+        // Issue the document
+        const receipt = await issueDocument(
           prefixedAddress,
-          walletAddress,
           rawMerkleRoot
         );
 
-        console.log("Document minted successfully:", receipt);
+        console.log("Document issued successfully:", receipt);
 
         // Update transaction status
         const { error: updateError } = await supabase
