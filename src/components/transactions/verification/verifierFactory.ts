@@ -12,7 +12,7 @@ export class VerifierFactory {
       // Use the official OpenAttestation verify function
       const fragments = await verify(document, {
         network: "sepolia"  // Using Sepolia testnet by default
-      });
+      }) as VerificationFragment[];
       
       console.log("Verification fragments:", fragments);
 

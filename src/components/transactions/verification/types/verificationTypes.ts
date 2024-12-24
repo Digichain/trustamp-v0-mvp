@@ -3,7 +3,10 @@ import {
   ValidVerificationFragment,
   InvalidVerificationFragment,
   ErrorVerificationFragment,
-  SkippedVerificationFragment
+  SkippedVerificationFragment,
+  OpenAttestationDnsDidIdentityProof,
+  OpenAttestationDnsTxtIdentityProof,
+  OpenAttestationEthereumDocumentStoreStatusFragment
 } from "@govtechsg/oa-verify";
 
 export enum VerificationFragmentType {
@@ -35,11 +38,11 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process Document Store Status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  );
+  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragment> | undefined;
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           (documentStoreFragment as ValidVerificationFragment)?.data?.issuedOnAll === true,
+           documentStoreFragment?.data?.issuedOnAll === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -49,7 +52,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process DNS Identity
   const identityFragment = fragments.find(f => 
     f.name === "OpenAttestationDnsTxtIdentityProof"
-  );
+  ) as ValidVerificationFragment<OpenAttestationDnsTxtIdentityProof> | undefined;
 
   const issuerIdentity = {
     valid: identityFragment?.status === "VALID",
@@ -57,9 +60,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: (identityFragment as ValidVerificationFragment)?.data ? {
-      name: (identityFragment as ValidVerificationFragment).data.value,
-      domain: (identityFragment as ValidVerificationFragment).data.location
+    details: identityFragment?.data ? {
+      name: identityFragment.data.value,
+      domain: identityFragment.data.location
     } : undefined
   };
 
@@ -85,11 +88,13 @@ const getFragmentMessage = (
   }
   
   if (fragment.status === "SKIPPED") {
-    return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
+    const skippedFragment = fragment as SkippedVerificationFragment;
+    return skippedFragment.reason?.message || "Verification skipped";
   }
   
   if ('reason' in fragment) {
-    return fragment.reason.message;
+    const errorFragment = fragment as ErrorVerificationFragment;
+    return errorFragment.reason.message || defaultFailureMessage;
   }
   
   return defaultFailureMessage;

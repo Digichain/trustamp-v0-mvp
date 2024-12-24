@@ -3,7 +3,7 @@ import { DocumentVerifier, VerificationResult } from "../types";
 import { getDocumentIdentifier } from "./utils/documentIdentifier";
 import { DNSTextVerifier } from "./utils/dnsTextVerifier";
 import { DocumentStoreVerifier } from "./utils/documentStoreVerifier";
-import { processVerificationFragments } from "./utils/verificationFragments";
+import { processVerificationFragments } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
