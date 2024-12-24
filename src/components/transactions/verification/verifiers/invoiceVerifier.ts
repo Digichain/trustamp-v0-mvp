@@ -1,27 +1,32 @@
 import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
-import { ExtendedVerificationFragment, VerificationOptions } from "../types/verificationTypes";
+import { ExtendedVerificationFragment } from "../types/verificationTypes";
 import { SEPOLIA_NETWORK_ID } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
-      console.log("Starting verification with document:", document);
+      // Extract the data from wrapped document if it exists
+      const documentData = document.data || document;
+      console.log("Document data for verification:", documentData);
 
       // Log document store address if present
-      const documentStoreAddress = document?.issuers?.[0]?.documentStore;
+      const documentStoreAddress = documentData?.issuers?.[0]?.documentStore;
       if (documentStoreAddress) {
         console.log("Document Store Address to verify:", documentStoreAddress);
       } else {
-        console.warn("No document store address found in document");
+        const didIdentifier = documentData?.issuers?.[0]?.id;
+        console.log("DID Identifier found:", didIdentifier);
       }
 
-      // Log DNS location if present
-      const dnsLocation = document?.issuers?.[0]?.identityProof?.location;
-      if (dnsLocation) {
-        console.log("DNS Location to verify:", dnsLocation);
-      } else {
-        console.warn("No DNS location found in document");
+      // Log DNS location or DID location if present
+      const identityProof = documentData?.issuers?.[0]?.identityProof;
+      if (identityProof) {
+        console.log("Identity Proof details:", {
+          type: identityProof.type,
+          location: identityProof.location,
+          key: identityProof.key
+        });
       }
       
       console.log("Starting OpenAttestation verification...");
@@ -51,12 +56,13 @@ export class InvoiceVerifier implements DocumentVerifier {
           });
         }
 
-        // Log specific details for DNS verification
-        if (fragment.name === "OpenAttestationDnsTxtIdentityProof") {
-          console.log("DNS verification details:", {
+        // Log specific details for DNS or DID verification
+        if (fragment.name === "OpenAttestationDnsTxtIdentityProof" || 
+            fragment.name === "OpenAttestationDnsDidIdentityProof") {
+          console.log("Identity verification details:", {
             status: fragment.status,
             reason: (fragment as ExtendedVerificationFragment).reason,
-            location: dnsLocation
+            identityProof
           });
         }
       });
