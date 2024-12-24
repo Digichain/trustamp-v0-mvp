@@ -1,5 +1,8 @@
 import { 
-  VerificationFragment,
+  type VerificationFragment
+} from "@/utils/openattestation";
+
+import {
   isValidFragment,
   isDnsFragment,
   isDocumentStoreFragment,
@@ -77,11 +80,11 @@ const getFragmentMessage = (
   }
   
   if (fragment.status === "SKIPPED") {
-    return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
+    return "Verification skipped";
   }
   
-  if ('reason' in fragment && fragment.reason?.message) {
-    return fragment.reason.message;
+  if (fragment.status === "ERROR" && 'reason' in fragment) {
+    return (fragment.reason as { message: string })?.message || defaultFailureMessage;
   }
   
   return defaultFailureMessage;

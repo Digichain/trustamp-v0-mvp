@@ -10,13 +10,9 @@ export class VerifierFactory {
     
     try {
       // Use the official OpenAttestation verify function
-      const fragments = await verify(document) as VerificationFragment[];
+      const verificationResponse = await verify(document);
+      const fragments = Array.isArray(verificationResponse) ? verificationResponse : [verificationResponse];
       
-      if (!Array.isArray(fragments)) {
-        console.error("Verification did not return an array of fragments");
-        throw new Error("Invalid verification response");
-      }
-
       console.log("Verification fragments:", fragments);
 
       // Process the verification fragments
