@@ -1,13 +1,24 @@
 import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { ExtendedVerificationFragment } from "../types/verificationTypes";
+import { SEPOLIA_NETWORK_ID, SEPOLIA_RPC_URL } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting verification with document:", document);
 
-      const fragments = await verify(document) as ExtendedVerificationFragment[];
+      // Configure verification options with network details
+      const verificationOptions = {
+        network: SEPOLIA_NETWORK_ID,
+        provider: {
+          network: SEPOLIA_NETWORK_ID,
+          url: SEPOLIA_RPC_URL
+        }
+      };
+
+      console.log("Verifying with options:", verificationOptions);
+      const fragments = await verify(document, verificationOptions) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       fragments.forEach((fragment, index) => {
