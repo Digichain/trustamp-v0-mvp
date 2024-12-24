@@ -9,7 +9,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Starting verification with document:", document);
 
       // Configure verification options
-      const verificationOptions = {
+      const verificationOptions: VerificationOptions = {
         network: SEPOLIA_NETWORK_ID,
         provider: {
           network: SEPOLIA_NETWORK_ID,
@@ -23,7 +23,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Verifying with options:", verificationOptions);
       
       // Use verify function with proper typing
-      const fragments = await verify(document, verificationOptions) as VerificationFragment[];
+      const fragments = await verify(document) as VerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       if (!Array.isArray(fragments)) {
