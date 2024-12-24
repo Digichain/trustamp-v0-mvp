@@ -1,6 +1,6 @@
-import { verify, isValid } from "@govtechsg/oa-verify";
+import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
-import { ExtendedVerificationFragment } from "../types/verificationTypes";
+import { ExtendedVerificationFragment, VerificationOptions } from "../types/verificationTypes";
 import { SEPOLIA_NETWORK_ID, SEPOLIA_RPC_URL } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
 
 export class InvoiceVerifier implements DocumentVerifier {
@@ -9,11 +9,13 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Starting verification with document:", document);
 
       // Configure verification options with network details
-      const verificationOptions = {
+      const verificationOptions: VerificationOptions = {
         network: SEPOLIA_NETWORK_ID,
         provider: {
-          network: SEPOLIA_NETWORK_ID,
-          url: SEPOLIA_RPC_URL
+          network: SEPOLIA_NETWORK_ID
+        },
+        resolver: {
+          network: SEPOLIA_NETWORK_ID
         }
       };
 
