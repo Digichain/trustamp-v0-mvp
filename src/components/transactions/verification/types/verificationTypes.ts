@@ -8,8 +8,6 @@ export interface VerificationOptions {
   resolver?: {
     network: string;
   };
-  verificationMethod?: string;
-  verifiers?: Verifier<any>[];
 }
 
 export interface VerificationDetails {
@@ -31,40 +29,16 @@ export interface VerificationDetails {
   };
 }
 
-export interface OpenAttestationDocument {
-  version: string;
-  data: {
-    $template: {
-      name: string;
-      type: string;
-      url: string;
-    };
-    issuers: Array<{
-      id: string;
-      name: string;
-      identityProof: {
-        type: string;
-        key: string;
-        location: string;
-      };
-    }>;
-  };
-}
-
-export interface VerificationFragmentData {
-  identifier?: string;
-  location?: string;
-  status?: string;
-  value?: any;
-}
-
-export interface VerificationReason {
-  code: number;
-  codeString: string;
-  message: string;
-}
-
 export interface ExtendedVerificationFragment extends VerificationFragment {
-  data?: VerificationFragmentData;
-  reason?: VerificationReason;
+  data?: {
+    identifier?: string;
+    location?: string;
+    status?: string;
+    value?: any;
+  };
+  reason?: {
+    code: number;
+    codeString: string;
+    message: string;
+  };
 }

@@ -1,7 +1,7 @@
-import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { ExtendedVerificationFragment, VerificationOptions } from "../types/verificationTypes";
-import { SEPOLIA_NETWORK_ID, SEPOLIA_RPC_URL } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
+import { SEPOLIA_NETWORK_ID } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
@@ -20,8 +20,9 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
 
       console.log("Verifying with options:", verificationOptions);
-      // Pass document as first argument and options as second argument
-      const fragments = await verify(document, verificationOptions) as ExtendedVerificationFragment[];
+      
+      // Use verify function with proper typing
+      const fragments = await verify(document, { ...verificationOptions }) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       fragments.forEach((fragment, index) => {
@@ -51,7 +52,7 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   getTemplate(): string {
-    return "ANY"; // No longer specific to invoice template
+    return "ANY";
   }
 
   private processVerificationFragments(fragments: ExtendedVerificationFragment[]): any {
