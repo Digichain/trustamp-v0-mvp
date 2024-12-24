@@ -4,7 +4,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   DOCUMENT_STORE_ABI, 
   DOCUMENT_STORE_BYTECODE,
-  DOCUMENT_STORE_ACCESS_CONTROL_ADDRESS 
+  DOCUMENT_STORE_ACCESS_CONTROL_ADDRESS,
+  ISSUER_ROLE,
+  REVOKER_ROLE
 } from './contracts/DocumentStoreConstants';
 import { DocumentStoreContract } from './types';
 
@@ -26,6 +28,10 @@ export const useDocumentStore = () => {
       const signerAddress = await signer.getAddress();
       console.log("Deploying from address:", signerAddress);
 
+      if (!DOCUMENT_STORE_BYTECODE) {
+        throw new Error("Document store bytecode is undefined");
+      }
+
       // Create contract factory
       const factory = new ethers.ContractFactory(
         DOCUMENT_STORE_ABI,
@@ -44,11 +50,11 @@ export const useDocumentStore = () => {
       console.log("Document store deployed at:", deployedContract.address);
 
       // Grant issuer and revoker roles to the owner
-      const ISSUER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ISSUER_ROLE"));
-      const REVOKER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("REVOKER_ROLE"));
+      const ISSUER_ROLE_HASH = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(ISSUER_ROLE));
+      const REVOKER_ROLE_HASH = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(REVOKER_ROLE));
       
-      await deployedContract.grantRole(ISSUER_ROLE, signerAddress);
-      await deployedContract.grantRole(REVOKER_ROLE, signerAddress);
+      await deployedContract.grantRole(ISSUER_ROLE_HASH, signerAddress);
+      await deployedContract.grantRole(REVOKER_ROLE_HASH, signerAddress);
 
       toast({
         title: "Document Store Deployed",
