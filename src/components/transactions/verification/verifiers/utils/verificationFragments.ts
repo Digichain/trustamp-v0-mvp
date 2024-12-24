@@ -1,18 +1,31 @@
-import { VerificationFragment, VerificationFragmentType } from "@govtechsg/oa-verify";
+import { VerificationFragment } from "@govtechsg/oa-verify";
+
+export enum VerificationFragmentType {
+  DOCUMENT_STATUS = "DOCUMENT_STATUS",
+  DOCUMENT_INTEGRITY = "DOCUMENT_INTEGRITY",
+  ISSUER_IDENTITY = "ISSUER_IDENTITY",
+}
+
+export enum VerificationStatus {
+  VALID = "VALID",
+  INVALID = "INVALID",
+  ERROR = "ERROR",
+  SKIPPED = "SKIPPED",
+}
 
 export interface ExtendedVerificationFragment extends VerificationFragment {
   name: string;
-  status: "VALID" | "INVALID" | "ERROR" | "SKIPPED";
+  status: VerificationStatus;
   type: VerificationFragmentType;
   data?: {
-    status?: string;
-    value?: any;
-    location?: string;
     issuedOnAll?: boolean;
+    revokedOnAny?: boolean;
     details?: {
       issuance?: Array<{ issued: boolean; address: string }>;
       revocation?: Array<{ revoked: boolean; address: string }>;
     };
+    location?: string;
+    value?: string;
   };
   reason?: {
     code: number;
@@ -24,22 +37,23 @@ export interface ExtendedVerificationFragment extends VerificationFragment {
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
   console.log("Processing verification fragments:", fragments);
 
+  // Process Document Integrity
   const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
   const documentIntegrity = {
-    valid: integrityFragment?.status === "VALID",
+    valid: integrityFragment?.status === VerificationStatus.VALID,
     message: getFragmentMessage(integrityFragment, 
       "Document has not been tampered with",
       "Document integrity check failed"
     )
   };
 
-  // Check document store status
+  // Process Document Store Status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
   ) as ExtendedVerificationFragment;
 
   const issuanceStatus = {
-    valid: documentStoreFragment?.status === "VALID" && 
+    valid: documentStoreFragment?.status === VerificationStatus.VALID && 
            documentStoreFragment?.data?.issuedOnAll === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
@@ -47,13 +61,13 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     )
   };
 
-  // Check DNS-TXT identity proof
+  // Process DNS Identity
   const identityFragment = fragments.find(f => 
     f.name === "OpenAttestationDnsTxtIdentityProof"
   ) as ExtendedVerificationFragment;
 
   const issuerIdentity = {
-    valid: identityFragment?.status === "VALID",
+    valid: identityFragment?.status === VerificationStatus.VALID,
     message: getFragmentMessage(identityFragment,
       "Document issuer has been identified",
       "Issuer identity verification failed"
@@ -80,7 +94,14 @@ const getFragmentMessage = (
   defaultFailureMessage: string
 ): string => {
   if (!fragment) return "Verification check not performed";
-  if (fragment.status === "VALID") return successMessage;
+  
+  if (fragment.status === VerificationStatus.VALID) {
+    return successMessage;
+  }
+  
+  if (fragment.status === VerificationStatus.SKIPPED) {
+    return (fragment as ExtendedVerificationFragment).reason?.message || "Verification skipped";
+  }
   
   const extendedFragment = fragment as ExtendedVerificationFragment;
   if (extendedFragment.reason) {
