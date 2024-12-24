@@ -85,40 +85,9 @@ export const useDocumentStore = () => {
     }
   };
 
-  const initializeDocumentStore = async (signer: ethers.Signer, address: string): Promise<DocumentStoreContract> => {
-    console.log("Initializing Document Store contract with address:", address);
-
-    try {
-      const provider = signer.provider;
-      if (!provider) {
-        throw new Error("No provider available");
-      }
-
-      // Create contract instance with explicit typing
-      const contract = new ethers.Contract(
-        ethers.utils.getAddress(address),
-        DOCUMENT_STORE_ABI,
-        signer
-      ) as DocumentStoreContract;
-
-      console.log("Document store contract initialized");
-      return contract;
-
-    } catch (error) {
-      console.error("Error initializing document store:", error);
-      toast({
-        title: "Initialization Failed",
-        description: error instanceof Error ? error.message : "Failed to initialize document store",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
   return {
     isDeploying,
     isIssuing,
     deployDocumentStore,
-    initializeDocumentStore,
   };
 };
