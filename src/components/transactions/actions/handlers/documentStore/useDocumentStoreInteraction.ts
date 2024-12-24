@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
-import { DOCUMENT_STORE_ABI } from "./contracts";
+import { DOCUMENT_STORE_ABI } from "./contracts/DocumentStoreConstants";
 
 export const useDocumentStoreInteraction = () => {
   const { toast } = useToast();
@@ -27,67 +27,78 @@ export const useDocumentStoreInteraction = () => {
     }
   };
 
-  const mintDocument = async (contractAddress: string, toAddress: string, merkleRoot: string) => {
+  const issueDocument = async (contractAddress: string, merkleRoot: string) => {
     try {
-      console.log("Starting document minting process...");
+      console.log("Starting document issuance process...");
       console.log("Contract address:", contractAddress);
-      console.log("To address:", toAddress);
       console.log("Merkle root:", merkleRoot);
 
       const contract = await getContract(contractAddress);
-
-      // Check if document is already minted
-      const isIssued = await contract.isMerkleRootIssued(merkleRoot);
-      if (isIssued) {
-        console.error("Document already minted for merkle root:", merkleRoot);
-        throw new Error("Document has already been minted");
+      
+      console.log("Checking if document is already issued...");
+      const isAlreadyIssued = await contract.isIssued(merkleRoot);
+      
+      if (isAlreadyIssued) {
+        throw new Error("Document has already been issued");
       }
 
-      console.log("Attempting to mint document with merkle root:", merkleRoot);
-
-      // Mint the document with higher gas limit to ensure completion
-      const tx = await contract.safeMint(toAddress, merkleRoot, {
-        gasLimit: 1000000 // Increased gas limit
+      console.log("Issuing document...");
+      const tx = await contract.issue(merkleRoot, {
+        gasLimit: 500000 // Increased gas limit for safety
       });
-      console.log("Minting transaction sent:", tx.hash);
-
-      // Wait for confirmation with more blocks
+      console.log("Waiting for transaction confirmation...");
+      
       const receipt = await tx.wait(2); // Wait for 2 block confirmations
-      console.log("Minting confirmed in block:", receipt.blockNumber);
+      console.log("Document issued successfully:", receipt);
 
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed during execution");
-      }
+      toast({
+        title: "Document Issued",
+        description: "Document has been successfully issued to the store",
+      });
 
       return receipt;
+
     } catch (error: any) {
-      console.error("Error minting document:", error);
-      
-      // Provide more specific error messages based on the error type
-      if (error.message.includes("gas")) {
-        throw new Error("Transaction failed due to gas estimation. Please try with a higher gas limit.");
-      } else if (error.message.includes("rejected")) {
-        throw new Error("Transaction was rejected by the user");
-      } else {
-        throw new Error(error.message || "Failed to mint document");
-      }
+      console.error("Error issuing document:", error);
+      toast({
+        title: "Issuance Failed",
+        description: error.message || "Failed to issue document",
+        variant: "destructive",
+      });
+      throw error;
     }
   };
 
-  const checkMerkleRoot = async (contractAddress: string, merkleRoot: string) => {
+  const revokeDocument = async (contractAddress: string, merkleRoot: string) => {
     try {
+      console.log("Starting document revocation process...");
       const contract = await getContract(contractAddress);
-      const isIssued = await contract.isMerkleRootIssued(merkleRoot);
-      return isIssued;
-    } catch (error) {
-      console.error("Error checking merkle root:", error);
+
+      const tx = await contract.revoke(merkleRoot, {
+        gasLimit: 500000
+      });
+      const receipt = await tx.wait(2);
+
+      toast({
+        title: "Document Revoked",
+        description: "Document has been successfully revoked",
+      });
+
+      return receipt;
+    } catch (error: any) {
+      console.error("Error revoking document:", error);
+      toast({
+        title: "Revocation Failed",
+        description: error.message || "Failed to revoke document",
+        variant: "destructive",
+      });
       throw error;
     }
   };
 
   return {
     getContract,
-    mintDocument,
-    checkMerkleRoot
+    issueDocument,
+    revokeDocument
   };
 };

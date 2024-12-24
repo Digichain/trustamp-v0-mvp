@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
-import { DOCUMENT_STORE_ABI, DOCUMENT_STORE_BYTECODE } from './contracts';
+import { 
+  DOCUMENT_STORE_ABI, 
+  DOCUMENT_STORE_BYTECODE,
+  DOCUMENT_STORE_ACCESS_CONTROL_ADDRESS 
+} from './contracts/DocumentStoreConstants';
 import { DocumentStoreContract } from './types';
 
 export const useDocumentStore = () => {
@@ -30,11 +34,21 @@ export const useDocumentStore = () => {
       );
 
       console.log("Deploying document store contract...");
-      const contract = await factory.deploy(name, signerAddress);
-      console.log("Waiting for deployment transaction...");
+      // Deploy with constructor arguments: name and owner address
+      const contract = await factory.deploy(name, signerAddress, {
+        gasLimit: 5000000 // Increased gas limit for safety
+      });
       
+      console.log("Waiting for deployment transaction...");
       const deployedContract = await contract.deployed() as DocumentStoreContract;
       console.log("Document store deployed at:", deployedContract.address);
+
+      // Grant issuer and revoker roles to the owner
+      const ISSUER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ISSUER_ROLE"));
+      const REVOKER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("REVOKER_ROLE"));
+      
+      await deployedContract.grantRole(ISSUER_ROLE, signerAddress);
+      await deployedContract.grantRole(REVOKER_ROLE, signerAddress);
 
       toast({
         title: "Document Store Deployed",
@@ -86,59 +100,10 @@ export const useDocumentStore = () => {
     }
   };
 
-  const issueDocument = async (
-    signer: ethers.Signer,
-    storeAddress: string,
-    documentHash: string
-  ) => {
-    console.log("Starting document issuance process...");
-    console.log("Store address:", storeAddress);
-    console.log("Document hash:", documentHash);
-    
-    setIsIssuing(true);
-
-    try {
-      const contract = await initializeDocumentStore(signer, storeAddress);
-      
-      console.log("Checking if document is already issued...");
-      const isAlreadyIssued = await contract.isIssued(documentHash);
-      
-      if (isAlreadyIssued) {
-        throw new Error("Document has already been issued");
-      }
-
-      console.log("Issuing document...");
-      const tx = await contract.issue(documentHash);
-      console.log("Waiting for transaction confirmation...");
-      
-      const receipt = await tx.wait();
-      console.log("Document issued successfully:", receipt);
-
-      toast({
-        title: "Document Issued",
-        description: "Document has been successfully issued to the store",
-      });
-
-      return receipt;
-
-    } catch (error) {
-      console.error("Error issuing document:", error);
-      toast({
-        title: "Issuance Failed",
-        description: error instanceof Error ? error.message : "Failed to issue document",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsIssuing(false);
-    }
-  };
-
   return {
     isDeploying,
     isIssuing,
     deployDocumentStore,
     initializeDocumentStore,
-    issueDocument,
   };
 };
