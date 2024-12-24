@@ -9,11 +9,9 @@ export class VerifierFactory {
     console.log("Starting document verification process with document:", document);
     
     try {
-      // Use the official OpenAttestation verify function with options
+      // Use the official OpenAttestation verify function
       const fragments = await verify(document, {
-        client: {
-          network: "sepolia"  // Using Sepolia testnet by default
-        }
+        network: "sepolia"  // Using Sepolia testnet by default
       }) as VerificationFragment[];
       
       console.log("Verification fragments:", fragments);

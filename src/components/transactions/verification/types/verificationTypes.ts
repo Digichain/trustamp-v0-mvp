@@ -7,8 +7,7 @@ import {
   openAttestationDnsDidIdentityProof,
   openAttestationDnsTxtIdentityProof,
   OpenAttestationEthereumDocumentStoreStatusFragment,
-  OpenAttestationEthereumDocumentStoreStatusFragmentV2,
-  OpenAttestationHashFragment
+  OpenAttestationHashValidFragment
 } from "@govtechsg/oa-verify";
 
 export enum VerificationFragmentType {
@@ -29,7 +28,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   // Process Document Integrity
   const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash") as 
-    ValidVerificationFragment<OpenAttestationHashFragment> | undefined;
+    ValidVerificationFragment<OpenAttestationHashValidFragment> | undefined;
     
   const documentIntegrity = {
     valid: integrityFragment?.status === "VALID",
@@ -42,7 +41,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process Document Store Status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragmentV2> | undefined;
+  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragment> | undefined;
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
@@ -65,8 +64,8 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Issuer identity verification failed"
     ),
     details: identityFragment?.data ? {
-      name: identityFragment.data.value,
-      domain: identityFragment.data.location
+      name: identityFragment.data.identifier,
+      domain: identityFragment.data.domain
     } : undefined
   };
 
