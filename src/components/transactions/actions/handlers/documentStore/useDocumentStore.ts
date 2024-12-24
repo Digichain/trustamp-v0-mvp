@@ -40,10 +40,8 @@ export const useDocumentStore = () => {
       );
 
       console.log("Deploying document store contract...");
-      // Deploy with constructor arguments: name and owner address
-      const contract = await factory.deploy(name, signerAddress, {
-        gasLimit: 5000000 // Increased gas limit for safety
-      });
+      // Deploy with constructor arguments: name and owner address, letting MetaMask estimate gas
+      const contract = await factory.deploy(name, signerAddress);
       
       console.log("Waiting for deployment transaction...");
       const deployedContract = await contract.deployed() as DocumentStoreContract;
