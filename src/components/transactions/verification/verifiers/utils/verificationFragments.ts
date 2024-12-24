@@ -11,13 +11,16 @@ export interface ExtendedVerificationFragment extends VerificationFragment {
     status?: string;
     value?: any;
     issuedOnAll?: boolean;
-    details?: any;
+    details?: {
+      issuance?: Array<{ issued: boolean; address: string }>;
+      revocation?: Array<{ revoked: boolean; address: string }>;
+    };
   };
   reason?: {
     code: number;
     codeString: string;
     message: string;
-  } | string;
+  };
 }
 
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
@@ -32,28 +35,25 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     )
   };
 
-  // Check both token registry and document store status
+  // Check document store status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  );
-  const tokenRegistryFragment = fragments.find(f => 
-    f.name === "OpenAttestationEthereumTokenRegistryStatus"
-  );
+  ) as ExtendedVerificationFragment;
 
-  // Document is valid if either document store or token registry verification passes
+  // Document is valid if document store verification passes
+  // Note: We're specifically checking issuedOnAll from the data
   const issuanceStatus = {
-    valid: documentStoreFragment?.status === "VALID" || 
-           (documentStoreFragment?.status === "INVALID" && tokenRegistryFragment?.status === "VALID"),
-    message: getFragmentMessage(
-      documentStoreFragment?.status === "VALID" ? documentStoreFragment : tokenRegistryFragment,
+    valid: documentStoreFragment?.status === "VALID" && 
+           documentStoreFragment?.data?.issuedOnAll === true,
+    message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
     )
   };
 
+  // Check DNS-TXT identity proof
   const identityFragment = fragments.find(f => 
-    f.name === "OpenAttestationDnsTxtIdentityProof" ||
-    f.name === "OpenAttestationDnsDidIdentityProof"
+    f.name === "OpenAttestationDnsTxtIdentityProof"
   ) as ExtendedVerificationFragment;
 
   const issuerIdentity = {
@@ -63,7 +63,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Issuer identity verification failed"
     ),
     details: identityFragment?.data ? {
-      name: identityFragment.data.identifier,
+      name: identityFragment.data.value,
       domain: identityFragment.data.location
     } : undefined
   };
