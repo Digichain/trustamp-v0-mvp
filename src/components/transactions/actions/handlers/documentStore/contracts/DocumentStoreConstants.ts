@@ -11,10 +11,10 @@ export const DOCUMENT_STORE_ABI = DocumentStoreArtifact.abi;
 export const BASE_DOCUMENT_STORE_ABI = BaseDocumentStoreArtifact.abi;
 export const DOCUMENT_STORE_ACCESS_CONTROL_ABI = DocumentStoreAccessControlArtifact.abi;
 
-// Export contract bytecode
-export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.bytecode;
-export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.bytecode;
-export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.bytecode;
+// Export contract bytecode - accessing the correct path in the artifact
+export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.deployedBytecode;
+export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.deployedBytecode;
+export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.deployedBytecode;
 
 // Export role constants
 export const ISSUER_ROLE = "ISSUER_ROLE";
