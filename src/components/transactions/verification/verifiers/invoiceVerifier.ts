@@ -10,16 +10,11 @@ export class InvoiceVerifier implements DocumentVerifier {
       const documentData = document.data || document;
       console.log("Document data for verification:", documentData);
 
-      // Remove salt from document store address if present
-      const documentStoreAddress = this.removeSalt(documentData?.issuers?.[0]?.documentStore);
-      if (documentStoreAddress) {
-        console.log("Document Store Address to verify:", documentStoreAddress);
-      } else {
-        const didIdentifier = this.removeSalt(documentData?.issuers?.[0]?.id);
-        console.log("DID Identifier found:", didIdentifier);
-      }
+      // Get document identifier (either document store or DID)
+      const identifier = this.getDocumentIdentifier(documentData);
+      console.log("Document identifier:", identifier);
 
-      // Log DNS location or DID location if present
+      // Log identity proof details
       const identityProof = documentData?.issuers?.[0]?.identityProof;
       if (identityProof) {
         console.log("Identity Proof details:", {
@@ -51,7 +46,7 @@ export class InvoiceVerifier implements DocumentVerifier {
           console.log("Document Store verification details:", {
             status: fragment.status,
             reason: (fragment as ExtendedVerificationFragment).reason,
-            contractAddress: documentStoreAddress,
+            contractAddress: identifier.type === 'documentStore' ? identifier.value : undefined,
             network: SEPOLIA_NETWORK_ID
           });
         }
@@ -88,6 +83,33 @@ export class InvoiceVerifier implements DocumentVerifier {
 
   getTemplate(): string {
     return "ANY";
+  }
+
+  private getDocumentIdentifier(document: any): { type: 'documentStore' | 'did', value: string } | null {
+    const issuer = document?.issuers?.[0];
+    if (!issuer) {
+      console.log("No issuer found in document");
+      return null;
+    }
+
+    // Check for document store
+    const documentStore = this.removeSalt(issuer.documentStore);
+    if (documentStore && this.isValidEthereumAddress(documentStore)) {
+      return { type: 'documentStore', value: documentStore };
+    }
+
+    // Check for DID
+    const did = this.removeSalt(issuer.id);
+    if (did?.startsWith('did:')) {
+      return { type: 'did', value: did };
+    }
+
+    console.log("No valid identifier found in document");
+    return null;
+  }
+
+  private isValidEthereumAddress(address: string): boolean {
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
   }
 
   private removeSalt(value: string): string | undefined {
