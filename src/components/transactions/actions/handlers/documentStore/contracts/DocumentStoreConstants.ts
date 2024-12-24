@@ -1,6 +1,3 @@
-export const DOCUMENT_STORE_ACCESS_CONTROL_ADDRESS = "0x24ac75Ac29EAE7E203f73E4773eB3ea10d52dDc1";
-export const BASE_DOCUMENT_STORE_ADDRESS = "0x4A5Cd89C739C6d4CC9192F66eE79055C1227cfF6";
-
 // Import ABI and bytecode from artifacts
 import DocumentStoreArtifact from "@/contract/artifacts/DocumentStore.json";
 import BaseDocumentStoreArtifact from "@/contract/artifacts/BaseDocumentStore.json";
@@ -11,17 +8,20 @@ export const DOCUMENT_STORE_ABI = DocumentStoreArtifact.abi;
 export const BASE_DOCUMENT_STORE_ABI = BaseDocumentStoreArtifact.abi;
 export const DOCUMENT_STORE_ACCESS_CONTROL_ABI = DocumentStoreAccessControlArtifact.abi;
 
-// Export contract bytecode - accessing the bytecode from the correct path in the artifact
-// The bytecode is stored in the object.bytecode property of the artifact
-export const DOCUMENT_STORE_BYTECODE = (DocumentStoreArtifact as any).object?.bytecode || "";
-export const BASE_DOCUMENT_STORE_BYTECODE = (BaseDocumentStoreArtifact as any).object?.bytecode || "";
-export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = (DocumentStoreAccessControlArtifact as any).object?.bytecode || "";
+// Export contract bytecode - accessing the bytecode directly from the artifact
+export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.bytecode || "";
+export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.bytecode || "";
+export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.bytecode || "";
 
 // Add console logs to help with debugging
-console.log("Document Store Bytecode:", DOCUMENT_STORE_BYTECODE ? "Loaded" : "Not found");
-console.log("Base Document Store Bytecode:", BASE_DOCUMENT_STORE_BYTECODE ? "Loaded" : "Not found");
-console.log("Access Control Bytecode:", DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE ? "Loaded" : "Not found");
+console.log("Document Store Bytecode length:", DOCUMENT_STORE_BYTECODE.length);
+console.log("Base Document Store Bytecode length:", BASE_DOCUMENT_STORE_BYTECODE.length);
+console.log("Access Control Bytecode length:", DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE.length);
 
 // Export role constants
 export const ISSUER_ROLE = "ISSUER_ROLE";
 export const REVOKER_ROLE = "REVOKER_ROLE";
+
+// Export contract addresses
+export const DOCUMENT_STORE_ACCESS_CONTROL_ADDRESS = "0x24ac75Ac29EAE7E203f73E4773eB3ea10d52dDc1";
+export const BASE_DOCUMENT_STORE_ADDRESS = "0x4A5Cd89C739C6d4CC9192F66eE79055C1227cfF6";
