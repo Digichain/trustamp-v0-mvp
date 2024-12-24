@@ -1,4 +1,4 @@
-import { verify, isValid } from "@govtechsg/oa-verify";
+import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { ExtendedVerificationFragment, VerificationOptions } from "../types/verificationTypes";
 import { SEPOLIA_NETWORK_ID } from "../../../transactions/actions/handlers/documentStore/contracts/NetworkConfig";
@@ -23,7 +23,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Verifying with options:", verificationOptions);
       
       // Use verify function with proper typing
-      const fragments = await verify(document, verificationOptions);
+      const fragments = await verify(document, verificationOptions) as VerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
       if (!Array.isArray(fragments)) {
@@ -34,9 +34,7 @@ export class InvoiceVerifier implements DocumentVerifier {
         console.log(`Fragment ${index + 1} (${fragment.name}):`, {
           name: fragment.name,
           type: fragment.type,
-          status: fragment.status,
-          data: fragment.data,
-          reason: fragment.reason
+          status: fragment.status
         });
       });
 
@@ -60,7 +58,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     return "ANY";
   }
 
-  private processVerificationFragments(fragments: ExtendedVerificationFragment[]): any {
+  private processVerificationFragments(fragments: VerificationFragment[]): any {
     console.log("Processing verification fragments:", fragments);
 
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
@@ -88,7 +86,7 @@ export class InvoiceVerifier implements DocumentVerifier {
     const identityFragment = fragments.find(f => 
       f.name === "OpenAttestationDnsTxtIdentityProof" ||
       f.name === "OpenAttestationDnsDidIdentityProof"
-    );
+    ) as ExtendedVerificationFragment;
 
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
@@ -110,15 +108,18 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   private getFragmentMessage(
-    fragment: ExtendedVerificationFragment | undefined, 
+    fragment: VerificationFragment | undefined, 
     successMessage: string, 
     defaultFailureMessage: string
   ): string {
     if (!fragment) return "Verification check not performed";
     if (fragment.status === "VALID") return successMessage;
     
-    if (fragment.reason) {
-      return typeof fragment.reason === 'string' ? fragment.reason : fragment.reason.message;
+    const extendedFragment = fragment as ExtendedVerificationFragment;
+    if (extendedFragment.reason) {
+      return typeof extendedFragment.reason === 'string' 
+        ? extendedFragment.reason 
+        : extendedFragment.reason.message;
     }
     
     return defaultFailureMessage;

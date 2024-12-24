@@ -41,5 +41,5 @@ export interface ExtendedVerificationFragment extends VerificationFragment {
     code: number;
     codeString: string;
     message: string;
-  };
+  } | string;
 }
