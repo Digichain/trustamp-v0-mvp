@@ -10,7 +10,7 @@ export class VerifierFactory {
     
     try {
       // Use the official OpenAttestation verify function
-      const fragments = await verify(document);
+      const fragments: VerificationFragment[] = await verify(document);
       
       console.log("Verification fragments:", fragments);
 
@@ -19,7 +19,7 @@ export class VerifierFactory {
       
       // Create a verifier instance that wraps the OpenAttestation verification
       return {
-        verify: async () => {
+        verify: async (): Promise<VerificationResult> => {
           return {
             isValid: fragments.every(fragment => isValid(fragment)),
             details: verificationDetails
