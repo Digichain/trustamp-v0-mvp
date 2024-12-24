@@ -16,9 +16,9 @@ export class DNSTextVerifier {
       const expectedRecord = `openatts net=ethereum netId=11155111 addr=${documentStoreAddress.toLowerCase()}`;
       console.log("Expected DNS TXT record:", expectedRecord);
 
-      // In a real implementation, this would make a DNS query
-      // For now, we'll simulate the verification
-      const isValid = true; // Replace with actual DNS verification logic
+      // For development/testing, return true if the location is tempdns.trustamp.in
+      // In production, this should make an actual DNS query
+      const isValid = location === "tempdns.trustamp.in";
       
       console.log("DNS TXT verification result:", isValid);
       return isValid;

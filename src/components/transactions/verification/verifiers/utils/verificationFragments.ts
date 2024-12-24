@@ -1,15 +1,13 @@
 import { VerificationFragment, VerificationFragmentType } from "@govtechsg/oa-verify";
-import { VerificationResult } from "../../types";
 
 export interface ExtendedVerificationFragment extends VerificationFragment {
   name: string;
   status: "VALID" | "INVALID" | "ERROR" | "SKIPPED";
   type: VerificationFragmentType;
   data?: {
-    identifier?: string;
-    location?: string;
     status?: string;
     value?: any;
+    location?: string;
     issuedOnAll?: boolean;
     details?: {
       issuance?: Array<{ issued: boolean; address: string }>;
@@ -40,8 +38,6 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
   ) as ExtendedVerificationFragment;
 
-  // Document is valid if document store verification passes
-  // Note: We're specifically checking issuedOnAll from the data
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
            documentStoreFragment?.data?.issuedOnAll === true,
