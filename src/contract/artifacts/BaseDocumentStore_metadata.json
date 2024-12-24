@@ -1,0 +1,358 @@
+{
+	"compiler": {
+		"version": "0.8.26+commit.8a97fa7a"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "DocumentIssued",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "DocumentRevoked",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "documentIssued",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "documentRevoked",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "getIssuedBlock",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "isIssued",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "blockNumber",
+						"type": "uint256"
+					}
+				],
+				"name": "isIssuedBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "isRevoked",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "blockNumber",
+						"type": "uint256"
+					}
+				],
+				"name": "isRevokedBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "name",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "version",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"events": {
+				"DocumentIssued(bytes32)": {
+					"params": {
+						"document": "The hash of the issued document"
+					}
+				},
+				"DocumentRevoked(bytes32)": {
+					"params": {
+						"document": "The hash of the revoked document"
+					}
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"getIssuedBlock(bytes32)": {
+					"params": {
+						"document": "The hash of the issued document"
+					},
+					"returns": {
+						"_0": "The block number at which the document was issued"
+					}
+				},
+				"isIssued(bytes32)": {
+					"params": {
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document has been issued"
+					}
+				},
+				"isIssuedBefore(bytes32,uint256)": {
+					"params": {
+						"blockNumber": "The block number to check against",
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document was issued before the specified block number"
+					}
+				},
+				"isRevoked(bytes32)": {
+					"params": {
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document has been revoked"
+					}
+				},
+				"isRevokedBefore(bytes32,uint256)": {
+					"params": {
+						"blockNumber": "The block number to check against",
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document was revoked before the specified block number"
+					}
+				}
+			},
+			"title": "BaseDocumentStore",
+			"version": 1
+		},
+		"userdoc": {
+			"events": {
+				"DocumentIssued(bytes32)": {
+					"notice": "Emitted when a document is issued"
+				},
+				"DocumentRevoked(bytes32)": {
+					"notice": "Emitted when a document is revoked"
+				}
+			},
+			"kind": "user",
+			"methods": {
+				"documentIssued(bytes32)": {
+					"notice": "A mapping of the document hash to the block number that was issued"
+				},
+				"documentRevoked(bytes32)": {
+					"notice": "A mapping of the hash of the claim being revoked to the revocation block number"
+				},
+				"getIssuedBlock(bytes32)": {
+					"notice": "Gets the block number at which a document was issued"
+				},
+				"isIssued(bytes32)": {
+					"notice": "Checks if a document has been issued"
+				},
+				"isIssuedBefore(bytes32,uint256)": {
+					"notice": "Checks if a document was issued before a specific block number (inclusive)"
+				},
+				"isRevoked(bytes32)": {
+					"notice": "Checks if a document has been revoked"
+				},
+				"isRevokedBefore(bytes32,uint256)": {
+					"notice": "Checks if a document was revoked before a specific block number (inclusive)"
+				},
+				"name()": {
+					"notice": "The name of the contract"
+				},
+				"version()": {
+					"notice": "The version of the contract"
+				}
+			},
+			"notice": "A base contract for storing and revoking documents",
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/BaseDocumentStore.sol": "BaseDocumentStore"
+		},
+		"evmVersion": "cancun",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
+			"keccak256": "0x8b2abd85d0ece7e866e100e9d47ca9cbec93c87cf71a8d267b2b93eb81f7d5e9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://fe9fa1beb63e4a09637701f783982ba80380d630d600c9cafe26b68bf58be1b2",
+				"dweb:/ipfs/QmRA3GXhTWys88joD9x8xYhdjzvGwmDGLMMzGw3LxbSEge"
+			]
+		},
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0x6bb804a310218875e89d12c053e94a13a4607cdf7cc2052f3e52bd32a0dc50a1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b2ebbbe6d0011175bd9e7268b83de3f9c2f9d8d4cbfbaef12aff977d7d727163",
+				"dweb:/ipfs/Qmd5c7Vxtis9wzkDNhxwc6A2QT5H9xn9kfjhx7qx44vpro"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0x95098bd1d9c8dec4d80d3dedb88a0d949fa0d740ee99f2aa466bc308216ca6d5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7fec968dcd68e13961521fa3c7dd87baecad91a2653b19240e81f21cc4f3ba85",
+				"dweb:/ipfs/QmaXtsYt4Mphm8XHNUfk2me1cF3ssS2SqDBNFpYAzMjomC"
+			]
+		},
+		"contracts/BaseDocumentStore.sol": {
+			"keccak256": "0x11fbaac9ff4bf71fed9b6c2b634393c39830f8d0d9c7f7342517bd8c96eae918",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://bd76296ad333799fb13de89574c3c8bd255d4e0f31eb1220b2d44185468b8df3",
+				"dweb:/ipfs/QmSSEDDiGLZUANiyR9YjLytH6rYVMe7SvBJTwG2eGYa7JV"
+			]
+		}
+	},
+	"version": 1
+}

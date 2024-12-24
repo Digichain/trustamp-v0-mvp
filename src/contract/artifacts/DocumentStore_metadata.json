@@ -1,0 +1,797 @@
+{
+	"compiler": {
+		"version": "0.8.26+commit.8a97fa7a"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "DocumentIssued",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "DocumentRevoked",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "previousAdminRole",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "newAdminRole",
+						"type": "bytes32"
+					}
+				],
+				"name": "RoleAdminChanged",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "RoleGranted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "RoleRevoked",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "DEFAULT_ADMIN_ROLE",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "ISSUER_ROLE",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "REVOKER_ROLE",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32[]",
+						"name": "documents",
+						"type": "bytes32[]"
+					}
+				],
+				"name": "bulkIssue",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32[]",
+						"name": "documents",
+						"type": "bytes32[]"
+					}
+				],
+				"name": "bulkRevoke",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "documentIssued",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "documentRevoked",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "getIssuedBlock",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					}
+				],
+				"name": "getRoleAdmin",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "grantRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "hasRole",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "isIssued",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "blockNumber",
+						"type": "uint256"
+					}
+				],
+				"name": "isIssuedBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "isRevoked",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "blockNumber",
+						"type": "uint256"
+					}
+				],
+				"name": "isRevokedBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "issue",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "name",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "renounceRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "document",
+						"type": "bytes32"
+					}
+				],
+				"name": "revoke",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "revokeRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes4",
+						"name": "interfaceId",
+						"type": "bytes4"
+					}
+				],
+				"name": "supportsInterface",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "version",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"events": {
+				"DocumentIssued(bytes32)": {
+					"params": {
+						"document": "The hash of the issued document"
+					}
+				},
+				"DocumentRevoked(bytes32)": {
+					"params": {
+						"document": "The hash of the revoked document"
+					}
+				},
+				"RoleAdminChanged(bytes32,bytes32,bytes32)": {
+					"details": "Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this. _Available since v3.1._"
+				},
+				"RoleGranted(bytes32,address,address)": {
+					"details": "Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {_setupRole}."
+				},
+				"RoleRevoked(bytes32,address,address)": {
+					"details": "Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)"
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"bulkIssue(bytes32[])": {
+					"params": {
+						"documents": "The hashes of the documents to issue"
+					}
+				},
+				"bulkRevoke(bytes32[])": {
+					"params": {
+						"documents": "The hashes of the documents to revoke"
+					}
+				},
+				"constructor": {
+					"params": {
+						"_name": "The name of the contract",
+						"owner": "The owner of the contract"
+					}
+				},
+				"getIssuedBlock(bytes32)": {
+					"params": {
+						"document": "The hash of the issued document"
+					},
+					"returns": {
+						"_0": "The block number at which the document was issued"
+					}
+				},
+				"getRoleAdmin(bytes32)": {
+					"details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+				},
+				"grantRole(bytes32,address)": {
+					"details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role."
+				},
+				"hasRole(bytes32,address)": {
+					"details": "Returns `true` if `account` has been granted `role`."
+				},
+				"isIssued(bytes32)": {
+					"params": {
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document has been issued"
+					}
+				},
+				"isIssuedBefore(bytes32,uint256)": {
+					"params": {
+						"blockNumber": "The block number to check against",
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document was issued before the specified block number"
+					}
+				},
+				"isRevoked(bytes32)": {
+					"params": {
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document has been revoked"
+					}
+				},
+				"isRevokedBefore(bytes32,uint256)": {
+					"params": {
+						"blockNumber": "The block number to check against",
+						"document": "The hash of the document to check"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the document was revoked before the specified block number"
+					}
+				},
+				"issue(bytes32)": {
+					"params": {
+						"document": "The hash of the document to issue"
+					}
+				},
+				"renounceRole(bytes32,address)": {
+					"details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`."
+				},
+				"revoke(bytes32)": {
+					"params": {
+						"document": "The hash of the document to revoke"
+					},
+					"returns": {
+						"_0": "A boolean indicating whether the revocation was successful"
+					}
+				},
+				"revokeRole(bytes32,address)": {
+					"details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role."
+				},
+				"supportsInterface(bytes4)": {
+					"details": "See {IERC165-supportsInterface}."
+				}
+			},
+			"title": "DocumentStore",
+			"version": 1
+		},
+		"userdoc": {
+			"events": {
+				"DocumentIssued(bytes32)": {
+					"notice": "Emitted when a document is issued"
+				},
+				"DocumentRevoked(bytes32)": {
+					"notice": "Emitted when a document is revoked"
+				}
+			},
+			"kind": "user",
+			"methods": {
+				"bulkIssue(bytes32[])": {
+					"notice": "Issues multiple documents"
+				},
+				"bulkRevoke(bytes32[])": {
+					"notice": "Revokes documents in bulk"
+				},
+				"constructor": {
+					"notice": "Initialises the contract with a name and owner"
+				},
+				"documentIssued(bytes32)": {
+					"notice": "A mapping of the document hash to the block number that was issued"
+				},
+				"documentRevoked(bytes32)": {
+					"notice": "A mapping of the hash of the claim being revoked to the revocation block number"
+				},
+				"getIssuedBlock(bytes32)": {
+					"notice": "Gets the block number at which a document was issued"
+				},
+				"isIssued(bytes32)": {
+					"notice": "Checks if a document has been issued"
+				},
+				"isIssuedBefore(bytes32,uint256)": {
+					"notice": "Checks if a document was issued before a specific block number (inclusive)"
+				},
+				"isRevoked(bytes32)": {
+					"notice": "Checks if a document has been revoked"
+				},
+				"isRevokedBefore(bytes32,uint256)": {
+					"notice": "Checks if a document was revoked before a specific block number (inclusive)"
+				},
+				"issue(bytes32)": {
+					"notice": "Issues a document"
+				},
+				"name()": {
+					"notice": "The name of the contract"
+				},
+				"revoke(bytes32)": {
+					"notice": "Revokes a document"
+				},
+				"version()": {
+					"notice": "The version of the contract"
+				}
+			},
+			"notice": "A contract for storing and revoking documents with access control",
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/DocumentStore.sol": "DocumentStore"
+		},
+		"evmVersion": "cancun",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol": {
+			"keccak256": "0xa51e24ce76a2fe7a63627bb0a11e23ab04ccc6a1bb1dd3e1a61ffbe3e419de7c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4c1af0f438289aaffa917399f75b8e8fcc297eef2d3cb601bccdef403f6179b1",
+				"dweb:/ipfs/QmQdYAEdgPnWRHAYfd1eHsM6kvxAhnbqnRc1WD5kdz5PCg"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol": {
+			"keccak256": "0x35b09b69aca3bc2633da8f47382a81ecf367efe57167a2114f60f9ec81988afa",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4dd39ae44599da9e6b59035de3cddcfaa8d7b2a45f1c887adf5a1e38315cf6cd",
+				"dweb:/ipfs/QmcFVkc7m3MzxoiCWCb2yZuezqW7eQTEvnScNALXhdsyJu"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
+			"keccak256": "0x8b2abd85d0ece7e866e100e9d47ca9cbec93c87cf71a8d267b2b93eb81f7d5e9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://fe9fa1beb63e4a09637701f783982ba80380d630d600c9cafe26b68bf58be1b2",
+				"dweb:/ipfs/QmRA3GXhTWys88joD9x8xYhdjzvGwmDGLMMzGw3LxbSEge"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol": {
+			"keccak256": "0x828a6fb02c79a63dc5867427f355c0a9c65b4359fecadae73883154da550f6f8",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://9cebeae5077fc0a0aa17afa7dc646904ac4d35b06694c756cf50321adf59edd0",
+				"dweb:/ipfs/QmZn8QydMVAZAjPyUThKtu2sp3JeDmRyi68WGBZbAQVtkR"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol": {
+			"keccak256": "0xc7af08df3d3e818ce36f95aa879c13245772fed21b553e6033292ea4edc2a9f3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://639c22bcf1ba4c783016c3eed1d9b546444feecb917a67201d66b6762df0b8a2",
+				"dweb:/ipfs/QmebyzSijf6BPXaXLHcJPZnPpLk48UW1esmUTEoGd4hHkv"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol": {
+			"keccak256": "0x17c9c5d2d6b56527215ee7b3da6dde66b6f23f1b3d5c66cc436e753ef349a97a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://dd7c775bc6000f44c048796b5e013dbb3ec7592986bc289868b19ff9439ee31d",
+				"dweb:/ipfs/QmSuBfTT9z9sEpmEcGihEc5DJGsXery8QyyuNfvub875ej"
+			]
+		},
+		"@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol": {
+			"keccak256": "0x1c4860acd323e34a67b3e97faab9aaa55fe8e92b1dcf08b5f47f3468d58ce75c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3c2746f8ebb4bfb6b8e8a768296c7f85f11b36f4873daabb91933c3602f00590",
+				"dweb:/ipfs/QmdumDez8WEdk9FDuP7Jp5pDSJiQeFtFSJw3B5CEHJL4KU"
+			]
+		},
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0x6bb804a310218875e89d12c053e94a13a4607cdf7cc2052f3e52bd32a0dc50a1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b2ebbbe6d0011175bd9e7268b83de3f9c2f9d8d4cbfbaef12aff977d7d727163",
+				"dweb:/ipfs/Qmd5c7Vxtis9wzkDNhxwc6A2QT5H9xn9kfjhx7qx44vpro"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0x95098bd1d9c8dec4d80d3dedb88a0d949fa0d740ee99f2aa466bc308216ca6d5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7fec968dcd68e13961521fa3c7dd87baecad91a2653b19240e81f21cc4f3ba85",
+				"dweb:/ipfs/QmaXtsYt4Mphm8XHNUfk2me1cF3ssS2SqDBNFpYAzMjomC"
+			]
+		},
+		"contracts/BaseDocumentStore.sol": {
+			"keccak256": "0x11fbaac9ff4bf71fed9b6c2b634393c39830f8d0d9c7f7342517bd8c96eae918",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://bd76296ad333799fb13de89574c3c8bd255d4e0f31eb1220b2d44185468b8df3",
+				"dweb:/ipfs/QmSSEDDiGLZUANiyR9YjLytH6rYVMe7SvBJTwG2eGYa7JV"
+			]
+		},
+		"contracts/DocumentStore.sol": {
+			"keccak256": "0xe304c5ca75141500cb07dd025000b2949d188a0c66d82e71f6fee496b9a93100",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://2a389babaef1c12cfe1b065cd0f445a2da8248a38f6d190844e68f7886424098",
+				"dweb:/ipfs/QmRMyw4KcqqTuhYCvmg4TBuDpkeHZUBuW1VdSv4PEQaYGE"
+			]
+		},
+		"contracts/base/DocumentStoreAccessControl.sol": {
+			"keccak256": "0x5b37aa1b7c76591f0fd4ab0b4c998255daa5dc75dc6e0e4ff5e3ed1910c26fbe",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://6ee64c3d5ded0b816c6ea6053e9d75bbe4d92a667189318c4a1a1144e6ff4a0f",
+				"dweb:/ipfs/QmfYXgxuzKTpeJyg4Pcj7xTJrooXQycXqkp8NDZys6sHU9"
+			]
+		}
+	},
+	"version": 1
+}
