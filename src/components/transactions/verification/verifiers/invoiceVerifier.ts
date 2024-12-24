@@ -20,6 +20,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       };
 
       console.log("Verifying with options:", verificationOptions);
+      // Pass document as first argument and options as second argument
       const fragments = await verify(document, verificationOptions) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
