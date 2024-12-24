@@ -1,6 +1,6 @@
 import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from './types';
-import { processVerificationFragments } from './types/verificationTypes';
+import { processVerificationFragments } from '../verification/types/verificationTypes';
 
 export class VerifierFactory {
   private static verifier: DocumentVerifier;
@@ -10,7 +10,9 @@ export class VerifierFactory {
     
     try {
       // Use the official OpenAttestation verify function
-      const fragments: VerificationFragment[] = await verify(document);
+      const fragments = await verify(document, {
+        network: "sepolia"  // Using Sepolia testnet by default
+      });
       
       console.log("Verification fragments:", fragments);
 
@@ -19,7 +21,7 @@ export class VerifierFactory {
       
       // Create a verifier instance that wraps the OpenAttestation verification
       return {
-        verify: async (): Promise<VerificationResult> => {
+        verify: async () => {
           return {
             isValid: fragments.every(fragment => isValid(fragment)),
             details: verificationDetails

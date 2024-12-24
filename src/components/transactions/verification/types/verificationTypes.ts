@@ -3,15 +3,20 @@ import {
   ValidVerificationFragment,
   InvalidVerificationFragment,
   ErrorVerificationFragment,
-  SkippedVerificationFragment,
-  OpenAttestationDnsTxtCode,
-  VerificationFragmentType,
-  DocumentStoreIssuanceStatus // Fixed import name
+  SkippedVerificationFragment
 } from "@govtechsg/oa-verify";
 
-interface DnsTextRecord {
-  value: string;
-  location: string;
+export enum VerificationFragmentType {
+  DOCUMENT_STATUS = "DOCUMENT_STATUS",
+  DOCUMENT_INTEGRITY = "DOCUMENT_INTEGRITY",
+  ISSUER_IDENTITY = "ISSUER_IDENTITY",
+}
+
+export enum VerificationStatus {
+  VALID = "VALID",
+  INVALID = "INVALID",
+  ERROR = "ERROR",
+  SKIPPED = "SKIPPED",
 }
 
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
@@ -34,7 +39,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           (documentStoreFragment as ValidVerificationFragment<{ issuedOnAll: boolean }>)?.data?.issuedOnAll === true,
+           (documentStoreFragment as ValidVerificationFragment)?.data?.issuedOnAll === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -52,9 +57,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: (identityFragment as ValidVerificationFragment<DnsTextRecord>)?.data ? {
-      name: (identityFragment as ValidVerificationFragment<DnsTextRecord>).data.value,
-      domain: (identityFragment as ValidVerificationFragment<DnsTextRecord>).data.location
+    details: (identityFragment as ValidVerificationFragment)?.data ? {
+      name: (identityFragment as ValidVerificationFragment).data.value,
+      domain: (identityFragment as ValidVerificationFragment).data.location
     } : undefined
   };
 
@@ -83,8 +88,8 @@ const getFragmentMessage = (
     return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
   }
   
-  if ('reason' in fragment && fragment.reason && typeof fragment.reason === 'object' && 'message' in fragment.reason) {
-    return fragment.reason.message as string;
+  if ('reason' in fragment) {
+    return fragment.reason.message;
   }
   
   return defaultFailureMessage;
