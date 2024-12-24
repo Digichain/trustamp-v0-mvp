@@ -8,10 +8,10 @@ export const DOCUMENT_STORE_ABI = DocumentStoreArtifact.abi;
 export const BASE_DOCUMENT_STORE_ABI = BaseDocumentStoreArtifact.abi;
 export const DOCUMENT_STORE_ACCESS_CONTROL_ABI = DocumentStoreAccessControlArtifact.abi;
 
-// Export contract bytecode - accessing the bytecode from the correct path in the artifact
-export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.deployedBytecode || "";
-export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.deployedBytecode || "";
-export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.deployedBytecode || "";
+// Export contract bytecode - accessing the nested bytecode object
+export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.data?.bytecode?.object || "";
+export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.data?.bytecode?.object || "";
+export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.data?.bytecode?.object || "";
 
 // Add console logs to help with debugging
 console.log("Document Store Bytecode length:", DOCUMENT_STORE_BYTECODE.length);
