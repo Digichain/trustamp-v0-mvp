@@ -4,22 +4,14 @@ import {
   InvalidVerificationFragment,
   ErrorVerificationFragment,
   SkippedVerificationFragment,
-  OpenAttestationDNSTextRecord,
-  OpenAttestationDnsTxtVerificationStatus,
-  OpenAttestationEthereumDocumentStoreStatusCode
+  OpenAttestationDnsTxtCode,
+  VerificationFragmentType,
+  DocumentStoreIssuanceStatusCode
 } from "@govtechsg/oa-verify";
 
-export enum VerificationFragmentType {
-  DOCUMENT_STATUS = "DOCUMENT_STATUS",
-  DOCUMENT_INTEGRITY = "DOCUMENT_INTEGRITY",
-  ISSUER_IDENTITY = "ISSUER_IDENTITY",
-}
-
-export enum VerificationStatus {
-  VALID = "VALID",
-  INVALID = "INVALID",
-  ERROR = "ERROR",
-  SKIPPED = "SKIPPED",
+interface DnsTextRecord {
+  value: string;
+  location: string;
 }
 
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
@@ -60,9 +52,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>)?.data ? {
-      name: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>).data.value,
-      domain: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>).data.location
+    details: (identityFragment as ValidVerificationFragment<DnsTextRecord>)?.data ? {
+      name: (identityFragment as ValidVerificationFragment<DnsTextRecord>).data.value,
+      domain: (identityFragment as ValidVerificationFragment<DnsTextRecord>).data.location
     } : undefined
   };
 
