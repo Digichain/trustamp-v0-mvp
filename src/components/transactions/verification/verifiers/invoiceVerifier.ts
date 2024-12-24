@@ -1,37 +1,29 @@
-import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { DOCUMENT_TEMPLATES } from "../types";
-import { ExtendedVerificationFragment, VerificationReason } from "../types/verificationTypes";
+import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting verification with document:", document);
 
-      // Use the original document structure for verification
       const fragments = await verify(document) as ExtendedVerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
-      // Log each fragment in detail
       fragments.forEach((fragment, index) => {
         console.log(`Fragment ${index + 1} (${fragment.name}):`, {
           name: fragment.name,
           type: fragment.type,
           status: fragment.status,
           data: fragment.data,
-          reason: fragment.reason,
-          // Additional debug info
-          validationErrors: fragment.validationErrors,
-          originalErrorMessage: fragment.originalErrorMessage,
-          skipped: fragment.skipped
+          reason: fragment.reason
         });
       });
 
-      // Check overall validity
       const documentIsValid = isValid(fragments);
       console.log("Overall document validity:", documentIsValid);
 
-      // Process fragments for detailed status
       const verificationDetails = this.processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
 
@@ -52,7 +44,6 @@ export class InvoiceVerifier implements DocumentVerifier {
   private processVerificationFragments(fragments: ExtendedVerificationFragment[]): any {
     console.log("Processing verification fragments:", fragments);
 
-    // Document Integrity Check (Fragment 1)
     const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
     const documentIntegrity = {
       valid: integrityFragment?.status === "VALID",
@@ -62,33 +53,29 @@ export class InvoiceVerifier implements DocumentVerifier {
       )
     };
 
-    // Issuance Status Check (Fragment 3)
     const issuanceFragment = fragments.find(f => 
       f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
       f.name === "OpenAttestationEthereumTokenRegistryStatus"
     );
-    console.log("Issuance fragment details:", issuanceFragment);
     
     const issuanceStatus = {
       valid: issuanceFragment?.status === "VALID",
       message: this.getFragmentMessage(issuanceFragment,
         "Document has been issued",
-        issuanceFragment?.reason?.message || "Document issuance verification failed"
+        "Document issuance verification failed"
       )
     };
 
-    // Issuer Identity Check (Fragment 5)
     const identityFragment = fragments.find(f => 
       f.name === "OpenAttestationDnsTxtIdentityProof" ||
       f.name === "OpenAttestationDnsDidIdentityProof"
     );
-    console.log("Identity fragment details:", identityFragment);
 
     const issuerIdentity = {
       valid: identityFragment?.status === "VALID",
       message: this.getFragmentMessage(identityFragment,
         "Document issuer has been identified",
-        identityFragment?.reason?.message || "Issuer identity verification failed"
+        "Issuer identity verification failed"
       ),
       details: identityFragment?.data ? {
         name: identityFragment.data.identifier,
@@ -106,13 +93,16 @@ export class InvoiceVerifier implements DocumentVerifier {
   private getFragmentMessage(
     fragment: ExtendedVerificationFragment | undefined, 
     successMessage: string, 
-    failureMessage: string
+    defaultFailureMessage: string
   ): string {
     if (!fragment) return "Verification check not performed";
     if (fragment.status === "VALID") return successMessage;
-    if (fragment.reason?.message) return fragment.reason.message;
-    if (typeof fragment.reason === "string") return fragment.reason;
-    return failureMessage;
+    
+    if (fragment.reason) {
+      return typeof fragment.reason === 'string' ? fragment.reason : fragment.reason.message;
+    }
+    
+    return defaultFailureMessage;
   }
 
   private createErrorResponse(message: string): VerificationResult {

@@ -66,5 +66,5 @@ export interface VerificationReason {
 
 export interface ExtendedVerificationFragment extends VerificationFragment {
   data?: VerificationFragmentData;
-  reason?: VerificationReason | string;
+  reason?: VerificationReason;
 }
