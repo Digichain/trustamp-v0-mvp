@@ -54,7 +54,10 @@ export class InvoiceVerifier implements DocumentVerifier {
         }
       }
 
-      const documentIsValid = isValid(fragments);
+      // Overall validity is determined by all verification aspects
+      const documentIsValid = verificationDetails.documentIntegrity.valid && 
+                            (verificationDetails.issuanceStatus.valid || isValid(fragments));
+      
       console.log("Overall document validity:", documentIsValid);
 
       return {

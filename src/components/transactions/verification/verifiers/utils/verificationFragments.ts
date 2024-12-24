@@ -10,6 +10,8 @@ export interface ExtendedVerificationFragment extends VerificationFragment {
     location?: string;
     status?: string;
     value?: any;
+    issuedOnAll?: boolean;
+    details?: any;
   };
   reason?: {
     code: number;
@@ -30,14 +32,20 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     )
   };
 
-  const issuanceFragment = fragments.find(f => 
-    f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
+  // Check both token registry and document store status
+  const documentStoreFragment = fragments.find(f => 
+    f.name === "OpenAttestationEthereumDocumentStoreStatus"
+  );
+  const tokenRegistryFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumTokenRegistryStatus"
   );
-  
+
+  // Document is valid if either document store or token registry verification passes
   const issuanceStatus = {
-    valid: issuanceFragment?.status === "VALID",
-    message: getFragmentMessage(issuanceFragment,
+    valid: documentStoreFragment?.status === "VALID" || 
+           (documentStoreFragment?.status === "INVALID" && tokenRegistryFragment?.status === "VALID"),
+    message: getFragmentMessage(
+      documentStoreFragment?.status === "VALID" ? documentStoreFragment : tokenRegistryFragment,
       "Document has been issued",
       "Document issuance verification failed"
     )
@@ -60,11 +68,14 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     } : undefined
   };
 
-  return {
+  const result = {
     issuanceStatus,
     issuerIdentity,
     documentIntegrity
   };
+
+  console.log("Processed verification details:", result);
+  return result;
 };
 
 const getFragmentMessage = (
