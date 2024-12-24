@@ -10,12 +10,12 @@ export class InvoiceVerifier implements DocumentVerifier {
       const documentData = document.data || document;
       console.log("Document data for verification:", documentData);
 
-      // Log document store address if present
-      const documentStoreAddress = documentData?.issuers?.[0]?.documentStore;
+      // Remove salt from document store address if present
+      const documentStoreAddress = this.removeSalt(documentData?.issuers?.[0]?.documentStore);
       if (documentStoreAddress) {
         console.log("Document Store Address to verify:", documentStoreAddress);
       } else {
-        const didIdentifier = documentData?.issuers?.[0]?.id;
+        const didIdentifier = this.removeSalt(documentData?.issuers?.[0]?.id);
         console.log("DID Identifier found:", didIdentifier);
       }
 
@@ -23,9 +23,9 @@ export class InvoiceVerifier implements DocumentVerifier {
       const identityProof = documentData?.issuers?.[0]?.identityProof;
       if (identityProof) {
         console.log("Identity Proof details:", {
-          type: identityProof.type,
-          location: identityProof.location,
-          key: identityProof.key
+          type: this.removeSalt(identityProof.type),
+          location: this.removeSalt(identityProof.location),
+          key: this.removeSalt(identityProof.key)
         });
       }
       
@@ -62,7 +62,10 @@ export class InvoiceVerifier implements DocumentVerifier {
           console.log("Identity verification details:", {
             status: fragment.status,
             reason: (fragment as ExtendedVerificationFragment).reason,
-            identityProof
+            identityProof: {
+              type: this.removeSalt(identityProof?.type),
+              location: this.removeSalt(identityProof?.location)
+            }
           });
         }
       });
@@ -85,6 +88,13 @@ export class InvoiceVerifier implements DocumentVerifier {
 
   getTemplate(): string {
     return "ANY";
+  }
+
+  private removeSalt(value: string): string | undefined {
+    if (!value) return undefined;
+    // Remove the salt pattern (uuid:string:) from the value
+    const match = value.match(/^[^:]+:string:(.+)$/);
+    return match ? match[1] : value;
   }
 
   private processVerificationFragments(fragments: VerificationFragment[]): any {
