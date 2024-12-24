@@ -14,6 +14,11 @@ export class VerifierFactory {
       
       console.log("Verification fragments:", fragments);
 
+      if (!Array.isArray(fragments)) {
+        console.error("Verification did not return an array of fragments");
+        throw new Error("Invalid verification response");
+      }
+
       // Process the verification fragments
       const verificationDetails = processVerificationFragments(fragments);
       

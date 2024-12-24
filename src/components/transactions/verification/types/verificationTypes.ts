@@ -45,7 +45,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           documentStoreFragment?.data?.issuedOnAll === true,
+           documentStoreFragment?.data?.issued === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -64,8 +64,8 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Issuer identity verification failed"
     ),
     details: identityFragment?.data ? {
-      name: identityFragment.data.value,
-      domain: identityFragment.data.location
+      name: identityFragment.data.identifier,
+      domain: identityFragment.data.domain
     } : undefined
   };
 
@@ -96,7 +96,7 @@ const getFragmentMessage = (
   }
   
   if ('reason' in fragment) {
-    const errorFragment = fragment as ErrorVerificationFragment<any>;
+    const errorFragment = fragment as ErrorVerificationFragment<unknown>;
     return errorFragment.reason?.message || defaultFailureMessage;
   }
   
