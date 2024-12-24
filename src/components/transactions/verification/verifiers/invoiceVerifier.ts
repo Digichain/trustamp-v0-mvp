@@ -1,8 +1,6 @@
 import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
 import { getDocumentIdentifier } from "./utils/documentIdentifier";
-import { DNSTextVerifier } from "./utils/dnsTextVerifier";
-import { DocumentStoreVerifier } from "./utils/documentStoreVerifier";
 import { processVerificationFragments } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
@@ -35,24 +33,6 @@ export class InvoiceVerifier implements DocumentVerifier {
       // Process verification fragments
       const verificationDetails = processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
-
-      // Additional verification based on identifier type
-      if (identifier.type === 'documentStore') {
-        console.log("Verifying document store:", {
-          documentStoreAddress: identifier.value,
-          merkleRoot: document.signature?.merkleRoot
-        });
-
-        const isValidStore = await DocumentStoreVerifier.verify(
-          identifier.value,
-          document.signature?.merkleRoot
-        );
-        
-        if (!isValidStore) {
-          console.error("Document store verification failed");
-          return this.createErrorResponse("Document store verification failed");
-        }
-      }
 
       // Overall validity is determined by all required verification aspects
       const documentIsValid = verificationDetails.documentIntegrity.valid && 
