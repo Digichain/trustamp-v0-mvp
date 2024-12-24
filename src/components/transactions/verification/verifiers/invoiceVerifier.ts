@@ -38,8 +38,15 @@ export class InvoiceVerifier implements DocumentVerifier {
 
       // Additional verification based on identifier type
       if (identifier.type === 'documentStore') {
-        const merkleRoot = document.signature?.merkleRoot;
-        const isValidStore = await DocumentStoreVerifier.verify(identifier.value, merkleRoot);
+        console.log("Verifying document store:", {
+          documentStoreAddress: identifier.value,
+          merkleRoot: document.signature?.merkleRoot
+        });
+
+        const isValidStore = await DocumentStoreVerifier.verify(
+          identifier.value,
+          document.signature?.merkleRoot
+        );
         
         if (!isValidStore) {
           console.error("Document store verification failed");
@@ -60,10 +67,6 @@ export class InvoiceVerifier implements DocumentVerifier {
     }
   }
 
-  getTemplate(): string {
-    return "ANY";
-  }
-
   private createErrorResponse(message: string): VerificationResult {
     return {
       isValid: false,
@@ -82,5 +85,9 @@ export class InvoiceVerifier implements DocumentVerifier {
         }
       }
     };
+  }
+
+  getTemplate(): string {
+    return "ANY";
   }
 }

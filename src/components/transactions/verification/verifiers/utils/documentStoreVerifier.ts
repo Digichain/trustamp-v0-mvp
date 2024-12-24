@@ -13,17 +13,26 @@ export class DocumentStoreVerifier {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const contract = new ethers.Contract(documentStoreAddress, DOCUMENT_STORE_ABI, provider);
 
-      // Verify the contract exists and has the correct interface
+      // Verify the contract exists
       const code = await provider.getCode(documentStoreAddress);
       if (code === "0x") {
+        console.error("No contract found at address:", documentStoreAddress);
         throw new Error("No contract found at the provided address");
       }
 
-      // Check if the document is issued
-      const isIssued = await contract.isIssued(merkleRoot);
-      console.log("Document issuance status:", isIssued);
-      
-      return isIssued;
+      // Ensure merkle root has 0x prefix
+      const prefixedMerkleRoot = merkleRoot.startsWith('0x') ? merkleRoot : `0x${merkleRoot}`;
+      console.log("Using prefixed merkle root for verification:", prefixedMerkleRoot);
+
+      try {
+        // Check if the document is issued
+        const isIssued = await contract.isIssued(prefixedMerkleRoot);
+        console.log("Document issuance status:", isIssued);
+        return isIssued;
+      } catch (error) {
+        console.error("Error checking document issuance:", error);
+        throw new Error("Failed to verify document issuance");
+      }
     } catch (error) {
       console.error("Document store verification error:", error);
       return false;
