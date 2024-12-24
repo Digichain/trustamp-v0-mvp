@@ -11,10 +11,16 @@ export const DOCUMENT_STORE_ABI = DocumentStoreArtifact.abi;
 export const BASE_DOCUMENT_STORE_ABI = BaseDocumentStoreArtifact.abi;
 export const DOCUMENT_STORE_ACCESS_CONTROL_ABI = DocumentStoreAccessControlArtifact.abi;
 
-// Export contract bytecode - accessing the correct path in the artifact
-export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.deployedBytecode;
-export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.deployedBytecode;
-export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.deployedBytecode;
+// Export contract bytecode - accessing the bytecode from the correct path in the artifact
+// The bytecode is stored in the object.bytecode property of the artifact
+export const DOCUMENT_STORE_BYTECODE = (DocumentStoreArtifact as any).object?.bytecode || "";
+export const BASE_DOCUMENT_STORE_BYTECODE = (BaseDocumentStoreArtifact as any).object?.bytecode || "";
+export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = (DocumentStoreAccessControlArtifact as any).object?.bytecode || "";
+
+// Add console logs to help with debugging
+console.log("Document Store Bytecode:", DOCUMENT_STORE_BYTECODE ? "Loaded" : "Not found");
+console.log("Base Document Store Bytecode:", BASE_DOCUMENT_STORE_BYTECODE ? "Loaded" : "Not found");
+console.log("Access Control Bytecode:", DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE ? "Loaded" : "Not found");
 
 // Export role constants
 export const ISSUER_ROLE = "ISSUER_ROLE";
