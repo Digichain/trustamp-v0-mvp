@@ -1,8 +1,21 @@
-import { VerificationFragment } from "../../types";
+import { VerificationFragment } from "@govtechsg/oa-verify";
+import { VerificationResult } from "../../types";
 
 export interface ExtendedVerificationFragment extends VerificationFragment {
-  data?: any;
-  reason?: string | { message: string };
+  name: string;
+  status: "VALID" | "INVALID" | "ERROR" | "SKIPPED";
+  type: string;
+  data?: {
+    identifier?: string;
+    location?: string;
+    status?: string;
+    value?: any;
+  };
+  reason?: {
+    code: number;
+    codeString: string;
+    message: string;
+  } | string;
 }
 
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
