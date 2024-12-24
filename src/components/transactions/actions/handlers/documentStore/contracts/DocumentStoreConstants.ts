@@ -8,13 +8,14 @@ export const DOCUMENT_STORE_ABI = DocumentStoreArtifact.abi;
 export const BASE_DOCUMENT_STORE_ABI = BaseDocumentStoreArtifact.abi;
 export const DOCUMENT_STORE_ACCESS_CONTROL_ABI = DocumentStoreAccessControlArtifact.abi;
 
-// Export contract bytecode - accessing the bytecode directly from the artifact
-export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.bytecode || "";
-export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.bytecode || "";
-export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.bytecode || "";
+// Export contract bytecode - accessing the bytecode from the correct path in the artifact
+export const DOCUMENT_STORE_BYTECODE = DocumentStoreArtifact.deployedBytecode || "";
+export const BASE_DOCUMENT_STORE_BYTECODE = BaseDocumentStoreArtifact.deployedBytecode || "";
+export const DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE = DocumentStoreAccessControlArtifact.deployedBytecode || "";
 
 // Add console logs to help with debugging
 console.log("Document Store Bytecode length:", DOCUMENT_STORE_BYTECODE.length);
+console.log("First 64 chars of bytecode:", DOCUMENT_STORE_BYTECODE.substring(0, 64));
 console.log("Base Document Store Bytecode length:", BASE_DOCUMENT_STORE_BYTECODE.length);
 console.log("Access Control Bytecode length:", DOCUMENT_STORE_ACCESS_CONTROL_BYTECODE.length);
 
