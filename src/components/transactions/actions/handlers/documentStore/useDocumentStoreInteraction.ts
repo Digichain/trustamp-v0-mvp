@@ -16,14 +16,20 @@ export const useDocumentStoreInteraction = () => {
   const issueDocument = async (contractAddress: string, merkleRoot: string) => {
     console.log("Issuing document with merkle root:", merkleRoot);
     const contract = await getContract(contractAddress);
-    const tx = await contract.issue(merkleRoot, { gasLimit: 500000 });
-    return await tx.wait();
+    
+    // Let MetaMask estimate the gas
+    const tx = await contract.issue(merkleRoot);
+    console.log("Transaction sent:", tx);
+    
+    const receipt = await tx.wait();
+    console.log("Transaction receipt:", receipt);
+    return receipt;
   };
 
   const revokeDocument = async (contractAddress: string, merkleRoot: string) => {
     console.log("Revoking document with merkle root:", merkleRoot);
     const contract = await getContract(contractAddress);
-    const tx = await contract.revoke(merkleRoot, { gasLimit: 500000 });
+    const tx = await contract.revoke(merkleRoot);
     return await tx.wait();
   };
 
