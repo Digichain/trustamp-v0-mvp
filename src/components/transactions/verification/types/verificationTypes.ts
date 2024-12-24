@@ -1,13 +1,11 @@
 import { 
-  VerificationFragment, 
-  ValidVerificationFragment,
-  InvalidVerificationFragment,
-  ErrorVerificationFragment,
-  SkippedVerificationFragment,
-  OpenAttestationDnsTxtIdentityProofVerificationFragment,
-  OpenAttestationEthereumDocumentStoreStatusFragment,
-  OpenAttestationHashValidFragment
-} from "@govtechsg/oa-verify";
+  VerificationFragment,
+  isValidFragment,
+  isDnsFragment,
+  isDocumentStoreFragment,
+  isHashFragment,
+  getDnsData
+} from "@/utils/openattestation";
 
 export enum VerificationFragmentType {
   DOCUMENT_STATUS = "DOCUMENT_STATUS",
@@ -26,9 +24,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   console.log("Processing verification fragments:", fragments);
 
   // Process Document Integrity
-  const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash") as 
-    ValidVerificationFragment<OpenAttestationHashValidFragment> | undefined;
-    
+  const integrityFragment = fragments.find(f => isHashFragment(f));
   const documentIntegrity = {
     valid: integrityFragment?.status === "VALID",
     message: getFragmentMessage(integrityFragment, 
@@ -38,10 +34,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   };
 
   // Process Document Store Status
-  const documentStoreFragment = fragments.find(f => 
-    f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragment> | undefined;
-
+  const documentStoreFragment = fragments.find(f => isDocumentStoreFragment(f));
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID",
     message: getFragmentMessage(documentStoreFragment,
@@ -51,20 +44,15 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   };
 
   // Process DNS Identity
-  const identityFragment = fragments.find(f => 
-    f.name === "OpenAttestationDnsTxtIdentityProof"
-  ) as ValidVerificationFragment<OpenAttestationDnsTxtIdentityProofVerificationFragment> | undefined;
-
+  const identityFragment = fragments.find(f => isDnsFragment(f));
   const issuerIdentity = {
     valid: identityFragment?.status === "VALID",
     message: getFragmentMessage(identityFragment,
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: identityFragment?.status === "VALID" && identityFragment?.data ? {
-      name: identityFragment.data.value,
-      domain: identityFragment.data.location
-    } : undefined
+    details: identityFragment && isValidFragment(identityFragment) ? 
+      getDnsData(identityFragment) : undefined
   };
 
   const result = {
@@ -89,13 +77,11 @@ const getFragmentMessage = (
   }
   
   if (fragment.status === "SKIPPED") {
-    const skippedFragment = fragment as SkippedVerificationFragment;
-    return skippedFragment.reason?.message || "Verification skipped";
+    return fragment.reason?.message || "Verification skipped";
   }
   
   if ('reason' in fragment) {
-    const errorFragment = fragment as ErrorVerificationFragment<unknown>;
-    return errorFragment.reason?.message || defaultFailureMessage;
+    return fragment.reason?.message || defaultFailureMessage;
   }
   
   return defaultFailureMessage;

@@ -1,6 +1,6 @@
-import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
+import { verify, isValid, VerificationFragment } from "@/utils/openattestation";
 import { DocumentVerifier, VerificationResult } from './types';
-import { processVerificationFragments } from '../verification/types/verificationTypes';
+import { processVerificationFragments } from './types/verificationTypes';
 
 export class VerifierFactory {
   private static verifier: DocumentVerifier;
@@ -10,14 +10,14 @@ export class VerifierFactory {
     
     try {
       // Use the official OpenAttestation verify function
-      const fragments = await verify(document) as VerificationFragment[];
+      const fragments = await verify(document);
       
-      console.log("Verification fragments:", fragments);
-
       if (!Array.isArray(fragments)) {
         console.error("Verification did not return an array of fragments");
         throw new Error("Invalid verification response");
       }
+
+      console.log("Verification fragments:", fragments);
 
       // Process the verification fragments
       const verificationDetails = processVerificationFragments(fragments);
