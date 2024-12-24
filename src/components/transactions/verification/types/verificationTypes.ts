@@ -4,8 +4,7 @@ import {
   InvalidVerificationFragment,
   ErrorVerificationFragment,
   SkippedVerificationFragment,
-  openAttestationDnsDidIdentityProof,
-  openAttestationDnsTxtIdentityProof,
+  OpenAttestationDnsTxtIdentityProofVerificationFragment,
   OpenAttestationEthereumDocumentStoreStatusFragment,
   OpenAttestationHashValidFragment
 } from "@govtechsg/oa-verify";
@@ -45,7 +44,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           documentStoreFragment?.data?.issued === true,
+           documentStoreFragment?.data?.isValid === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -55,7 +54,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process DNS Identity
   const identityFragment = fragments.find(f => 
     f.name === "OpenAttestationDnsTxtIdentityProof"
-  ) as ValidVerificationFragment<typeof openAttestationDnsTxtIdentityProof> | undefined;
+  ) as ValidVerificationFragment<OpenAttestationDnsTxtIdentityProofVerificationFragment> | undefined;
 
   const issuerIdentity = {
     valid: identityFragment?.status === "VALID",
@@ -64,8 +63,8 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Issuer identity verification failed"
     ),
     details: identityFragment?.data ? {
-      name: identityFragment.data.identifier,
-      domain: identityFragment.data.domain
+      name: identityFragment.data.identityProof?.identifier,
+      domain: identityFragment.data.identityProof?.location
     } : undefined
   };
 

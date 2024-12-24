@@ -10,7 +10,7 @@ export class VerifierFactory {
     
     try {
       // Use the official OpenAttestation verify function
-      const fragments = await verify(document) as VerificationFragment[];
+      const fragments = await verify(document);
       
       console.log("Verification fragments:", fragments);
 
