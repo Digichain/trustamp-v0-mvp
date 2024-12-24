@@ -1,10 +1,10 @@
-import { VerificationFragment } from "@govtechsg/oa-verify";
+import { VerificationFragment, VerificationFragmentType } from "@govtechsg/oa-verify";
 import { VerificationResult } from "../../types";
 
 export interface ExtendedVerificationFragment extends VerificationFragment {
   name: string;
   status: "VALID" | "INVALID" | "ERROR" | "SKIPPED";
-  type: string;
+  type: VerificationFragmentType;
   data?: {
     identifier?: string;
     location?: string;
