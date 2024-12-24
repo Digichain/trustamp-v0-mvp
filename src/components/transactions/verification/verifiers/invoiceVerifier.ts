@@ -1,6 +1,5 @@
 import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "../types";
-import { DOCUMENT_TEMPLATES } from "../types";
 import { ExtendedVerificationFragment } from "../types/verificationTypes";
 
 export class InvoiceVerifier implements DocumentVerifier {
@@ -38,7 +37,7 @@ export class InvoiceVerifier implements DocumentVerifier {
   }
 
   getTemplate(): string {
-    return DOCUMENT_TEMPLATES.INVOICE;
+    return "ANY"; // No longer specific to invoice template
   }
 
   private processVerificationFragments(fragments: ExtendedVerificationFragment[]): any {
