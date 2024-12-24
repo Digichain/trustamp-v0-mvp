@@ -8,21 +8,23 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting verification with document:", document);
 
-      // Configure verification options
-      const verificationOptions: VerificationOptions = {
-        network: SEPOLIA_NETWORK_ID,
-        provider: {
-          network: SEPOLIA_NETWORK_ID,
-          url: "https://sepolia.infura.io/v3/6ed316896ad34f1cb4627d8564c95ab1"
-        },
-        resolver: {
-          network: SEPOLIA_NETWORK_ID
-        }
-      };
+      // Log document store address if present
+      const documentStoreAddress = document?.issuers?.[0]?.documentStore;
+      if (documentStoreAddress) {
+        console.log("Document Store Address to verify:", documentStoreAddress);
+      } else {
+        console.warn("No document store address found in document");
+      }
 
-      console.log("Verifying with options:", verificationOptions);
+      // Log DNS location if present
+      const dnsLocation = document?.issuers?.[0]?.identityProof?.location;
+      if (dnsLocation) {
+        console.log("DNS Location to verify:", dnsLocation);
+      } else {
+        console.warn("No DNS location found in document");
+      }
       
-      // Use verify function with proper typing
+      console.log("Starting OpenAttestation verification...");
       const fragments = await verify(document) as VerificationFragment[];
       console.log("Raw verification fragments received:", fragments);
       
@@ -34,8 +36,29 @@ export class InvoiceVerifier implements DocumentVerifier {
         console.log(`Fragment ${index + 1} (${fragment.name}):`, {
           name: fragment.name,
           type: fragment.type,
-          status: fragment.status
+          status: fragment.status,
+          data: (fragment as ExtendedVerificationFragment).data,
+          reason: (fragment as ExtendedVerificationFragment).reason
         });
+
+        // Log specific details for document store verification
+        if (fragment.name === "OpenAttestationEthereumDocumentStoreStatus") {
+          console.log("Document Store verification details:", {
+            status: fragment.status,
+            reason: (fragment as ExtendedVerificationFragment).reason,
+            contractAddress: documentStoreAddress,
+            network: SEPOLIA_NETWORK_ID
+          });
+        }
+
+        // Log specific details for DNS verification
+        if (fragment.name === "OpenAttestationDnsTxtIdentityProof") {
+          console.log("DNS verification details:", {
+            status: fragment.status,
+            reason: (fragment as ExtendedVerificationFragment).reason,
+            location: dnsLocation
+          });
+        }
       });
 
       const documentIsValid = isValid(fragments);
