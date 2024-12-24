@@ -1,30 +1,23 @@
 import { ethers } from "ethers";
 
 export interface DocumentStoreContract extends ethers.Contract {
-  // Base document store functions
-  issue(document: string): Promise<ethers.ContractTransaction>;
-  bulkIssue(documents: string[]): Promise<ethers.ContractTransaction>;
-  revoke(document: string): Promise<ethers.ContractTransaction>;
-  bulkRevoke(documents: string[]): Promise<ethers.ContractTransaction>;
-  isIssued(document: string): Promise<boolean>;
-  isRevoked(document: string): Promise<boolean>;
-  getIssuedBlock(document: string): Promise<number>;
-  isIssuedBefore(document: string, blockNumber: number): Promise<boolean>;
-  isRevokedBefore(document: string, blockNumber: number): Promise<boolean>;
+  // Constructor and initialization (0x4cd88b76)
+  initialize(name: string, owner: string): Promise<void>;
   
-  // Contract info functions
-  name(): Promise<string>;
-  version(): Promise<string>;
-
-  // Access control functions
-  DEFAULT_ADMIN_ROLE(): Promise<string>;
-  ISSUER_ROLE(): Promise<string>;
-  REVOKER_ROLE(): Promise<string>;
-  hasRole(role: string, account: string): Promise<boolean>;
-  getRoleAdmin(role: string): Promise<string>;
-  grantRole(role: string, account: string): Promise<ethers.ContractTransaction>;
-  revokeRole(role: string, account: string): Promise<ethers.ContractTransaction>;
-  renounceRole(role: string, account: string): Promise<ethers.ContractTransaction>;
+  // Document management functions
+  issue(document: string): Promise<ethers.ContractTransaction>;  // 0x4d55f23b
+  bulkIssue(documents: string[]): Promise<ethers.ContractTransaction>;  // 0xb37b96b9
+  revoke(document: string): Promise<ethers.ContractTransaction>;  // 0x54d83fd4
+  isIssued(document: string): Promise<boolean>;  // 0x59c45d70
+  isRevoked(document: string): Promise<boolean>;  // 0x9a59c8a4
+  
+  // Role management functions
+  hasRole(role: string, account: string): Promise<boolean>;  // 0x91d14854
+  grantRole(role: string, account: string): Promise<ethers.ContractTransaction>;  // 0x2f2ff15d
+  
+  // Contract info
+  name(): Promise<string>;  // 0x06fdde03
+  version(): Promise<string>;  // 0x54fd4d50
 }
 
 // Constants for role identifiers

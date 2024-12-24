@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 import { DOCUMENT_STORE_ABI } from "./contracts/DocumentStoreConstants";
 import { DocumentStoreContract, ISSUER_ROLE } from "./types";
-import { verifyDocumentStore } from "./contracts/DocumentStoreVerification";
 
 export const useDocumentStoreInteraction = () => {
   const getContract = async (contractAddress: string): Promise<DocumentStoreContract> => {
@@ -11,7 +10,13 @@ export const useDocumentStoreInteraction = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    return new ethers.Contract(contractAddress, DOCUMENT_STORE_ABI, signer) as DocumentStoreContract;
+    
+    console.log("Creating contract instance at address:", contractAddress);
+    return new ethers.Contract(
+      contractAddress, 
+      DOCUMENT_STORE_ABI, 
+      signer
+    ) as DocumentStoreContract;
   };
 
   const issueDocument = async (contractAddress: string, merkleRoot: string) => {
@@ -27,31 +32,25 @@ export const useDocumentStoreInteraction = () => {
       throw new Error("Caller does not have permission to issue documents");
     }
     
-    // Call the issue function with the merkle root
+    // Call the issue function with the merkle root (method ID: 0x4d55f23b)
     console.log("Calling issue function with merkle root:", merkleRoot);
     const tx = await contract.issue(merkleRoot);
-    console.log("Transaction sent:", tx.hash);
+    console.log("Issue transaction hash:", tx.hash);
     
     const receipt = await tx.wait();
-    console.log("Transaction receipt:", receipt);
+    console.log("Issue transaction receipt:", receipt);
     return receipt;
   };
 
-  const revokeDocument = async (contractAddress: string, merkleRoot: string) => {
-    console.log("Revoking document with merkle root:", merkleRoot);
+  const verifyIssuance = async (contractAddress: string, merkleRoot: string): Promise<boolean> => {
     const contract = await getContract(contractAddress);
-    const tx = await contract.revoke(merkleRoot);
-    return await tx.wait();
-  };
-
-  const verifyContract = async (contractAddress: string, name: string, owner: string) => {
-    return await verifyDocumentStore(contractAddress, name, owner);
+    // Call isIssued function (method ID: 0x59c45d70)
+    return await contract.isIssued(merkleRoot);
   };
 
   return {
     getContract,
     issueDocument,
-    revokeDocument,
-    verifyContract
+    verifyIssuance
   };
 };

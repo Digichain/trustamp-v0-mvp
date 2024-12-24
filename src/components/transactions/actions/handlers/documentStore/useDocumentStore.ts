@@ -4,14 +4,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   DOCUMENT_STORE_ABI, 
   DOCUMENT_STORE_BYTECODE,
-  ISSUER_ROLE,
-  REVOKER_ROLE
 } from './contracts/DocumentStoreConstants';
-import { DocumentStoreContract } from './types';
+import { DocumentStoreContract, ISSUER_ROLE, REVOKER_ROLE } from './types';
 
 export const useDocumentStore = () => {
   const [isDeploying, setIsDeploying] = useState(false);
-  const [isIssuing, setIsIssuing] = useState(false);
   const { toast } = useToast();
 
   const deployDocumentStore = async (signer: ethers.Signer, name: string) => {
@@ -27,50 +24,52 @@ export const useDocumentStore = () => {
       const signerAddress = await signer.getAddress();
       console.log("Deploying from address:", signerAddress);
 
-      // Verify bytecode exists and is valid
-      if (!DOCUMENT_STORE_BYTECODE || DOCUMENT_STORE_BYTECODE === "0x") {
-        console.error("Invalid bytecode:", DOCUMENT_STORE_BYTECODE);
+      // Get bytecode from artifact
+      const bytecode = DOCUMENT_STORE_BYTECODE;
+      if (!bytecode || bytecode === "0x") {
+        console.error("Invalid bytecode:", bytecode);
         throw new Error("Document store bytecode is invalid or empty");
       }
 
-      console.log("Bytecode length:", DOCUMENT_STORE_BYTECODE.length);
-      console.log("First 64 chars of bytecode:", DOCUMENT_STORE_BYTECODE.substring(0, 64));
-
+      console.log("Creating contract factory with bytecode length:", bytecode.length);
+      
       // Create contract factory
       const factory = new ethers.ContractFactory(
         DOCUMENT_STORE_ABI,
-        DOCUMENT_STORE_BYTECODE,
+        bytecode,
         signer
       );
 
-      console.log("Deploying document store contract...");
-      // Deploy with constructor arguments: name and owner address, letting MetaMask estimate gas
-      const contract = await factory.deploy(name, signerAddress);
+      console.log("Deploying document store contract with params:", {
+        name,
+        owner: signerAddress
+      });
       
-      console.log("Waiting for deployment transaction...");
-      const deployedContract = await contract.deployed() as DocumentStoreContract;
-      console.log("Document store deployed at:", deployedContract.address);
+      // Deploy with constructor arguments
+      const contract = await factory.deploy(name, signerAddress) as DocumentStoreContract;
+      console.log("Deployment transaction hash:", contract.deployTransaction.hash);
+      
+      console.log("Waiting for deployment confirmation...");
+      await contract.deployed();
+      console.log("Document store deployed at:", contract.address);
 
       // Verify contract code was deployed
-      const deployedCode = await provider.getCode(deployedContract.address);
+      const deployedCode = await provider.getCode(contract.address);
       if (deployedCode === "0x") {
         throw new Error("Contract deployment failed - no bytecode at deployed address");
       }
-      console.log("Deployed contract bytecode length:", deployedCode.length);
 
-      // Grant issuer and revoker roles to the owner
-      const ISSUER_ROLE_HASH = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(ISSUER_ROLE));
-      const REVOKER_ROLE_HASH = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(REVOKER_ROLE));
-      
-      await deployedContract.grantRole(ISSUER_ROLE_HASH, signerAddress);
-      await deployedContract.grantRole(REVOKER_ROLE_HASH, signerAddress);
+      // Grant roles to owner
+      console.log("Granting roles to owner:", signerAddress);
+      await contract.grantRole(ISSUER_ROLE, signerAddress);
+      await contract.grantRole(REVOKER_ROLE, signerAddress);
 
       toast({
         title: "Document Store Deployed",
-        description: `Contract deployed at ${deployedContract.address}`,
+        description: `Contract deployed at ${contract.address}`,
       });
 
-      return deployedContract;
+      return contract;
 
     } catch (error) {
       console.error("Error deploying document store:", error);
@@ -87,7 +86,6 @@ export const useDocumentStore = () => {
 
   return {
     isDeploying,
-    isIssuing,
     deployDocumentStore,
   };
 };
