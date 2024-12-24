@@ -6,7 +6,7 @@ import {
   SkippedVerificationFragment,
   OpenAttestationDnsTxtCode,
   VerificationFragmentType,
-  DocumentStoreIssuanceStatusCode
+  DocumentStoreIssuanceStatus // Fixed import name
 } from "@govtechsg/oa-verify";
 
 interface DnsTextRecord {
