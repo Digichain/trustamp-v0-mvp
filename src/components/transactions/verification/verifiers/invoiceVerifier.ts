@@ -8,11 +8,12 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting verification with document:", document);
 
-      // Configure verification options with network details
-      const verificationOptions: VerificationOptions = {
+      // Configure verification options
+      const verificationOptions = {
         network: SEPOLIA_NETWORK_ID,
         provider: {
-          network: SEPOLIA_NETWORK_ID
+          network: SEPOLIA_NETWORK_ID,
+          url: "https://sepolia.infura.io/v3/6ed316896ad34f1cb4627d8564c95ab1"
         },
         resolver: {
           network: SEPOLIA_NETWORK_ID
@@ -22,9 +23,13 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Verifying with options:", verificationOptions);
       
       // Use verify function with proper typing
-      const fragments = await verify(document, { ...verificationOptions }) as ExtendedVerificationFragment[];
+      const fragments = await verify(document, verificationOptions);
       console.log("Raw verification fragments received:", fragments);
       
+      if (!Array.isArray(fragments)) {
+        throw new Error("Invalid verification response");
+      }
+
       fragments.forEach((fragment, index) => {
         console.log(`Fragment ${index + 1} (${fragment.name}):`, {
           name: fragment.name,

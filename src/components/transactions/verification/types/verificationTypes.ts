@@ -4,6 +4,7 @@ export interface VerificationOptions {
   network: string;
   provider?: {
     network: string;
+    url?: string;
   };
   resolver?: {
     network: string;
