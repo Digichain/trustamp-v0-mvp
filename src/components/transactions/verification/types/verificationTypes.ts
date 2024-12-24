@@ -45,7 +45,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           documentStoreFragment?.data?.issuedOnAll === true,
+           documentStoreFragment?.data?.issued === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
