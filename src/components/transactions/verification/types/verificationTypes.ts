@@ -4,9 +4,11 @@ import {
   InvalidVerificationFragment,
   ErrorVerificationFragment,
   SkippedVerificationFragment,
-  OpenAttestationDnsDidIdentityProof,
-  OpenAttestationDnsTxtIdentityProof,
-  OpenAttestationEthereumDocumentStoreStatusFragment
+  openAttestationDnsDidIdentityProof,
+  openAttestationDnsTxtIdentityProof,
+  OpenAttestationEthereumDocumentStoreStatusFragment,
+  OpenAttestationEthereumDocumentStoreStatusFragmentV2,
+  OpenAttestationHashFragment
 } from "@govtechsg/oa-verify";
 
 export enum VerificationFragmentType {
@@ -26,7 +28,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   console.log("Processing verification fragments:", fragments);
 
   // Process Document Integrity
-  const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
+  const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash") as 
+    ValidVerificationFragment<OpenAttestationHashFragment> | undefined;
+    
   const documentIntegrity = {
     valid: integrityFragment?.status === "VALID",
     message: getFragmentMessage(integrityFragment, 
@@ -38,11 +42,11 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process Document Store Status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragment> | undefined;
+  ) as ValidVerificationFragment<OpenAttestationEthereumDocumentStoreStatusFragmentV2> | undefined;
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           documentStoreFragment?.data?.issuedOnAll === true,
+           documentStoreFragment?.data?.issued === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -52,7 +56,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process DNS Identity
   const identityFragment = fragments.find(f => 
     f.name === "OpenAttestationDnsTxtIdentityProof"
-  ) as ValidVerificationFragment<OpenAttestationDnsTxtIdentityProof> | undefined;
+  ) as ValidVerificationFragment<typeof openAttestationDnsTxtIdentityProof> | undefined;
 
   const issuerIdentity = {
     valid: identityFragment?.status === "VALID",
@@ -93,8 +97,8 @@ const getFragmentMessage = (
   }
   
   if ('reason' in fragment) {
-    const errorFragment = fragment as ErrorVerificationFragment;
-    return errorFragment.reason.message || defaultFailureMessage;
+    const errorFragment = fragment as ErrorVerificationFragment<unknown>;
+    return errorFragment.reason?.message || defaultFailureMessage;
   }
   
   return defaultFailureMessage;
