@@ -1,20 +1,21 @@
 import { 
   verify,
   isValid,
-  VerificationFragment,
-  ValidVerificationFragment,
-  InvalidVerificationFragment,
-  ErrorVerificationFragment,
-  SkippedVerificationFragment,
-  OpenAttestationDnsTxtIdentityProofVerificationFragment,
-  OpenAttestationEthereumDocumentStoreStatusFragment,
-  OpenAttestationHashValidFragment
+  type VerificationFragment,
+  type ValidVerificationFragment,
+  type InvalidVerificationFragment,
+  type ErrorVerificationFragment,
+  type SkippedVerificationFragment,
+  type OpenAttestationDnsTxtIdentityProofVerificationFragment,
+  type OpenAttestationEthereumDocumentStoreStatusFragment,
+  type OpenAttestationHashValidFragment
 } from "@govtechsg/oa-verify";
 
-// Re-export everything
-export {
-  verify,
-  isValid,
+// Re-export functions
+export { verify, isValid };
+
+// Re-export types with 'export type'
+export type {
   VerificationFragment,
   ValidVerificationFragment,
   InvalidVerificationFragment,
@@ -26,7 +27,7 @@ export {
 };
 
 // Helper type guards
-export const isValidFragment = (fragment: VerificationFragment): fragment is ValidVerificationFragment => {
+export const isValidFragment = (fragment: VerificationFragment): fragment is ValidVerificationFragment<any> => {
   return fragment.status === "VALID";
 };
 
@@ -46,7 +47,7 @@ export const isHashFragment = (fragment: VerificationFragment): fragment is Vali
 export const getDnsData = (fragment: ValidVerificationFragment<OpenAttestationDnsTxtIdentityProofVerificationFragment>) => {
   if (fragment.data) {
     return {
-      name: fragment.data.value,
+      name: fragment.data.identifier,
       domain: fragment.data.location
     };
   }

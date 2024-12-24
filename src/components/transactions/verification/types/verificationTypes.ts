@@ -77,11 +77,11 @@ const getFragmentMessage = (
   }
   
   if (fragment.status === "SKIPPED") {
-    return fragment.reason?.message || "Verification skipped";
+    return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
   }
   
-  if ('reason' in fragment) {
-    return fragment.reason?.message || defaultFailureMessage;
+  if ('reason' in fragment && fragment.reason?.message) {
+    return fragment.reason.message;
   }
   
   return defaultFailureMessage;
