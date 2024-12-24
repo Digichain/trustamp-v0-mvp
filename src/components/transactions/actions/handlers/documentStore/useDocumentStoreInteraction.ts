@@ -23,7 +23,7 @@ export const useDocumentStoreInteraction = () => {
     console.log("Issuing document with merkle root:", merkleRoot);
     const contract = await getContract(contractAddress);
     
-    // Verify the caller has ISSUER_ROLE
+    // Verify the caller has ISSUER_ROLE (method ID: 0x91d14854)
     const signer = await contract.signer.getAddress();
     const hasRole = await contract.hasRole(ISSUER_ROLE, signer);
     
