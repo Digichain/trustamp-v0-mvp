@@ -61,9 +61,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: identityFragment?.status === "VALID" ? {
-      name: identityFragment.data?.identifier,
-      domain: identityFragment.data?.location
+    details: identityFragment?.status === "VALID" && identityFragment?.data ? {
+      name: identityFragment.data.value,
+      domain: identityFragment.data.location
     } : undefined
   };
 
