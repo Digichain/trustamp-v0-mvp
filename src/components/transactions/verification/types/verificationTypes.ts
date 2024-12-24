@@ -3,7 +3,10 @@ import {
   ValidVerificationFragment,
   InvalidVerificationFragment,
   ErrorVerificationFragment,
-  SkippedVerificationFragment
+  SkippedVerificationFragment,
+  OpenAttestationDNSTextRecord,
+  OpenAttestationDnsTxtVerificationStatus,
+  OpenAttestationEthereumDocumentStoreStatusCode
 } from "@govtechsg/oa-verify";
 
 export enum VerificationFragmentType {
@@ -39,7 +42,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 
   const issuanceStatus = {
     valid: documentStoreFragment?.status === "VALID" && 
-           (documentStoreFragment as ValidVerificationFragment)?.data?.issuedOnAll === true,
+           (documentStoreFragment as ValidVerificationFragment<{ issuedOnAll: boolean }>)?.data?.issuedOnAll === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -57,9 +60,9 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: (identityFragment as ValidVerificationFragment)?.data ? {
-      name: (identityFragment as ValidVerificationFragment).data.value,
-      domain: (identityFragment as ValidVerificationFragment).data.location
+    details: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>)?.data ? {
+      name: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>).data.value,
+      domain: (identityFragment as ValidVerificationFragment<OpenAttestationDNSTextRecord>).data.location
     } : undefined
   };
 
@@ -88,8 +91,8 @@ const getFragmentMessage = (
     return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
   }
   
-  if ('reason' in fragment) {
-    return fragment.reason.message;
+  if ('reason' in fragment && fragment.reason && typeof fragment.reason === 'object' && 'message' in fragment.reason) {
+    return fragment.reason.message as string;
   }
   
   return defaultFailureMessage;

@@ -1,6 +1,6 @@
 import { verify, isValid, VerificationFragment } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from './types';
-import { processVerificationFragments } from '../verification/types/verificationTypes';
+import { processVerificationFragments } from './types/verificationTypes';
 
 export class VerifierFactory {
   private static verifier: DocumentVerifier;
