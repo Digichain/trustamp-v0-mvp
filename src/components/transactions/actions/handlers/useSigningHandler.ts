@@ -43,16 +43,20 @@ export const useSigningHandler = () => {
         const prefixedAddress = actualAddress.startsWith('0x') ? actualAddress : `0x${actualAddress}`;
         console.log("Prefixed address:", prefixedAddress);
 
-        // Get merkle root from wrapped document
+        // Get merkle root from wrapped document and ensure it has 0x prefix
         const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
         if (!rawMerkleRoot) {
           throw new Error("Merkle root not found in wrapped document");
         }
 
+        // Ensure merkle root has 0x prefix
+        const prefixedMerkleRoot = rawMerkleRoot.startsWith('0x') ? rawMerkleRoot : `0x${rawMerkleRoot}`;
+        console.log("Using merkle root with prefix:", prefixedMerkleRoot);
+
         // Issue the document
         const receipt = await issueDocument(
           prefixedAddress,
-          rawMerkleRoot
+          prefixedMerkleRoot
         );
 
         console.log("Document issued successfully:", receipt);
