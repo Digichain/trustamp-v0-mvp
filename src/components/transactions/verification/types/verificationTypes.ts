@@ -1,4 +1,10 @@
-import { VerificationFragment } from "@govtechsg/oa-verify";
+import { 
+  VerificationFragment, 
+  ValidVerificationFragment,
+  InvalidVerificationFragment,
+  ErrorVerificationFragment,
+  SkippedVerificationFragment
+} from "@govtechsg/oa-verify";
 
 export enum VerificationFragmentType {
   DOCUMENT_STATUS = "DOCUMENT_STATUS",
@@ -13,66 +19,13 @@ export enum VerificationStatus {
   SKIPPED = "SKIPPED",
 }
 
-interface BaseVerificationFragment {
-  name: string;
-  type: VerificationFragmentType;
-  status: VerificationStatus;
-}
-
-interface ValidFragment extends BaseVerificationFragment {
-  status: VerificationStatus.VALID;
-  data: {
-    issuedOnAll?: boolean;
-    revokedOnAny?: boolean;
-    details?: {
-      issuance?: Array<{ issued: boolean; address: string }>;
-      revocation?: Array<{ revoked: boolean; address: string }>;
-    };
-    location?: string;
-    value?: string;
-  };
-}
-
-interface InvalidFragment extends BaseVerificationFragment {
-  status: VerificationStatus.INVALID;
-  reason: {
-    code: number;
-    codeString: string;
-    message: string;
-  };
-}
-
-interface ErrorFragment extends BaseVerificationFragment {
-  status: VerificationStatus.ERROR;
-  reason: {
-    code: number;
-    codeString: string;
-    message: string;
-  };
-}
-
-interface SkippedFragment extends BaseVerificationFragment {
-  status: VerificationStatus.SKIPPED;
-  reason: {
-    code: number;
-    codeString: string;
-    message: string;
-  };
-}
-
-export type ExtendedVerificationFragment = 
-  | ValidFragment 
-  | InvalidFragment 
-  | ErrorFragment 
-  | SkippedFragment;
-
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
   console.log("Processing verification fragments:", fragments);
 
   // Process Document Integrity
-  const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash") as ExtendedVerificationFragment;
+  const integrityFragment = fragments.find(f => f.name === "OpenAttestationHash");
   const documentIntegrity = {
-    valid: integrityFragment?.status === VerificationStatus.VALID,
+    valid: integrityFragment?.status === "VALID",
     message: getFragmentMessage(integrityFragment, 
       "Document has not been tampered with",
       "Document integrity check failed"
@@ -82,11 +35,11 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process Document Store Status
   const documentStoreFragment = fragments.find(f => 
     f.name === "OpenAttestationEthereumDocumentStoreStatus"
-  ) as ExtendedVerificationFragment;
+  );
 
   const issuanceStatus = {
-    valid: documentStoreFragment?.status === VerificationStatus.VALID && 
-           (documentStoreFragment as ValidFragment)?.data?.issuedOnAll === true,
+    valid: documentStoreFragment?.status === "VALID" && 
+           (documentStoreFragment as ValidVerificationFragment)?.data?.issuedOnAll === true,
     message: getFragmentMessage(documentStoreFragment,
       "Document has been issued",
       "Document issuance verification failed"
@@ -96,17 +49,17 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   // Process DNS Identity
   const identityFragment = fragments.find(f => 
     f.name === "OpenAttestationDnsTxtIdentityProof"
-  ) as ExtendedVerificationFragment;
+  );
 
   const issuerIdentity = {
-    valid: identityFragment?.status === VerificationStatus.VALID,
+    valid: identityFragment?.status === "VALID",
     message: getFragmentMessage(identityFragment,
       "Document issuer has been identified",
       "Issuer identity verification failed"
     ),
-    details: (identityFragment as ValidFragment)?.data ? {
-      name: (identityFragment as ValidFragment).data.value,
-      domain: (identityFragment as ValidFragment).data.location
+    details: (identityFragment as ValidVerificationFragment)?.data ? {
+      name: (identityFragment as ValidVerificationFragment).data.value,
+      domain: (identityFragment as ValidVerificationFragment).data.location
     } : undefined
   };
 
@@ -121,18 +74,18 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
 };
 
 const getFragmentMessage = (
-  fragment: ExtendedVerificationFragment | undefined, 
+  fragment: VerificationFragment | undefined, 
   successMessage: string, 
   defaultFailureMessage: string
 ): string => {
   if (!fragment) return "Verification check not performed";
   
-  if (fragment.status === VerificationStatus.VALID) {
+  if (fragment.status === "VALID") {
     return successMessage;
   }
   
-  if (fragment.status === VerificationStatus.SKIPPED) {
-    return fragment.reason?.message || "Verification skipped";
+  if (fragment.status === "SKIPPED") {
+    return (fragment as SkippedVerificationFragment).reason?.message || "Verification skipped";
   }
   
   if ('reason' in fragment) {
