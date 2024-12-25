@@ -26,6 +26,10 @@ const partnerLogos = [
   {
     name: "Tokenaire",
     logo: "/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png"
+  },
+  {
+    name: "Austrade",
+    logo: "/lovable-uploads/9c4f5efa-7162-4ac3-b9b7-1adcd426d198.png"
   }
 ];
 
