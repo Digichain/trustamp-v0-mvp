@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ShieldCheck } from "lucide-react";
+import { Shield, ShieldCheck, Edit, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { format, addYears } from "date-fns";
 
 const Account = () => {
@@ -61,6 +62,18 @@ const Account = () => {
                     <p className="text-sm text-muted-foreground">Passport</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4">
+                <Button variant="outline" className="flex-1">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Update Details
+                </Button>
+                <Button className="flex-1">
+                  <Send className="mr-2 h-4 w-4" />
+                  Request Review
+                </Button>
               </div>
             </div>
           </CardContent>
