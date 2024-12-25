@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Building2, BookOpen, HandshakeIcon, Briefcase } from "lucide-react";
 
 export const Navigation = () => {
   return (
@@ -17,19 +16,18 @@ export const Navigation = () => {
           <div className="flex-grow flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
               {[
-                { to: "#about", icon: <Lightbulb className="h-4 w-4" />, text: "ABOUT" },
-                { to: "#solution", icon: <Building2 className="h-4 w-4" />, text: "SOLUTION" },
-                { to: "#documentation", icon: <BookOpen className="h-4 w-4" />, text: "DOCUMENTATION" },
-                { to: "#partners", icon: <HandshakeIcon className="h-4 w-4" />, text: "PARTNERS" },
-                { to: "#careers", icon: <Briefcase className="h-4 w-4" />, text: "CAREERS" }
-              ].map(({ to, icon, text }) => (
+                { to: "#about", text: "ABOUT" },
+                { to: "#solution", text: "SOLUTION" },
+                { to: "#documentation", text: "DOCUMENTATION" },
+                { to: "#partners", text: "PARTNERS" },
+                { to: "#careers", text: "CAREERS" }
+              ].map(({ to, text }) => (
                 <Link
                   key={text}
                   to={to}
-                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium tracking-wider flex items-center gap-2"
+                  className="text-black hover:text-primary transition-colors duration-200 font-medium tracking-wider"
                 >
-                  {icon}
-                  <span>{text}</span>
+                  {text}
                 </Link>
               ))}
             </div>
