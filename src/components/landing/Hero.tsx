@@ -3,16 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export const Hero = () => {
   return (
-    <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-      {/* Dynamic background with gradient animation */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-100 animate-gradient-x"></div>
-      
-      {/* Animated shapes */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full blur-3xl animate-blob"></div>
-        <div className="absolute -bottom-1/2 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-indigo-400/20 to-blue-500/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-      </div>
-
+    <section className="relative pt-32 pb-20 px-4 bg-background">
       <div className="container mx-auto text-center relative z-10">
         <img
           src="/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
@@ -27,7 +18,7 @@ export const Hero = () => {
         </p>
         <div className="flex justify-center gap-4">
           <Link to="/auth">
-            <Button size="lg" className="gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
+            <Button size="lg" className="gap-2">
               Get Started
             </Button>
           </Link>
