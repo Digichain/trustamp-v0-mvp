@@ -119,16 +119,36 @@ const Landing = () => {
             <div className="flex space-x-16 animate-[gradient-x_15s_linear_infinite] hover:pause group">
               {[
                 {
-                  name: "Digital Economy Council",
-                  logo: "/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
+                  name: "AUDD",
+                  logo: "/lovable-uploads/e256b69c-090e-49d1-a172-c3b3e485c38c.png"
                 },
                 {
                   name: "Austrade",
-                  logo: "/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                  logo: "/lovable-uploads/3f10b725-bb07-4cc8-919f-c85c5f289480.png"
                 },
                 {
-                  name: "Novatti",
-                  logo: "/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+                  name: "Digital Economy Council",
+                  logo: "/lovable-uploads/53283235-07df-42fe-889a-fdbbd7137b28.png"
+                },
+                {
+                  name: "DigiChain Innovations",
+                  logo: "/lovable-uploads/f7899a5a-7596-40c2-803c-ae0fd45d42d9.png"
+                },
+                {
+                  name: "XDC Network",
+                  logo: "/lovable-uploads/c4558b84-fdff-4546-a988-f4f33874854d.png"
+                },
+                {
+                  name: "Monetary Authority of Singapore",
+                  logo: "/lovable-uploads/feba1516-1bc2-40cc-a34a-e3464af259e6.png"
+                },
+                {
+                  name: "Singapore Fintech Festival",
+                  logo: "/lovable-uploads/2ee372c3-8029-48bf-a1d8-87df67783bb7.png"
+                },
+                {
+                  name: "Tokenaire",
+                  logo: "/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png"
                 }
               ].map((partner, index) => (
                 <div
@@ -145,16 +165,36 @@ const Landing = () => {
               {/* Duplicate items for seamless loop */}
               {[
                 {
-                  name: "Digital Economy Council",
-                  logo: "/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
+                  name: "AUDD",
+                  logo: "/lovable-uploads/e256b69c-090e-49d1-a172-c3b3e485c38c.png"
                 },
                 {
                   name: "Austrade",
-                  logo: "/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                  logo: "/lovable-uploads/3f10b725-bb07-4cc8-919f-c85c5f289480.png"
                 },
                 {
-                  name: "Novatti",
-                  logo: "/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+                  name: "Digital Economy Council",
+                  logo: "/lovable-uploads/53283235-07df-42fe-889a-fdbbd7137b28.png"
+                },
+                {
+                  name: "DigiChain Innovations",
+                  logo: "/lovable-uploads/f7899a5a-7596-40c2-803c-ae0fd45d42d9.png"
+                },
+                {
+                  name: "XDC Network",
+                  logo: "/lovable-uploads/c4558b84-fdff-4546-a988-f4f33874854d.png"
+                },
+                {
+                  name: "Monetary Authority of Singapore",
+                  logo: "/lovable-uploads/feba1516-1bc2-40cc-a34a-e3464af259e6.png"
+                },
+                {
+                  name: "Singapore Fintech Festival",
+                  logo: "/lovable-uploads/2ee372c3-8029-48bf-a1d8-87df67783bb7.png"
+                },
+                {
+                  name: "Tokenaire",
+                  logo: "/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png"
                 }
               ].map((partner, index) => (
                 <div
