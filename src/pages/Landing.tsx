@@ -44,26 +44,35 @@ const Landing = () => {
       </section>
 
       {/* Solution Section */}
-      <section className="py-20" id="solution">
+      <section className="py-24 bg-gradient-to-b from-white to-gray-50" id="solution">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+          <h2 className="text-4xl font-bold text-center mb-16 tracking-tight">
             Our <span className="text-primary">Solution</span>
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="space-y-6">
-              <h3 className="text-3xl font-semibold text-gray-900">
-                Revolutionizing Digital Trust in Global Trade
-              </h3>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Experience the future of secure, efficient, and transparent trade documentation. 
-                Our innovative platform combines cutting-edge blockchain technology with 
-                user-friendly interfaces to transform how businesses handle digital assets 
-                and trade documentation.
-              </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-7xl mx-auto">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-3xl font-semibold text-gray-900 mb-4 leading-tight">
+                  Revolutionizing Digital Trust in Global Trade
+                </h3>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Experience the future of secure, efficient, and transparent trade documentation. 
+                  Our innovative platform combines cutting-edge blockchain technology with 
+                  user-friendly interfaces to transform how businesses handle digital assets 
+                  and trade documentation.
+                </p>
+              </div>
+              <div className="hidden lg:block">
+                <img 
+                  src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png" 
+                  alt="Digital Trust Illustration" 
+                  className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                />
+              </div>
             </div>
-            <div className="bg-gray-50 rounded-xl p-8">
-              <h4 className="text-xl font-semibold mb-6 text-gray-900">Key Features</h4>
-              <div className="space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+              <h4 className="text-2xl font-semibold mb-8 text-gray-900">Key Features</h4>
+              <div className="space-y-6">
                 {[
                   "Tamper-Proof Verification: Ensures documents and digital assets are immutable and authentic.",
                   "Real-Time Authentication: Provides instant validation of information and transactions.",
@@ -74,9 +83,14 @@ const Landing = () => {
                   "Instant Settlement: Settle the payments instantly through our powerful Escrow Smart Contract System.",
                   "Liquidity: Option to Settle the payments through Trade Finance or Supply Chain Finance leveraging Asset Tokenisation."
                 ].map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                    <p className="text-gray-700">{feature}</p>
+                  <div key={index} className="flex items-start gap-4 group">
+                    <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform duration-200" />
+                    <div>
+                      <p className="text-gray-800">
+                        <span className="font-medium">{feature.split(":")[0]}:</span>
+                        {feature.split(":")[1]}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
