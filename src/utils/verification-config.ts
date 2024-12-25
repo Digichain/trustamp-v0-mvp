@@ -14,14 +14,22 @@ export interface VerificationConfig {
 const getInfuraApiKey = async (): Promise<string> => {
   try {
     console.log("Fetching Infura API key from Supabase secrets...");
-    const { data: { INFURA_API_KEY } } = await supabase.functions.invoke('get-secret', {
-      body: { secretName: 'INFURA_API_KEY' }
-    });
+    const { data, error } = await supabase
+      .from('secrets')
+      .select('value')
+      .eq('name', 'INFURA_API_KEY')
+      .single();
+    
+    if (error) {
+      console.error("Error fetching Infura API key:", error);
+      return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key
+    }
+
     console.log("Successfully retrieved Infura API key");
-    return INFURA_API_KEY || '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key if secret is not set
+    return data.value;
   } catch (error) {
-    console.error("Error fetching Infura API key:", error);
-    return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback to default key
+    console.error("Error in getInfuraApiKey:", error);
+    return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key
   }
 };
 
