@@ -6,7 +6,7 @@ import { Solution } from "@/components/landing/Solution";
 import { Partners } from "@/components/landing/Partners";
 import { Footer } from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Mail, Download } from "lucide-react";
 
 const Landing = () => {
@@ -14,22 +14,26 @@ const Landing = () => {
     {
       name: "TruStamp Slide Deck",
       type: "Presentation",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-6 w-6" />,
+      description: "Overview of TruStamp's platform and capabilities"
     },
     {
       name: "TruStamp White Paper",
       type: "Document",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-6 w-6" />,
+      description: "Technical deep-dive into our technology and approach"
     },
     {
       name: "TruStamp Solution Proposal",
       type: "Document",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-6 w-6" />,
+      description: "Detailed solution architecture and implementation"
     },
     {
       name: "Use Cases Snapshot",
       type: "Document",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FileText className="h-6 w-6" />,
+      description: "Real-world applications and success stories"
     },
   ];
 
@@ -49,35 +53,38 @@ const Landing = () => {
             Documentation
           </h2>
           
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead>Document Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="w-20"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {documents.map((doc) => (
-                  <TableRow key={doc.name} className="hover:bg-gray-50">
-                    <TableCell>{doc.icon}</TableCell>
-                    <TableCell className="font-medium">{doc.name}</TableCell>
-                    <TableCell>{doc.type}</TableCell>
-                    <TableCell>
-                      <Download className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {documents.map((doc) => (
+              <Card 
+                key={doc.name}
+                className="group hover:shadow-lg transition-shadow duration-200"
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                      {doc.icon}
+                    </div>
+                    <h3 className="font-semibold text-lg">{doc.name}</h3>
+                    <p className="text-sm text-muted-foreground">{doc.description}</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-12 text-center">
             <Button
               onClick={() => window.location.href = 'mailto:contact@trustamp.in'}
               className="inline-flex items-center gap-2"
+              size="lg"
             >
               <Mail className="h-4 w-4" />
               Request More Information
