@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ShieldCheck, Edit, Send, Building2, MapPin, Mail, Phone } from "lucide-react";
+import { Shield, ShieldCheck, Edit, Send, Building2, MapPin, Mail, Phone, FileText, Award, CreditCard, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, addYears } from "date-fns";
@@ -96,6 +96,48 @@ const Account = () => {
                   <div>
                     <p className="text-sm font-medium">Company Name</p>
                     <p className="text-sm text-muted-foreground">TrustAmp Technologies Pte Ltd</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <FileText className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">ACN Number</p>
+                    <p className="text-sm text-muted-foreground">123456789012</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <Award className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Compliance Score</p>
+                    <div className="flex items-center">
+                      <p className="text-sm text-muted-foreground">5/5</p>
+                      <Badge variant="secondary" className="ml-2">Excellent</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <CreditCard className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Credit Score</p>
+                    <div className="flex items-center">
+                      <p className="text-sm text-muted-foreground">4/5</p>
+                      <Badge variant="secondary" className="ml-2">Good</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <User className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Contact Person</p>
+                    <div className="text-sm text-muted-foreground">
+                      <p>John Doe</p>
+                      <p>john.doe@email.com</p>
+                      <p>+61 4 8768 9876</p>
+                    </div>
                   </div>
                 </div>
 
