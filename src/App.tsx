@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { AppSidebar } from "@/components/AppSidebar";
+import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
 import Transactions from '@/pages/Transactions';
 import CreateTransaction from '@/pages/CreateTransaction';
@@ -85,7 +86,7 @@ function App() {
         <SidebarProvider>
           <div className="flex min-h-screen w-full">
             <Routes>
-              <Route path="/" element={<Navigate to="/auth" replace />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route
                 path="/dashboard"
