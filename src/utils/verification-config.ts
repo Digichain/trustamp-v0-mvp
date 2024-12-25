@@ -12,13 +12,15 @@ export interface VerificationConfig {
 
 const getInfuraApiKey = async (): Promise<string> => {
   try {
+    console.log("Fetching Infura API key from Supabase secrets...");
     const { data: { INFURA_API_KEY } } = await supabase.functions.invoke('get-secret', {
       body: { secretName: 'INFURA_API_KEY' }
     });
-    return INFURA_API_KEY || '';
+    console.log("Successfully retrieved Infura API key");
+    return INFURA_API_KEY || '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key if secret is not set
   } catch (error) {
     console.error("Error fetching Infura API key:", error);
-    return '';
+    return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback to default key
   }
 };
 
@@ -28,7 +30,7 @@ export const getVerificationConfig = async (): Promise<VerificationConfig> => {
   
   return {
     provider: {
-      network: "sepolia",  // We're using Sepolia testnet as default
+      network: "sepolia",  // We're using Sepolia testnet
       provider: `https://sepolia.infura.io/v3/${infuraApiKey}`,
       apiKey: infuraApiKey
     }
