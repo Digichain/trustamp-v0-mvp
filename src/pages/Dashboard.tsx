@@ -10,7 +10,8 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  Legend
 } from 'recharts';
 
 const mockBarChartData = [
@@ -154,6 +155,11 @@ const Dashboard = () => {
                       ))}
                     </Pie>
                     <Tooltip />
+                    <Legend 
+                      verticalAlign="bottom"
+                      height={36}
+                      iconType="circle"
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
