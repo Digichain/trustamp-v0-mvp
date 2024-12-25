@@ -8,12 +8,17 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting invoice verification for document:", document);
       
-      // Ensure verification config is set before verification
+      // Set up verification configuration before any verification attempt
       console.log("Setting up verification configuration...");
       await getVerificationConfig();
       console.log("Verification configuration set successfully");
       
+      // Add a small delay to ensure the global config is set
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       console.log("Starting document verification process...");
+      console.log("Global config:", (window as any).openAttestationEthereumProviderConfig);
+      
       const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
       

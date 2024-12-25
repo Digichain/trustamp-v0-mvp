@@ -11,7 +11,6 @@ export interface VerificationConfig {
   provider: ProviderConfig;
 }
 
-// Define the type for our secrets table
 interface Secret {
   name: string;
   value: string;
@@ -47,28 +46,30 @@ const getInfuraApiKey = async (): Promise<string> => {
 export const getVerificationConfig = async (): Promise<VerificationConfig> => {
   console.log("Getting verification configuration...");
   
-  // Ensure we have the API key before proceeding
   const infuraApiKey = await getInfuraApiKey();
   console.log("Using network: sepolia");
   
-  // Explicitly set the provider configuration for Sepolia
+  // Set up the provider configuration for Sepolia
   const providerConfig: ProviderDetails = {
-    network: "sepolia" as const,
+    network: "sepolia",
     providerType: "infura",
     url: `https://sepolia.infura.io/v3/${infuraApiKey}`,
     apiKey: infuraApiKey
   };
 
-  console.log("Provider configuration:", {
+  console.log("Setting up provider configuration:", {
     network: providerConfig.network,
     url: providerConfig.url,
     providerType: providerConfig.providerType
   });
 
   // Set this as a global configuration for OpenAttestation
-  (global as any).openAttestationEthereumProviderConfig = providerConfig;
+  // This is crucial to prevent fallback to default configuration
+  if (typeof window !== 'undefined') {
+    (window as any).openAttestationEthereumProviderConfig = providerConfig;
+  }
   
-  console.log("Verification config set with network:", providerConfig.network);
+  console.log("Global OpenAttestation provider config set");
 
   return {
     provider: {
