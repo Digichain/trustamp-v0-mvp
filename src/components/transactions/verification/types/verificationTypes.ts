@@ -23,6 +23,40 @@ export enum VerificationStatus {
   SKIPPED = "SKIPPED",
 }
 
+const isValidIssuanceStatus = (fragments: VerificationFragment[]): boolean => {
+  return fragments.some(fragment => {
+    const type = fragment.name;
+    const isValid = fragment.status === "VALID";
+    
+    return isValid && (
+      type === "OpenAttestationDidSignedDocumentStatus" ||
+      type === "OpenAttestationEthereumDocumentStoreStatus" ||
+      type === "OpenAttestationEthereumTokenRegistryStatus"
+    );
+  });
+};
+
+const getIssuanceStatusMessage = (fragments: VerificationFragment[]): string => {
+  const validIssuance = isValidIssuanceStatus(fragments);
+  
+  if (validIssuance) {
+    return "Document has been issued";
+  }
+
+  // Check for specific error messages
+  const relevantFragment = fragments.find(f => 
+    f.name === "OpenAttestationDidSignedDocumentStatus" ||
+    f.name === "OpenAttestationEthereumDocumentStoreStatus" ||
+    f.name === "OpenAttestationEthereumTokenRegistryStatus"
+  );
+
+  if (relevantFragment && 'reason' in relevantFragment) {
+    return (relevantFragment.reason as { message: string })?.message || "Document issuance verification failed";
+  }
+
+  return "Document issuance verification failed";
+};
+
 export const processVerificationFragments = (fragments: VerificationFragment[]) => {
   console.log("Processing verification fragments:", fragments);
 
@@ -36,14 +70,10 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     )
   };
 
-  // Process Document Store Status
-  const documentStoreFragment = fragments.find(f => isDocumentStoreFragment(f));
+  // Process Issuance Status using the new logic
   const issuanceStatus = {
-    valid: documentStoreFragment?.status === "VALID",
-    message: getFragmentMessage(documentStoreFragment,
-      "Document has been issued",
-      "Document issuance verification failed"
-    )
+    valid: isValidIssuanceStatus(fragments),
+    message: getIssuanceStatusMessage(fragments)
   };
 
   // Process DNS Identity
@@ -62,7 +92,7 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
     issuanceStatus,
     issuerIdentity,
     documentIntegrity,
-    fragments // Include raw fragments in the result
+    fragments
   };
 
   console.log("Processed verification details:", result);
