@@ -73,7 +73,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'blob': 'blob 7s infinite',
         'gradient-x': 'gradient-x 15s linear infinite',
-        'marquee': 'marquee 20s linear infinite',
+        'marquee': 'marquee 30s linear infinite',
       },
       keyframes: {
         'accordion-down': {
