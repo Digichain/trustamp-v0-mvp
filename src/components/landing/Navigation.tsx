@@ -19,16 +19,22 @@ export const Navigation = () => {
                 { to: "#about", text: "ABOUT" },
                 { to: "#solution", text: "SOLUTION" },
                 { to: "#documentation", text: "DOCUMENTATION" },
-                { to: "#partners", text: "PARTNERS" },
-                { to: "#careers", text: "CAREERS" }
+                { to: "#partners", text: "PARTNERS" }
               ].map(({ to, text }) => (
-                <Link
+                <a
                   key={text}
-                  to={to}
+                  href={to}
                   className="text-black hover:text-primary transition-colors duration-200 font-medium tracking-wider"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.querySelector(to);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                 >
                   {text}
-                </Link>
+                </a>
               ))}
             </div>
           </div>

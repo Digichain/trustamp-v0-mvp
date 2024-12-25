@@ -40,6 +40,7 @@ const Landing = () => {
       <FeatureCards />
       <About />
       <Solution />
+      <Partners />
       
       {/* Documentation Section */}
       <section className="py-20 bg-gray-50" id="documentation">
@@ -84,8 +85,6 @@ const Landing = () => {
           </div>
         </div>
       </section>
-
-      <Partners />
       <Footer />
     </div>
   );
