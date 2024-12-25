@@ -1,22 +1,15 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ArrowUp, ArrowDown, MoreVertical, FileText, CreditCard, Settings } from "lucide-react";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DollarSign } from "lucide-react";
+import { ContractsTable } from "@/components/payments/ContractsTable";
+import { TransactionHistory } from "@/components/payments/TransactionHistory";
 
 const Payments = () => {
   console.log('Payments page rendered');
 
-  // Dummy contract data with creation dates
+  // Dummy contract data with valid Ethereum addresses
   const contracts = [
     {
-      id: "0x1234567890abcdef",
+      id: "0x1234567890123456789012345678901234567890",
       created: new Date('2024-03-15'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
@@ -24,7 +17,7 @@ const Payments = () => {
       status: "held in escrow"
     },
     {
-      id: "0xabcdef1234567890",
+      id: "0xabcdef0123456789abcdef0123456789abcdef01",
       created: new Date('2024-03-16'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
@@ -32,7 +25,7 @@ const Payments = () => {
       status: "paid"
     },
     {
-      id: "0x9876543210fedcba",
+      id: "0x9876543210fedcba9876543210fedcba98765432",
       created: new Date('2024-03-17'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
@@ -99,107 +92,15 @@ const Payments = () => {
             <CardTitle>Active Contracts</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Contract</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Current Holder</TableHead>
-                  <TableHead>Total Value</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contracts.map((contract) => (
-                  <TableRow key={contract.id}>
-                    <TableCell className="font-mono">{contract.id}</TableCell>
-                    <TableCell>{format(contract.created, 'dd-MM-yyyy')}</TableCell>
-                    <TableCell>{contract.owner}</TableCell>
-                    <TableCell>{contract.currentHolder}</TableCell>
-                    <TableCell>${contract.totalValue.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        contract.status === 'paid' ? 'bg-green-100 text-green-800' :
-                        contract.status === 'held in escrow' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {contract.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleAction('options', contract)}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Options</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAction('documents', contract)}>
-                            <FileText className="mr-2 h-4 w-4" />
-                            <span>Contract Documents</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleAction('pay', contract)}
-                            disabled={contract.status !== 'outstanding'}
-                            className={contract.status !== 'outstanding' ? 'opacity-50' : ''}
-                          >
-                            <CreditCard className="mr-2 h-4 w-4" />
-                            <span>Pay Now</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAction('override', contract)}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Override Conditions</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ContractsTable 
+              contracts={contracts}
+              onAction={handleAction}
+            />
           </CardContent>
         </Card>
 
         {/* Transaction History */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${
-                      transaction.type === 'incoming' ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
-                      {transaction.type === 'incoming' ? (
-                        <ArrowDown className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <ArrowUp className="h-4 w-4 text-red-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium">{transaction.description}</p>
-                      <p className="text-sm text-muted-foreground">{transaction.date}</p>
-                    </div>
-                  </div>
-                  <span className={`font-semibold ${
-                    transaction.type === 'incoming' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'incoming' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <TransactionHistory transactions={transactions} />
       </div>
     </div>
   );
