@@ -125,7 +125,7 @@ export const formatBillOfLadingToOpenAttestation = (bolData: any, registryDocume
       documentStore: registryDocument.contractAddress, // Changed from tokenRegistry to documentStore
       identityProof: {
         type: "DNS-TXT",
-        location: "tempdns.trustamp.in"
+        location: "tempdns.trustamp.com.au"
       }
     }],
     network: {
