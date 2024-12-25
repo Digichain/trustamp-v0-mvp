@@ -1,22 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Activity, FileText, ArrowUpDown } from "lucide-react";
 import { 
-  LineChart, 
-  Line, 
+  BarChart as RechartsBarChart,
+  Bar,
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
 
-const mockChartData = [
-  { name: 'Jan', value: 12 },
-  { name: 'Feb', value: 19 },
-  { name: 'Mar', value: 15 },
-  { name: 'Apr', value: 25 },
-  { name: 'May', value: 22 },
-  { name: 'Jun', value: 30 }
+const mockBarChartData = [
+  { name: 'Jan', transactions: 12 },
+  { name: 'Feb', transactions: 19 },
+  { name: 'Mar', transactions: 15 },
+  { name: 'Apr', transactions: 25 },
+  { name: 'May', transactions: 22 },
+  { name: 'Jun', transactions: 30 }
+];
+
+const mockPieChartData = [
+  { name: 'Invoices', value: 45, color: '#8884d8' },
+  { name: 'Bills of Lading', value: 30, color: '#82ca9d' },
+  { name: 'Other Documents', value: 25, color: '#ffc658' }
 ];
 
 const mockRecentTransactions = [
@@ -107,24 +116,51 @@ const Dashboard = () => {
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockChartData}>
+                  <RechartsBarChart data={mockBarChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#8884d8" 
-                      strokeWidth={2}
+                    <Bar 
+                      dataKey="transactions" 
+                      fill="#8884d8"
+                      radius={[4, 4, 0, 0]}
                     />
-                  </LineChart>
+                  </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
           <Card>
+            <CardHeader>
+              <CardTitle>Document Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={mockPieChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {mockPieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Recent Transactions</CardTitle>
             </CardHeader>
