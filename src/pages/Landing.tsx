@@ -52,8 +52,8 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <img
-                src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
-                alt="Logo"
+                src="/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+                alt="TruStamp Logo"
                 className="h-8 brightness-0 invert mb-4"
               />
               <p className="text-gray-400">

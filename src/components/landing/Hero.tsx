@@ -15,8 +15,8 @@ export const Hero = () => {
 
       <div className="container mx-auto text-center relative z-10">
         <img
-          src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
-          alt="Logo"
+          src="/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+          alt="TruStamp Logo"
           className="w-64 mx-auto mb-12"
         />
         <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
