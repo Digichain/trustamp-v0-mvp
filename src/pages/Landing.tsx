@@ -115,17 +115,30 @@ const Landing = () => {
           <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
             Our <span className="text-primary">Partners</span>
           </h2>
-          {/* Add partners content */}
-        </div>
-      </section>
-
-      {/* Careers Section */}
-      <section className="py-20 bg-gray-50" id="careers">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
-            Careers
-          </h2>
-          {/* Add careers content */}
+          <div className="relative overflow-hidden">
+            <div className="flex animate-[gradient-x_15s_linear_infinite] space-x-16">
+              {/* Note: Replace these placeholder divs with actual partner images once provided */}
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Digital Economy Council
+              </div>
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Austrade
+              </div>
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Novatti
+              </div>
+              {/* Duplicate items for seamless loop */}
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Digital Economy Council
+              </div>
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Austrade
+              </div>
+              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                Novatti
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -72,7 +72,25 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'blob': 'blob 7s infinite',
-        'gradient-x': 'gradient-x 15s ease infinite',
+        'gradient-x': 'gradient-x 15s linear infinite',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' }
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' }
+        },
+        'gradient-x': {
+          '0%, 100%': {
+            'transform': 'translateX(0%)'
+          },
+          '50%': {
+            'transform': 'translateX(-50%)'
+          }
+        }
       }
     }
   },
