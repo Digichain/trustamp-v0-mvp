@@ -72,7 +72,7 @@ export const TransactionsTable = () => {
       case "transferable":
         return <BillOfLadingPreview data={documentData} />;
       default:
-        return <div>Unsupported document type</div>;
+        return null; // Remove the "Unsupported document type" message
     }
   };
 
