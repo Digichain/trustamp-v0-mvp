@@ -11,6 +11,12 @@ export interface VerificationConfig {
   provider: ProviderConfig;
 }
 
+// Define the type for our secrets table
+interface Secret {
+  name: string;
+  value: string;
+}
+
 const getInfuraApiKey = async (): Promise<string> => {
   try {
     console.log("Fetching Infura API key from Supabase secrets...");
@@ -18,7 +24,7 @@ const getInfuraApiKey = async (): Promise<string> => {
       .from('secrets')
       .select('value')
       .eq('name', 'INFURA_API_KEY')
-      .single();
+      .single() as { data: Secret | null; error: any };
     
     if (error) {
       console.error("Error fetching Infura API key:", error);
@@ -26,7 +32,7 @@ const getInfuraApiKey = async (): Promise<string> => {
     }
 
     console.log("Successfully retrieved Infura API key");
-    return data.value;
+    return data?.value || '6ed316896ad34f1cb4627d8564c95ab1';
   } catch (error) {
     console.error("Error in getInfuraApiKey:", error);
     return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key
