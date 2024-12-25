@@ -1,6 +1,6 @@
 import { 
   type VerificationFragment
-} from "@/utils/openattestation";
+} from "@govtechsg/oa-verify";
 
 import {
   isValidFragment,
@@ -61,7 +61,8 @@ export const processVerificationFragments = (fragments: VerificationFragment[]) 
   const result = {
     issuanceStatus,
     issuerIdentity,
-    documentIntegrity
+    documentIntegrity,
+    fragments // Include raw fragments in the result
   };
 
   console.log("Processed verification details:", result);

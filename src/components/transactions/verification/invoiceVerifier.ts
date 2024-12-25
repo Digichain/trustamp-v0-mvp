@@ -1,4 +1,4 @@
-import { verify } from "@govtechsg/oa-verify";
+import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "./types";
 import { processVerificationFragments } from "./types/verificationTypes";
 
@@ -17,11 +17,15 @@ export class InvoiceVerifier implements DocumentVerifier {
       const verificationDetails = processVerificationFragments(fragments);
       console.log("Processed verification details:", verificationDetails);
 
+      // Add raw fragments to the verification details
+      const detailsWithFragments = {
+        ...verificationDetails,
+        fragments
+      };
+
       return {
-        isValid: verificationDetails.documentIntegrity.valid && 
-                verificationDetails.issuanceStatus.valid &&
-                verificationDetails.issuerIdentity.valid,
-        details: verificationDetails
+        isValid: isValid(fragments),
+        details: detailsWithFragments
       };
     } catch (error) {
       console.error("Verification error:", error);

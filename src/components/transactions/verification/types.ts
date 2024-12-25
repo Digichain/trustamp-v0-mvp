@@ -17,6 +17,7 @@ export interface VerificationResult {
       message: string;
       details?: any;
     };
+    fragments?: VerificationFragment[];
   };
 }
 

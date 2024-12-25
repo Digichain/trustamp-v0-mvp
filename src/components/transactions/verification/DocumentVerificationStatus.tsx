@@ -1,6 +1,7 @@
 import { VerificationStatus } from "./VerificationStatus";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface DocumentVerificationStatusProps {
   verificationDetails: {
@@ -20,6 +21,7 @@ interface DocumentVerificationStatusProps {
       valid: boolean;
       message: string;
     };
+    fragments?: any[];
   } | null;
   onReset: () => void;
 }
@@ -28,7 +30,6 @@ export const DocumentVerificationStatus = ({
   verificationDetails,
   onReset
 }: DocumentVerificationStatusProps) => {
-  // If verification details are null or undefined, show error state
   if (!verificationDetails) {
     return (
       <div className="space-y-6">
@@ -82,6 +83,15 @@ export const DocumentVerificationStatus = ({
         isValid={verificationDetails.documentIntegrity.valid}
         message={verificationDetails.documentIntegrity.message}
       />
+
+      {verificationDetails.fragments && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Verification Fragments</h3>
+          <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+            {JSON.stringify(verificationDetails.fragments, null, 2)}
+          </pre>
+        </Card>
+      )}
 
       {!allValid && (
         <div className="flex justify-center mt-8">
