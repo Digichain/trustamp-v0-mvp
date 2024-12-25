@@ -1,4 +1,4 @@
-import { isValid, openAttestationVerifiers, verificationBuilder } from "@govtechsg/oa-verify";
+import { isValid, openAttestationVerifiers, verificationBuilder, ProviderDetails } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "./types";
 import { processVerificationFragments } from "./types/verificationTypes";
 import { getVerificationConfig } from "@/utils/verification-config";
@@ -13,11 +13,15 @@ export class InvoiceVerifier implements DocumentVerifier {
       const config = await getVerificationConfig();
       console.log("Verification configuration:", config);
 
-      // Create verification function using builder
+      // Create verification function using builder with proper typing
       console.log("Creating verification builder with network:", config.provider.network);
       const verify = verificationBuilder(openAttestationVerifiers, {
-        network: config.provider.network,
-        provider: config.provider.provider,
+        network: config.provider.network as "sepolia" | "mainnet" | "local",
+        provider: {
+          network: config.provider.network as "sepolia" | "mainnet" | "local",
+          url: config.provider.provider,
+          apiKey: config.provider.apiKey
+        } as ProviderDetails
       });
       
       console.log("Starting document verification process...");
