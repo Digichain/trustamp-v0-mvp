@@ -1,11 +1,15 @@
 import { verify, isValid } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "./types";
 import { processVerificationFragments } from "./types/verificationTypes";
+import { getVerificationConfig } from "@/utils/verification-config";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
     try {
       console.log("Starting invoice verification for document:", document);
+      
+      // Ensure verification config is set before verification
+      await getVerificationConfig();
       
       const fragments = await verify(document);
       console.log("Verification fragments:", fragments);

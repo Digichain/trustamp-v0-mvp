@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { ProviderDetails } from "@govtechsg/oa-verify";
 
 export interface ProviderConfig {
   network: "mainnet" | "sepolia" | "local";
@@ -28,10 +29,24 @@ export const getVerificationConfig = async (): Promise<VerificationConfig> => {
   console.log("Getting verification configuration...");
   const infuraApiKey = await getInfuraApiKey();
   
+  // Override the default provider configuration
+  const providerConfig: ProviderDetails = {
+    network: "sepolia" as const,
+    providerType: "infura",
+    url: `https://sepolia.infura.io/v3/${infuraApiKey}`,
+    apiKey: infuraApiKey
+  };
+
+  // Set this as a global configuration for OpenAttestation
+  (global as any).openAttestationEthereumProviderConfig = providerConfig;
+  
+  console.log("Verification config set with network:", providerConfig.network);
+  console.log("Using provider URL:", providerConfig.url);
+
   return {
     provider: {
-      network: "sepolia",  // We're using Sepolia testnet
-      provider: `https://sepolia.infura.io/v3/${infuraApiKey}`,
+      network: "sepolia",
+      provider: providerConfig.url,
       apiKey: infuraApiKey
     }
   };
