@@ -9,7 +9,7 @@ export const Navigation = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex-shrink-0">
             <img
-              src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+              src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
               alt="Logo"
               className="h-8"
             />

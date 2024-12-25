@@ -15,7 +15,7 @@ export const Hero = () => {
 
       <div className="container mx-auto text-center relative z-10">
         <img
-          src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+          src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
           alt="Logo"
           className="w-64 mx-auto mb-12"
         />

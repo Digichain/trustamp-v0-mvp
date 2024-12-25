@@ -52,7 +52,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <img
-                src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
                 alt="Logo"
                 className="h-8 brightness-0 invert mb-4"
               />
