@@ -5,17 +5,17 @@ export const FeatureCards = () => {
     {
       title: "Smart Document Creation",
       description: "Create and manage digital documents with blockchain-backed security and authenticity",
-      imagePath: "/placeholder.svg" // Replace with actual image path
+      imagePath: "/placeholder.svg"
     },
     {
       title: "Document Verification",
       description: "Instantly verify document authenticity using blockchain technology",
-      imagePath: "/placeholder.svg" // Replace with actual image path
+      imagePath: "/placeholder.svg"
     },
     {
       title: "Instant Settlements",
       description: "Streamline payments and settlements with secure blockchain transactions",
-      imagePath: "/placeholder.svg" // Replace with actual image path
+      imagePath: "/placeholder.svg"
     }
   ];
 
@@ -44,10 +44,13 @@ export const FeatureCards = () => {
       </div>
 
       {/* Vision Statement Section */}
-      <div className="mt-20 bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold max-w-4xl mx-auto leading-tight">
-            Set to become Innovation leaders for Global Trade and Supply Chain through digital transformation
+      <div className="mt-20 bg-gray-900 py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center max-w-4xl mx-auto leading-tight">
+            <span className="block mb-2">Set to become</span>
+            <span className="text-blue-400">Innovation leaders</span>
+            <span className="block mt-2">for Global Trade and Supply Chain</span>
+            <span className="block mt-2 text-2xl md:text-3xl text-gray-300">through digital transformation</span>
           </h2>
         </div>
       </div>
@@ -56,7 +59,6 @@ export const FeatureCards = () => {
       <div className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center items-center gap-12">
-            {/* Replace with actual partner logos */}
             <div className="w-40 h-20 bg-gray-200 rounded flex items-center justify-center">
               Digital Economy Council
             </div>
