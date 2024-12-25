@@ -9,12 +9,16 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.log("Starting invoice verification for document:", document);
       
       // Ensure verification config is set before verification
+      console.log("Setting up verification configuration...");
       await getVerificationConfig();
+      console.log("Verification configuration set successfully");
       
+      console.log("Starting document verification process...");
       const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
       
       if (!Array.isArray(fragments)) {
+        console.error("Invalid verification response - not an array:", fragments);
         throw new Error("Invalid verification response");
       }
 
@@ -27,8 +31,11 @@ export class InvoiceVerifier implements DocumentVerifier {
         fragments
       };
 
+      const isDocumentValid = isValid(fragments);
+      console.log("Document validity:", isDocumentValid);
+
       return {
-        isValid: isValid(fragments),
+        isValid: isDocumentValid,
         details: detailsWithFragments
       };
     } catch (error) {
