@@ -83,12 +83,39 @@ export const useSigningHandler = () => {
         return true;
       } else {
         // Handle verifiable documents (non-transferable)
+        console.log("Handling verifiable document signing");
         const result = await signAndStoreDocument(
           transaction.wrapped_document,
           walletAddress.toLowerCase(),
           transaction.id
         );
-        console.log("Verifiable document signed and stored:", result);
+        
+        console.log("Document signed and stored:", result);
+
+        // Update transaction status for verifiable documents
+        const { error: updateError } = await supabase
+          .from("transactions")
+          .update({ 
+            status: "document_signed",
+            signed_document: result.signedDocument,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", transaction.id);
+
+        if (updateError) {
+          console.error("Error updating transaction status:", updateError);
+          throw updateError;
+        }
+
+        console.log("Transaction status updated to document_signed");
+        await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        
+        toast({
+          title: "Success",
+          description: "Document signed successfully",
+        });
+
+        return true;
       }
     } catch (error: any) {
       console.error("Error in handleSignDocument:", error);
