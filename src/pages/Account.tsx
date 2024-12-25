@@ -13,7 +13,10 @@ const Account = () => {
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Account Settings</h1>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
+          <p className="text-gray-600">Manage your account preferences and settings.</p>
+        </div>
         
         {/* KYC Status Section */}
         <Card>
@@ -62,8 +65,6 @@ const Account = () => {
             </div>
           </CardContent>
         </Card>
-
-        <p className="text-gray-600">Manage your account preferences and settings.</p>
       </div>
     </div>
   );
