@@ -1,71 +1,20 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDistanceToNow } from "date-fns";
 import { PreviewDialog } from "./previews/PreviewDialog";
 import { InvoicePreview } from "./previews/InvoicePreview";
 import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
-import { TransactionActions } from "./actions/TransactionActions";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useDocumentData } from "@/hooks/useDocumentData";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-// Define a more complete Transaction interface based on our database schema
-interface Transaction {
-  id: string;
-  user_id: string;
-  transaction_hash: string | null;
-  network: string;
-  status: string;
-  transaction_type: string;
-  document_subtype: string | null;
-  title: string | null;
-  created_at: string;
-  raw_document: any | null;
-  wrapped_document: any | null;
-  signed_document: any | null;
-}
-
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "document_created":
-      return "text-blue-600";
-    case "document_wrapped":
-      return "text-purple-600";
-    case "document_signed":
-      return "text-orange-600";
-    case "document_issued":
-      return "text-green-600";
-    case "failed":
-      return "text-red-600";
-    default:
-      return "text-gray-600";
-  }
-};
-
-const getStatusDisplay = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "document_created":
-      return "Created";
-    case "document_wrapped":
-      return "Wrapped";
-    case "document_signed":
-      return "Signed";
-    case "document_issued":
-      return "Issued";
-    case "failed":
-      return "Failed";
-    default:
-      return status;
-  }
-};
+import { TransactionRow } from "./TransactionRow";
+import { useTransactionSubscription } from "@/hooks/useTransactionSubscription";
+import { Transaction } from "@/types/transactions";
 
 export const TransactionsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -77,30 +26,7 @@ export const TransactionsTable = () => {
   const { fetchDocumentData, handleDelete } = useDocumentData();
 
   // Set up real-time subscription
-  useEffect(() => {
-    console.log("Setting up real-time subscription for transactions");
-    const channel = supabase
-      .channel('transactions-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'transactions'
-        },
-        async (payload) => {
-          console.log("Received real-time update:", payload);
-          await invalidateTransactions();
-        }
-      )
-      .subscribe();
-
-    // Cleanup subscription on component unmount
-    return () => {
-      console.log("Cleaning up real-time subscription");
-      supabase.removeChannel(channel);
-    };
-  }, [invalidateTransactions]);
+  useTransactionSubscription(invalidateTransactions);
 
   const handlePreviewClick = async (transaction: Transaction) => {
     try {
@@ -149,40 +75,6 @@ export const TransactionsTable = () => {
     }
   };
 
-  const transactionRows = useMemo(() => {
-    if (!transactions) return null;
-
-    return transactions.map((tx: Transaction) => (
-      <TableRow key={tx.id}>
-        <TableCell className="font-mono">
-          {tx.transaction_hash ? 
-            `${tx.transaction_hash.slice(0, 10)}...${tx.transaction_hash.slice(-8)}` :
-            '-'
-          }
-        </TableCell>
-        <TableCell className="capitalize">{tx.document_subtype || '-'}</TableCell>
-        <TableCell>{tx.title || '-'}</TableCell>
-        <TableCell>
-          <span className={getStatusColor(tx.status)}>
-            {getStatusDisplay(tx.status)}
-          </span>
-        </TableCell>
-        <TableCell>
-          {formatDistanceToNow(new Date(tx.created_at), {
-            addSuffix: true,
-          })}
-        </TableCell>
-        <TableCell className="text-right">
-          <TransactionActions
-            transaction={tx}
-            onPreviewClick={() => handlePreviewClick(tx)}
-            onDelete={() => onDelete(tx)}
-          />
-        </TableCell>
-      </TableRow>
-    ));
-  }, [transactions]);
-
   return (
     <>
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -198,7 +90,14 @@ export const TransactionsTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactionRows}
+            {transactions?.map((tx: Transaction) => (
+              <TransactionRow
+                key={tx.id}
+                transaction={tx}
+                onPreviewClick={handlePreviewClick}
+                onDelete={onDelete}
+              />
+            ))}
             {(!transactions || transactions.length === 0) && (
               <TableRow>
                 <TableCell
