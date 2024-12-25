@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import { TransactionActions } from "./actions/TransactionActions";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useDocumentData } from "@/hooks/useDocumentData";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define a more complete Transaction interface based on our database schema
 interface Transaction {
@@ -74,6 +75,32 @@ export const TransactionsTable = () => {
   
   const { transactions, isLoading, invalidateTransactions } = useTransactions();
   const { fetchDocumentData, handleDelete } = useDocumentData();
+
+  // Set up real-time subscription
+  useEffect(() => {
+    console.log("Setting up real-time subscription for transactions");
+    const channel = supabase
+      .channel('transactions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'transactions'
+        },
+        async (payload) => {
+          console.log("Received real-time update:", payload);
+          await invalidateTransactions();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on component unmount
+    return () => {
+      console.log("Cleaning up real-time subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [invalidateTransactions]);
 
   const handlePreviewClick = async (transaction: Transaction) => {
     try {
