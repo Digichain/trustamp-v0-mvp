@@ -61,8 +61,13 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto text-center">
+          <img
+            src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+            alt="Logo"
+            className="w-64 mx-auto mb-12"
+          />
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Secure Document Management
+            Unlock Trust and Transparency with Blockchain-Powered Solutions
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Transform your document workflow with blockchain-powered verification and secure sharing
