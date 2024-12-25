@@ -54,23 +54,6 @@ export const FeatureCards = () => {
           </h2>
         </div>
       </div>
-
-      {/* Partner Logos Section */}
-      <div className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center items-center gap-12">
-            <div className="w-40 h-20 bg-gray-200 rounded flex items-center justify-center">
-              Digital Economy Council
-            </div>
-            <div className="w-40 h-20 bg-gray-200 rounded flex items-center justify-center">
-              Austrade
-            </div>
-            <div className="w-40 h-20 bg-gray-200 rounded flex items-center justify-center">
-              Novatti
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
   );
 };
