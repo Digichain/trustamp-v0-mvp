@@ -28,22 +28,30 @@ const getInfuraApiKey = async (): Promise<string> => {
     
     if (error) {
       console.error("Error fetching Infura API key:", error);
-      return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key
+      throw new Error("Failed to fetch Infura API key");
+    }
+
+    if (!data?.value) {
+      console.error("No Infura API key found in secrets");
+      throw new Error("Infura API key not found");
     }
 
     console.log("Successfully retrieved Infura API key");
-    return data?.value || '6ed316896ad34f1cb4627d8564c95ab1';
+    return data.value;
   } catch (error) {
     console.error("Error in getInfuraApiKey:", error);
-    return '6ed316896ad34f1cb4627d8564c95ab1'; // Fallback key
+    throw error;
   }
 };
 
 export const getVerificationConfig = async (): Promise<VerificationConfig> => {
   console.log("Getting verification configuration...");
-  const infuraApiKey = await getInfuraApiKey();
   
-  // Override the default provider configuration
+  // Ensure we have the API key before proceeding
+  const infuraApiKey = await getInfuraApiKey();
+  console.log("Using network: sepolia");
+  
+  // Explicitly set the provider configuration for Sepolia
   const providerConfig: ProviderDetails = {
     network: "sepolia" as const,
     providerType: "infura",
@@ -51,11 +59,16 @@ export const getVerificationConfig = async (): Promise<VerificationConfig> => {
     apiKey: infuraApiKey
   };
 
+  console.log("Provider configuration:", {
+    network: providerConfig.network,
+    url: providerConfig.url,
+    providerType: providerConfig.providerType
+  });
+
   // Set this as a global configuration for OpenAttestation
   (global as any).openAttestationEthereumProviderConfig = providerConfig;
   
   console.log("Verification config set with network:", providerConfig.network);
-  console.log("Using provider URL:", providerConfig.url);
 
   return {
     provider: {
@@ -68,6 +81,11 @@ export const getVerificationConfig = async (): Promise<VerificationConfig> => {
 
 // Helper to check if we have required configuration
 export const isConfigured = async (): Promise<boolean> => {
-  const config = await getVerificationConfig();
-  return !!config.provider.apiKey;
+  try {
+    const config = await getVerificationConfig();
+    return !!config.provider.apiKey;
+  } catch (error) {
+    console.error("Configuration check failed:", error);
+    return false;
+  }
 };
