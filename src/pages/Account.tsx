@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ShieldCheck, Edit, Send } from "lucide-react";
+import { Shield, ShieldCheck, Edit, Send, Building2, MapPin, Mail, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, addYears } from "date-fns";
@@ -73,6 +73,65 @@ const Account = () => {
                 <Button className="flex-1">
                   <Send className="mr-2 h-4 w-4" />
                   Request Review
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Profile Section */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-bold">Company Profile</CardTitle>
+              <CardDescription>Your company information and details</CardDescription>
+            </div>
+            <Building2 className="h-8 w-8 text-gray-400" />
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              <div className="grid gap-6">
+                <div className="flex items-center space-x-4">
+                  <Building2 className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Company Name</p>
+                    <p className="text-sm text-muted-foreground">TrustAmp Technologies Pte Ltd</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <MapPin className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Address</p>
+                    <p className="text-sm text-muted-foreground">
+                      71 Robinson Road, #14-01<br />
+                      Singapore 068895
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Business Email</p>
+                    <p className="text-sm text-muted-foreground">contact@trustamp.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">Business Phone</p>
+                    <p className="text-sm text-muted-foreground">+65 6789 0123</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-4">
+                <Button variant="outline" className="w-full">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Update Company Details
                 </Button>
               </div>
             </div>
