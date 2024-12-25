@@ -49,20 +49,6 @@ export const Partners = () => {
               </div>
             ))}
           </div>
-          <div className="flex space-x-8 animate-marquee2 whitespace-nowrap absolute top-0">
-            {[...partnerLogos, ...partnerLogos].map((partner, index) => (
-              <div
-                key={`${partner.name}-second-${index}`}
-                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
-              >
-                <img
-                  src={partner.logo}
-                  alt={partner.name}
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
