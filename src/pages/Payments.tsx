@@ -7,7 +7,10 @@ import { TransactionHistory } from "@/components/payments/TransactionHistory";
 const Payments = () => {
   console.log('Payments page rendered');
 
-  // Dummy contract data with valid Ethereum addresses
+  // Generate random numbers for stats
+  const activeCount = Math.floor(Math.random() * 10) + 1; // Random number between 1-10
+  const completedCount = Math.floor(Math.random() * 6) + 3; // Random number between 3-8
+
   const contracts = [
     {
       id: "0x1234567890123456789012345678901234567890",
@@ -69,7 +72,31 @@ const Payments = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Top Section with Title and Wallet Balance */}
         <div className="flex justify-between items-start">
-          <h1 className="text-3xl font-bold">Payments</h1>
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold">Payments</h1>
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Active
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{activeCount}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completed
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{completedCount}</div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
           
           <Card className="w-[400px]">
             <CardHeader>
