@@ -2,6 +2,7 @@ import { isValid, openAttestationVerifiers, verificationBuilder, ProviderDetails
 import { DocumentVerifier, VerificationResult } from "./types";
 import { processVerificationFragments } from "./types/verificationTypes";
 import { getVerificationConfig } from "@/utils/verification-config";
+import { ethers } from "ethers";
 
 export class InvoiceVerifier implements DocumentVerifier {
   async verify(document: any): Promise<VerificationResult> {
@@ -13,15 +14,17 @@ export class InvoiceVerifier implements DocumentVerifier {
       const config = await getVerificationConfig();
       console.log("Verification configuration:", config);
 
-      // Create verification function using builder with proper typing
-      console.log("Creating verification builder with network:", config.provider.network);
+      // Create custom provider
+      const customProvider = new ethers.providers.JsonRpcProvider(
+        config.provider.provider,
+        "sepolia"
+      );
+
+      // Create verification function using builder
+      console.log("Creating verification builder with network: sepolia");
       const verify = verificationBuilder(openAttestationVerifiers, {
-        network: config.provider.network as "sepolia" | "mainnet" | "local",
-        provider: {
-          network: config.provider.network as "sepolia" | "mainnet" | "local",
-          url: config.provider.provider,
-          apiKey: config.provider.apiKey
-        } as ProviderDetails
+        network: "sepolia",
+        provider: customProvider
       });
       
       console.log("Starting document verification process...");
