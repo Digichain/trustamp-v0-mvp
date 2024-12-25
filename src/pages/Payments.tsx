@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DollarSign, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { ContractsTable } from "@/components/payments/ContractsTable";
 import { TransactionHistory } from "@/components/payments/TransactionHistory";
 
@@ -66,20 +67,35 @@ const Payments = () => {
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Top Section with Wallet Balance */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="col-span-2">
+        {/* Top Section with Title and Wallet Balance */}
+        <div className="flex justify-between items-start">
+          <h1 className="text-3xl font-bold">Payments</h1>
+          
+          <Card className="w-[400px]">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Fiat Account Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-4">
-                <div className="p-4 bg-primary/10 rounded-full">
-                  <DollarSign className="h-6 w-6 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <div className="p-4 bg-primary/10 rounded-full">
+                    <DollarSign className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Current Balance</p>
+                    <h2 className="text-3xl font-bold">$100.00</h2>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Current Balance</p>
-                  <h2 className="text-3xl font-bold">$100.00</h2>
+                
+                <div className="flex gap-4">
+                  <Button className="flex-1" variant="outline">
+                    <ArrowUpCircle className="mr-2 h-4 w-4" />
+                    Deposit
+                  </Button>
+                  <Button className="flex-1" variant="outline">
+                    <ArrowDownCircle className="mr-2 h-4 w-4" />
+                    Withdraw
+                  </Button>
                 </div>
               </div>
             </CardContent>
