@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, HelpCircle, Support } from "lucide-react";
+import { LogOut, HelpCircle, LifeBuoy } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -73,7 +73,7 @@ export const AppSidebar = () => {
           className="w-full justify-start"
           onClick={() => navigate('/support')}
         >
-          <Support className="h-5 w-5 mr-2" />
+          <LifeBuoy className="h-5 w-5 mr-2" />
           Support
         </Button>
         <Button 
