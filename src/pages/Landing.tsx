@@ -2,7 +2,7 @@ import { Navigation } from "@/components/landing/Navigation";
 import { Hero } from "@/components/landing/Hero";
 import { FeatureCards } from "@/components/landing/FeatureCards";
 import { Link } from "react-router-dom";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Trophy } from "lucide-react";
 
 const Landing = () => {
   return (
@@ -52,21 +52,21 @@ const Landing = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-7xl mx-auto">
             <div className="space-y-8">
               <div>
-                <h3 className="text-3xl font-semibold text-gray-900 mb-4 leading-tight">
-                  Revolutionizing Digital Trust in Global Trade
+                <h3 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent leading-tight">
+                  A Complete End to End Solution
                 </h3>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Experience the future of secure, efficient, and transparent trade documentation. 
-                  Our innovative platform combines cutting-edge blockchain technology with 
-                  user-friendly interfaces to transform how businesses handle digital assets 
-                  and trade documentation.
-                </p>
+                <div className="flex items-center gap-2 text-xl text-gray-600 mb-4">
+                  <Trophy className="h-6 w-6 text-yellow-500" />
+                  <p className="leading-relaxed">
+                    Finalists of the Singapore Fintech Festival 2024
+                  </p>
+                </div>
               </div>
               <div className="hidden lg:block">
                 <img 
-                  src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png" 
-                  alt="Digital Trust Illustration" 
-                  className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                  src="/lovable-uploads/3252abbb-cf47-4c25-9740-92b6ae23d542.png" 
+                  alt="Singapore Fintech Festival 2024" 
+                  className="w-full max-w-lg mx-auto"
                 />
               </div>
             </div>
