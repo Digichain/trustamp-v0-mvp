@@ -38,7 +38,7 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full">
       <Navigation />
       <Hero />
       <FeatureCards />
@@ -47,8 +47,8 @@ const Landing = () => {
       <Partners />
       
       {/* Documentation Section */}
-      <section className="py-20 bg-gray-50" id="documentation">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gray-50 w-full" id="documentation">
+        <div className="container mx-auto px-4 w-full">
           <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
             Documentation
           </h2>
