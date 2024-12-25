@@ -24,13 +24,13 @@ export const FeatureCards = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {features.map((feature) => (
-            <Card key={feature.title} className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card key={feature.title} className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 min-h-[400px]">
               <CardHeader>
-                <div className="w-full h-48 mb-4 overflow-hidden rounded-t-lg">
+                <div className="w-full h-56 mb-4 overflow-hidden rounded-t-lg">
                   <img
                     src={feature.imagePath}
                     alt={feature.title}
-                    className="w-full h-full object-contain p-4"
+                    className="w-full h-full object-contain p-2"
                   />
                 </div>
                 <CardTitle>{feature.title}</CardTitle>
