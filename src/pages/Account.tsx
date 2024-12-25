@@ -90,81 +90,87 @@ const Account = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-6">
-              <div className="grid gap-6">
-                <div className="flex items-center space-x-4">
-                  <Building2 className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Company Name</p>
-                    <p className="text-sm text-muted-foreground">TrustAmp Technologies Pte Ltd</p>
+              <div className="grid grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <Building2 className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Company Name</p>
+                      <p className="text-sm text-muted-foreground">TrustAmp Technologies Pte Ltd</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                  <FileText className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">ACN Number</p>
-                    <p className="text-sm text-muted-foreground">123456789012</p>
+                  <div className="flex items-center space-x-4">
+                    <MapPin className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Address</p>
+                      <p className="text-sm text-muted-foreground">
+                        71 Robinson Road, #14-01<br />
+                        Singapore 068895
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                  <Award className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Compliance Score</p>
-                    <div className="flex items-center">
-                      <p className="text-sm text-muted-foreground">5/5</p>
-                      <Badge variant="secondary" className="ml-2">Excellent</Badge>
+                  <div className="flex items-center space-x-4">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Business Email</p>
+                      <p className="text-sm text-muted-foreground">contact@trustamp.com</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    <Phone className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Business Phone</p>
+                      <p className="text-sm text-muted-foreground">+65 6789 0123</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <CreditCard className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Credit Score</p>
-                    <div className="flex items-center">
-                      <p className="text-sm text-muted-foreground">4/5</p>
-                      <Badge variant="secondary" className="ml-2">Good</Badge>
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <FileText className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">ACN Number</p>
+                      <p className="text-sm text-muted-foreground">123456789012</p>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                  <User className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Contact Person</p>
-                    <div className="text-sm text-muted-foreground">
-                      <p>John Doe</p>
-                      <p>john.doe@email.com</p>
-                      <p>+61 4 8768 9876</p>
+                  <div className="flex items-center space-x-4">
+                    <Award className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Compliance Score</p>
+                      <div className="flex items-center">
+                        <p className="text-sm text-muted-foreground">5/5</p>
+                        <Badge variant="secondary" className="ml-2">Excellent</Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Address</p>
-                    <p className="text-sm text-muted-foreground">
-                      71 Robinson Road, #14-01<br />
-                      Singapore 068895
-                    </p>
+                  <div className="flex items-center space-x-4">
+                    <CreditCard className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Credit Score</p>
+                      <div className="flex items-center">
+                        <p className="text-sm text-muted-foreground">4/5</p>
+                        <Badge variant="secondary" className="ml-2">Good</Badge>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-4">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Business Email</p>
-                    <p className="text-sm text-muted-foreground">contact@trustamp.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">Business Phone</p>
-                    <p className="text-sm text-muted-foreground">+65 6789 0123</p>
+                  <div className="flex items-center space-x-4">
+                    <User className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">Contact Person</p>
+                      <div className="text-sm text-muted-foreground">
+                        <p>John Doe</p>
+                        <p>john.doe@email.com</p>
+                        <p>+61 4 8768 9876</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
