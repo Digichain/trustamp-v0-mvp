@@ -1,36 +1,63 @@
-import { verify, isValid, type VerificationFragment } from "@/utils/openattestation";
-import { DocumentVerifier, VerificationResult } from './types';
-import { processVerificationFragments } from './types/verificationTypes';
+import { DocumentType } from "@/types/documents";
+import { InvoiceVerifier } from "./invoiceVerifier";
 
-export class VerifierFactory {
-  private static verifier: DocumentVerifier;
-
-  static async verifyDocument(document: any): Promise<DocumentVerifier | null> {
-    console.log("Starting document verification process with document:", document);
-    
-    try {
-      // Use the official OpenAttestation verify function
-      const verificationResponse = await verify(document);
-      const fragments = Array.isArray(verificationResponse) ? verificationResponse : [verificationResponse];
-      
-      console.log("Verification fragments:", fragments);
-
-      // Process the verification fragments
-      const verificationDetails = processVerificationFragments(fragments);
-      
-      // Create a verifier instance that wraps the OpenAttestation verification
-      return {
-        verify: async () => {
-          return {
-            isValid: fragments.every(fragment => isValid(fragment)),
-            details: verificationDetails
-          };
-        },
-        getTemplate: () => "ANY"
-      };
-    } catch (error) {
-      console.error("Error in verifier factory:", error);
-      return null;
-    }
-  }
+interface VerificationFragment {
+  name: string;
+  status: "VALID" | "INVALID" | "ERROR";
+  type: string;
+  data?: any;
 }
+
+interface VerificationResult {
+  isValid: boolean;
+  fragments: VerificationFragment[];
+  error?: string;
+}
+
+interface DocumentVerifier {
+  verify(documentData: any): Promise<VerificationResult>;
+}
+
+export const createVerifier = (documentType: DocumentType): DocumentVerifier => {
+  switch (documentType) {
+    case DocumentType.VERIFIABLE_INVOICE:
+      return new InvoiceVerifier();
+    default:
+      throw new Error(`Unsupported document type: ${documentType}`);
+  }
+};
+
+export const verifyFragment = async (
+  fragment: VerificationFragment[],
+  documentData: any
+): Promise<VerificationResult> => {
+  try {
+    const verifier = createVerifier(documentData.type);
+    const result = await verifier.verify(documentData);
+    return {
+      isValid: result.fragments.every((f) => f.status === "VALID"),
+      fragments: result.fragments,
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      fragments: [],
+      error: error instanceof Error ? error.message : "Unknown verification error",
+    };
+  }
+};
+
+export const validateDocumentIntegrity = async (
+  documentData: any
+): Promise<VerificationResult> => {
+  try {
+    const verifier = createVerifier(documentData.type);
+    return await verifier.verify(documentData);
+  } catch (error) {
+    return {
+      isValid: false,
+      fragments: [],
+      error: error instanceof Error ? error.message : "Document validation failed",
+    };
+  }
+};

@@ -6,7 +6,11 @@ import {
   Building2,
   HandshakeIcon,
   Lightbulb,
+  FileText,
+  ShieldCheck,
+  DollarSign,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Landing = () => {
   return (
@@ -15,32 +19,47 @@ const Landing = () => {
       <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 border-b">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <Link to="/">
-                <img
-                  src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
-                  alt="Logo"
-                  className="h-8"
-                />
-              </Link>
-              <div className="hidden md:flex items-center space-x-6">
-                <Link to="#about" className="text-gray-600 hover:text-primary flex items-center gap-2">
+            <Link to="/" className="flex-shrink-0">
+              <img
+                src="/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                alt="Logo"
+                className="h-8"
+              />
+            </Link>
+            <div className="flex-grow flex justify-center">
+              <div className="hidden md:flex items-center space-x-8">
+                <Link 
+                  to="#about" 
+                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium flex items-center gap-2"
+                >
                   <Lightbulb className="h-4 w-4" />
                   About
                 </Link>
-                <Link to="#solution" className="text-gray-600 hover:text-primary flex items-center gap-2">
+                <Link 
+                  to="#solution" 
+                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium flex items-center gap-2"
+                >
                   <Building2 className="h-4 w-4" />
                   Solution
                 </Link>
-                <Link to="#documentation" className="text-gray-600 hover:text-primary flex items-center gap-2">
+                <Link 
+                  to="#documentation" 
+                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium flex items-center gap-2"
+                >
                   <BookOpen className="h-4 w-4" />
                   Documentation
                 </Link>
-                <Link to="#partners" className="text-gray-600 hover:text-primary flex items-center gap-2">
+                <Link 
+                  to="#partners" 
+                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium flex items-center gap-2"
+                >
                   <HandshakeIcon className="h-4 w-4" />
                   Partners
                 </Link>
-                <Link to="#careers" className="text-gray-600 hover:text-primary flex items-center gap-2">
+                <Link 
+                  to="#careers" 
+                  className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium flex items-center gap-2"
+                >
                   <Briefcase className="h-4 w-4" />
                   Careers
                 </Link>
@@ -83,6 +102,55 @@ const Landing = () => {
                 Learn More
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Cards */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Smart Document Creation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Create and manage digital documents with blockchain-backed security and authenticity
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <ShieldCheck className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Document Verification</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Instantly verify document authenticity using blockchain technology
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <DollarSign className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Instant Settlements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Streamline payments and settlements with secure blockchain transactions
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
