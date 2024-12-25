@@ -116,27 +116,58 @@ const Landing = () => {
             Our <span className="text-primary">Partners</span>
           </h2>
           <div className="relative overflow-hidden">
-            <div className="flex animate-[gradient-x_15s_linear_infinite] space-x-16">
-              {/* Note: Replace these placeholder divs with actual partner images once provided */}
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Digital Economy Council
-              </div>
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Austrade
-              </div>
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Novatti
-              </div>
+            <div className="flex space-x-16 animate-[gradient-x_15s_linear_infinite] hover:pause group">
+              {[
+                {
+                  name: "Digital Economy Council",
+                  logo: "/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
+                },
+                {
+                  name: "Austrade",
+                  logo: "/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                },
+                {
+                  name: "Novatti",
+                  logo: "/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+                }
+              ].map((partner, index) => (
+                <div
+                  key={index}
+                  className="flex-none w-48 h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              ))}
               {/* Duplicate items for seamless loop */}
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Digital Economy Council
-              </div>
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Austrade
-              </div>
-              <div className="flex-none w-48 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                Novatti
-              </div>
+              {[
+                {
+                  name: "Digital Economy Council",
+                  logo: "/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png"
+                },
+                {
+                  name: "Austrade",
+                  logo: "/lovable-uploads/df36eb75-8c90-479d-961a-9fa2c1a89be2.png"
+                },
+                {
+                  name: "Novatti",
+                  logo: "/lovable-uploads/646ae116-5adf-4c13-ba5d-ecd754fae841.png"
+                }
+              ].map((partner, index) => (
+                <div
+                  key={`duplicate-${index}`}
+                  className="flex-none w-48 h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
