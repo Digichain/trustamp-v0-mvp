@@ -13,14 +13,20 @@ const Landing = () => {
       {/* About Section */}
       <section className="py-20 bg-gray-50" id="about">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">About Us</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+            About <span className="text-primary">Us</span>
+          </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <p className="text-gray-700 leading-relaxed">
-                In an increasingly digital world, ensuring the authenticity and integrity of information is crucial. TruStamp offers a cutting-edge, blockchain-based solution designed to address critical challenges in global trade and supply chain digitization. It provides instant, escrow-based payments, including liquidity optimization.
+              <p className="text-lg text-gray-700 leading-relaxed">
+                In an increasingly digital world, ensuring the authenticity and integrity of information is crucial. 
+                <span className="font-medium text-primary"> TruStamp </span> 
+                offers a cutting-edge, blockchain-based solution designed to address critical challenges in global trade and supply chain digitization. It provides instant, escrow-based payments, including liquidity optimization.
               </p>
-              <p className="text-gray-700 leading-relaxed">
-                TruStamp's innovative approach ensures traceability, transparency, and automation for trade settlements. By leveraging blockchain technology, smart contracts, and tokenization, the platform optimizes working capital, enables safe and efficient end-to-end transactions, and supports document verification, identity validation, and robust security.
+              <p className="text-lg text-gray-700 leading-relaxed">
+                TruStamp's innovative approach ensures traceability, transparency, and automation for trade settlements. By leveraging 
+                <span className="font-medium"> blockchain technology, smart contracts, and tokenization</span>, 
+                the platform optimizes working capital, enables safe and efficient end-to-end transactions, and supports document verification, identity validation, and robust security.
               </p>
             </div>
             <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
@@ -38,28 +44,36 @@ const Landing = () => {
 
       <section className="py-20" id="solution">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Solution</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+            Our <span className="text-primary">Solution</span>
+          </h2>
           {/* Add solution content */}
         </div>
       </section>
 
       <section className="py-20 bg-gray-50" id="documentation">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Documentation</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+            Documentation
+          </h2>
           {/* Add documentation content */}
         </div>
       </section>
 
       <section className="py-20" id="partners">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Partners</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+            Our <span className="text-primary">Partners</span>
+          </h2>
           {/* Add partners content */}
         </div>
       </section>
 
       <section className="py-20 bg-gray-50" id="careers">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Careers</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
+            Careers
+          </h2>
           {/* Add careers content */}
         </div>
       </section>
@@ -79,27 +93,27 @@ const Landing = () => {
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4 text-lg">Company</h3>
               <ul className="space-y-2">
-                <li><Link to="#about" className="text-gray-400 hover:text-white">About</Link></li>
-                <li><Link to="#careers" className="text-gray-400 hover:text-white">Careers</Link></li>
-                <li><Link to="#partners" className="text-gray-400 hover:text-white">Partners</Link></li>
+                <li><Link to="#about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
+                <li><Link to="#careers" className="text-gray-400 hover:text-white transition-colors">Careers</Link></li>
+                <li><Link to="#partners" className="text-gray-400 hover:text-white transition-colors">Partners</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
+              <h3 className="font-semibold mb-4 text-lg">Resources</h3>
               <ul className="space-y-2">
-                <li><Link to="#documentation" className="text-gray-400 hover:text-white">Documentation</Link></li>
-                <li><Link to="#" className="text-gray-400 hover:text-white">API Reference</Link></li>
-                <li><Link to="#" className="text-gray-400 hover:text-white">Support</Link></li>
+                <li><Link to="#documentation" className="text-gray-400 hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link to="#" className="text-gray-400 hover:text-white transition-colors">API Reference</Link></li>
+                <li><Link to="#" className="text-gray-400 hover:text-white transition-colors">Support</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
+              <h3 className="font-semibold mb-4 text-lg">Legal</h3>
               <ul className="space-y-2">
-                <li><Link to="#" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
-                <li><Link to="#" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
-                <li><Link to="#" className="text-gray-400 hover:text-white">Cookie Policy</Link></li>
+                <li><Link to="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link to="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
