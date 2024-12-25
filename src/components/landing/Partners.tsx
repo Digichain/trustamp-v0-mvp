@@ -34,12 +34,12 @@ export const Partners = () => {
         <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
           Our <span className="text-primary">Partners</span>
         </h2>
-        <div className="relative overflow-hidden w-full">
-          <div className="flex space-x-8 animate-marquee whitespace-nowrap">
-            {[...partnerLogos, ...partnerLogos].map((partner, index) => (
+        <div className="overflow-x-auto pb-4">
+          <div className="flex space-x-8 min-w-max">
+            {partnerLogos.map((partner, index) => (
               <div
                 key={`${partner.name}-${index}`}
-                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
+                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 shadow-sm"
               >
                 <img
                   src={partner.logo}
