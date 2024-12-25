@@ -1,14 +1,23 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ArrowUp, ArrowDown } from "lucide-react";
+import { DollarSign, ArrowUp, ArrowDown, MoreVertical, FileText, CreditCard, Settings } from "lucide-react";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Payments = () => {
   console.log('Payments page rendered');
 
-  // Dummy contract data
+  // Dummy contract data with creation dates
   const contracts = [
     {
       id: "0x1234567890abcdef",
+      created: new Date('2024-03-15'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 1500.00,
@@ -16,6 +25,7 @@ const Payments = () => {
     },
     {
       id: "0xabcdef1234567890",
+      created: new Date('2024-03-16'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 2500.00,
@@ -23,6 +33,7 @@ const Payments = () => {
     },
     {
       id: "0x9876543210fedcba",
+      created: new Date('2024-03-17'),
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 3000.00,
@@ -54,6 +65,10 @@ const Payments = () => {
       description: "Contract settlement"
     }
   ];
+
+  const handleAction = (action: string, contract: any) => {
+    console.log(`Action ${action} triggered for contract ${contract.id}`);
+  };
 
   return (
     <div className="p-8">
@@ -88,16 +103,19 @@ const Payments = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Contract</TableHead>
+                  <TableHead>Created</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Current Holder</TableHead>
                   <TableHead>Total Value</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {contracts.map((contract) => (
                   <TableRow key={contract.id}>
                     <TableCell className="font-mono">{contract.id}</TableCell>
+                    <TableCell>{format(contract.created, 'dd-MM-yyyy')}</TableCell>
                     <TableCell>{contract.owner}</TableCell>
                     <TableCell>{contract.currentHolder}</TableCell>
                     <TableCell>${contract.totalValue.toFixed(2)}</TableCell>
@@ -109,6 +127,37 @@ const Payments = () => {
                       }`}>
                         {contract.status}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleAction('options', contract)}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Options</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleAction('documents', contract)}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>Contract Documents</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleAction('pay', contract)}
+                            disabled={contract.status !== 'outstanding'}
+                            className={contract.status !== 'outstanding' ? 'opacity-50' : ''}
+                          >
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            <span>Pay Now</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleAction('override', contract)}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Override Conditions</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
