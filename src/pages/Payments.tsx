@@ -132,7 +132,7 @@ const Payments = () => {
         {/* Contracts Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Active Contracts</CardTitle>
+            <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <ContractsTable 
