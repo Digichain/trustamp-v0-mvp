@@ -1,4 +1,4 @@
-import { verify, isValid } from "@govtechsg/oa-verify";
+import { isValid, openAttestationVerifiers, verificationBuilder } from "@govtechsg/oa-verify";
 import { DocumentVerifier, VerificationResult } from "./types";
 import { processVerificationFragments } from "./types/verificationTypes";
 import { getVerificationConfig } from "@/utils/verification-config";
@@ -8,17 +8,19 @@ export class InvoiceVerifier implements DocumentVerifier {
     try {
       console.log("Starting invoice verification for document:", document);
       
-      // Set up verification configuration before any verification attempt
-      console.log("Setting up verification configuration...");
-      await getVerificationConfig();
-      console.log("Verification configuration set successfully");
-      
-      // Add a small delay to ensure the global config is set
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Get verification configuration
+      console.log("Getting verification configuration...");
+      const config = await getVerificationConfig();
+      console.log("Verification configuration:", config);
+
+      // Create verification function using builder
+      console.log("Creating verification builder with network:", config.provider.network);
+      const verify = verificationBuilder(openAttestationVerifiers, {
+        network: config.provider.network,
+        provider: config.provider.provider,
+      });
       
       console.log("Starting document verification process...");
-      console.log("Global config:", (window as any).openAttestationEthereumProviderConfig);
-      
       const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
       
