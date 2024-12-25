@@ -4,6 +4,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TransactionChart } from "@/components/dashboard/TransactionChart";
 import { DocumentDistribution } from "@/components/dashboard/DocumentDistribution";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { UserProfile } from "@/components/dashboard/UserProfile";
 
 const mockBarChartData = [
   { name: 'Jan', transactions: 12 },
@@ -45,13 +46,8 @@ const Dashboard = () => {
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome to Trustamp</h1>
-          <p className="text-gray-600">
-            Track and manage your digital trade documentation in one place.
-          </p>
-        </div>
-
+        <UserProfile />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Transactions"
