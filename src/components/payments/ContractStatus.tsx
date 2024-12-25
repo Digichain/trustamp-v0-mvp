@@ -7,7 +7,7 @@ export const ContractStatus = ({ status }: ContractStatusProps) => {
     switch (status.toLowerCase()) {
       case 'paid':
         return 'bg-green-100 text-green-800 border border-green-200';
-      case 'held in escrow':
+      case 'escrow':
         return 'bg-blue-100 text-blue-800 border border-blue-200';
       case 'outstanding':
         return 'bg-yellow-100 text-yellow-800 border border-yellow-200';

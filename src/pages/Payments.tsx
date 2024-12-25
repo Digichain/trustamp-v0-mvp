@@ -20,7 +20,7 @@ const Payments = () => {
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 1500.00,
-      status: "held in escrow"
+      status: "escrow"
     },
     {
       id: "0xabcdef0123456789abcdef0123456789abcdef01",
