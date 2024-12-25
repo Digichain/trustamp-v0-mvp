@@ -1,7 +1,9 @@
 import { VerificationStatus } from "./VerificationStatus";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface DocumentVerificationStatusProps {
   verificationDetails: {
@@ -30,6 +32,8 @@ export const DocumentVerificationStatus = ({
   verificationDetails,
   onReset
 }: DocumentVerificationStatusProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!verificationDetails) {
     return (
       <div className="space-y-6">
@@ -86,10 +90,25 @@ export const DocumentVerificationStatus = ({
 
       {verificationDetails.fragments && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Verification Fragments</h3>
-          <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
-            {JSON.stringify(verificationDetails.fragments, null, 2)}
-          </pre>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Verification Details</h3>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  {isOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <pre className="mt-4 bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                {JSON.stringify(verificationDetails.fragments, null, 2)}
+              </pre>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
       )}
 
