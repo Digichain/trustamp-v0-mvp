@@ -1,4 +1,6 @@
-import { Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 const partnerLogos = [
   {
@@ -28,27 +30,61 @@ const partnerLogos = [
 ];
 
 export const Partners = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+      scrollContainerRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section className="py-20" id="partners">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
           Our <span className="text-primary">Partners</span>
         </h2>
-        <div className="overflow-x-auto pb-4">
-          <div className="flex space-x-8 min-w-max">
-            {partnerLogos.map((partner, index) => (
-              <div
-                key={`${partner.name}-${index}`}
-                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 shadow-sm"
-              >
-                <img
-                  src={partner.logo}
-                  alt={partner.name}
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
-            ))}
+        <div className="relative">
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-hidden pb-4 scrollbar-hide"
+          >
+            <div className="flex space-x-8 min-w-max">
+              {partnerLogos.map((partner, index) => (
+                <div
+                  key={`${partner.name}-${index}`}
+                  className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 shadow-sm"
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 rounded-full bg-background shadow-md hover:bg-accent"
+            onClick={() => scroll('left')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 rounded-full bg-background shadow-md hover:bg-accent"
+            onClick={() => scroll('right')}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>
