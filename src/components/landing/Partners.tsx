@@ -35,8 +35,8 @@ export const Partners = () => {
           Our <span className="text-primary">Partners</span>
         </h2>
         <div className="relative overflow-hidden">
-          <div className="flex flex-wrap justify-center gap-8">
-            {partnerLogos.map((partner, index) => (
+          <div className="flex space-x-16 animate-[gradient-x_15s_linear_infinite] hover:pause group">
+            {[...partnerLogos, ...partnerLogos].map((partner, index) => (
               <div
                 key={`${partner.name}-${index}`}
                 className="flex-none w-48 h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
