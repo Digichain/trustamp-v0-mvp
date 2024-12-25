@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ContractStatus } from "./ContractStatus";
+import { ContractActions } from "./ContractActions";
 import { format } from "date-fns";
 
 interface Contract {
@@ -29,6 +30,7 @@ export const ContractsTable = ({ contracts, onAction }: ContractsTableProps) => 
           <TableHead>Current Holder</TableHead>
           <TableHead>Total Value</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -44,6 +46,12 @@ export const ContractsTable = ({ contracts, onAction }: ContractsTableProps) => 
             <TableCell>${contract.totalValue.toFixed(2)}</TableCell>
             <TableCell>
               <ContractStatus status={contract.status} />
+            </TableCell>
+            <TableCell className="text-right">
+              <ContractActions 
+                contract={contract} 
+                onAction={onAction}
+              />
             </TableCell>
           </TableRow>
         ))}
