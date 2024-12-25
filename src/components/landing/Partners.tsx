@@ -34,12 +34,26 @@ export const Partners = () => {
         <h2 className="text-4xl font-bold text-center mb-12 tracking-tight">
           Our <span className="text-primary">Partners</span>
         </h2>
-        <div className="relative overflow-hidden">
-          <div className="flex space-x-16 animate-marquee">
+        <div className="relative overflow-hidden w-full">
+          <div className="flex space-x-8 animate-marquee whitespace-nowrap">
             {[...partnerLogos, ...partnerLogos].map((partner, index) => (
               <div
                 key={`${partner.name}-${index}`}
-                className="flex-none w-48 h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
+                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
+              >
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex space-x-8 animate-marquee2 whitespace-nowrap absolute top-0">
+            {[...partnerLogos, ...partnerLogos].map((partner, index) => (
+              <div
+                key={`${partner.name}-second-${index}`}
+                className="flex-none w-[200px] h-24 bg-white rounded-lg flex items-center justify-center p-4 hover:shadow-lg transition-shadow"
               >
                 <img
                   src={partner.logo}
