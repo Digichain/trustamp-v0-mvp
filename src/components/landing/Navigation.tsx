@@ -39,7 +39,7 @@ export const Navigation = () => {
               <Button variant="ghost">Login</Button>
             </Link>
             <Link to="/auth">
-              <Button>Sign Up</Button>
+              <Button className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">Sign Up</Button>
             </Link>
           </div>
         </div>

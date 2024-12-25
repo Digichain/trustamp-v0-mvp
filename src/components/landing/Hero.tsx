@@ -27,12 +27,12 @@ export const Hero = () => {
         </p>
         <div className="flex justify-center gap-4">
           <Link to="/auth">
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
               Get Started
             </Button>
           </Link>
           <Link to="#documentation">
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button size="lg" variant="outline" className="gap-2 border-2">
               Learn More
             </Button>
           </Link>
