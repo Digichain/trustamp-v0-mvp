@@ -28,7 +28,6 @@ export const createVerifier = (documentType: DocumentType): DocumentVerifier => 
 };
 
 export const verifyFragment = async (
-  fragment: VerificationFragment[],
   documentData: any
 ): Promise<VerificationResult> => {
   try {

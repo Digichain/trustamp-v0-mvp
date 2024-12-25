@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
 import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
 import { useWallet } from '@/contexts/WalletContext';
+import { VerificationResult } from '@/components/transactions/verification/types';
 
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
@@ -34,19 +35,8 @@ const VerifyDocument = () => {
         return;
       }
 
-      const verifier = await VerifierFactory.verifyDocument(document);
-      if (!verifier) {
-        console.error("No verifier found for document");
-        toast({
-          title: "Verification Error",
-          description: "Unsupported document type",
-          variant: "destructive"
-        });
-        return;
-      }
-
       console.log("Starting document verification");
-      const result = await verifier.verify(document);
+      const result = await VerifierFactory.verifyDocument(document);
       console.log("Verification result:", result);
 
       setVerificationResult({
@@ -63,7 +53,7 @@ const VerifyDocument = () => {
       } else {
         toast({
           title: "Document Invalid",
-          description: result.errors?.[0] || "Verification failed",
+          description: result.error || "Verification failed",
           variant: "destructive"
         });
       }
