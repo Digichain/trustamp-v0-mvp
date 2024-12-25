@@ -1,33 +1,34 @@
-import {
-  OpenAttestationEthereumDocumentStoreStatusFragment,
-  OpenAttestationHashValidFragment,
+import { 
+  VerificationFragment as OAVerificationFragment,
+  OpenAttestationDNSTextRecord,
+  OpenAttestationDNSProof
 } from "@govtechsg/oa-verify";
 
-export const getDocumentStoreAddress = (fragments: any[]): string => {
-  const documentStoreFragment = fragments.find(
-    (fragment) =>
-      fragment.name === "OpenAttestationEthereumDocumentStoreStatus"
-  );
-  return documentStoreFragment?.values?.[0]?.location || "";
+export type VerificationFragment = OAVerificationFragment;
+
+export const isValidFragment = (fragment: VerificationFragment): boolean => {
+  return fragment.status === "VALID";
 };
 
-export const getDocumentHash = (fragments: any[]): string => {
-  const hashFragment = fragments.find(
-    (fragment) => fragment.name === "OpenAttestationHash"
-  );
-  return hashFragment?.values?.[0]?.location || "";
+export const isDnsFragment = (fragment: VerificationFragment): boolean => {
+  return fragment.type === "ISSUER_IDENTITY";
 };
 
-export const isValidDocument = (fragments: any[]): boolean => {
-  const hashValidFragment = fragments.find(
-    (fragment) => fragment.name === "OpenAttestationHashValid"
-  );
-  return hashValidFragment?.values?.[0]?.valid || false;
+export const isDocumentStoreFragment = (fragment: VerificationFragment): boolean => {
+  return fragment.type === "DOCUMENT_STATUS";
 };
 
-export const getDocumentStatus = (fragments: any[]): string => {
-  const statusFragment = fragments.find(
-    (fragment) => fragment.name === "OpenAttestationEthereumDocumentStoreStatus"
-  );
-  return statusFragment?.values?.[0]?.status || "";
+export const isHashFragment = (fragment: VerificationFragment): boolean => {
+  return fragment.type === "DOCUMENT_INTEGRITY";
+};
+
+export const getDnsData = (fragment: VerificationFragment): { name?: string; domain?: string } => {
+  if (isDnsFragment(fragment) && fragment.data) {
+    const dnsData = fragment.data as OpenAttestationDNSProof;
+    return {
+      name: dnsData.location,
+      domain: dnsData.location
+    };
+  }
+  return {};
 };

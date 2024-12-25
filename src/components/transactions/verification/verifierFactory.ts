@@ -18,6 +18,12 @@ interface DocumentVerifier {
   verify(documentData: any): Promise<VerificationResult>;
 }
 
+export class VerifierFactory {
+  static async verifyDocument(document: any): Promise<DocumentVerifier> {
+    return new InvoiceVerifier();
+  }
+}
+
 export const createVerifier = (documentType: DocumentType): DocumentVerifier => {
   switch (documentType) {
     case DocumentType.VERIFIABLE_INVOICE:
