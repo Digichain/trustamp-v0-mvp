@@ -17,7 +17,7 @@ export const TransactionHistory = ({ transactions }: TransactionHistoryProps) =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
+        <CardTitle>History</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
