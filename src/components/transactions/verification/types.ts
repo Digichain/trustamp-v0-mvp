@@ -1,7 +1,23 @@
+import { VerificationFragment } from "@govtechsg/oa-verify";
+
 export interface VerificationResult {
   isValid: boolean;
-  errors?: string[];
-  details?: Record<string, any>;
+  error?: string;
+  details?: {
+    documentIntegrity?: {
+      valid: boolean;
+      message: string;
+    };
+    issuanceStatus?: {
+      valid: boolean;
+      message: string;
+    };
+    issuerIdentity?: {
+      valid: boolean;
+      message: string;
+      details?: any;
+    };
+  };
 }
 
 export interface DocumentVerifier {
@@ -9,7 +25,6 @@ export interface DocumentVerifier {
   getTemplate: () => string;
 }
 
-// Document template names
 export const DOCUMENT_TEMPLATES = {
   INVOICE: 'INVOICE',
   BILL_OF_LADING: 'BILL_OF_LADING',

@@ -1,26 +1,20 @@
 import { DocumentType } from "@/types/documents";
 import { InvoiceVerifier } from "./invoiceVerifier";
-
-interface VerificationFragment {
-  name: string;
-  status: "VALID" | "INVALID" | "ERROR";
-  type: string;
-  data?: any;
-}
-
-interface VerificationResult {
-  isValid: boolean;
-  fragments: VerificationFragment[];
-  error?: string;
-}
-
-interface DocumentVerifier {
-  verify(documentData: any): Promise<VerificationResult>;
-}
+import { VerificationResult, DocumentVerifier } from "./types";
 
 export class VerifierFactory {
-  static async verifyDocument(document: any): Promise<DocumentVerifier> {
-    return new InvoiceVerifier();
+  static createVerifier(documentType: DocumentType): DocumentVerifier {
+    switch (documentType) {
+      case DocumentType.VERIFIABLE_INVOICE:
+        return new InvoiceVerifier();
+      default:
+        throw new Error(`Unsupported document type: ${documentType}`);
+    }
+  }
+
+  static async verifyDocument(document: any): Promise<VerificationResult> {
+    const verifier = new InvoiceVerifier();
+    return verifier.verify(document);
   }
 }
 
@@ -40,15 +34,11 @@ export const verifyFragment = async (
   try {
     const verifier = createVerifier(documentData.type);
     const result = await verifier.verify(documentData);
-    return {
-      isValid: result.fragments.every((f) => f.status === "VALID"),
-      fragments: result.fragments,
-    };
+    return result;
   } catch (error) {
     return {
       isValid: false,
-      fragments: [],
-      error: error instanceof Error ? error.message : "Unknown verification error",
+      error: error instanceof Error ? error.message : "Unknown verification error"
     };
   }
 };
@@ -62,8 +52,7 @@ export const validateDocumentIntegrity = async (
   } catch (error) {
     return {
       isValid: false,
-      fragments: [],
-      error: error instanceof Error ? error.message : "Document validation failed",
+      error: error instanceof Error ? error.message : "Document validation failed"
     };
   }
 };

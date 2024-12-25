@@ -27,7 +27,7 @@ export class InvoiceVerifier implements DocumentVerifier {
       console.error("Verification error:", error);
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : "Unknown verification error"]
+        error: error instanceof Error ? error.message : "Unknown verification error"
       };
     }
   }

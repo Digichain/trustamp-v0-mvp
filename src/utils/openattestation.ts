@@ -1,10 +1,9 @@
 import { 
-  VerificationFragment as OAVerificationFragment,
-  OpenAttestationDNSTextRecord,
-  OpenAttestationDNSProof
+  VerificationFragment,
+  OpenAttestationDnsTxtCode
 } from "@govtechsg/oa-verify";
 
-export type VerificationFragment = OAVerificationFragment;
+export type { VerificationFragment };
 
 export const isValidFragment = (fragment: VerificationFragment): boolean => {
   return fragment.status === "VALID";
@@ -23,8 +22,8 @@ export const isHashFragment = (fragment: VerificationFragment): boolean => {
 };
 
 export const getDnsData = (fragment: VerificationFragment): { name?: string; domain?: string } => {
-  if (isDnsFragment(fragment) && fragment.data) {
-    const dnsData = fragment.data as OpenAttestationDNSProof;
+  if (isDnsFragment(fragment) && 'data' in fragment) {
+    const dnsData = fragment.data as { location: string };
     return {
       name: dnsData.location,
       domain: dnsData.location
