@@ -5,17 +5,17 @@ export const FeatureCards = () => {
     {
       title: "Smart Document Creation",
       description: "Create and manage digital documents with blockchain-backed security and authenticity",
-      imagePath: "/placeholder.svg"
+      imagePath: "/lovable-uploads/0eeaddc3-20bd-4a8f-90f7-7850f9122bc4.png"
     },
     {
       title: "Document Verification",
       description: "Instantly verify document authenticity using blockchain technology",
-      imagePath: "/placeholder.svg"
+      imagePath: "/lovable-uploads/b89f2486-94a2-4566-966c-5fa336c6e971.png"
     },
     {
       title: "Instant Settlements",
       description: "Streamline payments and settlements with secure blockchain transactions",
-      imagePath: "/placeholder.svg"
+      imagePath: "/lovable-uploads/0d20854b-1212-4f30-a7c6-acc4b63adc49.png"
     }
   ];
 
@@ -30,7 +30,7 @@ export const FeatureCards = () => {
                   <img
                     src={feature.imagePath}
                     alt={feature.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-4"
                   />
                 </div>
                 <CardTitle>{feature.title}</CardTitle>
