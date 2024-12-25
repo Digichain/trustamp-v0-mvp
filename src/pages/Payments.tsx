@@ -8,13 +8,15 @@ const Payments = () => {
   console.log('Payments page rendered');
 
   // Generate random numbers for stats
-  const activeCount = Math.floor(Math.random() * 10) + 1; // Random number between 1-10
-  const completedCount = Math.floor(Math.random() * 6) + 3; // Random number between 3-8
+  const activeCount = Math.floor(Math.random() * 10) + 1;
+  const completedCount = Math.floor(Math.random() * 6) + 3;
 
+  // Updated contracts array with updated dates
   const contracts = [
     {
       id: "0x1234567890123456789012345678901234567890",
       created: new Date('2024-03-15'),
+      updated: new Date('2024-03-17'), // 2 days after creation
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 1500.00,
@@ -23,6 +25,7 @@ const Payments = () => {
     {
       id: "0xabcdef0123456789abcdef0123456789abcdef01",
       created: new Date('2024-03-16'),
+      updated: new Date('2024-03-19'), // 3 days after creation
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 2500.00,
@@ -31,6 +34,7 @@ const Payments = () => {
     {
       id: "0x9876543210fedcba9876543210fedcba98765432",
       created: new Date('2024-03-17'),
+      updated: new Date('2024-03-18'), // 1 day after creation
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 3000.00,

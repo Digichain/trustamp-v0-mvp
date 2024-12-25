@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
-import { ContractActions } from "./ContractActions";
 import { ContractStatus } from "./ContractStatus";
+import { format } from "date-fns";
 
 interface Contract {
   id: string;
   created: Date;
+  updated?: Date; // Make updated optional since we're adding it now
   owner: string;
   currentHolder: string;
   totalValue: number;
@@ -22,31 +22,28 @@ export const ContractsTable = ({ contracts, onAction }: ContractsTableProps) => 
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Contract</TableHead>
+          <TableHead>Contract ID</TableHead>
           <TableHead>Created</TableHead>
+          <TableHead>Updated</TableHead>
           <TableHead>Owner</TableHead>
           <TableHead>Current Holder</TableHead>
           <TableHead>Total Value</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {contracts.map((contract) => (
           <TableRow key={contract.id}>
-            <TableCell className="font-mono">{contract.id}</TableCell>
-            <TableCell>{format(contract.created, 'dd-MM-yyyy')}</TableCell>
+            <TableCell className="font-mono text-xs">{contract.id}</TableCell>
+            <TableCell>{format(contract.created, 'dd MMM yyyy')}</TableCell>
+            <TableCell>
+              {contract.updated ? format(contract.updated, 'dd MMM yyyy') : '-'}
+            </TableCell>
             <TableCell>{contract.owner}</TableCell>
             <TableCell>{contract.currentHolder}</TableCell>
             <TableCell>${contract.totalValue.toFixed(2)}</TableCell>
             <TableCell>
               <ContractStatus status={contract.status} />
-            </TableCell>
-            <TableCell className="text-right">
-              <ContractActions 
-                contract={contract} 
-                onAction={onAction} 
-              />
             </TableCell>
           </TableRow>
         ))}
