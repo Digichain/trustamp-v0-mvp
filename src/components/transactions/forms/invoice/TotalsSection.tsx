@@ -41,7 +41,7 @@ export const TotalsSection = ({
               step="0.01"
               value={tax || 0}
               onChange={handleTaxChange}
-              className="w-20"
+              className="w-20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <div className="flex justify-between">
