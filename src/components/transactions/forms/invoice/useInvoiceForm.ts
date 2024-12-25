@@ -92,6 +92,13 @@ export const useInvoiceForm = () => {
           }
         }));
       }
+    } else if (section === "tax" || section === "taxTotal" || section === "total") {
+      // Handle tax-related fields directly as numbers
+      const numericValue = parseFloat(value) || 0;
+      setFormData(prev => ({
+        ...prev,
+        [section]: numericValue
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
