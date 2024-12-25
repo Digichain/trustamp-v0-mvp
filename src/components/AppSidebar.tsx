@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, HelpCircle, Support } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -59,7 +59,23 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border p-4">
+      <SidebarFooter className="border-t border-border p-4 flex flex-col gap-2">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start"
+          onClick={() => navigate('/faq')}
+        >
+          <HelpCircle className="h-5 w-5 mr-2" />
+          FAQ
+        </Button>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start"
+          onClick={() => navigate('/support')}
+        >
+          <Support className="h-5 w-5 mr-2" />
+          Support
+        </Button>
         <Button 
           variant="ghost" 
           className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
