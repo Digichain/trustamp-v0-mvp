@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ShieldCheck, Edit, Send, Building2, MapPin, Mail, Phone, FileText, Award, CreditCard, User } from "lucide-react";
+import { Shield, ShieldCheck, Edit, Send, Building2, MapPin, Mail, Phone, FileText, Award, CreditCard, User, Bell, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { format, addYears } from "date-fns";
 
 const Account = () => {
@@ -180,6 +182,76 @@ const Account = () => {
                 <Button variant="outline" className="w-full">
                   <Edit className="mr-2 h-4 w-4" />
                   Update Company Details
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notification Settings Section */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-bold">Notification Settings</CardTitle>
+              <CardDescription>Manage how you receive notifications</CardDescription>
+            </div>
+            <Bell className="h-8 w-8 text-gray-400" />
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              {/* Notification Channels */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Notification Channels</h3>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                      <Label htmlFor="email-notifications">Email Notifications</Label>
+                    </div>
+                    <Switch id="email-notifications" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <MessageSquare className="h-5 w-5 text-gray-400" />
+                      <Label htmlFor="sms-notifications">SMS Notifications</Label>
+                    </div>
+                    <Switch id="sms-notifications" defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Notifications */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Event Notifications</h3>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="contract-transfer">Contract Transfer</Label>
+                    <Switch id="contract-transfer" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="invoice-paid">Invoice Paid</Label>
+                    <Switch id="invoice-paid" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="invoice-unpaid">Invoice Unpaid</Label>
+                    <Switch id="invoice-unpaid" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="document-verification">Document Verification</Label>
+                    <Switch id="document-verification" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="kyc-updates">KYC Updates</Label>
+                    <Switch id="kyc-updates" defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-4">
+                <Button variant="outline" className="w-full">
+                  <Bell className="mr-2 h-4 w-4" />
+                  Update Notification Preferences
                 </Button>
               </div>
             </div>
