@@ -88,7 +88,7 @@ const Auth = () => {
             />
           </Link>
           <div>
-            <h2 className="text-3xl font-bold text-card-foreground">Welcome to Trustamp</h2>
+            <h2 className="text-3xl font-bold text-card-foreground">Welcome Back</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Please sign in to continue
             </p>
@@ -109,16 +109,10 @@ const Auth = () => {
           }}
           providers={[]}
           theme="light"
+          view="sign_in"
+          showLinks={false}
           localization={{
             variables: {
-              sign_up: {
-                email_label: 'Email',
-                password_label: 'Create Password',
-                button_label: 'Create Account',
-                loading_button_label: 'Creating Account...',
-                social_provider_text: 'Sign up with {{provider}}',
-                link_text: "Don't have an account? Sign up",
-              },
               sign_in: {
                 email_label: 'Email',
                 password_label: 'Your Password',
