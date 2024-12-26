@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { DollarSign, ArrowUpCircle, ArrowDownCircle, ShoppingCart } from "lucide-react";
 import { ContractsTable } from "@/components/payments/ContractsTable";
 import { TransactionHistory } from "@/components/payments/TransactionHistory";
 
@@ -102,35 +102,48 @@ const Payments = () => {
             </div>
           </div>
           
-          <Card className="w-[400px]">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">Fiat Account Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="p-4 bg-primary/10 rounded-full">
-                    <DollarSign className="h-6 w-6 text-primary" />
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col gap-4">
+              <Button className="w-full" variant="outline">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Buy Ether
+              </Button>
+              <Button className="w-full" variant="outline">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Buy USDC
+              </Button>
+            </div>
+            
+            <Card className="w-[400px]">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Fiat Account Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-4 bg-primary/10 rounded-full">
+                      <DollarSign className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Balance</p>
+                      <h2 className="text-3xl font-bold">$100.00</h2>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Current Balance</p>
-                    <h2 className="text-3xl font-bold">$100.00</h2>
+                  
+                  <div className="flex gap-4">
+                    <Button className="flex-1" variant="outline">
+                      <ArrowUpCircle className="mr-2 h-4 w-4" />
+                      Deposit
+                    </Button>
+                    <Button className="flex-1" variant="outline">
+                      <ArrowDownCircle className="mr-2 h-4 w-4" />
+                      Withdraw
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex gap-4">
-                  <Button className="flex-1" variant="outline">
-                    <ArrowUpCircle className="mr-2 h-4 w-4" />
-                    Deposit
-                  </Button>
-                  <Button className="flex-1" variant="outline">
-                    <ArrowDownCircle className="mr-2 h-4 w-4" />
-                    Withdraw
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Contracts Table */}
