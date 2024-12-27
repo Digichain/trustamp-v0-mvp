@@ -7,44 +7,86 @@ interface InvoiceTemplateProps {
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
-  // Handle both wrapped and unwrapped documents
-  const invoiceDetails = document?.invoiceDetails || document;
-  const billFrom = invoiceDetails?.billFrom || {};
-  const billTo = invoiceDetails?.billTo || {};
-  const company = billTo?.company || {};
-  const billableItems = document?.billableItems || [];
+  // Helper function to get clean value from wrapped data
+  const getCleanValue = (value: any) => {
+    if (typeof value === 'string' && value.includes(':string:')) {
+      return value.split(':string:')[1];
+    }
+    if (typeof value === 'string' && value.includes(':number:')) {
+      return Number(value.split(':number:')[1]);
+    }
+    return value;
+  };
+
+  // Clean up the document data
+  const invoiceDetails = {
+    invoiceNumber: getCleanValue(document.invoiceDetails?.invoiceNumber),
+    date: getCleanValue(document.invoiceDetails?.date),
+    billFrom: {
+      name: getCleanValue(document.invoiceDetails?.billFrom?.name),
+      streetAddress: getCleanValue(document.invoiceDetails?.billFrom?.streetAddress),
+      city: getCleanValue(document.invoiceDetails?.billFrom?.city),
+      postalCode: getCleanValue(document.invoiceDetails?.billFrom?.postalCode),
+      phoneNumber: getCleanValue(document.invoiceDetails?.billFrom?.phoneNumber)
+    },
+    billTo: {
+      name: getCleanValue(document.invoiceDetails?.billTo?.name),
+      email: getCleanValue(document.invoiceDetails?.billTo?.email),
+      company: {
+        name: getCleanValue(document.invoiceDetails?.billTo?.company?.name),
+        streetAddress: getCleanValue(document.invoiceDetails?.billTo?.company?.streetAddress),
+        city: getCleanValue(document.invoiceDetails?.billTo?.company?.city),
+        postalCode: getCleanValue(document.invoiceDetails?.billTo?.company?.postalCode),
+        phoneNumber: getCleanValue(document.invoiceDetails?.billTo?.company?.phoneNumber)
+      }
+    }
+  };
+
+  const billableItems = Array.isArray(document.billableItems) 
+    ? document.billableItems.map((item: any) => ({
+        description: getCleanValue(item.description),
+        quantity: getCleanValue(item.quantity),
+        unitPrice: getCleanValue(item.unitPrice),
+        amount: getCleanValue(item.amount)
+      }))
+    : [];
+
+  const subtotal = getCleanValue(document.subtotal);
+  const tax = getCleanValue(document.tax);
+  const taxTotal = getCleanValue(document.taxTotal);
+  const total = getCleanValue(document.total);
 
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{invoiceDetails?.invoiceNumber || 'N/A'}</h2>
-        <p className="text-gray-600">{invoiceDetails?.date || 'N/A'}</p>
+        <h2 className="text-2xl font-bold">Invoice #{invoiceDetails.invoiceNumber || 'N/A'}</h2>
+        <p className="text-gray-600">{invoiceDetails.date || 'N/A'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
         <div>
           <h3 className="font-semibold mb-2">Bill From</h3>
           <div className="space-y-1">
-            <p className="font-medium">{billFrom.name || 'N/A'}</p>
-            <p>{billFrom.streetAddress || 'N/A'}</p>
-            <p>{billFrom.city || 'N/A'}</p>
-            <p>{billFrom.postalCode || 'N/A'}</p>
-            <p>{billFrom.phoneNumber || 'N/A'}</p>
+            <p className="font-medium">{invoiceDetails.billFrom.name || 'N/A'}</p>
+            <p>{invoiceDetails.billFrom.streetAddress || 'N/A'}</p>
+            <p>{invoiceDetails.billFrom.city || 'N/A'}</p>
+            <p>{invoiceDetails.billFrom.postalCode || 'N/A'}</p>
+            <p>{invoiceDetails.billFrom.phoneNumber || 'N/A'}</p>
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Bill To</h3>
           <div className="space-y-1">
-            <p className="font-medium">{company.name || 'N/A'}</p>
-            <p>{company.streetAddress || 'N/A'}</p>
-            <p>{company.city || 'N/A'}</p>
-            <p>{company.postalCode || 'N/A'}</p>
-            <p>{company.phoneNumber || 'N/A'}</p>
+            <p className="font-medium">{invoiceDetails.billTo.company.name || 'N/A'}</p>
+            <p>{invoiceDetails.billTo.company.streetAddress || 'N/A'}</p>
+            <p>{invoiceDetails.billTo.company.city || 'N/A'}</p>
+            <p>{invoiceDetails.billTo.company.postalCode || 'N/A'}</p>
+            <p>{invoiceDetails.billTo.company.phoneNumber || 'N/A'}</p>
             <div className="mt-4">
               <p className="font-medium">Contact Person</p>
-              <p>{billTo.name || 'N/A'}</p>
-              <p>{billTo.email || 'N/A'}</p>
+              <p>{invoiceDetails.billTo.name || 'N/A'}</p>
+              <p>{invoiceDetails.billTo.email || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -78,15 +120,15 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${Number(document?.subtotal || 0).toFixed(2)}</span>
+            <span>${Number(subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({Number(document?.tax || 0)}%):</span>
-            <span>${Number(document?.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({Number(tax || 0)}%):</span>
+            <span>${Number(taxTotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${Number(document?.total || 0).toFixed(2)}</span>
+            <span>${Number(total || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
