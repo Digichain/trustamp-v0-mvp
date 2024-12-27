@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { WrappedInvoice } from "./types";
+import { WrappedInvoice, BillToContact, CompanyDetails } from "./types";
 
 interface InvoiceTemplateProps {
   document: WrappedInvoice;
@@ -22,8 +22,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     return <div>No invoice details available</div>;
   }
 
-  const { billFrom = {}, billTo = {} } = invoiceDetails;
-  const company = billTo.company || {};
+  const { billFrom = {}, billTo = {} as BillToContact } = invoiceDetails;
+  const company = (billTo.company || {}) as CompanyDetails;
   
   const formatLabel = (key: string) => {
     return key
@@ -55,23 +55,6 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       }
     });
     return unwrappedObj;
-  };
-
-  const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
-    const unwrappedData = unwrapValue(obj);
-    console.log("Unwrapped data for rendering:", unwrappedData);
-    
-    return Object.entries(unwrappedData)
-      .filter(([key]) => !excludeKeys.includes(key) && obj[key])
-      .map(([key, value]) => {
-        console.log("Rendering key-value:", { key, value });
-        return (
-          <p key={key} className="text-sm">
-            <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
-            <span>{String(value)}</span>
-          </p>
-        );
-      });
   };
 
   // Unwrap all document data
