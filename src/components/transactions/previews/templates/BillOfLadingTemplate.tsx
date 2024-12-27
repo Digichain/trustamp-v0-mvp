@@ -18,19 +18,15 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
   };
 
   const unwrapValue = (value: any): any => {
-    // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // If it's an array, unwrap each item
     if (Array.isArray(value)) {
       return value.map(item => unwrapValue(item));
     }
     
-    // For objects, check each property for UUID pattern
     const unwrappedObj: any = {};
     Object.entries(value).forEach(([key, val]) => {
       if (typeof val === 'string') {
-        // Check for UUID pattern followed by :string or :number
         const match = val.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
         if (match) {
           console.log(`Found wrapped value: ${val}, extracting: ${match[2]}`);
@@ -76,8 +72,13 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
   console.log("Unwrapped document:", unwrappedDoc);
 
   return (
-    <Card className="p-6 space-y-6 bg-white print:shadow-none">
+    <Card className="p-6 space-y-6 bg-[#F1F0FB] shadow-lg print:shadow-none">
       <div className="border-b pb-4">
+        <img 
+          src="/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png" 
+          alt="TruStamp Logo" 
+          className="h-12 mb-4"
+        />
         <h2 className="text-2xl font-bold">Bill of Lading</h2>
         <p className="text-gray-600">BL Number: {unwrappedDoc?.blNumber || 'N/A'}</p>
       </div>

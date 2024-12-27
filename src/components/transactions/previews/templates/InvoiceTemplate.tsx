@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { WrappedInvoice, BillToContact, CompanyDetails } from "./types";
+import { WrappedInvoice } from "./types";
 
 interface InvoiceTemplateProps {
   document: WrappedInvoice;
@@ -22,8 +22,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     return <div>No invoice details available</div>;
   }
 
-  const { billFrom = {}, billTo = {} as BillToContact } = invoiceDetails;
-  const company = (billTo.company || {}) as CompanyDetails;
+  const { billFrom = {}, billTo = {} } = invoiceDetails;
+  const company = (billTo.company || {});
   
   const formatLabel = (key: string) => {
     return key
@@ -57,12 +57,12 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     return unwrappedObj;
   };
 
-  const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
+  const renderKeyValue = (obj: any) => {
     const unwrappedData = unwrapValue(obj);
     console.log("Unwrapped data for rendering:", unwrappedData);
     
     return Object.entries(unwrappedData)
-      .filter(([key]) => !excludeKeys.includes(key) && obj[key])
+      .filter(([_, value]) => value)
       .map(([key, value]) => {
         console.log("Rendering key-value:", { key, value });
         return (
@@ -79,10 +79,17 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Unwrapped document:", unwrappedDoc);
 
   return (
-    <Card className="p-6 space-y-6 bg-white print:shadow-none">
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{unwrappedDoc.invoiceDetails?.invoiceNumber || 'N/A'}</h2>
-        <p className="text-gray-600">{unwrappedDoc.invoiceDetails?.date || 'N/A'}</p>
+    <Card className="p-6 space-y-6 bg-[#F1F0FB] shadow-lg print:shadow-none">
+      <div className="flex justify-between items-center border-b pb-4">
+        <div>
+          <img 
+            src="/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png" 
+            alt="TruStamp Logo" 
+            className="h-12 mb-2"
+          />
+          <h2 className="text-2xl font-bold">Invoice #{unwrappedDoc.invoiceDetails?.invoiceNumber || 'N/A'}</h2>
+          <p className="text-gray-600">{unwrappedDoc.invoiceDetails?.date || 'N/A'}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -102,7 +109,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
             </div>
             <div>
               <p className="font-medium mb-1">Contact Person</p>
-              {renderKeyValue(billTo, ['company'])}
+              {renderKeyValue(billTo)}
             </div>
           </div>
         </div>
