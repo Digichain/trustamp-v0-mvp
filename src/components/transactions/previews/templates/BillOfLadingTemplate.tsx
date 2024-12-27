@@ -16,15 +16,17 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
   };
 
   const unwrapValue = (value: any): any => {
+    // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // Check if it's an OpenAttestation wrapped value
+    // Check if it's an OpenAttestation wrapped value by looking for a key containing ':'
     const key = Object.keys(value).find(k => k.includes(':'));
     if (key) {
-      const type = key.split(':')[1]; // Get the type (string, number, etc)
+      const [, type] = key.split(':');
       return type === 'number' ? Number(value[key]) : value[key];
     }
     
+    // If it's an object but not wrapped, return as is
     return value;
   };
 
