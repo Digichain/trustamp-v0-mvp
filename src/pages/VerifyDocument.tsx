@@ -3,9 +3,9 @@ import { FileUploader } from '@/components/transactions/verification/FileUploade
 import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
-import { BillOfLadingPreview } from '@/components/transactions/previews/BillOfLadingPreview';
 import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
 import { useWallet } from '@/contexts/WalletContext';
+import { VerificationResult } from '@/components/transactions/verification/types';
 
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
@@ -74,8 +74,6 @@ const VerifyDocument = () => {
     switch (verificationResult.document.$template?.name) {
       case 'INVOICE':
         return <InvoicePreview data={verificationResult.document} />;
-      case 'BILL_OF_LADING':
-        return <BillOfLadingPreview data={verificationResult.document.billOfLadingDetails} />;
       default:
         return <div>Unsupported document type</div>;
     }
@@ -96,12 +94,13 @@ const VerifyDocument = () => {
         )}
 
         {verificationResult && (
-          <DocumentVerificationStatus
-            verificationDetails={verificationResult.details}
-            onReset={resetVerification}
-          >
+          <div className="space-y-8">
+            <DocumentVerificationStatus
+              verificationDetails={verificationResult.details}
+              onReset={resetVerification}
+            />
             {renderPreview()}
-          </DocumentVerificationStatus>
+          </div>
         )}
       </div>
     </div>

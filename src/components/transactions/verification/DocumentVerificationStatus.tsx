@@ -1,6 +1,6 @@
 import { VerificationStatus } from "./VerificationStatus";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp, Printer } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -26,20 +26,13 @@ interface DocumentVerificationStatusProps {
     fragments?: any[];
   } | null;
   onReset: () => void;
-  children?: React.ReactNode; // Add this to accept document preview component
 }
 
 export const DocumentVerificationStatus = ({
   verificationDetails,
-  onReset,
-  children
+  onReset
 }: DocumentVerificationStatusProps) => {
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!verificationDetails) {
     return (
@@ -97,46 +90,14 @@ export const DocumentVerificationStatus = ({
         />
       </div>
 
-      {children && (
-        <Card className="p-6">
-          <Collapsible open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Document Preview</h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-9 p-0">
-                  {isPreviewOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="mt-4">
-                <div className="flex justify-end mb-4">
-                  <Button onClick={handlePrint} variant="outline">
-                    <Printer className="mr-2 h-4 w-4" />
-                    Print Document
-                  </Button>
-                </div>
-                <div className="print:p-0">
-                  {children}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      )}
-
       {verificationDetails.fragments && (
         <Card className="p-6">
-          <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Verification Details</h3>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-9 p-0">
-                  {isDetailsOpen ? (
+                  {isOpen ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
                     <ChevronDown className="h-4 w-4" />
