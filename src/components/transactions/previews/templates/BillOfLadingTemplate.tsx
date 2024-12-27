@@ -18,12 +18,19 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
   const renderKeyValue = (obj: any) => {
     return Object.entries(obj)
       .filter(([_, value]) => value)
-      .map(([key, value]) => (
-        <p key={key} className="text-sm">
-          <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
-          <span>{String(value)}</span>
-        </p>
-      ));
+      .map(([key, value]) => {
+        // Handle nested objects that might be in OpenAttestation format
+        const cleanValue = typeof value === 'object' && value?.hasOwnProperty('") 
+          ? value[""] 
+          : value;
+          
+        return (
+          <p key={key} className="text-sm">
+            <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
+            <span>{String(cleanValue)}</span>
+          </p>
+        );
+      });
   };
 
   const renderParty = (party: any, title: string) => (

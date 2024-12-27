@@ -7,6 +7,7 @@ interface InvoiceTemplateProps {
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
+  // Get the unwrapped data
   const invoiceDetails = document?.invoiceDetails || {};
   const billFrom = invoiceDetails?.billFrom || {};
   const billTo = invoiceDetails?.billTo || {};
@@ -22,12 +23,19 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
     return Object.entries(obj)
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
-      .map(([key, value]) => (
-        <p key={key} className="text-sm">
-          <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
-          <span>{String(value)}</span>
-        </p>
-      ));
+      .map(([key, value]) => {
+        // Handle nested objects that might be in OpenAttestation format
+        const cleanValue = typeof value === 'object' && value?.hasOwnProperty('") 
+          ? value[""] 
+          : value;
+          
+        return (
+          <p key={key} className="text-sm">
+            <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
+            <span>{String(cleanValue)}</span>
+          </p>
+        );
+      });
   };
 
   return (
