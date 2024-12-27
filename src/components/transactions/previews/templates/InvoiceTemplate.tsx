@@ -30,7 +30,17 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   };
 
   const unwrapValue = (value: any): any => {
-    if (!value || typeof value !== 'object') return value;
+    if (!value || typeof value !== 'object') {
+      // Handle string values that might be wrapped
+      if (typeof value === 'string') {
+        const match = value.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
+        if (match) {
+          console.log(`Found wrapped value: ${value}, extracting: ${match[2]}`);
+          return match[1] === 'number' ? Number(match[2]) : match[2];
+        }
+      }
+      return value;
+    }
     
     if (Array.isArray(value)) {
       return value.map(item => unwrapValue(item));
@@ -38,19 +48,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     
     const unwrappedObj: any = {};
     Object.entries(value).forEach(([key, val]) => {
-      if (typeof val === 'string') {
-        const match = val.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
-        if (match) {
-          console.log(`Found wrapped value: ${val}, extracting: ${match[2]}`);
-          unwrappedObj[key] = match[1] === 'number' ? Number(match[2]) : match[2];
-        } else {
-          unwrappedObj[key] = val;
-        }
-      } else if (typeof val === 'object') {
-        unwrappedObj[key] = unwrapValue(val);
-      } else {
-        unwrappedObj[key] = val;
-      }
+      unwrappedObj[key] = unwrapValue(val);
     });
     return unwrappedObj;
   };
@@ -111,10 +109,10 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
           <tbody>
             {document.data.billableItems?.map((item: any, index: number) => (
               <tr key={index} className="border-b">
-                <td className="py-2">{item.description || 'N/A'}</td>
-                <td className="text-right py-2">{item.quantity || 0}</td>
-                <td className="text-right py-2">${Number(item.unitPrice || 0).toFixed(2)}</td>
-                <td className="text-right py-2">${Number(item.amount || 0).toFixed(2)}</td>
+                <td className="py-2">{unwrapValue(item.description) || 'N/A'}</td>
+                <td className="text-right py-2">{unwrapValue(item.quantity) || 0}</td>
+                <td className="text-right py-2">${Number(unwrapValue(item.unitPrice) || 0).toFixed(2)}</td>
+                <td className="text-right py-2">${Number(unwrapValue(item.amount) || 0).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -125,15 +123,15 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${Number(document.data.subtotal || 0).toFixed(2)}</span>
+            <span>${Number(unwrapValue(document.data.subtotal) || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({Number(document.data.tax || 0)}%):</span>
-            <span>${Number(document.data.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({Number(unwrapValue(document.data.tax) || 0)}%):</span>
+            <span>${Number(unwrapValue(document.data.taxTotal) || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${Number(document.data.total || 0).toFixed(2)}</span>
+            <span>${Number(unwrapValue(document.data.total) || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
