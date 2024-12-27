@@ -37,13 +37,13 @@ const VerifyDocument = () => {
       const result = await VerifierFactory.verifyDocument(document);
       console.log("Verification result:", result);
 
-      // Unwrap the document data
-      const unwrappedDoc = document.data || document;
-      console.log("Unwrapped document:", unwrappedDoc);
+      // Get the document data, handling both wrapped and unwrapped formats
+      const documentData = document.data || document;
+      console.log("Document data for preview:", documentData);
 
       setVerificationResult({
         isValid: result.isValid,
-        document: unwrappedDoc,
+        document: documentData,
         details: result.details
       });
 
@@ -71,13 +71,16 @@ const VerifyDocument = () => {
   };
 
   const renderPreview = () => {
-    if (!verificationResult?.document) return null;
+    if (!verificationResult?.document) {
+      console.log("No document data available for preview");
+      return null;
+    }
 
-    // Document is already unwrapped at this point
+    // Document data should already be unwrapped at this point
     const doc = verificationResult.document;
     console.log("Processing document for template:", doc);
 
-    // Determine template type
+    // Determine template type based on document structure
     let templateName;
     if (doc.invoiceDetails || doc.billFrom) {
       templateName = "INVOICE";
@@ -93,7 +96,7 @@ const VerifyDocument = () => {
     }
 
     const Template = registry[templateName][0].template;
-    return <Template document={doc} />;
+    return <Template document={{ data: doc }} />;
   };
 
   return (
