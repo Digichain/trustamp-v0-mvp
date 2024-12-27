@@ -24,11 +24,11 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // Check if it's an OpenAttestation wrapped value by looking for a key containing ':'
+    // Check if it's an OpenAttestation wrapped value
     const key = Object.keys(value).find(k => k.includes(':'));
     if (key) {
-      const [, type] = key.split(':');
-      return type === 'number' ? Number(value[key]) : value[key];
+      console.log("Unwrapping value:", { value, key });
+      return value[key];
     }
     
     // If it's an object but not wrapped, return as is
@@ -40,6 +40,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
       .map(([key, value]) => {
         const cleanValue = unwrapValue(value);
+        console.log("Rendering key-value:", { key, value, cleanValue });
         
         return (
           <p key={key} className="text-sm">
