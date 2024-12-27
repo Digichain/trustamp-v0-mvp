@@ -64,10 +64,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Basic Information</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              scac: details.scac,
-              vessel: details.vessel,
-              voyageNo: details.voyageNo,
-              carrierName: details.carrierName
+              scac: unwrapValue(details.scac),
+              vessel: unwrapValue(details.vessel),
+              voyageNo: unwrapValue(details.voyageNo),
+              carrierName: unwrapValue(details.carrierName)
             })}
           </div>
         </div>
@@ -76,10 +76,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Locations</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              portOfLoading: details.portOfLoading,
-              portOfDischarge: details.portOfDischarge,
-              placeOfReceipt: details.placeOfReceipt,
-              placeOfDelivery: details.placeOfDelivery
+              portOfLoading: unwrapValue(details.portOfLoading),
+              portOfDischarge: unwrapValue(details.portOfDischarge),
+              placeOfReceipt: unwrapValue(details.placeOfReceipt),
+              placeOfDelivery: unwrapValue(details.placeOfDelivery)
             })}
           </div>
         </div>
@@ -87,16 +87,16 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
         <div>
           <h3 className="font-semibold mb-2">Parties</h3>
           <div className="space-y-4">
-            {renderParty(details.shipper || {}, 'Shipper')}
-            {renderParty(details.consignee || {}, 'Consignee')}
-            {renderParty(details.notifyParty || {}, 'Notify Party')}
+            {renderParty(unwrapValue(details.shipper) || {}, 'Shipper')}
+            {renderParty(unwrapValue(details.consignee) || {}, 'Consignee')}
+            {renderParty(unwrapValue(details.notifyParty) || {}, 'Notify Party')}
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Packages</h3>
           <div className="space-y-2">
-            {(details.packages || []).map((pkg: any, index: number) => (
+            {(unwrapValue(details.packages) || []).map((pkg: any, index: number) => (
               <div key={index} className="border-b pb-2">
                 <div className="grid grid-cols-3 gap-4">
                   {renderKeyValue(pkg)}
