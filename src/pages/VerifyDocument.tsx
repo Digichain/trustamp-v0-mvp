@@ -71,8 +71,9 @@ const VerifyDocument = () => {
   };
 
   const renderPreview = () => {
-    if (!verificationResult?.document) {
-      console.log("No document data available for preview");
+    // Only render preview if verification was successful
+    if (!verificationResult?.document || !verificationResult.isValid) {
+      console.log("Preview not shown - verification failed or no document");
       return null;
     }
 
@@ -92,7 +93,7 @@ const VerifyDocument = () => {
 
     if (!templateName || !registry[templateName]) {
       console.warn("Unknown document template:", templateName);
-      return <div className="text-center text-gray-500">Document preview not available for this type</div>;
+      return null;
     }
 
     const Template = registry[templateName][0].template;
@@ -118,7 +119,7 @@ const VerifyDocument = () => {
             <DocumentVerificationStatus
               verificationDetails={verificationResult.details}
               onReset={resetVerification}
-              documentPreview={renderPreview()}
+              documentPreview={verificationResult.isValid ? renderPreview() : null}
             />
           </div>
         )}
