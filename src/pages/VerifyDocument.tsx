@@ -37,9 +37,13 @@ const VerifyDocument = () => {
       const result = await VerifierFactory.verifyDocument(document);
       console.log("Verification result:", result);
 
+      // Unwrap the document data
+      const unwrappedDoc = document.data || document;
+      console.log("Unwrapped document:", unwrappedDoc);
+
       setVerificationResult({
         isValid: result.isValid,
-        document: document,
+        document: unwrappedDoc,
         details: result.details
       });
 
@@ -69,23 +73,13 @@ const VerifyDocument = () => {
   const renderPreview = () => {
     if (!verificationResult?.document) return null;
 
-    // Get the document data, handling both wrapped and unwrapped formats
-    const doc = verificationResult.document.data || verificationResult.document;
+    // Document is already unwrapped at this point
+    const doc = verificationResult.document;
     console.log("Processing document for template:", doc);
-
-    // Helper function to extract clean string value
-    const getCleanValue = (value: string) => {
-      if (typeof value === 'string' && value.includes(':string:')) {
-        return value.split(':string:')[1];
-      }
-      return value;
-    };
 
     // Determine template type
     let templateName;
-    if (doc.$template) {
-      templateName = getCleanValue(doc.$template.name);
-    } else if (doc.invoiceDetails || doc.billFrom) {
+    if (doc.invoiceDetails || doc.billFrom) {
       templateName = "INVOICE";
     } else if (doc.billOfLadingDetails || doc.blNumber) {
       templateName = "BILL_OF_LADING";
