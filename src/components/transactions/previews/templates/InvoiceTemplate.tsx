@@ -8,10 +8,22 @@ interface InvoiceTemplateProps {
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
-  // Get the unwrapped data with proper null checks
-  const { invoiceDetails, billableItems = [], subtotal = 0, tax = 0, taxTotal = 0, total = 0 } = document.data || {};
-  const { billFrom = {}, billTo = {} } = invoiceDetails || {};
-  const company = billTo?.company || {};
+  // Ensure we have data before destructuring
+  if (!document?.data) {
+    console.warn("No document data provided to InvoiceTemplate");
+    return <div>No document data available</div>;
+  }
+  
+  const { invoiceDetails, billableItems = [], subtotal = 0, tax = 0, taxTotal = 0, total = 0 } = document.data;
+  
+  // Ensure we have invoice details before destructuring
+  if (!invoiceDetails) {
+    console.warn("No invoice details found in document");
+    return <div>No invoice details available</div>;
+  }
+
+  const { billFrom = {}, billTo = {} } = invoiceDetails;
+  const company = billTo.company || {};
   
   const formatLabel = (key: string) => {
     return key
@@ -20,19 +32,15 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   };
 
   const unwrapValue = (value: any): any => {
-    // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // If it's an array, unwrap each item
     if (Array.isArray(value)) {
       return value.map(item => unwrapValue(item));
     }
     
-    // For objects, check each property for UUID pattern
     const unwrappedObj: any = {};
     Object.entries(value).forEach(([key, val]) => {
       if (typeof val === 'string') {
-        // Check for UUID pattern followed by :string or :number
         const match = val.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
         if (match) {
           console.log(`Found wrapped value: ${val}, extracting: ${match[2]}`);
