@@ -71,7 +71,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   };
 
   return (
-    <DocumentWrapper title={`Invoice #${invoiceDetails?.invoiceNumber || 'N/A'}`}>
+    <DocumentWrapper title={`Invoice #${unwrapValue(invoiceDetails?.invoiceNumber) || 'N/A'}`}>
       <div className="grid grid-cols-2 gap-8">
         <div>
           <h3 className="font-semibold mb-2">Bill From</h3>
