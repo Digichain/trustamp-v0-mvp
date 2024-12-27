@@ -6,128 +6,86 @@ interface BillOfLadingTemplateProps {
 
 export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) => {
   console.log("Rendering Bill of Lading template with document:", document);
-
-  // Helper function to get clean value from wrapped data
-  const getCleanValue = (value: any) => {
-    if (typeof value === 'string' && value.includes(':string:')) {
-      return value.split(':string:')[1];
-    }
-    if (typeof value === 'string' && value.includes(':number:')) {
-      return Number(value.split(':number:')[1]);
-    }
-    return value;
+  
+  const details = document?.billOfLadingDetails || document || {};
+  
+  const formatLabel = (key: string) => {
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase());
   };
 
-  // Clean up the document data
-  const details = {
-    scac: getCleanValue(document.billOfLadingDetails?.scac),
-    blNumber: getCleanValue(document.billOfLadingDetails?.blNumber),
-    vessel: getCleanValue(document.billOfLadingDetails?.vessel),
-    voyageNo: getCleanValue(document.billOfLadingDetails?.voyageNo),
-    portOfLoading: getCleanValue(document.billOfLadingDetails?.portOfLoading),
-    portOfDischarge: getCleanValue(document.billOfLadingDetails?.portOfDischarge),
-    carrierName: getCleanValue(document.billOfLadingDetails?.carrierName),
-    placeOfReceipt: getCleanValue(document.billOfLadingDetails?.placeOfReceipt),
-    placeOfDelivery: getCleanValue(document.billOfLadingDetails?.placeOfDelivery)
+  const renderKeyValue = (obj: any) => {
+    return Object.entries(obj)
+      .filter(([_, value]) => value)
+      .map(([key, value]) => (
+        <p key={key} className="text-sm">
+          <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
+          <span>{String(value)}</span>
+        </p>
+      ));
   };
 
-  const packages = Array.isArray(document.billOfLadingDetails?.packages) 
-    ? document.billOfLadingDetails.packages.map((pkg: any) => ({
-        description: getCleanValue(pkg.description),
-        weight: getCleanValue(pkg.weight),
-        measurement: getCleanValue(pkg.measurement)
-      }))
-    : [];
-
-  const parties = {
-    shipper: {
-      name: getCleanValue(document.billOfLadingDetails?.shipper?.name),
-      address: getCleanValue(document.billOfLadingDetails?.shipper?.address)
-    },
-    consignee: {
-      name: getCleanValue(document.billOfLadingDetails?.consignee?.name),
-      address: getCleanValue(document.billOfLadingDetails?.consignee?.address)
-    },
-    notifyParty: {
-      name: getCleanValue(document.billOfLadingDetails?.notifyParty?.name),
-      address: getCleanValue(document.billOfLadingDetails?.notifyParty?.address)
-    }
-  };
+  const renderParty = (party: any, title: string) => (
+    <div className="border-b pb-2">
+      <h4 className="font-medium mb-1">{title}</h4>
+      {renderKeyValue(party)}
+    </div>
+  );
 
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Bill of Lading #{details.blNumber || 'N/A'}</h2>
-        <p className="text-gray-600">SCAC: {details.scac || 'N/A'}</p>
+        <h2 className="text-2xl font-bold">Bill of Lading</h2>
+        <p className="text-gray-600">BL Number: {details.blNumber || 'N/A'}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="space-y-4">
         <div>
-          <h3 className="font-semibold mb-2">Vessel Details</h3>
-          <div className="space-y-1">
-            <p><span className="font-medium">Vessel:</span> {details.vessel || 'N/A'}</p>
-            <p><span className="font-medium">Voyage No:</span> {details.voyageNo || 'N/A'}</p>
-            <p><span className="font-medium">Carrier:</span> {details.carrierName || 'N/A'}</p>
+          <h3 className="font-semibold mb-2">Basic Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {renderKeyValue({
+              scac: details.scac,
+              vessel: details.vessel,
+              voyageNo: details.voyageNo,
+              carrierName: details.carrierName
+            })}
           </div>
         </div>
 
         <div>
-          <h3 className="font-semibold mb-2">Port Information</h3>
-          <div className="space-y-1">
-            <p><span className="font-medium">Port of Loading:</span> {details.portOfLoading || 'N/A'}</p>
-            <p><span className="font-medium">Port of Discharge:</span> {details.portOfDischarge || 'N/A'}</p>
-            <p><span className="font-medium">Place of Receipt:</span> {details.placeOfReceipt || 'N/A'}</p>
-            <p><span className="font-medium">Place of Delivery:</span> {details.placeOfDelivery || 'N/A'}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-8">
-        <div>
-          <h3 className="font-semibold mb-2">Shipper</h3>
-          <div className="space-y-1">
-            <p className="font-medium">{parties.shipper.name || 'N/A'}</p>
-            <p className="whitespace-pre-line">{parties.shipper.address || 'N/A'}</p>
+          <h3 className="font-semibold mb-2">Locations</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {renderKeyValue({
+              portOfLoading: details.portOfLoading,
+              portOfDischarge: details.portOfDischarge,
+              placeOfReceipt: details.placeOfReceipt,
+              placeOfDelivery: details.placeOfDelivery
+            })}
           </div>
         </div>
 
         <div>
-          <h3 className="font-semibold mb-2">Consignee</h3>
-          <div className="space-y-1">
-            <p className="font-medium">{parties.consignee.name || 'N/A'}</p>
-            <p className="whitespace-pre-line">{parties.consignee.address || 'N/A'}</p>
+          <h3 className="font-semibold mb-2">Parties</h3>
+          <div className="space-y-4">
+            {renderParty(details.shipper || {}, 'Shipper')}
+            {renderParty(details.consignee || {}, 'Consignee')}
+            {renderParty(details.notifyParty || {}, 'Notify Party')}
           </div>
         </div>
 
         <div>
-          <h3 className="font-semibold mb-2">Notify Party</h3>
-          <div className="space-y-1">
-            <p className="font-medium">{parties.notifyParty.name || 'N/A'}</p>
-            <p className="whitespace-pre-line">{parties.notifyParty.address || 'N/A'}</p>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-2">Packages</h3>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left py-2">Description</th>
-              <th className="text-right py-2">Weight</th>
-              <th className="text-right py-2">Measurement</th>
-            </tr>
-          </thead>
-          <tbody>
-            {packages.map((pkg: any, index: number) => (
-              <tr key={index} className="border-b">
-                <td className="py-2">{pkg.description || 'N/A'}</td>
-                <td className="text-right py-2">{pkg.weight || 'N/A'}</td>
-                <td className="text-right py-2">{pkg.measurement || 'N/A'}</td>
-              </tr>
+          <h3 className="font-semibold mb-2">Packages</h3>
+          <div className="space-y-2">
+            {(details.packages || []).map((pkg: any, index: number) => (
+              <div key={index} className="border-b pb-2">
+                <div className="grid grid-cols-3 gap-4">
+                  {renderKeyValue(pkg)}
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </Card>
   );
