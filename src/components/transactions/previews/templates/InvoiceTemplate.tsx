@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card";
 import { WrappedInvoice, BillToContact, CompanyDetails } from "./types";
+import { DocumentWrapper } from "./DocumentWrapper";
 
 interface InvoiceTemplateProps {
   document: WrappedInvoice;
@@ -8,7 +8,6 @@ interface InvoiceTemplateProps {
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
-  // Ensure we have data before destructuring
   if (!document?.data) {
     console.warn("No document data provided to InvoiceTemplate");
     return <div>No document data available</div>;
@@ -16,7 +15,6 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   
   const { invoiceDetails, billableItems = [], subtotal = 0, tax = 0, taxTotal = 0, total = 0 } = document.data;
   
-  // Ensure we have invoice details before destructuring
   if (!invoiceDetails) {
     console.warn("No invoice details found in document");
     return <div>No invoice details available</div>;
@@ -74,24 +72,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       });
   };
 
-  // Unwrap all document data
-  const unwrappedDoc = unwrapValue(document.data);
-  console.log("Unwrapped document:", unwrappedDoc);
-
   return (
-    <Card className="p-6 space-y-6 bg-[#F1F0FB] shadow-lg print:shadow-none">
-      <div className="flex justify-between items-center border-b pb-4">
-        <div>
-          <img 
-            src="/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png" 
-            alt="TruStamp Logo" 
-            className="h-12 mb-2"
-          />
-          <h2 className="text-2xl font-bold">Invoice #{unwrappedDoc.invoiceDetails?.invoiceNumber || 'N/A'}</h2>
-          <p className="text-gray-600">{unwrappedDoc.invoiceDetails?.date || 'N/A'}</p>
-        </div>
-      </div>
-
+    <DocumentWrapper title={`Invoice #${invoiceDetails?.invoiceNumber || 'N/A'}`}>
       <div className="grid grid-cols-2 gap-8">
         <div>
           <h3 className="font-semibold mb-2">Bill From</h3>
@@ -127,7 +109,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
             </tr>
           </thead>
           <tbody>
-            {unwrappedDoc.billableItems?.map((item: any, index: number) => (
+            {document.data.billableItems?.map((item: any, index: number) => (
               <tr key={index} className="border-b">
                 <td className="py-2">{item.description || 'N/A'}</td>
                 <td className="text-right py-2">{item.quantity || 0}</td>
@@ -143,18 +125,18 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${Number(unwrappedDoc.subtotal || 0).toFixed(2)}</span>
+            <span>${Number(document.data.subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({Number(unwrappedDoc.tax || 0)}%):</span>
-            <span>${Number(unwrappedDoc.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({Number(document.data.tax || 0)}%):</span>
+            <span>${Number(document.data.taxTotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${Number(unwrappedDoc.total || 0).toFixed(2)}</span>
+            <span>${Number(document.data.total || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
-    </Card>
+    </DocumentWrapper>
   );
 };

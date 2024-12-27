@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card";
 import { WrappedBillOfLading } from "./types";
+import { DocumentWrapper } from "./DocumentWrapper";
 
 interface BillOfLadingTemplateProps {
   document: WrappedBillOfLading;
@@ -60,29 +60,12 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
       });
   };
 
-  const renderParty = (party: any, title: string) => (
-    <div className="border-b pb-2">
-      <h4 className="font-medium mb-1">{title}</h4>
-      {renderKeyValue(party)}
-    </div>
-  );
-
   // Unwrap all document data
   const unwrappedDoc = unwrapValue(billOfLadingDetails);
   console.log("Unwrapped document:", unwrappedDoc);
 
   return (
-    <Card className="p-6 space-y-6 bg-[#F1F0FB] shadow-lg print:shadow-none">
-      <div className="border-b pb-4">
-        <img 
-          src="/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png" 
-          alt="TruStamp Logo" 
-          className="h-12 mb-4"
-        />
-        <h2 className="text-2xl font-bold">Bill of Lading</h2>
-        <p className="text-gray-600">BL Number: {unwrappedDoc?.blNumber || 'N/A'}</p>
-      </div>
-
+    <DocumentWrapper title={`Bill of Lading #${unwrappedDoc?.blNumber || 'N/A'}`}>
       <div className="space-y-4">
         <div>
           <h3 className="font-semibold mb-2">Basic Information</h3>
@@ -111,9 +94,18 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
         <div>
           <h3 className="font-semibold mb-2">Parties</h3>
           <div className="space-y-4">
-            {renderParty(unwrappedDoc?.shipper || {}, 'Shipper')}
-            {renderParty(unwrappedDoc?.consignee || {}, 'Consignee')}
-            {renderParty(unwrappedDoc?.notifyParty || {}, 'Notify Party')}
+            <div className="border-b pb-2">
+              <h4 className="font-medium mb-1">Shipper</h4>
+              {renderKeyValue(unwrappedDoc?.shipper || {})}
+            </div>
+            <div className="border-b pb-2">
+              <h4 className="font-medium mb-1">Consignee</h4>
+              {renderKeyValue(unwrappedDoc?.consignee || {})}
+            </div>
+            <div className="border-b pb-2">
+              <h4 className="font-medium mb-1">Notify Party</h4>
+              {renderKeyValue(unwrappedDoc?.notifyParty || {})}
+            </div>
           </div>
         </div>
 
@@ -130,6 +122,6 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           </div>
         </div>
       </div>
-    </Card>
+    </DocumentWrapper>
   );
 };
