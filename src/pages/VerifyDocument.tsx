@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { FileUploader } from '@/components/transactions/verification/FileUploader';
 import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
 import { useToast } from '@/hooks/use-toast';
-import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
-import { BillOfLadingPreview } from '@/components/transactions/previews/BillOfLadingPreview';
 import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
+import { registry } from '@/components/transactions/previews/TemplateRegistry';
 
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
@@ -73,15 +72,13 @@ const VerifyDocument = () => {
     const templateName = verificationResult.document.$template?.name;
     console.log("Template name for rendering:", templateName);
 
-    switch (templateName) {
-      case 'INVOICE':
-        return <InvoicePreview data={verificationResult.document} />;
-      case 'BILL_OF_LADING':
-        return <BillOfLadingPreview data={verificationResult.document.billOfLadingDetails} />;
-      default:
-        console.warn("Unknown document template:", templateName);
-        return <div className="text-center text-gray-500">Document preview not available for this type</div>;
+    if (!templateName || !registry[templateName]) {
+      console.warn("Unknown document template:", templateName);
+      return <div className="text-center text-gray-500">Document preview not available for this type</div>;
     }
+
+    const Template = registry[templateName][0].template;
+    return <Template document={verificationResult.document} />;
   };
 
   return (
