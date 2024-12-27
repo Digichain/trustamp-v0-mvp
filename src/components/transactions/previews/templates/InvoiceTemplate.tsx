@@ -16,8 +16,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   
   const formatLabel = (key: string) => {
     return key
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-      .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase());
   };
 
   const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
@@ -25,8 +25,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
       .map(([key, value]) => {
         // Handle nested objects that might be in OpenAttestation format
-        const cleanValue = typeof value === 'object' && value?.hasOwnProperty('") 
-          ? value[""] 
+        const cleanValue = typeof value === 'object' && value?.hasOwnProperty("")
+          ? value[""]
           : value;
           
         return (

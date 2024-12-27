@@ -20,8 +20,8 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
       .filter(([_, value]) => value)
       .map(([key, value]) => {
         // Handle nested objects that might be in OpenAttestation format
-        const cleanValue = typeof value === 'object' && value?.hasOwnProperty('") 
-          ? value[""] 
+        const cleanValue = typeof value === 'object' && value?.hasOwnProperty("")
+          ? value[""]
           : value;
           
         return (
