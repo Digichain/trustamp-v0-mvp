@@ -12,6 +12,9 @@ import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
 import VerifyDocument from '@/pages/VerifyDocument';
+import Finance from '@/pages/Finance';
+import Reports from '@/pages/Reports';
+import Subscription from '@/pages/Subscription';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 
@@ -141,6 +144,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Payments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/finance"
+                element={
+                  <ProtectedRoute>
+                    <Finance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subscription"
+                element={
+                  <ProtectedRoute>
+                    <Subscription />
                   </ProtectedRoute>
                 }
               />
