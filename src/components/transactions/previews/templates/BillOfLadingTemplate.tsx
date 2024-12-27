@@ -1,4 +1,5 @@
 import { TemplateProps } from "@govtechsg/decentralized-renderer-react-components";
+import { v2, v3 } from "@govtechsg/open-attestation";
 import { Card } from "@/components/ui/card";
 
 interface Party {
@@ -12,31 +13,37 @@ interface Package {
   measurement: string;
 }
 
-interface BillOfLadingData {
-  billOfLadingDetails: {
-    scac: string;
-    blNumber: string;
-    vessel: string;
-    voyageNo: string;
-    carrierName: string;
-    portOfLoading: string;
-    portOfDischarge: string;
-    placeOfReceipt: string;
-    placeOfDelivery: string;
-    shipper: Party;
-    consignee: Party;
-    notifyParty: Party;
-    packages: Package[];
-  };
+interface BillOfLadingDetails {
+  scac: string;
+  blNumber: string;
+  vessel: string;
+  voyageNo: string;
+  carrierName: string;
+  portOfLoading: string;
+  portOfDischarge: string;
+  placeOfReceipt: string;
+  placeOfDelivery: string;
+  shipper: Party;
+  consignee: Party;
+  notifyParty: Party;
+  packages: Package[];
 }
 
-export const BillOfLadingTemplate: React.FC<TemplateProps<BillOfLadingData>> = ({ document }) => {
+// Extend from v2.OpenAttestationDocument
+interface BillOfLadingData extends v2.OpenAttestationDocument {
+  billOfLadingDetails: BillOfLadingDetails;
+}
+
+export const BillOfLadingTemplate: React.FC<TemplateProps<BillOfLadingData>> = ({ document, handleObfuscation }) => {
+  console.log("Rendering Bill of Lading template with document:", document);
+  
+  // Handle both wrapped and unwrapped documents
   const data = document?.billOfLadingDetails || document;
   
-  const parties: Array<{ key: keyof typeof data; label: string }> = [
-    { key: 'shipper', label: 'Shipper' },
-    { key: 'consignee', label: 'Consignee' },
-    { key: 'notifyParty', label: 'Notify Party' }
+  const parties = [
+    { key: 'shipper' as const, label: 'Shipper' },
+    { key: 'consignee' as const, label: 'Consignee' },
+    { key: 'notifyParty' as const, label: 'Notify Party' }
   ];
 
   return (

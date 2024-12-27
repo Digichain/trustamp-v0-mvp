@@ -1,43 +1,51 @@
 import { TemplateProps } from "@govtechsg/decentralized-renderer-react-components";
+import { v2 } from "@govtechsg/open-attestation";
 import { Card } from "@/components/ui/card";
 
-interface InvoiceData {
-  invoiceDetails: {
-    invoiceNumber: string;
-    date: string;
-    billFrom: {
+interface InvoiceDetails {
+  invoiceNumber: string;
+  date: string;
+  billFrom: {
+    name: string;
+    streetAddress: string;
+    city: string;
+    postalCode: string;
+    phoneNumber: string;
+  };
+  billTo: {
+    company: {
       name: string;
       streetAddress: string;
       city: string;
       postalCode: string;
       phoneNumber: string;
     };
-    billTo: {
-      company: {
-        name: string;
-        streetAddress: string;
-        city: string;
-        postalCode: string;
-        phoneNumber: string;
-      };
-      name: string;
-      email: string;
-    };
+    name: string;
+    email: string;
   };
-  billableItems: Array<{
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    amount: number;
-  }>;
+}
+
+interface BillableItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+}
+
+// Extend from v2.OpenAttestationDocument
+interface InvoiceData extends v2.OpenAttestationDocument {
+  invoiceDetails: InvoiceDetails;
+  billableItems: BillableItem[];
   subtotal: number;
   tax: number;
   taxTotal: number;
   total: number;
 }
 
-export const InvoiceTemplate: React.FC<TemplateProps<InvoiceData>> = ({ document }) => {
-  // Handle both direct data and nested data structures
+export const InvoiceTemplate: React.FC<TemplateProps<InvoiceData>> = ({ document, handleObfuscation }) => {
+  console.log("Rendering Invoice template with document:", document);
+  
+  // Handle both wrapped and unwrapped documents
   const invoiceDetails = document?.invoiceDetails || document;
   const billFrom = invoiceDetails?.billFrom || {};
   const billTo = invoiceDetails?.billTo || {};
