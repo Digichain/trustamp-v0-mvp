@@ -8,7 +8,7 @@ interface InvoiceTemplateProps {
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
-  // Get the unwrapped data
+  // Get the unwrapped data with proper null checks
   const { invoiceDetails, billableItems = [], subtotal = 0, tax = 0, taxTotal = 0, total = 0 } = document.data || {};
   const { billFrom = {}, billTo = {} } = invoiceDetails || {};
   const company = billTo?.company || {};
