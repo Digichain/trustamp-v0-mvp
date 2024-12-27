@@ -57,6 +57,23 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     return unwrappedObj;
   };
 
+  const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
+    const unwrappedData = unwrapValue(obj);
+    console.log("Unwrapped data for rendering:", unwrappedData);
+    
+    return Object.entries(unwrappedData)
+      .filter(([key]) => !excludeKeys.includes(key) && obj[key])
+      .map(([key, value]) => {
+        console.log("Rendering key-value:", { key, value });
+        return (
+          <p key={key} className="text-sm">
+            <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
+            <span>{String(value)}</span>
+          </p>
+        );
+      });
+  };
+
   // Unwrap all document data
   const unwrappedDoc = unwrapValue(document.data);
   console.log("Unwrapped document:", unwrappedDoc);
