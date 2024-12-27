@@ -1,5 +1,3 @@
-import { TemplateProps } from "@govtechsg/decentralized-renderer-react-components";
-import { v2, v3 } from "@govtechsg/open-attestation";
 import { Card } from "@/components/ui/card";
 
 interface Party {
@@ -29,12 +27,11 @@ interface BillOfLadingDetails {
   packages: Package[];
 }
 
-// Extend from v2.OpenAttestationDocument
-interface BillOfLadingData extends v2.OpenAttestationDocument {
-  billOfLadingDetails: BillOfLadingDetails;
+interface BillOfLadingTemplateProps {
+  document: any;
 }
 
-export const BillOfLadingTemplate: React.FC<TemplateProps<BillOfLadingData>> = ({ document, handleObfuscation }) => {
+export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) => {
   console.log("Rendering Bill of Lading template with document:", document);
   
   // Handle both wrapped and unwrapped documents
@@ -117,7 +114,7 @@ export const BillOfLadingTemplate: React.FC<TemplateProps<BillOfLadingData>> = (
         <div>
           <h3 className="font-semibold mb-2">Packages</h3>
           <div className="space-y-2">
-            {data.packages?.map((pkg, index) => (
+            {data.packages?.map((pkg: Package, index: number) => (
               <div key={index} className="border-b pb-2">
                 <div className="grid grid-cols-3 gap-4">
                   <div>

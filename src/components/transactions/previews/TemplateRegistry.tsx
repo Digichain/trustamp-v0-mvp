@@ -1,8 +1,7 @@
-import { TemplateRegistry } from "@govtechsg/decentralized-renderer-react-components";
 import { InvoiceTemplate } from "./templates/InvoiceTemplate";
 import { BillOfLadingTemplate } from "./templates/BillOfLadingTemplate";
 
-export const registry: TemplateRegistry<any> = {
+export const registry = {
   INVOICE: [
     {
       id: "default",

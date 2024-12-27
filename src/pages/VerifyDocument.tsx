@@ -66,10 +66,6 @@ const VerifyDocument = () => {
     }
   };
 
-  const handleObfuscation = () => {
-    console.log("Obfuscation not implemented");
-  };
-
   const renderPreview = () => {
     if (!verificationResult?.document) return null;
 
@@ -82,7 +78,7 @@ const VerifyDocument = () => {
     }
 
     const Template = registry[templateName][0].template;
-    return <Template document={verificationResult.document} handleObfuscation={handleObfuscation} />;
+    return <Template document={verificationResult.document} />;
   };
 
   return (

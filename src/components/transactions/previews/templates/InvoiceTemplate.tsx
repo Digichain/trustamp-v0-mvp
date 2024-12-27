@@ -1,48 +1,10 @@
-import { TemplateProps } from "@govtechsg/decentralized-renderer-react-components";
-import { v2 } from "@govtechsg/open-attestation";
 import { Card } from "@/components/ui/card";
 
-interface InvoiceDetails {
-  invoiceNumber: string;
-  date: string;
-  billFrom: {
-    name: string;
-    streetAddress: string;
-    city: string;
-    postalCode: string;
-    phoneNumber: string;
-  };
-  billTo: {
-    company: {
-      name: string;
-      streetAddress: string;
-      city: string;
-      postalCode: string;
-      phoneNumber: string;
-    };
-    name: string;
-    email: string;
-  };
+interface InvoiceTemplateProps {
+  document: any;
 }
 
-interface BillableItem {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  amount: number;
-}
-
-// Extend from v2.OpenAttestationDocument
-interface InvoiceData extends v2.OpenAttestationDocument {
-  invoiceDetails: InvoiceDetails;
-  billableItems: BillableItem[];
-  subtotal: number;
-  tax: number;
-  taxTotal: number;
-  total: number;
-}
-
-export const InvoiceTemplate: React.FC<TemplateProps<InvoiceData>> = ({ document, handleObfuscation }) => {
+export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
   // Handle both wrapped and unwrapped documents
@@ -100,7 +62,7 @@ export const InvoiceTemplate: React.FC<TemplateProps<InvoiceData>> = ({ document
             </tr>
           </thead>
           <tbody>
-            {billableItems.map((item, index) => (
+            {billableItems.map((item: any, index: number) => (
               <tr key={index} className="border-b">
                 <td className="py-2">{item.description || 'N/A'}</td>
                 <td className="text-right py-2">{item.quantity || 0}</td>
