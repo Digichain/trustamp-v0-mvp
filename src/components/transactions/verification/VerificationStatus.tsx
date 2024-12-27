@@ -21,7 +21,7 @@ export const VerificationStatus = ({
   const displayMessage = typeof message === 'string' ? message : 'Verification status unavailable';
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 h-full">
       <div className="flex items-start space-x-4">
         <div className="mt-1">
           {isValid ? (

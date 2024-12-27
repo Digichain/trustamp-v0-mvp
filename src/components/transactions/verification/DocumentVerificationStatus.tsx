@@ -69,24 +69,26 @@ export const DocumentVerificationStatus = ({
         </h2>
       </div>
 
-      <VerificationStatus
-        title="Issuance Status"
-        isValid={verificationDetails.issuanceStatus.valid}
-        message={verificationDetails.issuanceStatus.message}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <VerificationStatus
+          title="Issuance Status"
+          isValid={verificationDetails.issuanceStatus.valid}
+          message={verificationDetails.issuanceStatus.message}
+        />
 
-      <VerificationStatus
-        title="Issuer Identity"
-        isValid={verificationDetails.issuerIdentity.valid}
-        message={verificationDetails.issuerIdentity.message}
-        details={verificationDetails.issuerIdentity.details}
-      />
+        <VerificationStatus
+          title="Issuer Identity"
+          isValid={verificationDetails.issuerIdentity.valid}
+          message={verificationDetails.issuerIdentity.message}
+          details={verificationDetails.issuerIdentity.details}
+        />
 
-      <VerificationStatus
-        title="Document Integrity"
-        isValid={verificationDetails.documentIntegrity.valid}
-        message={verificationDetails.documentIntegrity.message}
-      />
+        <VerificationStatus
+          title="Document Integrity"
+          isValid={verificationDetails.documentIntegrity.valid}
+          message={verificationDetails.documentIntegrity.message}
+        />
+      </div>
 
       {verificationDetails.fragments && (
         <Card className="p-6">
