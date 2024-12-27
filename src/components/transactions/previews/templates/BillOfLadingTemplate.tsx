@@ -15,15 +15,25 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
       .replace(/^./, str => str.toUpperCase());
   };
 
+  const unwrapValue = (value: any): any => {
+    if (!value || typeof value !== 'object') return value;
+    
+    // Check if it's an OpenAttestation wrapped value
+    const key = Object.keys(value).find(k => k.includes(':'));
+    if (key) {
+      const type = key.split(':')[1]; // Get the type (string, number, etc)
+      return type === 'number' ? Number(value[key]) : value[key];
+    }
+    
+    return value;
+  };
+
   const renderKeyValue = (obj: any) => {
     return Object.entries(obj)
       .filter(([_, value]) => value)
       .map(([key, value]) => {
-        // Handle nested objects that might be in OpenAttestation format
-        const cleanValue = typeof value === 'object' && value?.hasOwnProperty("")
-          ? value[""]
-          : value;
-          
+        const cleanValue = unwrapValue(value);
+        
         return (
           <p key={key} className="text-sm">
             <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
@@ -44,7 +54,7 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
         <h2 className="text-2xl font-bold">Bill of Lading</h2>
-        <p className="text-gray-600">BL Number: {details.blNumber || 'N/A'}</p>
+        <p className="text-gray-600">BL Number: {unwrapValue(details.blNumber) || 'N/A'}</p>
       </div>
 
       <div className="space-y-4">

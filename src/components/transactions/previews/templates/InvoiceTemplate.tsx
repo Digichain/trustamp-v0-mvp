@@ -20,15 +20,25 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       .replace(/^./, str => str.toUpperCase());
   };
 
+  const unwrapValue = (value: any): any => {
+    if (!value || typeof value !== 'object') return value;
+    
+    // Check if it's an OpenAttestation wrapped value
+    const key = Object.keys(value).find(k => k.includes(':'));
+    if (key) {
+      const type = key.split(':')[1]; // Get the type (string, number, etc)
+      return type === 'number' ? Number(value[key]) : value[key];
+    }
+    
+    return value;
+  };
+
   const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
     return Object.entries(obj)
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
       .map(([key, value]) => {
-        // Handle nested objects that might be in OpenAttestation format
-        const cleanValue = typeof value === 'object' && value?.hasOwnProperty("")
-          ? value[""]
-          : value;
-          
+        const cleanValue = unwrapValue(value);
+        
         return (
           <p key={key} className="text-sm">
             <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
@@ -41,8 +51,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{invoiceDetails.invoiceNumber || 'N/A'}</h2>
-        <p className="text-gray-600">{invoiceDetails.date || 'N/A'}</p>
+        <h2 className="text-2xl font-bold">Invoice #{unwrapValue(invoiceDetails.invoiceNumber) || 'N/A'}</h2>
+        <p className="text-gray-600">{unwrapValue(invoiceDetails.date) || 'N/A'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -82,10 +92,10 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
           <tbody>
             {billableItems.map((item: any, index: number) => (
               <tr key={index} className="border-b">
-                <td className="py-2">{item.description || 'N/A'}</td>
-                <td className="text-right py-2">{item.quantity || 0}</td>
-                <td className="text-right py-2">${Number(item.unitPrice || 0).toFixed(2)}</td>
-                <td className="text-right py-2">${Number(item.amount || 0).toFixed(2)}</td>
+                <td className="py-2">{unwrapValue(item.description) || 'N/A'}</td>
+                <td className="text-right py-2">{unwrapValue(item.quantity) || 0}</td>
+                <td className="text-right py-2">${Number(unwrapValue(item.unitPrice) || 0).toFixed(2)}</td>
+                <td className="text-right py-2">${Number(unwrapValue(item.amount) || 0).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -96,15 +106,15 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${Number(document.subtotal || 0).toFixed(2)}</span>
+            <span>${Number(unwrapValue(document.subtotal) || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({Number(document.tax || 0)}%):</span>
-            <span>${Number(document.taxTotal || 0).toFixed(2)}</span>
+            <span>Tax ({Number(unwrapValue(document.tax) || 0)}%):</span>
+            <span>${Number(unwrapValue(document.taxTotal) || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${Number(document.total || 0).toFixed(2)}</span>
+            <span>${Number(unwrapValue(document.total) || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
