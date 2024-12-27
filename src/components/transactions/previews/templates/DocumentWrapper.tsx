@@ -13,7 +13,7 @@ export const DocumentWrapper = ({ title, children }: DocumentWrapperProps) => {
         <img 
           src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png" 
           alt="TruStamp Logo" 
-          className="h-12 mb-4"
+          className="h-36 mb-4" // Changed from h-12 to h-36 (3x larger)
         />
         <h2 className="text-2xl font-bold">{title}</h2>
       </div>
