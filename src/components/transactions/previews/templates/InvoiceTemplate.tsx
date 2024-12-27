@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { WrappedInvoice } from "./types";
+import { WrappedInvoice, BillToContact, CompanyDetails } from "./types";
 
 interface InvoiceTemplateProps {
   document: WrappedInvoice;
@@ -22,8 +22,8 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     return <div>No invoice details available</div>;
   }
 
-  const { billFrom = {}, billTo = {} } = invoiceDetails;
-  const company = (billTo.company || {});
+  const { billFrom = {}, billTo = {} as BillToContact } = invoiceDetails;
+  const company = (billTo.company || {}) as CompanyDetails;
   
   const formatLabel = (key: string) => {
     return key
