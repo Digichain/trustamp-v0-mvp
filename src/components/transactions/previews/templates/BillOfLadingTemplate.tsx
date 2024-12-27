@@ -20,10 +20,15 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
     if (!value || typeof value !== 'object') return value;
     
     // Check if it's an OpenAttestation wrapped value
-    const key = Object.keys(value).find(k => k.includes(':'));
+    // Look for a key that matches UUID pattern followed by :string or :number
+    const key = Object.keys(value).find(k => 
+      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)/)
+    );
+    
     if (key) {
-      console.log("Unwrapping value:", { value, key });
-      return value[key];
+      console.log("Found wrapped value with key:", key);
+      const [, type] = key.split(':');
+      return type === 'number' ? Number(value[key]) : value[key];
     }
     
     // If it's an object but not wrapped, return as is
