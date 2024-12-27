@@ -1,18 +1,17 @@
 import { Card } from "@/components/ui/card";
+import { WrappedInvoice } from "./types";
 
 interface InvoiceTemplateProps {
-  document: any;
+  document: WrappedInvoice;
 }
 
 export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   console.log("Rendering Invoice template with document:", document);
   
   // Get the unwrapped data
-  const invoiceDetails = document?.invoiceDetails || {};
-  const billFrom = invoiceDetails?.billFrom || {};
-  const billTo = invoiceDetails?.billTo || {};
+  const { invoiceDetails, billableItems = [], subtotal = 0, tax = 0, taxTotal = 0, total = 0 } = document.data || {};
+  const { billFrom = {}, billTo = {} } = invoiceDetails || {};
   const company = billTo?.company || {};
-  const billableItems = document?.billableItems || [];
   
   const formatLabel = (key: string) => {
     return key
@@ -29,28 +28,32 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
       return value.map(item => unwrapValue(item));
     }
     
-    // For objects, first check if it's a wrapped value
-    const wrappedKey = Object.keys(value).find(k => 
-      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)$/)
-    );
-    
-    if (wrappedKey) {
-      console.log("Found wrapped value with key:", wrappedKey);
-      const [, type] = wrappedKey.split(':');
-      const rawValue = value[wrappedKey];
-      return type === 'number' ? Number(rawValue) : rawValue;
-    }
-    
-    // If it's an object but not wrapped, process each property
-    const unwrappedObj = {};
+    // For objects, check each property for UUID pattern
+    const unwrappedObj: any = {};
     Object.entries(value).forEach(([key, val]) => {
-      unwrappedObj[key] = unwrapValue(val);
+      if (typeof val === 'string') {
+        // Check for UUID pattern followed by :string or :number
+        const match = val.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
+        if (match) {
+          console.log(`Found wrapped value: ${val}, extracting: ${match[2]}`);
+          unwrappedObj[key] = match[1] === 'number' ? Number(match[2]) : match[2];
+        } else {
+          unwrappedObj[key] = val;
+        }
+      } else if (typeof val === 'object') {
+        unwrappedObj[key] = unwrapValue(val);
+      } else {
+        unwrappedObj[key] = val;
+      }
     });
     return unwrappedObj;
   };
 
   const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
-    return Object.entries(unwrapValue(obj))
+    const unwrappedData = unwrapValue(obj);
+    console.log("Unwrapped data for rendering:", unwrappedData);
+    
+    return Object.entries(unwrappedData)
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
       .map(([key, value]) => {
         console.log("Rendering key-value:", { key, value });
@@ -64,7 +67,7 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
   };
 
   // Unwrap all document data
-  const unwrappedDoc = unwrapValue(document);
+  const unwrappedDoc = unwrapValue(document.data);
   console.log("Unwrapped document:", unwrappedDoc);
 
   return (

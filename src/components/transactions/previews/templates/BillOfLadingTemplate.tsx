@@ -1,13 +1,15 @@
 import { Card } from "@/components/ui/card";
+import { WrappedBillOfLading } from "./types";
 
 interface BillOfLadingTemplateProps {
-  document: any;
+  document: WrappedBillOfLading;
 }
 
 export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) => {
   console.log("Rendering Bill of Lading template with document:", document);
   
-  const details = document?.billOfLadingDetails || document || {};
+  // Get the unwrapped data
+  const { billOfLadingDetails } = document.data || {};
   
   const formatLabel = (key: string) => {
     return key
@@ -24,28 +26,32 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
       return value.map(item => unwrapValue(item));
     }
     
-    // For objects, first check if it's a wrapped value
-    const wrappedKey = Object.keys(value).find(k => 
-      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)$/)
-    );
-    
-    if (wrappedKey) {
-      console.log("Found wrapped value with key:", wrappedKey);
-      const [, type] = wrappedKey.split(':');
-      const rawValue = value[wrappedKey];
-      return type === 'number' ? Number(rawValue) : rawValue;
-    }
-    
-    // If it's an object but not wrapped, process each property
-    const unwrappedObj = {};
+    // For objects, check each property for UUID pattern
+    const unwrappedObj: any = {};
     Object.entries(value).forEach(([key, val]) => {
-      unwrappedObj[key] = unwrapValue(val);
+      if (typeof val === 'string') {
+        // Check for UUID pattern followed by :string or :number
+        const match = val.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number):(.+)$/);
+        if (match) {
+          console.log(`Found wrapped value: ${val}, extracting: ${match[2]}`);
+          unwrappedObj[key] = match[1] === 'number' ? Number(match[2]) : match[2];
+        } else {
+          unwrappedObj[key] = val;
+        }
+      } else if (typeof val === 'object') {
+        unwrappedObj[key] = unwrapValue(val);
+      } else {
+        unwrappedObj[key] = val;
+      }
     });
     return unwrappedObj;
   };
 
   const renderKeyValue = (obj: any) => {
-    return Object.entries(unwrapValue(obj))
+    const unwrappedData = unwrapValue(obj);
+    console.log("Unwrapped data for rendering:", unwrappedData);
+    
+    return Object.entries(unwrappedData)
       .filter(([_, value]) => value)
       .map(([key, value]) => {
         console.log("Rendering key-value:", { key, value });
@@ -66,14 +72,14 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
   );
 
   // Unwrap all document data
-  const unwrappedDoc = unwrapValue(details);
+  const unwrappedDoc = unwrapValue(billOfLadingDetails);
   console.log("Unwrapped document:", unwrappedDoc);
 
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
         <h2 className="text-2xl font-bold">Bill of Lading</h2>
-        <p className="text-gray-600">BL Number: {unwrappedDoc.blNumber || 'N/A'}</p>
+        <p className="text-gray-600">BL Number: {unwrappedDoc?.blNumber || 'N/A'}</p>
       </div>
 
       <div className="space-y-4">
@@ -81,10 +87,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Basic Information</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              scac: unwrappedDoc.scac,
-              vessel: unwrappedDoc.vessel,
-              voyageNo: unwrappedDoc.voyageNo,
-              carrierName: unwrappedDoc.carrierName
+              scac: unwrappedDoc?.scac,
+              vessel: unwrappedDoc?.vessel,
+              voyageNo: unwrappedDoc?.voyageNo,
+              carrierName: unwrappedDoc?.carrierName
             })}
           </div>
         </div>
@@ -93,10 +99,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Locations</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              portOfLoading: unwrappedDoc.portOfLoading,
-              portOfDischarge: unwrappedDoc.portOfDischarge,
-              placeOfReceipt: unwrappedDoc.placeOfReceipt,
-              placeOfDelivery: unwrappedDoc.placeOfDelivery
+              portOfLoading: unwrappedDoc?.portOfLoading,
+              portOfDischarge: unwrappedDoc?.portOfDischarge,
+              placeOfReceipt: unwrappedDoc?.placeOfReceipt,
+              placeOfDelivery: unwrappedDoc?.placeOfDelivery
             })}
           </div>
         </div>
@@ -104,16 +110,16 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
         <div>
           <h3 className="font-semibold mb-2">Parties</h3>
           <div className="space-y-4">
-            {renderParty(unwrappedDoc.shipper || {}, 'Shipper')}
-            {renderParty(unwrappedDoc.consignee || {}, 'Consignee')}
-            {renderParty(unwrappedDoc.notifyParty || {}, 'Notify Party')}
+            {renderParty(unwrappedDoc?.shipper || {}, 'Shipper')}
+            {renderParty(unwrappedDoc?.consignee || {}, 'Consignee')}
+            {renderParty(unwrappedDoc?.notifyParty || {}, 'Notify Party')}
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Packages</h3>
           <div className="space-y-2">
-            {(unwrappedDoc.packages || []).map((pkg: any, index: number) => (
+            {(unwrappedDoc?.packages || []).map((pkg: any, index: number) => (
               <div key={index} className="border-b pb-2">
                 <div className="grid grid-cols-3 gap-4">
                   {renderKeyValue(pkg)}
