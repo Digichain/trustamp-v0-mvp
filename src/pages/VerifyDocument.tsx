@@ -3,9 +3,8 @@ import { FileUploader } from '@/components/transactions/verification/FileUploade
 import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePreview } from '@/components/transactions/previews/InvoicePreview';
+import { BillOfLadingPreview } from '@/components/transactions/previews/BillOfLadingPreview';
 import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
-import { useWallet } from '@/contexts/WalletContext';
-import { VerificationResult } from '@/components/transactions/verification/types';
 
 const VerifyDocument = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
@@ -69,13 +68,19 @@ const VerifyDocument = () => {
   };
 
   const renderPreview = () => {
-    if (!verificationResult?.document || !verificationResult.isValid) return null;
+    if (!verificationResult?.document) return null;
 
-    switch (verificationResult.document.$template?.name) {
+    const templateName = verificationResult.document.$template?.name;
+    console.log("Template name for rendering:", templateName);
+
+    switch (templateName) {
       case 'INVOICE':
         return <InvoicePreview data={verificationResult.document} />;
+      case 'BILL_OF_LADING':
+        return <BillOfLadingPreview data={verificationResult.document.billOfLadingDetails} />;
       default:
-        return <div>Unsupported document type</div>;
+        console.warn("Unknown document template:", templateName);
+        return <div className="text-center text-gray-500">Document preview not available for this type</div>;
     }
   };
 
@@ -98,8 +103,8 @@ const VerifyDocument = () => {
             <DocumentVerificationStatus
               verificationDetails={verificationResult.details}
               onReset={resetVerification}
+              documentPreview={renderPreview()}
             />
-            {renderPreview()}
           </div>
         )}
       </div>
