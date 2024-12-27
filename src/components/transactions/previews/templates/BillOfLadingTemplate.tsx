@@ -19,33 +19,40 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
     // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // Check if it's an OpenAttestation wrapped value
-    // Look for a key that matches UUID pattern followed by :string or :number
-    const key = Object.keys(value).find(k => 
-      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)/)
-    );
-    
-    if (key) {
-      console.log("Found wrapped value with key:", key);
-      const [, type] = key.split(':');
-      return type === 'number' ? Number(value[key]) : value[key];
+    // If it's an array, unwrap each item
+    if (Array.isArray(value)) {
+      return value.map(item => unwrapValue(item));
     }
     
-    // If it's an object but not wrapped, return as is
-    return value;
+    // For objects, first check if it's a wrapped value
+    const wrappedKey = Object.keys(value).find(k => 
+      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)$/)
+    );
+    
+    if (wrappedKey) {
+      console.log("Found wrapped value with key:", wrappedKey);
+      const [, type] = wrappedKey.split(':');
+      const rawValue = value[wrappedKey];
+      return type === 'number' ? Number(rawValue) : rawValue;
+    }
+    
+    // If it's an object but not wrapped, process each property
+    const unwrappedObj = {};
+    Object.entries(value).forEach(([key, val]) => {
+      unwrappedObj[key] = unwrapValue(val);
+    });
+    return unwrappedObj;
   };
 
   const renderKeyValue = (obj: any) => {
-    return Object.entries(obj)
+    return Object.entries(unwrapValue(obj))
       .filter(([_, value]) => value)
       .map(([key, value]) => {
-        const cleanValue = unwrapValue(value);
-        console.log("Rendering key-value:", { key, value, cleanValue });
-        
+        console.log("Rendering key-value:", { key, value });
         return (
           <p key={key} className="text-sm">
             <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
-            <span>{String(cleanValue)}</span>
+            <span>{String(value)}</span>
           </p>
         );
       });
@@ -58,11 +65,15 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
     </div>
   );
 
+  // Unwrap all document data
+  const unwrappedDoc = unwrapValue(details);
+  console.log("Unwrapped document:", unwrappedDoc);
+
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
         <h2 className="text-2xl font-bold">Bill of Lading</h2>
-        <p className="text-gray-600">BL Number: {unwrapValue(details.blNumber) || 'N/A'}</p>
+        <p className="text-gray-600">BL Number: {unwrappedDoc.blNumber || 'N/A'}</p>
       </div>
 
       <div className="space-y-4">
@@ -70,10 +81,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Basic Information</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              scac: unwrapValue(details.scac),
-              vessel: unwrapValue(details.vessel),
-              voyageNo: unwrapValue(details.voyageNo),
-              carrierName: unwrapValue(details.carrierName)
+              scac: unwrappedDoc.scac,
+              vessel: unwrappedDoc.vessel,
+              voyageNo: unwrappedDoc.voyageNo,
+              carrierName: unwrappedDoc.carrierName
             })}
           </div>
         </div>
@@ -82,10 +93,10 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
           <h3 className="font-semibold mb-2">Locations</h3>
           <div className="grid grid-cols-2 gap-4">
             {renderKeyValue({
-              portOfLoading: unwrapValue(details.portOfLoading),
-              portOfDischarge: unwrapValue(details.portOfDischarge),
-              placeOfReceipt: unwrapValue(details.placeOfReceipt),
-              placeOfDelivery: unwrapValue(details.placeOfDelivery)
+              portOfLoading: unwrappedDoc.portOfLoading,
+              portOfDischarge: unwrappedDoc.portOfDischarge,
+              placeOfReceipt: unwrappedDoc.placeOfReceipt,
+              placeOfDelivery: unwrappedDoc.placeOfDelivery
             })}
           </div>
         </div>
@@ -93,16 +104,16 @@ export const BillOfLadingTemplate = ({ document }: BillOfLadingTemplateProps) =>
         <div>
           <h3 className="font-semibold mb-2">Parties</h3>
           <div className="space-y-4">
-            {renderParty(unwrapValue(details.shipper) || {}, 'Shipper')}
-            {renderParty(unwrapValue(details.consignee) || {}, 'Consignee')}
-            {renderParty(unwrapValue(details.notifyParty) || {}, 'Notify Party')}
+            {renderParty(unwrappedDoc.shipper || {}, 'Shipper')}
+            {renderParty(unwrappedDoc.consignee || {}, 'Consignee')}
+            {renderParty(unwrappedDoc.notifyParty || {}, 'Notify Party')}
           </div>
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Packages</h3>
           <div className="space-y-2">
-            {(unwrapValue(details.packages) || []).map((pkg: any, index: number) => (
+            {(unwrappedDoc.packages || []).map((pkg: any, index: number) => (
               <div key={index} className="border-b pb-2">
                 <div className="grid grid-cols-3 gap-4">
                   {renderKeyValue(pkg)}

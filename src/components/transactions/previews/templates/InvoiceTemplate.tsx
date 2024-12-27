@@ -24,43 +24,54 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
     // If value is not an object or is null/undefined, return as is
     if (!value || typeof value !== 'object') return value;
     
-    // Check if it's an OpenAttestation wrapped value
-    // Look for a key that matches UUID pattern followed by :string or :number
-    const key = Object.keys(value).find(k => 
-      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)/)
-    );
-    
-    if (key) {
-      console.log("Found wrapped value with key:", key);
-      const [, type] = key.split(':');
-      return type === 'number' ? Number(value[key]) : value[key];
+    // If it's an array, unwrap each item
+    if (Array.isArray(value)) {
+      return value.map(item => unwrapValue(item));
     }
     
-    // If it's an object but not wrapped, return as is
-    return value;
+    // For objects, first check if it's a wrapped value
+    const wrappedKey = Object.keys(value).find(k => 
+      k.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:(string|number)$/)
+    );
+    
+    if (wrappedKey) {
+      console.log("Found wrapped value with key:", wrappedKey);
+      const [, type] = wrappedKey.split(':');
+      const rawValue = value[wrappedKey];
+      return type === 'number' ? Number(rawValue) : rawValue;
+    }
+    
+    // If it's an object but not wrapped, process each property
+    const unwrappedObj = {};
+    Object.entries(value).forEach(([key, val]) => {
+      unwrappedObj[key] = unwrapValue(val);
+    });
+    return unwrappedObj;
   };
 
   const renderKeyValue = (obj: any, excludeKeys: string[] = []) => {
-    return Object.entries(obj)
+    return Object.entries(unwrapValue(obj))
       .filter(([key]) => !excludeKeys.includes(key) && obj[key])
       .map(([key, value]) => {
-        const cleanValue = unwrapValue(value);
-        console.log("Rendering key-value:", { key, value, cleanValue });
-        
+        console.log("Rendering key-value:", { key, value });
         return (
           <p key={key} className="text-sm">
             <span className="font-medium text-gray-600">{formatLabel(key)}:</span>{' '}
-            <span>{String(cleanValue)}</span>
+            <span>{String(value)}</span>
           </p>
         );
       });
   };
 
+  // Unwrap all document data
+  const unwrappedDoc = unwrapValue(document);
+  console.log("Unwrapped document:", unwrappedDoc);
+
   return (
     <Card className="p-6 space-y-6 bg-white print:shadow-none">
       <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Invoice #{unwrapValue(invoiceDetails.invoiceNumber) || 'N/A'}</h2>
-        <p className="text-gray-600">{unwrapValue(invoiceDetails.date) || 'N/A'}</p>
+        <h2 className="text-2xl font-bold">Invoice #{unwrappedDoc.invoiceDetails?.invoiceNumber || 'N/A'}</h2>
+        <p className="text-gray-600">{unwrappedDoc.invoiceDetails?.date || 'N/A'}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -98,12 +109,12 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
             </tr>
           </thead>
           <tbody>
-            {billableItems.map((item: any, index: number) => (
+            {unwrappedDoc.billableItems?.map((item: any, index: number) => (
               <tr key={index} className="border-b">
-                <td className="py-2">{unwrapValue(item.description) || 'N/A'}</td>
-                <td className="text-right py-2">{unwrapValue(item.quantity) || 0}</td>
-                <td className="text-right py-2">${Number(unwrapValue(item.unitPrice) || 0).toFixed(2)}</td>
-                <td className="text-right py-2">${Number(unwrapValue(item.amount) || 0).toFixed(2)}</td>
+                <td className="py-2">{item.description || 'N/A'}</td>
+                <td className="text-right py-2">{item.quantity || 0}</td>
+                <td className="text-right py-2">${Number(item.unitPrice || 0).toFixed(2)}</td>
+                <td className="text-right py-2">${Number(item.amount || 0).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -114,15 +125,15 @@ export const InvoiceTemplate = ({ document }: InvoiceTemplateProps) => {
         <div className="w-1/3 space-y-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${Number(unwrapValue(document.subtotal) || 0).toFixed(2)}</span>
+            <span>${Number(unwrappedDoc.subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax ({Number(unwrapValue(document.tax) || 0)}%):</span>
-            <span>${Number(unwrapValue(document.taxTotal) || 0).toFixed(2)}</span>
+            <span>Tax ({Number(unwrappedDoc.tax || 0)}%):</span>
+            <span>${Number(unwrappedDoc.taxTotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${Number(unwrapValue(document.total) || 0).toFixed(2)}</span>
+            <span>${Number(unwrappedDoc.total || 0).toFixed(2)}</span>
           </div>
         </div>
       </div>
