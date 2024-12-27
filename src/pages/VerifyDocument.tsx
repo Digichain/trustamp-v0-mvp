@@ -69,13 +69,23 @@ const VerifyDocument = () => {
   const renderPreview = () => {
     if (!verificationResult?.document) return null;
 
-    // Determine document type from the document structure
+    // Get the document data, handling both wrapped and unwrapped formats
+    const doc = verificationResult.document.data || verificationResult.document;
+    console.log("Processing document for template:", doc);
+
+    // Helper function to extract clean string value
+    const getCleanValue = (value: string) => {
+      if (typeof value === 'string' && value.includes(':string:')) {
+        return value.split(':string:')[1];
+      }
+      return value;
+    };
+
+    // Determine template type
     let templateName;
-    const doc = verificationResult.document;
-    
-    console.log("Determining template for document:", doc);
-    
-    if (doc.invoiceDetails || doc.billFrom) {
+    if (doc.$template) {
+      templateName = getCleanValue(doc.$template.name);
+    } else if (doc.invoiceDetails || doc.billFrom) {
       templateName = "INVOICE";
     } else if (doc.billOfLadingDetails || doc.blNumber) {
       templateName = "BILL_OF_LADING";
@@ -89,7 +99,7 @@ const VerifyDocument = () => {
     }
 
     const Template = registry[templateName][0].template;
-    return <Template document={verificationResult.document} />;
+    return <Template document={doc} />;
   };
 
   return (
