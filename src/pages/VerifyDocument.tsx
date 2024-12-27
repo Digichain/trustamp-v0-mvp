@@ -69,8 +69,19 @@ const VerifyDocument = () => {
   const renderPreview = () => {
     if (!verificationResult?.document) return null;
 
-    const templateName = verificationResult.document.$template?.name;
-    console.log("Template name for rendering:", templateName);
+    // Determine document type from the document structure
+    let templateName;
+    const doc = verificationResult.document;
+    
+    console.log("Determining template for document:", doc);
+    
+    if (doc.invoiceDetails || doc.billFrom) {
+      templateName = "INVOICE";
+    } else if (doc.billOfLadingDetails || doc.blNumber) {
+      templateName = "BILL_OF_LADING";
+    }
+
+    console.log("Detected template name:", templateName);
 
     if (!templateName || !registry[templateName]) {
       console.warn("Unknown document template:", templateName);
