@@ -4,6 +4,12 @@ import { getSchema } from "../shared/ajv";
 import { SchemaId } from "../shared/@types/document";
 import { SchemaValidationError } from "../shared/utils";
 
+// Function to unwrap values from OpenAttestation data
+export const unwrapValue = (value: any) => {
+  if (!value) return value;
+  return value.value || value;
+};
+
 // Function to wrap the document using OpenAttestation's official function
 export const wrapDocument = (rawDocument: any, schemaId: string = SchemaId.v2) => {
   console.log("Starting document wrapping process with raw document:", rawDocument);

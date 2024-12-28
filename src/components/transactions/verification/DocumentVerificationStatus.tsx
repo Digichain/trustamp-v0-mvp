@@ -97,7 +97,7 @@ export const DocumentVerificationStatus = ({
         />
       </div>
 
-      {documentPreview && (
+      {documentPreview && allValid && (
         <Card className="p-6">
           <Collapsible open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
             <div className="flex items-center justify-between">

@@ -10,6 +10,8 @@ import {
   getDnsData
 } from "@/utils/openattestation";
 
+export type { VerificationFragment };
+
 export enum VerificationFragmentType {
   DOCUMENT_STATUS = "DOCUMENT_STATUS",
   DOCUMENT_INTEGRITY = "DOCUMENT_INTEGRITY",

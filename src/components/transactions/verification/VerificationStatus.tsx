@@ -1,62 +1,42 @@
 import { FC } from "react";
-import { VerificationFragment } from "./types/verificationTypes";
+import { type VerificationFragment } from "./types/verificationTypes";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface VerificationStatusProps {
-  fragments: VerificationFragment[];
-  showPreview: boolean;
-  setShowPreview: (show: boolean) => void;
+  title: string;
+  isValid: boolean;
+  message: string;
+  details?: {
+    name?: string;
+    domain?: string;
+  };
 }
 
 export const VerificationStatus: FC<VerificationStatusProps> = ({
-  fragments,
-  showPreview,
-  setShowPreview
+  title,
+  isValid,
+  message,
+  details
 }) => {
-  const isValid = fragments.every((fragment) => fragment.status === "VALID");
-
-  // Update preview visibility based on verification status
-  if (!isValid && showPreview) {
-    setShowPreview(false);
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <span className="font-semibold">Verification Status:</span>
+    <div className="p-4 rounded-lg border">
+      <div className="flex items-center space-x-2 mb-2">
         {isValid ? (
-          <div className="flex items-center text-green-600">
-            <CheckCircle2 className="w-5 h-5 mr-1" />
-            <span>Valid</span>
-          </div>
+          <CheckCircle2 className="w-5 h-5 text-green-500" />
         ) : (
-          <div className="flex items-center text-red-600">
-            <XCircle className="w-5 h-5 mr-1" />
-            <span>Invalid</span>
-          </div>
+          <XCircle className="w-5 h-5 text-red-500" />
         )}
+        <h3 className="font-semibold">{title}</h3>
       </div>
-
-      <div className="space-y-2">
-        {fragments.map((fragment, index) => (
-          <div
-            key={index}
-            className={`flex items-center space-x-2 ${
-              fragment.status === "VALID" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {fragment.status === "VALID" ? (
-              <CheckCircle2 className="w-4 h-4" />
-            ) : (
-              <XCircle className="w-4 h-4" />
-            )}
-            <span>{fragment.name}</span>
-            {fragment.status !== "VALID" && fragment.reason && (
-              <span className="text-sm">- {fragment.reason}</span>
-            )}
-          </div>
-        ))}
-      </div>
+      <p className={`text-sm ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+        {message}
+      </p>
+      {details && (
+        <div className="mt-2 text-sm text-gray-600">
+          {details.name && <p>Name: {details.name}</p>}
+          {details.domain && <p>Domain: {details.domain}</p>}
+        </div>
+      )}
     </div>
   );
 };
