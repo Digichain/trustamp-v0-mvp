@@ -1,46 +1,62 @@
-import { Card } from "@/components/ui/card";
+import { FC } from "react";
+import { VerificationFragment } from "./types/verificationTypes";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface VerificationStatusProps {
-  title: string;
-  isValid: boolean;
-  message: string;
-  details?: {
-    name?: string;
-    domain?: string;
-  };
+  fragments: VerificationFragment[];
+  showPreview: boolean;
+  setShowPreview: (show: boolean) => void;
 }
 
-export const VerificationStatus = ({
-  title,
-  isValid,
-  message,
-  details
-}: VerificationStatusProps) => {
-  // Ensure message is a string
-  const displayMessage = typeof message === 'string' ? message : 'Verification status unavailable';
+export const VerificationStatus: FC<VerificationStatusProps> = ({
+  fragments,
+  showPreview,
+  setShowPreview
+}) => {
+  const isValid = fragments.every((fragment) => fragment.status === "VALID");
+
+  // Update preview visibility based on verification status
+  if (!isValid && showPreview) {
+    setShowPreview(false);
+  }
 
   return (
-    <Card className="p-6 h-full">
-      <div className="flex items-start space-x-4">
-        <div className="mt-1">
-          {isValid ? (
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-          ) : (
-            <XCircle className="h-5 w-5 text-red-500" />
-          )}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-1">{title}</h3>
-          <p className="text-gray-600">{displayMessage}</p>
-          {details && (
-            <div className="mt-2 text-sm text-gray-500">
-              {details.name && <p>Name: {details.name}</p>}
-              {details.domain && <p>Domain: {details.domain}</p>}
-            </div>
-          )}
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <span className="font-semibold">Verification Status:</span>
+        {isValid ? (
+          <div className="flex items-center text-green-600">
+            <CheckCircle2 className="w-5 h-5 mr-1" />
+            <span>Valid</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-red-600">
+            <XCircle className="w-5 h-5 mr-1" />
+            <span>Invalid</span>
+          </div>
+        )}
       </div>
-    </Card>
+
+      <div className="space-y-2">
+        {fragments.map((fragment, index) => (
+          <div
+            key={index}
+            className={`flex items-center space-x-2 ${
+              fragment.status === "VALID" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {fragment.status === "VALID" ? (
+              <CheckCircle2 className="w-4 h-4" />
+            ) : (
+              <XCircle className="w-4 h-4" />
+            )}
+            <span>{fragment.name}</span>
+            {fragment.status !== "VALID" && fragment.reason && (
+              <span className="text-sm">- {fragment.reason}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };

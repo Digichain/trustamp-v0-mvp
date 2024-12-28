@@ -1,23 +1,32 @@
-import { Card } from "@/components/ui/card";
-import { ReactNode } from "react";
+import { FC, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface DocumentWrapperProps {
-  title: string;
   children: ReactNode;
+  title: string;
+  className?: string;
 }
 
-export const DocumentWrapper = ({ title, children }: DocumentWrapperProps) => {
+export const DocumentWrapper: FC<DocumentWrapperProps> = ({
+  children,
+  title,
+  className,
+}) => {
   return (
-    <Card className="p-6 space-y-6 bg-[#F1F0FB] shadow-lg print:shadow-none">
-      <div className="border-b pb-4">
-        <img 
-          src="/lovable-uploads/332db982-2d48-46a4-8185-5f16eafbf9b5.png" 
-          alt="TruStamp Logo" 
-          className="h-36 mb-4" // Changed from h-12 to h-36 (3x larger)
-        />
-        <h2 className="text-2xl font-bold">{title}</h2>
+    <div className={cn("bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto", className)}>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        </div>
+        <div className="h-36">
+          <img
+            src="/lovable-uploads/e256b69c-090e-49d1-a172-c3b3e485c38c.png"
+            alt="Logo"
+            className="h-full w-auto object-contain"
+          />
+        </div>
       </div>
       {children}
-    </Card>
+    </div>
   );
 };
