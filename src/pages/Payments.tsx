@@ -112,6 +112,10 @@ const Payments = () => {
                 <DollarSign className="mr-2 h-4 w-4" />
                 Buy USDC
               </Button>
+              <Button className="w-full" variant="outline">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Buy AUDD
+              </Button>
             </div>
             
             <Card className="w-[400px]">
@@ -131,7 +135,7 @@ const Payments = () => {
                   </div>
                   
                   <div className="flex gap-4">
-                    <Button className="flex-1" variant="outline">
+                    <Button className="flex-1 bg-black hover:bg-black/90 text-white">
                       <ArrowUpCircle className="mr-2 h-4 w-4" />
                       Deposit
                     </Button>
