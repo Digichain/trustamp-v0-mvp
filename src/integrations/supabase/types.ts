@@ -17,6 +17,7 @@ export type Database = {
           company_name: string | null
           consignee: Json | null
           created_at: string | null
+          document_id: string
           id: string
           links: Json | null
           notifyParty: Json | null
@@ -28,7 +29,6 @@ export type Database = {
           raw_document: Json | null
           scac: string | null
           shipper: Json | null
-          transaction_id: string
           updated_at: string | null
           vessel: string | null
           voyageNo: string | null
@@ -40,6 +40,7 @@ export type Database = {
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
+          document_id: string
           id?: string
           links?: Json | null
           notifyParty?: Json | null
@@ -51,7 +52,6 @@ export type Database = {
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
-          transaction_id: string
           updated_at?: string | null
           vessel?: string | null
           voyageNo?: string | null
@@ -63,6 +63,7 @@ export type Database = {
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
+          document_id?: string
           id?: string
           links?: Json | null
           notifyParty?: Json | null
@@ -74,20 +75,67 @@ export type Database = {
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
-          transaction_id?: string
           updated_at?: string | null
           vessel?: string | null
           voyageNo?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "bill_of_lading_documents_transaction_id_fkey"
-            columns: ["transaction_id"]
+            foreignKeyName: "bill_of_lading_documents_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: "transactions"
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
         ]
+      }
+      documents: {
+        Row: {
+          created_at: string | null
+          document_subtype: string | null
+          id: string
+          network: string
+          raw_document: Json | null
+          signed_document: Json | null
+          status: string
+          title: string | null
+          transaction_hash: string
+          transaction_type: string
+          updated_at: string | null
+          user_id: string
+          wrapped_document: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_subtype?: string | null
+          id?: string
+          network: string
+          raw_document?: Json | null
+          signed_document?: Json | null
+          status?: string
+          title?: string | null
+          transaction_hash: string
+          transaction_type: string
+          updated_at?: string | null
+          user_id: string
+          wrapped_document?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          document_subtype?: string | null
+          id?: string
+          network?: string
+          raw_document?: Json | null
+          signed_document?: Json | null
+          status?: string
+          title?: string | null
+          transaction_hash?: string
+          transaction_type?: string
+          updated_at?: string | null
+          user_id?: string
+          wrapped_document?: Json | null
+        }
+        Relationships: []
       }
       invoice_documents: {
         Row: {
@@ -96,13 +144,13 @@ export type Database = {
           billable_items: Json | null
           created_at: string | null
           date: string | null
+          document_id: string
           id: string
           invoice_number: string | null
           subtotal: number | null
           tax: number | null
           tax_total: number | null
           total: number | null
-          transaction_id: string
           updated_at: string | null
         }
         Insert: {
@@ -111,13 +159,13 @@ export type Database = {
           billable_items?: Json | null
           created_at?: string | null
           date?: string | null
+          document_id: string
           id?: string
           invoice_number?: string | null
           subtotal?: number | null
           tax?: number | null
           tax_total?: number | null
           total?: number | null
-          transaction_id: string
           updated_at?: string | null
         }
         Update: {
@@ -126,21 +174,21 @@ export type Database = {
           billable_items?: Json | null
           created_at?: string | null
           date?: string | null
+          document_id?: string
           id?: string
           invoice_number?: string | null
           subtotal?: number | null
           tax?: number | null
           tax_total?: number | null
           total?: number | null
-          transaction_id?: string
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "invoice_documents_transaction_id_fkey"
-            columns: ["transaction_id"]
+            foreignKeyName: "invoice_documents_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: "transactions"
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
         ]

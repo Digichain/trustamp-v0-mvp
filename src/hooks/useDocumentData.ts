@@ -4,14 +4,14 @@ import { useToast } from "@/components/ui/use-toast";
 export const useDocumentData = () => {
   const { toast } = useToast();
 
-  const fetchDocumentData = async (transaction: any) => {
-    console.log("Fetching document data for transaction:", transaction);
+  const fetchDocumentData = async (document: any) => {
+    console.log("Fetching document data for document:", document);
     
-    if (transaction.document_subtype === "verifiable") {
+    if (document.document_subtype === "verifiable") {
       const { data, error } = await supabase
         .from("invoice_documents")
         .select("*")
-        .eq("transaction_id", transaction.id)
+        .eq("document_id", document.id)
         .maybeSingle();
 
       if (error) {
@@ -21,11 +21,11 @@ export const useDocumentData = () => {
 
       return data;
 
-    } else if (transaction.document_subtype === "transferable") {
+    } else if (document.document_subtype === "transferable") {
       const { data, error } = await supabase
         .from("bill_of_lading_documents")
         .select("*")
-        .eq("transaction_id", transaction.id)
+        .eq("document_id", document.id)
         .maybeSingle();
 
       if (error) {
@@ -39,11 +39,10 @@ export const useDocumentData = () => {
     return null;
   };
 
-  const handleDelete = async (transaction: any) => {
+  const handleDelete = async (document: any) => {
     try {
-      console.log("Starting deletion process for transaction:", transaction.id);
+      console.log("Starting deletion process for document:", document.id);
       
-      // First check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.error("No authenticated session found");
@@ -55,16 +54,16 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // Verify user owns the transaction before proceeding
-      const { data: transactionData, error: verifyError } = await supabase
-        .from("transactions")
+      // Verify user owns the document before proceeding
+      const { data: documentData, error: verifyError } = await supabase
+        .from("documents")
         .select("*")
-        .eq("id", transaction.id)
+        .eq("id", document.id)
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (verifyError || !transactionData) {
-        console.error("Error verifying transaction ownership:", verifyError);
+      if (verifyError || !documentData) {
+        console.error("Error verifying document ownership:", verifyError);
         toast({
           title: "Error",
           description: "You don't have permission to delete this document",
@@ -74,7 +73,7 @@ export const useDocumentData = () => {
       }
 
       // First delete from the appropriate document table
-      const documentTable = transaction.document_subtype === "verifiable" 
+      const documentTable = document.document_subtype === "verifiable" 
         ? "invoice_documents" 
         : "bill_of_lading_documents";
       
@@ -82,7 +81,7 @@ export const useDocumentData = () => {
       const { error: documentError } = await supabase
         .from(documentTable)
         .delete()
-        .eq("transaction_id", transaction.id);
+        .eq("document_id", document.id);
 
       if (documentError) {
         console.error(`Error deleting from ${documentTable}:`, documentError);
@@ -90,7 +89,7 @@ export const useDocumentData = () => {
       }
 
       // Then delete from storage if it exists
-      const fileName = `${transaction.id}.json`;
+      const fileName = `${document.id}.json`;
       console.log("Deleting storage file:", fileName);
       
       const { data: fileExists } = await supabase.storage
@@ -112,17 +111,17 @@ export const useDocumentData = () => {
         console.log("File not found in storage:", fileName);
       }
 
-      // Finally delete from transactions table
-      console.log("Deleting from transactions table...");
-      const { error: transactionError } = await supabase
-        .from("transactions")
+      // Finally delete from documents table
+      console.log("Deleting from documents table...");
+      const { error: documentError } = await supabase
+        .from("documents")
         .delete()
-        .eq("id", transaction.id)
+        .eq("id", document.id)
         .eq("user_id", session.user.id);
 
-      if (transactionError) {
-        console.error("Error deleting from transactions:", transactionError);
-        throw transactionError;
+      if (documentError) {
+        console.error("Error deleting from documents:", documentError);
+        throw documentError;
       }
 
       console.log("Deletion process completed successfully");
