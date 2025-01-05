@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, ListCheck, CreditCard, LayoutDashboard, LineChart, Wallet2, BadgeDollarSign } from "lucide-react";
+import { User, ListCheck, CreditCard, LayoutDashboard, LineChart, Wallet2, BadgeDollarSign, Receipt } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -21,6 +21,11 @@ const menuItems = [
     title: "Documents",
     url: "/transactions",
     icon: ListCheck,
+  },
+  {
+    title: "Transactions",
+    url: "/transaction-history",
+    icon: Receipt,
   },
   {
     title: "Payments",

@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
 import Transactions from '@/pages/Transactions';
+import TransactionHistory from '@/pages/TransactionHistory';
 import CreateTransaction from '@/pages/CreateTransaction';
 import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction';
 import Account from '@/pages/Account';
@@ -104,6 +105,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Transactions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transaction-history"
+                element={
+                  <ProtectedRoute>
+                    <TransactionHistory />
                   </ProtectedRoute>
                 }
               />
