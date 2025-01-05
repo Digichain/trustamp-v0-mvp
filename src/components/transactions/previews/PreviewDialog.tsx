@@ -38,11 +38,6 @@ export const PreviewDialog = ({
             <X className="mr-2" />
             Close Preview
           </Button>
-          {showCreateButton && onConfirm && (
-            <Button onClick={() => onConfirm()}>
-              Create Document
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>
