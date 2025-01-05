@@ -54,38 +54,20 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // Verify user owns the document before proceeding
-      const { data: documentData, error: verifyError } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("id", document.id)
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
-      if (verifyError || !documentData) {
-        console.error("Error verifying document ownership:", verifyError);
-        toast({
-          title: "Error",
-          description: "You don't have permission to delete this document",
-          variant: "destructive",
-        });
-        return false;
-      }
-
       // First delete from the appropriate document table
       const documentTable = document.document_subtype === "verifiable" 
         ? "invoice_documents" 
         : "bill_of_lading_documents";
       
       console.log(`Deleting from ${documentTable}...`);
-      const { error: documentError } = await supabase
+      const { error: specificDocError } = await supabase
         .from(documentTable)
         .delete()
         .eq("document_id", document.id);
 
-      if (documentError) {
-        console.error(`Error deleting from ${documentTable}:`, documentError);
-        throw documentError;
+      if (specificDocError) {
+        console.error(`Error deleting from ${documentTable}:`, specificDocError);
+        throw specificDocError;
       }
 
       // Then delete from storage if it exists
@@ -113,15 +95,15 @@ export const useDocumentData = () => {
 
       // Finally delete from documents table
       console.log("Deleting from documents table...");
-      const { error: documentError } = await supabase
+      const { error: mainDocError } = await supabase
         .from("documents")
         .delete()
         .eq("id", document.id)
         .eq("user_id", session.user.id);
 
-      if (documentError) {
-        console.error("Error deleting from documents:", documentError);
-        throw documentError;
+      if (mainDocError) {
+        console.error("Error deleting from documents:", mainDocError);
+        throw mainDocError;
       }
 
       console.log("Deletion process completed successfully");

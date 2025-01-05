@@ -12,3 +12,8 @@ export interface Document {
   wrapped_document: any | null;
   signed_document: any | null;
 }
+
+export enum DocumentType {
+  VERIFIABLE_INVOICE = "VERIFIABLE_INVOICE",
+  TRANSFERABLE_BILL_OF_LADING = "TRANSFERABLE_BILL_OF_LADING"
+}

@@ -141,8 +141,8 @@ export const TransferableBillOfLadingForm = () => {
 
       console.log("Formatted document:", formattedDoc);
 
-      const { data: transactionData, error: transactionError } = await supabase
-        .from("transactions")
+      const { data: documentData, error: documentError } = await supabase
+        .from("documents")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
@@ -156,12 +156,12 @@ export const TransferableBillOfLadingForm = () => {
         .select()
         .single();
 
-      if (transactionError) throw transactionError;
+      if (documentError) throw documentError;
 
       const { error: bolError } = await supabase
         .from("bill_of_lading_documents")
         .insert({
-          transaction_id: transactionData.id,
+          document_id: documentData.id,
           ...formData,
           raw_document: formattedDoc
         });
@@ -173,9 +173,9 @@ export const TransferableBillOfLadingForm = () => {
         description: "Bill of Lading created successfully",
       });
 
-      navigate("/transactions");
+      navigate("/documents");
     } catch (error) {
-      console.error("Error creating transaction:", error);
+      console.error("Error creating document:", error);
       toast({
         title: "Error",
         description: "Failed to create Bill of Lading",
@@ -250,7 +250,7 @@ export const TransferableBillOfLadingForm = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => navigate("/transactions")}
+              onClick={() => navigate("/documents")}
               disabled={isSubmitting}
             >
               Cancel
