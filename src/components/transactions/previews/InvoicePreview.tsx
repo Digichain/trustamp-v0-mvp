@@ -7,43 +7,48 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
-  const invoiceDetails = data || {};
-  const billFrom = invoiceDetails.bill_from || {};
-  const billTo = invoiceDetails.bill_to || {};
-  const billableItems = invoiceDetails.billable_items || [];
-
   console.log("Rendering invoice preview with data:", data);
 
+  // Extract data from the correct location in the document
+  const invoiceNumber = unwrapValue(data?.invoiceDetails?.invoiceNumber) || unwrapValue(data?.invoice_number) || 'N/A';
+  const billFrom = data?.invoiceDetails?.billFrom || data?.bill_from || {};
+  const billTo = data?.invoiceDetails?.billTo || data?.bill_to || {};
+  const billableItems = data?.billableItems || data?.billable_items || [];
+  const subtotal = unwrapValue(data?.subtotal);
+  const tax = unwrapValue(data?.tax);
+  const taxTotal = unwrapValue(data?.taxTotal) || unwrapValue(data?.tax_total);
+  const total = unwrapValue(data?.total);
+
   return (
-    <DocumentWrapper title={`Invoice #${unwrapValue(invoiceDetails?.invoice_number) || 'N/A'}`}>
+    <DocumentWrapper title={`Invoice #${invoiceNumber}`}>
       <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
           <h2 className="text-lg font-semibold mb-4">Bill From</h2>
           <div className="space-y-2">
             <p className="font-medium">Contact Person</p>
-            <p>{unwrapValue(billFrom.name)}</p>
-            <p>{unwrapValue(billFrom.email)}</p>
+            <p>{unwrapValue(billFrom?.name)}</p>
+            <p>{unwrapValue(billFrom?.email)}</p>
             <p className="font-medium mt-4">Company Details</p>
-            <p>{unwrapValue(billFrom.company?.name)}</p>
-            <p>{unwrapValue(billFrom.company?.streetAddress)}</p>
-            <p>{unwrapValue(billFrom.company?.city)}</p>
-            <p>{unwrapValue(billFrom.company?.postalCode)}</p>
-            <p>{unwrapValue(billFrom.company?.phoneNumber)}</p>
-            <p>{unwrapValue(billFrom.company?.registration)}</p>
+            <p>{unwrapValue(billFrom?.company?.name)}</p>
+            <p>{unwrapValue(billFrom?.company?.streetAddress) || unwrapValue(billFrom?.streetAddress)}</p>
+            <p>{unwrapValue(billFrom?.company?.city) || unwrapValue(billFrom?.city)}</p>
+            <p>{unwrapValue(billFrom?.company?.postalCode) || unwrapValue(billFrom?.postalCode)}</p>
+            <p>{unwrapValue(billFrom?.company?.phoneNumber) || unwrapValue(billFrom?.phoneNumber)}</p>
+            <p>{unwrapValue(billFrom?.company?.registration)}</p>
           </div>
         </div>
         <div>
           <h2 className="text-lg font-semibold mb-4">Bill To</h2>
           <div className="space-y-2">
             <p className="font-medium">Contact Person</p>
-            <p>{unwrapValue(billTo.name)}</p>
-            <p>{unwrapValue(billTo.email)}</p>
+            <p>{unwrapValue(billTo?.name)}</p>
+            <p>{unwrapValue(billTo?.email)}</p>
             <p className="font-medium mt-4">Company Details</p>
-            <p>{unwrapValue(billTo.company?.name)}</p>
-            <p>{unwrapValue(billTo.company?.streetAddress)}</p>
-            <p>{unwrapValue(billTo.company?.city)}</p>
-            <p>{unwrapValue(billTo.company?.postalCode)}</p>
-            <p>{unwrapValue(billTo.company?.phoneNumber)}</p>
+            <p>{unwrapValue(billTo?.company?.name)}</p>
+            <p>{unwrapValue(billTo?.company?.streetAddress) || unwrapValue(billTo?.streetAddress)}</p>
+            <p>{unwrapValue(billTo?.company?.city) || unwrapValue(billTo?.city)}</p>
+            <p>{unwrapValue(billTo?.company?.postalCode) || unwrapValue(billTo?.postalCode)}</p>
+            <p>{unwrapValue(billTo?.company?.phoneNumber) || unwrapValue(billTo?.phoneNumber)}</p>
           </div>
         </div>
       </div>
@@ -76,15 +81,15 @@ export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
-            <span>${unwrapValue(invoiceDetails.subtotal) || '0.00'}</span>
+            <span>${subtotal || '0.00'}</span>
           </div>
           <div className="flex justify-between py-2">
-            <span>Tax ({unwrapValue(invoiceDetails.tax) || '0'}%):</span>
-            <span>${unwrapValue(invoiceDetails.tax_total) || '0.00'}</span>
+            <span>Tax ({tax || '0'}%):</span>
+            <span>${taxTotal || '0.00'}</span>
           </div>
           <div className="flex justify-between py-2 font-bold">
             <span>Total:</span>
-            <span>${unwrapValue(invoiceDetails.total) || '0.00'}</span>
+            <span>${total || '0.00'}</span>
           </div>
         </div>
       </div>
