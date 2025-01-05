@@ -95,13 +95,14 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // First delete from the related document table based on document type
+      // Delete from related document tables first
       if (document.document_subtype === "verifiable") {
         console.log("Deleting from invoice_documents...");
         const { error: invoiceError } = await supabase
           .from("invoice_documents")
           .delete()
-          .eq("document_id", document.id);
+          .eq("document_id", document.id)
+          .single();
 
         if (invoiceError) {
           console.error("Error deleting from invoice_documents:", invoiceError);
@@ -112,7 +113,8 @@ export const useDocumentData = () => {
         const { error: bolError } = await supabase
           .from("bill_of_lading_documents")
           .delete()
-          .eq("document_id", document.id);
+          .eq("document_id", document.id)
+          .single();
 
         if (bolError) {
           console.error("Error deleting from bill_of_lading_documents:", bolError);
@@ -120,13 +122,14 @@ export const useDocumentData = () => {
         }
       }
 
-      // Then delete from documents table
+      // Delete from documents table
       console.log("Deleting from documents table...");
       const { error: mainDocError } = await supabase
         .from("documents")
         .delete()
         .eq("id", document.id)
-        .eq("user_id", session.user.id);
+        .eq("user_id", session.user.id)
+        .single();
 
       if (mainDocError) {
         console.error("Error deleting from documents:", mainDocError);
