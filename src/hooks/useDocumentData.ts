@@ -122,11 +122,11 @@ export const useDocumentData = () => {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in deletion process:", error);
       toast({
         title: "Error",
-        description: "Failed to delete document",
+        description: error.message || "Failed to delete document",
         variant: "destructive",
       });
       return false;
