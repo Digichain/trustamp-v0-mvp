@@ -12,6 +12,8 @@ export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
   const billTo = invoiceDetails.bill_to || {};
   const billableItems = invoiceDetails.billable_items || [];
 
+  console.log("Rendering invoice preview with data:", data);
+
   return (
     <DocumentWrapper title={`Invoice #${unwrapValue(invoiceDetails?.invoice_number) || 'N/A'}`}>
       <div className="grid grid-cols-2 gap-8 mb-8">
@@ -19,24 +21,29 @@ export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
           <h2 className="text-lg font-semibold mb-4">Bill From</h2>
           <div className="space-y-2">
             <p className="font-medium">Contact Person</p>
-            <p>{billFrom.name}</p>
-            <p>{billFrom.email}</p>
+            <p>{unwrapValue(billFrom.name)}</p>
+            <p>{unwrapValue(billFrom.email)}</p>
             <p className="font-medium mt-4">Company Details</p>
-            <p>{billFrom.company?.name}</p>
-            <p>{billFrom.company?.address}</p>
-            <p>{billFrom.company?.registration}</p>
+            <p>{unwrapValue(billFrom.company?.name)}</p>
+            <p>{unwrapValue(billFrom.company?.streetAddress)}</p>
+            <p>{unwrapValue(billFrom.company?.city)}</p>
+            <p>{unwrapValue(billFrom.company?.postalCode)}</p>
+            <p>{unwrapValue(billFrom.company?.phoneNumber)}</p>
+            <p>{unwrapValue(billFrom.company?.registration)}</p>
           </div>
         </div>
         <div>
           <h2 className="text-lg font-semibold mb-4">Bill To</h2>
           <div className="space-y-2">
             <p className="font-medium">Contact Person</p>
-            <p>{billTo.name}</p>
-            <p>{billTo.email}</p>
+            <p>{unwrapValue(billTo.name)}</p>
+            <p>{unwrapValue(billTo.email)}</p>
             <p className="font-medium mt-4">Company Details</p>
-            <p>{billTo.company?.name}</p>
-            <p>{billTo.company?.address}</p>
-            <p>{billTo.company?.registration}</p>
+            <p>{unwrapValue(billTo.company?.name)}</p>
+            <p>{unwrapValue(billTo.company?.streetAddress)}</p>
+            <p>{unwrapValue(billTo.company?.city)}</p>
+            <p>{unwrapValue(billTo.company?.postalCode)}</p>
+            <p>{unwrapValue(billTo.company?.phoneNumber)}</p>
           </div>
         </div>
       </div>
@@ -55,10 +62,10 @@ export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
           <tbody>
             {billableItems.map((item: any, index: number) => (
               <tr key={index} className="border-b">
-                <td className="py-2">{item.description}</td>
-                <td className="text-right py-2">{item.quantity}</td>
-                <td className="text-right py-2">${item.unitPrice}</td>
-                <td className="text-right py-2">${item.amount}</td>
+                <td className="py-2">{unwrapValue(item.description)}</td>
+                <td className="text-right py-2">{unwrapValue(item.quantity)}</td>
+                <td className="text-right py-2">${unwrapValue(item.unitPrice)}</td>
+                <td className="text-right py-2">${unwrapValue(item.amount)}</td>
               </tr>
             ))}
           </tbody>
@@ -69,15 +76,15 @@ export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
-            <span>${invoiceDetails.subtotal || '0.00'}</span>
+            <span>${unwrapValue(invoiceDetails.subtotal) || '0.00'}</span>
           </div>
           <div className="flex justify-between py-2">
-            <span>Tax ({invoiceDetails.tax || '0'}%):</span>
-            <span>${invoiceDetails.tax_total || '0.00'}</span>
+            <span>Tax ({unwrapValue(invoiceDetails.tax) || '0'}%):</span>
+            <span>${unwrapValue(invoiceDetails.tax_total) || '0.00'}</span>
           </div>
           <div className="flex justify-between py-2 font-bold">
             <span>Total:</span>
-            <span>${invoiceDetails.total || '0.00'}</span>
+            <span>${unwrapValue(invoiceDetails.total) || '0.00'}</span>
           </div>
         </div>
       </div>

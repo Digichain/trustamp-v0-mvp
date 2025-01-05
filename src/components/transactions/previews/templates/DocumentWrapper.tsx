@@ -18,10 +18,10 @@ export const DocumentWrapper: FC<DocumentWrapperProps> = ({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
         </div>
-        <div className="h-36">
+        <div className="h-12">
           <img
-            src="/lovable-uploads/e256b69c-090e-49d1-a172-c3b3e485c38c.png"
-            alt="Logo"
+            src="/lovable-uploads/e7871933-6aa9-4c04-8f45-3cc4022bb768.png"
+            alt="Trustamp Logo"
             className="h-full w-auto object-contain"
           />
         </div>
