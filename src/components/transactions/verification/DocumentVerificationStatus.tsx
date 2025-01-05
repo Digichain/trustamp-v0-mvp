@@ -1,6 +1,6 @@
 import { VerificationStatus } from "./VerificationStatus";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp, Printer } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Printer, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -96,6 +96,16 @@ export const DocumentVerificationStatus = ({
           message={verificationDetails.documentIntegrity.message}
         />
       </div>
+
+      {verificationDetails.issuerIdentity.valid && verificationDetails.issuerIdentity.details?.domain && (
+        <Card className="p-4 bg-muted">
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-muted-foreground" />
+            <span className="font-medium">Document Owner:</span>
+            <span className="text-muted-foreground">{verificationDetails.issuerIdentity.details.domain}</span>
+          </div>
+        </Card>
+      )}
 
       {documentPreview && allValid && (
         <Card className="p-6">
