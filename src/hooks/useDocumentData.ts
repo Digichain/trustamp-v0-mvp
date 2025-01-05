@@ -1,10 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Document } from "@/types/documents";
 
 export const useDocumentData = () => {
   const { toast } = useToast();
 
-  const fetchDocumentData = async (document: any) => {
+  const fetchDocumentData = async (document: Document) => {
     console.log("Fetching document data for document:", document);
     
     if (document.document_subtype === "verifiable") {
@@ -39,7 +40,7 @@ export const useDocumentData = () => {
     return null;
   };
 
-  const handleDelete = async (document: any) => {
+  const handleDelete = async (document: Document) => {
     try {
       console.log("Starting deletion process for document:", document.id);
       
@@ -54,7 +55,7 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // First delete from the appropriate document table
+      // First delete from the related document table
       if (document.document_subtype === "verifiable") {
         console.log("Deleting from invoice_documents...");
         const { error: invoiceError } = await supabase
@@ -81,7 +82,7 @@ export const useDocumentData = () => {
 
       // Then delete from storage if it exists
       const fileName = `${document.id}.json`;
-      console.log("Deleting storage file:", fileName);
+      console.log("Checking storage for file:", fileName);
       
       const { data: fileExists } = await supabase.storage
         .from('raw-documents')
@@ -90,6 +91,7 @@ export const useDocumentData = () => {
         });
 
       if (fileExists && fileExists.length > 0) {
+        console.log("Deleting file from storage:", fileName);
         const { error: storageError } = await supabase.storage
           .from('raw-documents')
           .remove([fileName]);
@@ -99,7 +101,7 @@ export const useDocumentData = () => {
           throw storageError;
         }
       } else {
-        console.log("File not found in storage:", fileName);
+        console.log("No file found in storage:", fileName);
       }
 
       // Finally delete from documents table
