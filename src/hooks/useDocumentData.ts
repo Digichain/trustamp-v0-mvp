@@ -102,7 +102,7 @@ export const useDocumentData = () => {
           .from("invoice_documents")
           .delete()
           .eq("document_id", document.id)
-          .single();
+          .maybeSingle();
 
         if (invoiceError) {
           console.error("Error deleting from invoice_documents:", invoiceError);
@@ -114,7 +114,7 @@ export const useDocumentData = () => {
           .from("bill_of_lading_documents")
           .delete()
           .eq("document_id", document.id)
-          .single();
+          .maybeSingle();
 
         if (bolError) {
           console.error("Error deleting from bill_of_lading_documents:", bolError);
@@ -129,7 +129,7 @@ export const useDocumentData = () => {
         .delete()
         .eq("id", document.id)
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (mainDocError) {
         console.error("Error deleting from documents:", mainDocError);
