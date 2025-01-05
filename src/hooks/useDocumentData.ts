@@ -55,19 +55,28 @@ export const useDocumentData = () => {
       }
 
       // First delete from the appropriate document table
-      const documentTable = document.document_subtype === "verifiable" 
-        ? "invoice_documents" 
-        : "bill_of_lading_documents";
-      
-      console.log(`Deleting from ${documentTable}...`);
-      const { error: specificDocError } = await supabase
-        .from(documentTable)
-        .delete()
-        .eq("document_id", document.id);
+      if (document.document_subtype === "verifiable") {
+        console.log("Deleting from invoice_documents...");
+        const { error: invoiceError } = await supabase
+          .from("invoice_documents")
+          .delete()
+          .eq("document_id", document.id);
 
-      if (specificDocError) {
-        console.error(`Error deleting from ${documentTable}:`, specificDocError);
-        throw specificDocError;
+        if (invoiceError) {
+          console.error("Error deleting from invoice_documents:", invoiceError);
+          throw invoiceError;
+        }
+      } else if (document.document_subtype === "transferable") {
+        console.log("Deleting from bill_of_lading_documents...");
+        const { error: bolError } = await supabase
+          .from("bill_of_lading_documents")
+          .delete()
+          .eq("document_id", document.id);
+
+        if (bolError) {
+          console.error("Error deleting from bill_of_lading_documents:", bolError);
+          throw bolError;
+        }
       }
 
       // Then delete from storage if it exists
