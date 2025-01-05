@@ -44,7 +44,6 @@ const Transactions = () => {
           <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
           <div className="flex gap-4">
             <Button 
-              variant="outline"
               onClick={handleImport}
               disabled={!isWalletConnected}
               className="disabled:opacity-50 disabled:cursor-not-allowed"
