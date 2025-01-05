@@ -41,7 +41,7 @@ export const DocumentVerificationStatus = ({
     window.print();
   };
 
-  console.log("Verification details:", verificationDetails); // Debug log
+  console.log("Verification details:", verificationDetails);
 
   if (!verificationDetails) {
     return (
@@ -70,10 +70,15 @@ export const DocumentVerificationStatus = ({
                   verificationDetails.issuerIdentity.valid &&
                   verificationDetails.documentIntegrity.valid;
 
-  // Debug logs for owner information
-  console.log("Issuer identity valid:", verificationDetails.issuerIdentity.valid);
-  console.log("Issuer details:", verificationDetails.issuerIdentity.details);
-  console.log("Domain:", verificationDetails.issuerIdentity.details?.domain);
+  // Find the DNS-DID proof fragment to get the domain
+  const dnsDidProof = verificationDetails.fragments?.find(
+    f => f.name === "OpenAttestationDnsDidIdentityProof" && f.status === "VALID"
+  );
+  
+  const ownerDomain = dnsDidProof?.data?.[0]?.location;
+  
+  console.log("DNS DID Proof:", dnsDidProof);
+  console.log("Owner domain:", ownerDomain);
 
   return (
     <div className="space-y-6">
@@ -104,12 +109,12 @@ export const DocumentVerificationStatus = ({
         />
       </div>
 
-      {verificationDetails.issuerIdentity.valid && verificationDetails.issuerIdentity.details?.domain && (
+      {verificationDetails.issuerIdentity.valid && ownerDomain && (
         <Card className="p-4 bg-muted">
           <div className="flex items-center gap-2">
             <User className="h-5 w-5 text-muted-foreground" />
             <span className="font-medium">Document Owner:</span>
-            <span className="text-muted-foreground">{verificationDetails.issuerIdentity.details.domain}</span>
+            <span className="text-muted-foreground">{ownerDomain}</span>
           </div>
         </Card>
       )}
