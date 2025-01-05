@@ -7,8 +7,8 @@ import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
 import Documents from '@/pages/Documents';
 import TransactionHistory from '@/pages/TransactionHistory';
-import CreateTransaction from '@/pages/CreateTransaction';
-import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction';
+import CreateDocument from '@/pages/CreateDocument';
+import CreateTransferableDocument from '@/pages/CreateTransferableDocument';
 import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
@@ -120,7 +120,7 @@ function App() {
                 path="/documents/create"
                 element={
                   <ProtectedRoute>
-                    <CreateTransaction />
+                    <CreateDocument />
                   </ProtectedRoute>
                 }
               />
@@ -128,7 +128,7 @@ function App() {
                 path="/documents/create-transferable"
                 element={
                   <ProtectedRoute>
-                    <CreateTransferableTransaction />
+                    <CreateTransferableDocument />
                   </ProtectedRoute>
                 }
               />
