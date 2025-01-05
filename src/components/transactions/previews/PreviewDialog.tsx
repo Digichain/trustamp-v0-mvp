@@ -5,12 +5,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eye, X } from "lucide-react";
+import { Eye, X, Check } from "lucide-react";
 
 interface PreviewDialogProps {
   title: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onConfirm?: () => void;
   children: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ export const PreviewDialog = ({
   title,
   isOpen,
   onOpenChange,
+  onConfirm,
   children,
 }: PreviewDialogProps) => {
   const handleClose = () => {
@@ -39,6 +41,12 @@ export const PreviewDialog = ({
             <X className="mr-2" />
             Close Preview
           </Button>
+          {onConfirm && (
+            <Button onClick={onConfirm}>
+              <Check className="mr-2" />
+              Create Document
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
