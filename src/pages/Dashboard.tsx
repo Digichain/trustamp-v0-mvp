@@ -76,8 +76,8 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TransactionChart data={mockBarChartData} />
           <DocumentDistribution data={mockPieChartData} />
+          <TransactionChart data={mockBarChartData} />
           <div className="lg:col-span-2">
             <RecentTransactions transactions={mockRecentTransactions} />
           </div>
