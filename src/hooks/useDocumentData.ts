@@ -9,6 +9,7 @@ export const useDocumentData = () => {
     console.log("Fetching document data for document:", document);
     
     if (document.document_subtype === "verifiable") {
+      console.log("Fetching verifiable document data");
       const { data, error } = await supabase
         .from("invoice_documents")
         .select("*")
@@ -20,9 +21,11 @@ export const useDocumentData = () => {
         return null;
       }
 
+      console.log("Retrieved invoice document data:", data);
       return data;
 
     } else if (document.document_subtype === "transferable") {
+      console.log("Fetching transferable document data");
       const { data, error } = await supabase
         .from("bill_of_lading_documents")
         .select("*")
@@ -34,6 +37,7 @@ export const useDocumentData = () => {
         return null;
       }
 
+      console.log("Retrieved bill of lading document data:", data);
       return data;
     }
 
