@@ -101,8 +101,7 @@ export const useDocumentData = () => {
         const { error: invoiceError } = await supabase
           .from("invoice_documents")
           .delete()
-          .eq("document_id", document.id)
-          .maybeSingle();
+          .eq("document_id", document.id);
 
         if (invoiceError) {
           console.error("Error deleting from invoice_documents:", invoiceError);
@@ -113,8 +112,7 @@ export const useDocumentData = () => {
         const { error: bolError } = await supabase
           .from("bill_of_lading_documents")
           .delete()
-          .eq("document_id", document.id)
-          .maybeSingle();
+          .eq("document_id", document.id);
 
         if (bolError) {
           console.error("Error deleting from bill_of_lading_documents:", bolError);
@@ -128,8 +126,7 @@ export const useDocumentData = () => {
         .from("documents")
         .delete()
         .eq("id", document.id)
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+        .eq("user_id", session.user.id);
 
       if (mainDocError) {
         console.error("Error deleting from documents:", mainDocError);
