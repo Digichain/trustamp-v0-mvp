@@ -95,7 +95,7 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // First delete from the related document table
+      // First delete from the related document table based on document type
       if (document.document_subtype === "verifiable") {
         console.log("Deleting from invoice_documents...");
         const { error: invoiceError } = await supabase
@@ -120,31 +120,7 @@ export const useDocumentData = () => {
         }
       }
 
-      // Then delete from storage if it exists
-      const fileName = `${document.id}.json`;
-      console.log("Checking storage for file:", fileName);
-      
-      const { data: fileExists } = await supabase.storage
-        .from('raw-documents')
-        .list('', {
-          search: fileName
-        });
-
-      if (fileExists && fileExists.length > 0) {
-        console.log("Deleting file from storage:", fileName);
-        const { error: storageError } = await supabase.storage
-          .from('raw-documents')
-          .remove([fileName]);
-
-        if (storageError) {
-          console.error("Error deleting from storage:", storageError);
-          throw storageError;
-        }
-      } else {
-        console.log("No file found in storage:", fileName);
-      }
-
-      // Finally delete from documents table
+      // Then delete from documents table
       console.log("Deleting from documents table...");
       const { error: mainDocError } = await supabase
         .from("documents")
