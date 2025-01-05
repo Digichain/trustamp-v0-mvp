@@ -186,6 +186,16 @@ export const TransferableBillOfLadingForm = () => {
     }
   };
 
+  const handlePreview = () => {
+    console.log("Opening preview dialog");
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    console.log("Closing preview dialog");
+    setShowPreview(false);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <DocumentStoreCreator onStoreCreated={setDocumentStore} />
@@ -256,7 +266,7 @@ export const TransferableBillOfLadingForm = () => {
               Cancel
             </Button>
             <PreviewButton 
-              onClick={() => setShowPreview(true)} 
+              onClick={handlePreview}
               disabled={isSubmitting} 
             />
             <Button 
@@ -270,7 +280,7 @@ export const TransferableBillOfLadingForm = () => {
           <PreviewDialog
             title="Bill of Lading Preview"
             isOpen={showPreview}
-            onOpenChange={setShowPreview}
+            onOpenChange={handleClosePreview}
           >
             <BillOfLadingPreview data={formData} />
           </PreviewDialog>
