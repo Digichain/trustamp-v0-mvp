@@ -11,8 +11,6 @@ interface PreviewDialogProps {
   title: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm?: () => void;
-  showConfirmButton?: boolean;
   children: React.ReactNode;
 }
 
@@ -20,10 +18,10 @@ export const PreviewDialog = ({
   title,
   isOpen,
   onOpenChange,
-  onConfirm,
-  showConfirmButton = false,
   children,
 }: PreviewDialogProps) => {
+  console.log("PreviewDialog - Rendering with state:", { isOpen });
+  
   const handleClose = () => {
     console.log("PreviewDialog - Closing preview");
     onOpenChange(false);
@@ -43,11 +41,6 @@ export const PreviewDialog = ({
             <X className="mr-2" />
             Close Preview
           </Button>
-          {showConfirmButton && onConfirm && (
-            <Button onClick={onConfirm}>
-              Create Document
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -55,12 +48,12 @@ export const PreviewDialog = ({
 };
 
 interface PreviewButtonProps {
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   disabled?: boolean;
 }
 
 export const PreviewButton = ({ onClick, disabled }: PreviewButtonProps) => (
-  <Button variant="outline" onClick={onClick} disabled={disabled}>
+  <Button type="button" variant="outline" onClick={onClick} disabled={disabled}>
     <Eye className="mr-2" />
     Preview
   </Button>

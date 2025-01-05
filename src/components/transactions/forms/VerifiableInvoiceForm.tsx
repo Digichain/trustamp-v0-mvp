@@ -49,8 +49,9 @@ export const VerifiableInvoiceForm = () => {
     }
   };
 
-  const handlePreview = () => {
-    console.log("Opening preview dialog");
+  const handlePreview = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    console.log("Opening preview dialog without submitting form");
     setShowPreview(true);
   };
 
