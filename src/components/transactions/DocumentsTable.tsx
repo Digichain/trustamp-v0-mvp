@@ -31,6 +31,7 @@ export const DocumentsTable = () => {
 
   const handlePreviewClick = async (document: Document) => {
     try {
+      console.log("DocumentsTable - Handling preview click for document:", document.id);
       const docData = await fetchDocumentData(document);
       if (!docData) {
         toast({
@@ -50,6 +51,15 @@ export const DocumentsTable = () => {
         description: "Failed to load document preview",
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePreviewClose = (open: boolean) => {
+    console.log("DocumentsTable - Handling preview close, new state:", open);
+    setShowPreview(open);
+    if (!open) {
+      setSelectedDocument(null);
+      setDocumentData(null);
     }
   };
 
@@ -116,7 +126,7 @@ export const DocumentsTable = () => {
       <PreviewDialog
         title={`${selectedDocument?.title || 'Document'} Preview`}
         isOpen={showPreview}
-        onOpenChange={setShowPreview}
+        onOpenChange={handlePreviewClose}
       >
         {renderPreview()}
       </PreviewDialog>

@@ -11,21 +11,22 @@ interface PreviewDialogProps {
   title: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm?: () => void;
   children: React.ReactNode;
-  showCreateButton?: boolean;
 }
 
 export const PreviewDialog = ({
   title,
   isOpen,
   onOpenChange,
-  onConfirm,
   children,
-  showCreateButton = false,
 }: PreviewDialogProps) => {
+  const handleClose = () => {
+    console.log("PreviewDialog - Closing preview");
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -34,7 +35,7 @@ export const PreviewDialog = ({
           {children}
         </div>
         <div className="flex justify-end gap-4 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleClose}>
             <X className="mr-2" />
             Close Preview
           </Button>
