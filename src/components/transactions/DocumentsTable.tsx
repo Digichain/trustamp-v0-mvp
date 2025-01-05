@@ -16,6 +16,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { DocumentRow } from "./DocumentRow";
 import { useDocumentSubscription } from "@/hooks/useDocumentSubscription";
 import { Document } from "@/types/documents";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export const DocumentsTable = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -26,8 +28,30 @@ export const DocumentsTable = () => {
   const { documents, isLoading, invalidateDocuments } = useDocuments();
   const { fetchDocumentData, handleDelete } = useDocumentData();
 
-  // Set up real-time subscription
-  useDocumentSubscription(invalidateDocuments);
+  // Set up real-time subscription for document status updates
+  useEffect(() => {
+    console.log("Setting up real-time subscription for documents");
+    const channel = supabase
+      .channel('document-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'documents'
+        },
+        async (payload) => {
+          console.log("Received document update:", payload);
+          await invalidateDocuments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log("Cleaning up document subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [invalidateDocuments]);
 
   const handlePreviewClick = async (document: Document) => {
     try {
