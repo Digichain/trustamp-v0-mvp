@@ -18,7 +18,7 @@ const menuItems = [
     icon: User,
   },
   {
-    title: "Transactions",
+    title: "Documents",
     url: "/transactions",
     icon: ListCheck,
   },

@@ -54,13 +54,13 @@ export const CreateTransactionDialog = () => {
       setOpen(false);
       toast({
         title: "Wallet Connection Required",
-        description: "Please connect your wallet to create a transaction",
+        description: "Please connect your wallet to create a document",
         variant: "destructive",
       });
       return;
     }
     
-    console.log("Creating transaction:", { selectedType, selectedSubType });
+    console.log("Creating document:", { selectedType, selectedSubType });
     setOpen(false);
     
     if (selectedSubType === "verifiable") {
@@ -87,7 +87,7 @@ export const CreateTransactionDialog = () => {
         className="disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusCircle className="mr-2" />
-        Create new Transaction
+        Create new Document
       </Button>
       
       <Dialog 
@@ -103,9 +103,9 @@ export const CreateTransactionDialog = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Select type of transaction</DialogTitle>
+            <DialogTitle>Select type of document</DialogTitle>
             <DialogDescription>
-              Choose the type of transaction you want to create
+              Choose the type of document you want to create
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">

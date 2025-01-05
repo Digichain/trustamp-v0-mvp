@@ -29,7 +29,7 @@ const Transactions = () => {
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
           <div className="flex gap-4">
             <CreateTransactionDialog />
             <Button 
@@ -44,7 +44,7 @@ const Transactions = () => {
           </div>
         </div>
         <p className="text-gray-600 mb-8">
-          View and manage your trade documentation transactions.
+          View and manage your trade documentation.
         </p>
 
         <TransactionsTable />
