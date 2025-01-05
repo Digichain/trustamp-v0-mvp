@@ -70,13 +70,19 @@ export const DocumentVerificationStatus = ({
                   verificationDetails.issuerIdentity.valid &&
                   verificationDetails.documentIntegrity.valid;
 
-  // Find the DNS-DID proof fragment to get the domain
+  // Find both types of identity proofs
+  const dnsTxtProof = verificationDetails.fragments?.find(
+    f => f.name === "OpenAttestationDnsTxtIdentityProof" && f.status === "VALID"
+  );
+  
   const dnsDidProof = verificationDetails.fragments?.find(
     f => f.name === "OpenAttestationDnsDidIdentityProof" && f.status === "VALID"
   );
   
-  const ownerDomain = dnsDidProof?.data?.[0]?.location;
+  // Get the owner domain from either proof type
+  const ownerDomain = dnsTxtProof?.data?.[0]?.location || dnsDidProof?.data?.[0]?.location;
   
+  console.log("DNS TXT Proof:", dnsTxtProof);
   console.log("DNS DID Proof:", dnsDidProof);
   console.log("Owner domain:", ownerDomain);
 
