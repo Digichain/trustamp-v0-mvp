@@ -64,9 +64,9 @@ export const CreateTransactionDialog = () => {
     setOpen(false);
     
     if (selectedSubType === "verifiable") {
-      navigate("/transactions/create");
+      navigate("/documents/create");
     } else if (selectedSubType === "transferable") {
-      navigate("/transactions/create-transferable");
+      navigate("/documents/create-transferable");
     }
     
     setSelectedType("");
