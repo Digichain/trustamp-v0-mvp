@@ -1,55 +1,55 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useTransactions } from "@/hooks/useTransactions";
+import { useDocuments } from "@/hooks/useDocuments";
 import { wrapDocument } from "@govtechsg/open-attestation";
 import { useDocumentStorage } from "./useDocumentStorage";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useWrappingHandler = () => {
   const { toast } = useToast();
-  const { invalidateTransactions } = useTransactions();
+  const { invalidateDocuments } = useDocuments();
   const { storeWrappedDocument } = useDocumentStorage();
 
-  const handleWrapDocument = async (transaction: any) => {
+  const handleWrapDocument = async (document: any) => {
     try {
-      console.log("Starting document wrapping process for transaction:", transaction.id);
+      console.log("Starting document wrapping process for document:", document.id);
       
-      if (!transaction.raw_document) {
+      if (!document.raw_document) {
         throw new Error("No raw document found");
       }
 
       // Use OpenAttestation's wrap function directly
-      console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(transaction.raw_document, null, 2));
-      const wrappedDoc = wrapDocument(transaction.raw_document);
+      console.log("RAW DOCUMENT BEFORE WRAPPING:", JSON.stringify(document.raw_document, null, 2));
+      const wrappedDoc = wrapDocument(document.raw_document);
       console.log("WRAPPED DOCUMENT STRUCTURE:", JSON.stringify(wrappedDoc, null, 2));
 
       // Store the wrapped document
-      await storeWrappedDocument(transaction.id, wrappedDoc);
+      await storeWrappedDocument(document.id, wrappedDoc);
       console.log("Wrapped document stored successfully");
 
       // Convert wrapped document to JSON for database storage
       const wrappedDocJson = JSON.parse(JSON.stringify(wrappedDoc));
 
-      // Update transaction status in database
-      console.log("Updating transaction status to document_wrapped");
+      // Update document status in database
+      console.log("Updating document status to document_wrapped");
       const { error: updateError } = await supabase
-        .from('transactions')
+        .from('documents')  // Changed from 'transactions' to 'documents'
         .update({ 
           status: 'document_wrapped',
           wrapped_document: wrappedDocJson,
           updated_at: new Date().toISOString()
         })
-        .eq('id', transaction.id);
+        .eq('id', document.id);
 
       if (updateError) {
-        console.error("Error updating transaction status:", updateError);
+        console.error("Error updating document status:", updateError);
         throw updateError;
       }
 
-      console.log("Transaction status updated successfully");
+      console.log("Document status updated successfully");
 
       // Force cache invalidation to update UI
-      console.log("Invalidating transactions cache");
-      await invalidateTransactions();
+      console.log("Invalidating documents cache");
+      await invalidateDocuments();
       console.log("Cache invalidated, UI should update");
 
       toast({
