@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { FileCheck, PlusCircle, Upload } from "lucide-react";
-import { CreateTransactionDialog } from "@/components/transactions/CreateTransactionDialog";
+import { FileCheck, Upload } from "lucide-react";
+import { CreateDocumentDialog } from "@/components/transactions/CreateDocumentDialog";
 import { DocumentsTable } from "@/components/transactions/DocumentsTable";
 import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "@/contexts/WalletContext";
@@ -51,7 +51,7 @@ const Documents = () => {
               <Upload className="mr-2" />
               Import Document
             </Button>
-            <CreateTransactionDialog />
+            <CreateDocumentDialog />
             <Button 
               variant="outline" 
               disabled={!isWalletConnected}
