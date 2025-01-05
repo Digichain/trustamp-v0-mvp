@@ -271,7 +271,6 @@ export const TransferableBillOfLadingForm = () => {
             title="Bill of Lading Preview"
             isOpen={showPreview}
             onOpenChange={setShowPreview}
-            onConfirm={() => handleSubmit()}
           >
             <BillOfLadingPreview data={formData} />
           </PreviewDialog>

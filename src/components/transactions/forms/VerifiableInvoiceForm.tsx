@@ -136,7 +136,6 @@ export const VerifiableInvoiceForm = () => {
             title="Invoice Preview"
             isOpen={showPreview}
             onOpenChange={setShowPreview}
-            onConfirm={() => onSubmit()}
           >
             <InvoicePreview data={formData} />
           </PreviewDialog>
