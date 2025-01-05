@@ -41,6 +41,8 @@ export const DocumentVerificationStatus = ({
     window.print();
   };
 
+  console.log("Verification details:", verificationDetails); // Debug log
+
   if (!verificationDetails) {
     return (
       <div className="space-y-6">
@@ -67,6 +69,11 @@ export const DocumentVerificationStatus = ({
   const allValid = verificationDetails.issuanceStatus.valid &&
                   verificationDetails.issuerIdentity.valid &&
                   verificationDetails.documentIntegrity.valid;
+
+  // Debug logs for owner information
+  console.log("Issuer identity valid:", verificationDetails.issuerIdentity.valid);
+  console.log("Issuer details:", verificationDetails.issuerIdentity.details);
+  console.log("Domain:", verificationDetails.issuerIdentity.details?.domain);
 
   return (
     <div className="space-y-6">
