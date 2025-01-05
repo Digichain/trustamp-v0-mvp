@@ -8,40 +8,56 @@ export const useDocumentData = () => {
   const fetchDocumentData = async (document: Document) => {
     console.log("Fetching document data for document:", document);
     
-    if (document.document_subtype === "verifiable") {
-      console.log("Fetching verifiable document data");
-      const { data, error } = await supabase
-        .from("invoice_documents")
-        .select("*")
-        .eq("document_id", document.id)
-        .maybeSingle();
+    try {
+      if (document.document_subtype === "verifiable") {
+        console.log("Fetching verifiable document data");
+        const { data: invoiceData, error: invoiceError } = await supabase
+          .from("invoice_documents")
+          .select("*")
+          .eq("document_id", document.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching invoice document:", error);
-        return null;
+        if (invoiceError) {
+          console.error("Error fetching invoice document:", invoiceError);
+          throw invoiceError;
+        }
+
+        if (!invoiceData) {
+          console.log("No invoice data found for document:", document.id);
+          return null;
+        }
+
+        console.log("Retrieved invoice document data:", invoiceData);
+        return invoiceData;
+
+      } else if (document.document_subtype === "transferable") {
+        console.log("Fetching transferable document data");
+        const { data: bolData, error: bolError } = await supabase
+          .from("bill_of_lading_documents")
+          .select("*")
+          .eq("document_id", document.id)
+          .maybeSingle();
+
+        if (bolError) {
+          console.error("Error fetching bill of lading document:", bolError);
+          throw bolError;
+        }
+
+        if (!bolData) {
+          console.log("No bill of lading data found for document:", document.id);
+          return null;
+        }
+
+        console.log("Retrieved bill of lading document data:", bolData);
+        return bolData;
       }
 
-      console.log("Retrieved invoice document data:", data);
-      return data;
-
-    } else if (document.document_subtype === "transferable") {
-      console.log("Fetching transferable document data");
-      const { data, error } = await supabase
-        .from("bill_of_lading_documents")
-        .select("*")
-        .eq("document_id", document.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching bill of lading document:", error);
-        return null;
-      }
-
-      console.log("Retrieved bill of lading document data:", data);
-      return data;
+      console.log("Unknown document subtype:", document.document_subtype);
+      return null;
+    } catch (error) {
+      console.error("Error in fetchDocumentData:", error);
+      throw error;
     }
-
-    return null;
   };
 
   const handleDelete = async (document: Document) => {
