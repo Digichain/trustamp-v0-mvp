@@ -6,9 +6,28 @@ export const useDocumentData = () => {
   const { toast } = useToast();
 
   const fetchDocumentData = async (document: Document) => {
-    console.log("Fetching document data for document:", document);
+    console.log("Starting document data fetch for:", document);
     
     try {
+      // First fetch the document to ensure it exists and get the raw_document
+      const { data: docData, error: docError } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("id", document.id)
+        .maybeSingle();
+
+      if (docError) {
+        console.error("Error fetching document:", docError);
+        throw docError;
+      }
+
+      if (!docData) {
+        console.log("No document found with id:", document.id);
+        return null;
+      }
+
+      console.log("Found document data:", docData);
+
       if (document.document_subtype === "verifiable") {
         console.log("Fetching verifiable document data");
         const { data: invoiceData, error: invoiceError } = await supabase
@@ -24,7 +43,7 @@ export const useDocumentData = () => {
 
         if (!invoiceData) {
           console.log("No invoice data found for document:", document.id);
-          return null;
+          return docData.raw_document;
         }
 
         console.log("Retrieved invoice document data:", invoiceData);
@@ -45,15 +64,16 @@ export const useDocumentData = () => {
 
         if (!bolData) {
           console.log("No bill of lading data found for document:", document.id);
-          return null;
+          return docData.raw_document;
         }
 
         console.log("Retrieved bill of lading document data:", bolData);
         return bolData;
       }
 
-      console.log("Unknown document subtype:", document.document_subtype);
-      return null;
+      // If no specific document type data is found, return the raw document
+      console.log("Returning raw document data");
+      return docData.raw_document;
     } catch (error) {
       console.error("Error in fetchDocumentData:", error);
       throw error;
