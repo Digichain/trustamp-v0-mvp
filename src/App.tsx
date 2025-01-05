@@ -5,7 +5,7 @@ import { WalletProvider } from "@/contexts/WalletContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
-import Transactions from '@/pages/Transactions';
+import Documents from '@/pages/Documents';
 import TransactionHistory from '@/pages/TransactionHistory';
 import CreateTransaction from '@/pages/CreateTransaction';
 import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction';
@@ -101,10 +101,10 @@ function App() {
                 }
               />
               <Route
-                path="/transactions"
+                path="/documents"
                 element={
                   <ProtectedRoute>
-                    <Transactions />
+                    <Documents />
                   </ProtectedRoute>
                 }
               />
@@ -117,7 +117,7 @@ function App() {
                 }
               />
               <Route
-                path="/transactions/create"
+                path="/documents/create"
                 element={
                   <ProtectedRoute>
                     <CreateTransaction />
@@ -125,7 +125,7 @@ function App() {
                 }
               />
               <Route
-                path="/transactions/create-transferable"
+                path="/documents/create-transferable"
                 element={
                   <ProtectedRoute>
                     <CreateTransferableTransaction />

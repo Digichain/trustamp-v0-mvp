@@ -19,7 +19,7 @@ const menuItems = [
   },
   {
     title: "Documents",
-    url: "/transactions",
+    url: "/documents",
     icon: ListCheck,
   },
   {
