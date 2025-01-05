@@ -13,7 +13,8 @@ import { DocumentTypeSelector } from "./DocumentTypeSelector";
 import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "@/contexts/WalletContext";
 
-export const CreateTransactionDialog = () => {
+// Changed export to be a named export
+export const CreateDocumentDialog = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedSubType, setSelectedSubType] = useState<string>("");
@@ -21,10 +22,10 @@ export const CreateTransactionDialog = () => {
   const { isWalletConnected } = useWallet();
   const { toast } = useToast();
 
-  console.log("CreateTransactionDialog - Component rendered with wallet state:", isWalletConnected);
+  console.log("CreateDocumentDialog - Component rendered with wallet state:", isWalletConnected);
 
   useEffect(() => {
-    console.log("CreateTransactionDialog - Wallet connection state changed:", isWalletConnected);
+    console.log("CreateDocumentDialog - Wallet connection state changed:", isWalletConnected);
     if (!isWalletConnected && open) {
       setOpen(false);
       toast({
@@ -36,7 +37,7 @@ export const CreateTransactionDialog = () => {
   }, [isWalletConnected, open]);
 
   const handleButtonClick = () => {
-    console.log("CreateTransactionDialog - Create button clicked, wallet state:", isWalletConnected);
+    console.log("CreateDocumentDialog - Create button clicked, wallet state:", isWalletConnected);
     if (!isWalletConnected) {
       toast({
         title: "Wallet Connection Required",
@@ -49,7 +50,7 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleCreate = () => {
-    console.log("CreateTransactionDialog - Handling create with wallet state:", isWalletConnected);
+    console.log("CreateDocumentDialog - Handling create with wallet state:", isWalletConnected);
     if (!isWalletConnected) {
       setOpen(false);
       toast({
@@ -93,7 +94,7 @@ export const CreateTransactionDialog = () => {
       <Dialog 
         open={open} 
         onOpenChange={(newOpen) => {
-          console.log("CreateTransactionDialog - Dialog state changing:", { newOpen, isWalletConnected });
+          console.log("CreateDocumentDialog - Dialog state changing:", { newOpen, isWalletConnected });
           if (!isWalletConnected) {
             setOpen(false);
             return;
