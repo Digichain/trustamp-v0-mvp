@@ -14,6 +14,7 @@ import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
 import VerifyDocument from '@/pages/VerifyDocument';
 import Finance from '@/pages/Finance';
+import Compliance from '@/pages/Compliance';
 import Reports from '@/pages/Reports';
 import Subscription from '@/pages/Subscription';
 import { useEffect, useState } from 'react';
@@ -161,6 +162,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Finance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/compliance"
+                element={
+                  <ProtectedRoute>
+                    <Compliance />
                   </ProtectedRoute>
                 }
               />

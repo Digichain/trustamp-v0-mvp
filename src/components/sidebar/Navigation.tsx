@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, ListCheck, CreditCard, LayoutDashboard, LineChart, Wallet2, BadgeDollarSign, Receipt } from "lucide-react";
+import { User, ListCheck, CreditCard, LayoutDashboard, LineChart, Wallet2, BadgeDollarSign, Receipt, ShieldCheck } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -36,6 +36,11 @@ const menuItems = [
     title: "Finance",
     url: "/finance",
     icon: Wallet2,
+  },
+  {
+    title: "Compliance",
+    url: "/compliance",
+    icon: ShieldCheck,
   },
   {
     title: "Reports",
