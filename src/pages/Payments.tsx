@@ -38,7 +38,7 @@ const Payments = () => {
       owner: "DigiChain",
       currentHolder: "DigiChain",
       totalValue: 3000.00,
-      status: "outstanding"
+      status: "escrow"
     }
   ];
 
