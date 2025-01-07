@@ -112,6 +112,9 @@ export const useDocumentData = () => {
           });
           return false;
         }
+        
+        // Wait a moment to ensure the deletion is processed
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Then delete any associated invoice documents
@@ -131,6 +134,9 @@ export const useDocumentData = () => {
           });
           return false;
         }
+        
+        // Wait a moment to ensure the deletion is processed
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Finally delete the main document
@@ -139,8 +145,7 @@ export const useDocumentData = () => {
         .from("documents")
         .delete()
         .eq("id", document.id)
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+        .eq("user_id", session.user.id);
 
       if (mainDocError) {
         console.error("Error deleting main document:", mainDocError);
