@@ -120,7 +120,7 @@ const Payments = () => {
             
             <Card className="w-[400px]">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Fiat Account Overview</CardTitle>
+                <CardTitle className="text-xl font-semibold">Account Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -130,7 +130,7 @@ const Payments = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Current Balance</p>
-                      <h2 className="text-3xl font-bold">$100.00</h2>
+                      <h2 className="text-3xl font-bold">$3000.00</h2>
                     </div>
                   </div>
                   
