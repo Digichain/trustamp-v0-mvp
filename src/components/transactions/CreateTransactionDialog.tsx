@@ -13,13 +13,11 @@ interface User {
 
 export const CreateTransactionDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>();
   const { toast } = useToast();
 
   const handleCreateTransaction = async () => {
     try {
-      console.log("Creating transaction with selected users:", selectedUsers);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
@@ -38,16 +36,14 @@ export const CreateTransactionDialog = () => {
 
       if (transactionError) throw transactionError;
 
-      // Create notification recipients
-      if (selectedUsers.length > 0) {
+      // Create notification recipient if a user is selected
+      if (selectedUserId) {
         const { error: notificationError } = await supabase
           .from("notification_recipients")
-          .insert(
-            selectedUsers.map(user => ({
-              transaction_id: transaction.id,
-              recipient_user_id: user.id
-            }))
-          );
+          .insert({
+            transaction_id: transaction.id,
+            recipient_user_id: selectedUserId
+          });
 
         if (notificationError) throw notificationError;
       }
@@ -81,11 +77,13 @@ export const CreateTransactionDialog = () => {
           <DialogTitle>Create New Transaction</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <UserSelector
-            selectedUsers={selectedUsers}
-            onUserSelect={(user) => setSelectedUsers([...selectedUsers, user])}
-            onUserRemove={(userId) => setSelectedUsers(selectedUsers.filter(u => u.id !== userId))}
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Notify User</label>
+            <UserSelector
+              selectedUserId={selectedUserId}
+              onSelect={setSelectedUserId}
+            />
+          </div>
 
           <div className="flex justify-end space-x-2 mt-4">
             <Button
@@ -96,7 +94,7 @@ export const CreateTransactionDialog = () => {
             </Button>
             <Button
               onClick={handleCreateTransaction}
-              disabled={!selectedUsers.length}
+              disabled={!selectedUserId}
             >
               Create
             </Button>
