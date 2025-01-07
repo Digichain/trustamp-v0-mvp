@@ -25,7 +25,7 @@ interface UserSelectorProps {
 export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const [open, setOpen] = useState(false);
 
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       console.log("Fetching users...");
@@ -43,8 +43,7 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
     },
   });
 
-  const selectedUser = users.find((user) => user.id === selectedUserId);
-
+  // Early return for loading state
   if (isLoading) {
     return (
       <Button variant="outline" className="w-full" disabled>
@@ -52,6 +51,20 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
       </Button>
     );
   }
+
+  // Early return for error state
+  if (error) {
+    console.error("Error in UserSelector:", error);
+    return (
+      <Button variant="outline" className="w-full text-red-500" disabled>
+        Error loading users
+      </Button>
+    );
+  }
+
+  // Ensure users is always an array
+  const safeUsers = users || [];
+  const selectedUser = safeUsers.find((user) => user.id === selectedUserId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,7 +84,7 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
           <CommandInput placeholder="Search users..." />
           <CommandEmpty>No users found.</CommandEmpty>
           <CommandGroup>
-            {users.map((user) => (
+            {safeUsers.map((user) => (
               <CommandItem
                 key={user.id}
                 value={user.id}
