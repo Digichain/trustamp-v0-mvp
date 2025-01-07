@@ -267,67 +267,80 @@ export type Database = {
         }
         Relationships: []
       }
+      transaction_documents: {
+        Row: {
+          created_at: string | null
+          document_id: string | null
+          id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_documents_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
-          attached_document_id: string | null
           created_at: string | null
-          document_subtype: string | null
           id: string
           network: string
           payment_bound: boolean | null
-          raw_document: Json | null
-          signed_document: Json | null
           status: string
           title: string | null
           transaction_hash: string
           transaction_type: string
           updated_at: string | null
           user_id: string
-          wrapped_document: Json | null
         }
         Insert: {
-          attached_document_id?: string | null
           created_at?: string | null
-          document_subtype?: string | null
           id?: string
           network: string
           payment_bound?: boolean | null
-          raw_document?: Json | null
-          signed_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash: string
           transaction_type: string
           updated_at?: string | null
           user_id: string
-          wrapped_document?: Json | null
         }
         Update: {
-          attached_document_id?: string | null
           created_at?: string | null
-          document_subtype?: string | null
           id?: string
           network?: string
           payment_bound?: boolean | null
-          raw_document?: Json | null
-          signed_document?: Json | null
           status?: string
           title?: string | null
           transaction_hash?: string
           transaction_type?: string
           updated_at?: string | null
           user_id?: string
-          wrapped_document?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_attached_document_id_fkey"
-            columns: ["attached_document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {

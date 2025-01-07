@@ -6,13 +6,11 @@ import { Transaction } from "@/types/transactions";
 
 interface TransactionRowProps {
   transaction: Transaction;
-  onPreviewClick: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
 }
 
 export const TransactionRow = ({ 
   transaction, 
-  onPreviewClick, 
   onDelete 
 }: TransactionRowProps) => {
   return (
@@ -23,8 +21,7 @@ export const TransactionRow = ({
           '-'
         }
       </TableCell>
-      <TableCell className="capitalize">{transaction.document_subtype || '-'}</TableCell>
-      <TableCell>{transaction.title || '-'}</TableCell>
+      <TableCell className="capitalize">{transaction.transaction_type}</TableCell>
       <TableCell>
         <TransactionStatus status={transaction.status} />
       </TableCell>
@@ -36,7 +33,6 @@ export const TransactionRow = ({
       <TableCell className="text-right">
         <TransactionActions
           transaction={transaction}
-          onPreviewClick={() => onPreviewClick(transaction)}
           onDelete={() => onDelete(transaction)}
         />
       </TableCell>
