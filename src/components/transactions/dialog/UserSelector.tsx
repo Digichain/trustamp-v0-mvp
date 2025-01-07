@@ -11,13 +11,15 @@ interface UserSelectorProps {
 export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const [inputValue, setInputValue] = useState("");
 
+  // Query to fetch users from profiles table
   const { data: users = [], isLoading, error } = useQuery({
-    queryKey: ["users"],
+    queryKey: ['users'],
     queryFn: async () => {
-      console.log("Fetching users...");
+      console.log("Fetching users from profiles table");
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, email");
+        .from('profiles')
+        .select('id, email')
+        .not('email', 'is', null);
 
       if (error) {
         console.error("Error fetching users:", error);
@@ -26,29 +28,16 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
 
       console.log("Fetched users:", data);
       return data || [];
-    },
+    }
   });
 
-  // Early return for loading state
   if (isLoading) {
-    return (
-      <Input
-        placeholder="Loading users..."
-        disabled
-      />
-    );
+    return <Input type="email" placeholder="Loading users..." disabled />;
   }
 
-  // Early return for error state
   if (error) {
     console.error("Error in UserSelector:", error);
-    return (
-      <Input
-        placeholder="Error loading users"
-        className="text-red-500"
-        disabled
-      />
-    );
+    return <Input type="email" placeholder="Error loading users..." disabled />;
   }
 
   const selectedUser = users.find((user) => user.id === selectedUserId);
@@ -57,13 +46,16 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
     const value = e.target.value;
     setInputValue(value);
     
-    // Find matching user
-    const matchingUser = users.find(
-      user => user.email?.toLowerCase() === value.toLowerCase()
-    );
-    
-    if (matchingUser) {
-      onSelect(matchingUser.id);
+    // Only try to match complete email addresses
+    if (value.includes('@') && value.includes('.')) {
+      const matchingUser = users.find(
+        user => user.email?.toLowerCase() === value.toLowerCase()
+      );
+      
+      if (matchingUser) {
+        console.log("Found matching user:", matchingUser);
+        onSelect(matchingUser.id);
+      }
     }
   };
 
@@ -87,8 +79,10 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
                 key={user.id}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onClick={() => {
-                  onSelect(user.id);
-                  setInputValue(user.email || "");
+                  if (user.email) {
+                    onSelect(user.id);
+                    setInputValue(user.email);
+                  }
                 }}
               >
                 {user.email}
