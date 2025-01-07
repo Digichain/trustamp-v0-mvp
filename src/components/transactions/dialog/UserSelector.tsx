@@ -26,7 +26,7 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const { data: users, isLoading, error } = useQuery({
+  const { data: users = [], isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       console.log("Fetching users...");
@@ -63,12 +63,10 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
     );
   }
 
-  // Ensure users is always an array
-  const safeUsers = users || [];
-  const selectedUser = safeUsers.find((user) => user.id === selectedUserId);
+  const selectedUser = users.find((user) => user.id === selectedUserId);
 
   // Filter users based on input value
-  const filteredUsers = safeUsers.filter((user) =>
+  const filteredUsers = users.filter((user) =>
     user.email?.toLowerCase().includes(inputValue.toLowerCase())
   );
 
