@@ -193,6 +193,35 @@ export type Database = {
           },
         ]
       }
+      notification_recipients: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipient_user_id: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipient_user_id?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipient_user_id?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_recipients_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       secrets: {
         Row: {
           created_at: string
@@ -219,10 +248,12 @@ export type Database = {
       }
       transactions: {
         Row: {
+          attached_document_id: string | null
           created_at: string | null
           document_subtype: string | null
           id: string
           network: string
+          payment_bound: boolean | null
           raw_document: Json | null
           signed_document: Json | null
           status: string
@@ -234,10 +265,12 @@ export type Database = {
           wrapped_document: Json | null
         }
         Insert: {
+          attached_document_id?: string | null
           created_at?: string | null
           document_subtype?: string | null
           id?: string
           network: string
+          payment_bound?: boolean | null
           raw_document?: Json | null
           signed_document?: Json | null
           status?: string
@@ -249,10 +282,12 @@ export type Database = {
           wrapped_document?: Json | null
         }
         Update: {
+          attached_document_id?: string | null
           created_at?: string | null
           document_subtype?: string | null
           id?: string
           network?: string
+          payment_bound?: boolean | null
           raw_document?: Json | null
           signed_document?: Json | null
           status?: string
@@ -263,7 +298,15 @@ export type Database = {
           user_id?: string
           wrapped_document?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transactions_attached_document_id_fkey"
+            columns: ["attached_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
