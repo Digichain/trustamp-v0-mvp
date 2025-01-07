@@ -1,81 +1,89 @@
-import { Check, X } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface User {
-  id: string;
-  email: string;
-}
-
 interface UserSelectorProps {
-  selectedUsers: User[];
-  onUserSelect: (user: User) => void;
-  onUserRemove: (userId: string) => void;
+  onSelect: (userId: string) => void;
+  selectedUserId?: string;
 }
 
-export const UserSelector = ({ selectedUsers, onUserSelect, onUserRemove }: UserSelectorProps) => {
-  const { data: users } = useQuery({
+export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
+  const [open, setOpen] = useState(false);
+
+  const { data: users, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      console.log("Fetching users from profiles table");
+      console.log("Fetching users...");
       const { data, error } = await supabase
         .from("profiles")
         .select("id, email");
-      
+
       if (error) {
         console.error("Error fetching users:", error);
         throw error;
       }
+
       console.log("Fetched users:", data);
-      return data as User[];
+      return data || [];
     },
   });
 
+  const selectedUser = users?.find((user) => user.id === selectedUserId);
+
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Notify Users</label>
-      <Command className="border rounded-md">
-        <CommandInput placeholder="Search users..." />
-        <CommandEmpty>No users found.</CommandEmpty>
-        <CommandGroup>
-          {users?.map((user) => (
-            <CommandItem
-              key={user.id}
-              onSelect={() => {
-                if (!selectedUsers.find(u => u.id === user.id)) {
-                  onUserSelect(user);
-                }
-              }}
-            >
-              {user.email}
-              <Check
-                className={`ml-auto h-4 w-4 ${
-                  selectedUsers.find(u => u.id === user.id) ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </Command>
-      {selectedUsers.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {selectedUsers.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-md"
-            >
-              <span className="text-sm">{user.email}</span>
-              <button
-                onClick={() => onUserRemove(user.id)}
-                className="text-muted-foreground hover:text-foreground"
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+        >
+          {selectedUser?.email || "Select user..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput placeholder="Search users..." />
+          <CommandEmpty>No users found.</CommandEmpty>
+          <CommandGroup>
+            {users?.map((user) => (
+              <CommandItem
+                key={user.id}
+                value={user.id}
+                onSelect={() => {
+                  onSelect(user.id);
+                  setOpen(false);
+                }}
               >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selectedUserId === user.id ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {user.email}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
-};
+}
