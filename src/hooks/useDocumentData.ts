@@ -105,7 +105,12 @@ export const useDocumentData = () => {
 
         if (bolError) {
           console.error("Error deleting bill of lading document:", bolError);
-          throw bolError;
+          toast({
+            title: "Error",
+            description: "Failed to delete associated bill of lading document",
+            variant: "destructive",
+          });
+          return false;
         }
       }
 
@@ -119,7 +124,12 @@ export const useDocumentData = () => {
 
         if (invoiceError) {
           console.error("Error deleting invoice document:", invoiceError);
-          throw invoiceError;
+          toast({
+            title: "Error",
+            description: "Failed to delete associated invoice document",
+            variant: "destructive",
+          });
+          return false;
         }
       }
 
@@ -133,7 +143,12 @@ export const useDocumentData = () => {
 
       if (mainDocError) {
         console.error("Error deleting main document:", mainDocError);
-        throw mainDocError;
+        toast({
+          title: "Error",
+          description: "Failed to delete main document",
+          variant: "destructive",
+        });
+        return false;
       }
 
       console.log("Deletion process completed successfully");
