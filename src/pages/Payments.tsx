@@ -104,18 +104,6 @@ const Payments = () => {
           
           <div className="flex items-start gap-4">
             <div className="flex flex-col gap-4">
-              <Button className="w-full" variant="outline">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Buy Ether
-              </Button>
-              <Button className="w-full" variant="outline">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Buy USDC
-              </Button>
-              <Button className="w-full" variant="outline">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Buy AUDD
-              </Button>
             </div>
             
             <Card className="w-[400px]">
