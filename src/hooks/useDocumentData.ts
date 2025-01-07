@@ -112,9 +112,6 @@ export const useDocumentData = () => {
           });
           return false;
         }
-        
-        // Wait a moment to ensure the deletion is processed
-        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Then delete any associated invoice documents
@@ -134,9 +131,6 @@ export const useDocumentData = () => {
           });
           return false;
         }
-        
-        // Wait a moment to ensure the deletion is processed
-        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       // Finally delete the main document
