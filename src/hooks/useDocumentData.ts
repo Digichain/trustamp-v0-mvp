@@ -95,33 +95,36 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // Delete from related document tables first
-      if (document.document_subtype === "verifiable") {
-        console.log("Deleting from invoice_documents...");
-        const { error: invoiceError } = await supabase
-          .from("invoice_documents")
-          .delete()
-          .eq("document_id", document.id);
-
-        if (invoiceError) {
-          console.error("Error deleting from invoice_documents:", invoiceError);
-          throw invoiceError;
-        }
-      } else if (document.document_subtype === "transferable") {
-        console.log("Deleting from bill_of_lading_documents...");
+      // First delete any associated bill of lading documents
+      if (document.document_subtype === "transferable") {
+        console.log("Deleting associated bill of lading document...");
         const { error: bolError } = await supabase
           .from("bill_of_lading_documents")
           .delete()
           .eq("document_id", document.id);
 
         if (bolError) {
-          console.error("Error deleting from bill_of_lading_documents:", bolError);
+          console.error("Error deleting bill of lading document:", bolError);
           throw bolError;
         }
       }
 
-      // Delete from documents table
-      console.log("Deleting from documents table...");
+      // Then delete any associated invoice documents
+      if (document.document_subtype === "verifiable") {
+        console.log("Deleting associated invoice document...");
+        const { error: invoiceError } = await supabase
+          .from("invoice_documents")
+          .delete()
+          .eq("document_id", document.id);
+
+        if (invoiceError) {
+          console.error("Error deleting invoice document:", invoiceError);
+          throw invoiceError;
+        }
+      }
+
+      // Finally delete the main document
+      console.log("Deleting main document...");
       const { error: mainDocError } = await supabase
         .from("documents")
         .delete()
@@ -129,7 +132,7 @@ export const useDocumentData = () => {
         .eq("user_id", session.user.id);
 
       if (mainDocError) {
-        console.error("Error deleting from documents:", mainDocError);
+        console.error("Error deleting main document:", mainDocError);
         throw mainDocError;
       }
 
