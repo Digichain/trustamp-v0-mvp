@@ -78,7 +78,7 @@ export const CreateTransactionDialog = () => {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notify User</label>
+            <label className="text-sm font-medium">Recipient Email</label>
             <UserSelector
               selectedUserId={selectedUserId}
               onSelect={setSelectedUserId}

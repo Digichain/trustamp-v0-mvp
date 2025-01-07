@@ -24,6 +24,7 @@ interface UserSelectorProps {
 
 export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const { data: users, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -66,6 +67,11 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const safeUsers = users || [];
   const selectedUser = safeUsers.find((user) => user.id === selectedUserId);
 
+  // Filter users based on input value
+  const filteredUsers = safeUsers.filter((user) =>
+    user.email?.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -75,22 +81,27 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedUser?.email || "Select user..."}
+          {selectedUser?.email || "Enter email..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="Search users..." />
-          <CommandEmpty>No users found.</CommandEmpty>
+          <CommandInput 
+            placeholder="Type email address..." 
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
+          <CommandEmpty>No matching users found.</CommandEmpty>
           <CommandGroup>
-            {safeUsers.map((user) => (
+            {filteredUsers.map((user) => (
               <CommandItem
                 key={user.id}
                 value={user.id}
                 onSelect={() => {
                   onSelect(user.id);
                   setOpen(false);
+                  setInputValue("");
                 }}
               >
                 <Check
