@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { TransactionRow } from "./TransactionRow";
 import { useTransactionSubscription } from "@/hooks/useTransactionSubscription";
 import { Transaction } from "@/types/transactions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const TransactionsTable = () => {
   const { toast } = useToast();
