@@ -1,18 +1,5 @@
 import { useState } from "react";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +9,6 @@ interface UserSelectorProps {
 }
 
 export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
-  const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const { data: users = [], isLoading, error } = useQuery({
@@ -67,50 +53,50 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
 
   const selectedUser = users.find((user) => user.id === selectedUserId);
 
-  // Filter users based on input value
-  const filteredUsers = users.filter((user) =>
-    user.email?.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    
+    // Find matching user
+    const matchingUser = users.find(
+      user => user.email?.toLowerCase() === value.toLowerCase()
+    );
+    
+    if (matchingUser) {
+      onSelect(matchingUser.id);
+    }
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Input
-          type="email"
-          placeholder="Enter email address..."
-          value={selectedUser?.email || inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-            if (!open) setOpen(true);
-          }}
-        />
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandEmpty>No matching users found.</CommandEmpty>
-          <CommandGroup>
-            {filteredUsers.map((user) => (
-              <CommandItem
+    <div className="relative">
+      <Input
+        type="email"
+        placeholder="Enter email address..."
+        value={selectedUser?.email || inputValue}
+        onChange={handleInputChange}
+        className="w-full"
+      />
+      {inputValue && !selectedUser && (
+        <div className="absolute w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-auto z-50">
+          {users
+            .filter(user => 
+              user.email?.toLowerCase().includes(inputValue.toLowerCase())
+            )
+            .map(user => (
+              <div
                 key={user.id}
-                value={user.id}
-                onSelect={() => {
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
                   onSelect(user.id);
                   setInputValue(user.email || "");
-                  setOpen(false);
                 }}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedUserId === user.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
                 {user.email}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+              </div>
+            ))
+          }
+        </div>
+      )}
+    </div>
   );
 }
