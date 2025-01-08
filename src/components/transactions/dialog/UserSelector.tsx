@@ -10,6 +10,7 @@ interface UserSelectorProps {
 
 export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const [inputValue, setInputValue] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // Query to fetch users from profiles table
   const { data: users = [], isLoading, error } = useQuery({
@@ -45,6 +46,7 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
+    setShowDropdown(true);
     
     // Only try to match complete email addresses
     if (value.includes('@') && value.includes('.')) {
@@ -59,6 +61,10 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
     }
   };
 
+  const filteredUsers = users.filter(user => 
+    user.email?.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
   return (
     <div className="relative">
       <Input
@@ -66,15 +72,13 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
         placeholder="Enter email address..."
         value={selectedUser?.email || inputValue}
         onChange={handleInputChange}
+        onFocus={() => setShowDropdown(true)}
         className="w-full"
       />
-      {inputValue && !selectedUser && (
+      {showDropdown && inputValue && (
         <div className="absolute w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-auto z-50">
-          {users
-            .filter(user => 
-              user.email?.toLowerCase().includes(inputValue.toLowerCase())
-            )
-            .map(user => (
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map(user => (
               <div
                 key={user.id}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -82,13 +86,16 @@ export function UserSelector({ onSelect, selectedUserId }: UserSelectorProps) {
                   if (user.email) {
                     onSelect(user.id);
                     setInputValue(user.email);
+                    setShowDropdown(false);
                   }
                 }}
               >
                 {user.email}
               </div>
             ))
-          }
+          ) : (
+            <div className="px-4 py-2 text-gray-500">No matching users found</div>
+          )}
         </div>
       )}
     </div>
