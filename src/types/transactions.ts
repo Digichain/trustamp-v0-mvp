@@ -7,4 +7,5 @@ export interface Transaction {
   transaction_type: string;
   title: string | null;
   created_at: string;
+  payment_bound: boolean;
 }

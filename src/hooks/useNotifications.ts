@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Notification {
   id: string;
   recipient_user_id: string;
-  transaction_id: string;
+  transaction_id: string | null;
   type: string;
   message: string;
   read: boolean;
@@ -51,7 +51,7 @@ export const useNotifications = () => {
   };
 
   return {
-    notifications,
+    notifications: notifications || [],
     isLoading,
     markAsRead,
     unreadCount: notifications?.filter(n => !n.read).length || 0
