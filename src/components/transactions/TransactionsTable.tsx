@@ -54,6 +54,7 @@ export const TransactionsTable = () => {
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead>Payment Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -68,7 +69,7 @@ export const TransactionsTable = () => {
           {(!transactions || transactions.length === 0) && (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={6}
                 className="text-center py-8 text-gray-500"
               >
                 No transactions found

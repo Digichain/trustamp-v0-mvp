@@ -51,6 +51,18 @@ export const CreateTransactionDialog = () => {
           });
 
         if (notificationError) throw notificationError;
+
+        // Create notification
+        const { error: notifError } = await supabase
+          .from("notifications")
+          .insert({
+            recipient_user_id: selectedUserId,
+            transaction_id: transaction.id,
+            type: "transaction_created",
+            message: "You have been added to a new transaction"
+          });
+
+        if (notifError) throw notifError;
       }
 
       // Create transaction document if a document is selected

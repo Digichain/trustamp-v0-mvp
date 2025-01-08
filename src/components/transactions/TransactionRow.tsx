@@ -3,6 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
 import { Transaction } from "@/types/transactions";
+import { Badge } from "@/components/ui/badge";
 
 interface TransactionRowProps {
   transaction: Transaction;
@@ -29,6 +30,11 @@ export const TransactionRow = ({
         {formatDistanceToNow(new Date(transaction.created_at), {
           addSuffix: true,
         })}
+      </TableCell>
+      <TableCell>
+        {transaction.payment_bound && (
+          <Badge variant="secondary">Payment Bound</Badge>
+        )}
       </TableCell>
       <TableCell className="text-right">
         <TransactionActions
