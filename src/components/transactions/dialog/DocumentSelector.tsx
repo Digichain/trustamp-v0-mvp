@@ -14,7 +14,7 @@ interface DocumentSelectorProps {
 }
 
 export const DocumentSelector = ({ selectedDocument, onDocumentSelect }: DocumentSelectorProps) => {
-  const { data: documents } = useQuery({
+  const { data: documents, isLoading } = useQuery({
     queryKey: ["signed-documents"],
     queryFn: async () => {
       console.log("Fetching signed/issued documents");
@@ -25,13 +25,14 @@ export const DocumentSelector = ({ selectedDocument, onDocumentSelect }: Documen
         .from("documents")
         .select("*")
         .eq("user_id", user.id)
-        .in("status", ["document_signed", "document_issued"]);
+        .in("status", ["document_signed", "document_issued"])
+        .order("created_at", { ascending: false });
       
       if (error) {
         console.error("Error fetching documents:", error);
         throw error;
       }
-      console.log("Fetched documents:", data);
+      console.log("Fetched signed/issued documents:", data);
       return data as Document[];
     },
   });
