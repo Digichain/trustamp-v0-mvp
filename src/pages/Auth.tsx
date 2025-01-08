@@ -24,12 +24,18 @@ const Auth = () => {
             // Clear any stale session data
             await supabase.auth.signOut();
             console.log("Cleared stale session data");
+            toast({
+              title: "Session Expired",
+              description: "Please sign in again",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Authentication Error",
+              description: error.message,
+              variant: "destructive",
+            });
           }
-          toast({
-            title: "Authentication Error",
-            description: error.message,
-            variant: "destructive",
-          });
           return;
         }
 
