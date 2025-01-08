@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationIcon } from "@/components/notifications/NotificationIcon"; // Import the NotificationIcon
 
 export const UserProfile = () => {
   const [email, setEmail] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export const UserProfile = () => {
             {email}
           </p>
         </div>
+        <NotificationIcon /> {/* Add the NotificationIcon here */}
       </CardContent>
     </Card>
   );
