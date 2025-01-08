@@ -30,19 +30,21 @@ export const UserProfile = () => {
 
   return (
     <Card className="mb-6">
-      <CardContent className="flex items-center gap-4 py-4">
-        <Avatar className="h-16 w-16">
-          <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-            {getInitials(email)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Welcome back!
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {email}
-          </p>
+      <CardContent className="flex items-center justify-between gap-4 py-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+              {getInitials(email)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Welcome back!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {email}
+            </p>
+          </div>
         </div>
         <NotificationIcon /> {/* Add the NotificationIcon here */}
       </CardContent>
