@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserSelector } from "./dialog/UserSelector";
+import { DocumentSelector } from "./dialog/DocumentSelector";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface User {
   id: string;
@@ -14,6 +16,8 @@ interface User {
 export const CreateTransactionDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>();
+  const [selectedDocument, setSelectedDocument] = useState<string>("");
+  const [isPaymentBound, setIsPaymentBound] = useState(false);
   const { toast } = useToast();
 
   const handleCreateTransaction = async () => {
@@ -29,7 +33,8 @@ export const CreateTransactionDialog = () => {
           status: "pending",
           transaction_type: "trade",
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
-          network: "ethereum"
+          network: "ethereum",
+          payment_bound: isPaymentBound
         })
         .select()
         .single();
@@ -46,6 +51,18 @@ export const CreateTransactionDialog = () => {
           });
 
         if (notificationError) throw notificationError;
+      }
+
+      // Create transaction document if a document is selected
+      if (selectedDocument) {
+        const { error: documentError } = await supabase
+          .from("transaction_documents")
+          .insert({
+            transaction_id: transaction.id,
+            document_id: selectedDocument
+          });
+
+        if (documentError) throw documentError;
       }
 
       console.log("Transaction created successfully:", transaction);
@@ -83,6 +100,25 @@ export const CreateTransactionDialog = () => {
               selectedUserId={selectedUserId}
               onSelect={setSelectedUserId}
             />
+          </div>
+
+          <DocumentSelector
+            selectedDocument={selectedDocument}
+            onDocumentSelect={setSelectedDocument}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="payment-bound"
+              checked={isPaymentBound}
+              onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
+            />
+            <label
+              htmlFor="payment-bound"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Payment Bound
+            </label>
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
