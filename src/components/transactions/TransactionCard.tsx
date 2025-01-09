@@ -5,6 +5,8 @@ import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Eye, Download } from "lucide-react";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -15,7 +17,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   const [documents, setDocuments] = useState<Array<{ id: string; title: string; status: string }>>([]);
   const { toast } = useToast();
 
-  // Fetch documents associated with this transaction
   const fetchDocuments = async () => {
     console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
     try {
@@ -51,7 +52,63 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     }
   };
 
-  // Fetch documents when component mounts
+  const handleDownload = async (documentId: string) => {
+    try {
+      console.log("TransactionCard - Starting document download for ID:", documentId);
+      
+      const { data: doc, error: docError } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("id", documentId)
+        .maybeSingle();
+
+      if (docError) throw docError;
+      if (!doc) {
+        toast({
+          title: "Document Not Found",
+          description: "The requested document could not be found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const documentData = doc.signed_document || doc.wrapped_document || doc.raw_document;
+      if (!documentData) {
+        toast({
+          title: "Error",
+          description: "No document data available for download",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(documentData, null, 2)], { 
+        type: 'application/json' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${doc.title || 'document'}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Document downloaded successfully",
+      });
+    } catch (error: any) {
+      console.error("TransactionCard - Error downloading document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download document",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchDocuments();
   }, [transaction.id]);
@@ -79,11 +136,14 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{doc.title}</span>
-                  <TransactionActions
-                    transaction={transaction}
-                    onDelete={() => onDelete(transaction)}
-                    documents={[doc]}
-                  />
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => console.log('Preview clicked')}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDownload(doc.id)}>
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
