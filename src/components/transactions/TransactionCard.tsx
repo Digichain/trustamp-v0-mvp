@@ -17,7 +17,13 @@ interface TransactionCardProps {
 }
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
-  const [documents, setDocuments] = useState<Array<{ id: string; title: string; status: string }>>([]);
+  const [documents, setDocuments] = useState<Array<{ 
+    id: string; 
+    title: string; 
+    status: string;
+    document_subtype: string;
+    raw_document: any;
+  }>>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const { toast } = useToast();
@@ -196,9 +202,9 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           onOpenChange={setIsPreviewOpen}
         >
           {selectedDocument.document_subtype === 'verifiable' ? (
-            <InvoicePreview document={selectedDocument} />
+            <InvoicePreview data={selectedDocument.raw_document} />
           ) : (
-            <BillOfLadingPreview document={selectedDocument} />
+            <BillOfLadingPreview data={selectedDocument.raw_document} />
           )}
         </PreviewDialog>
       )}
