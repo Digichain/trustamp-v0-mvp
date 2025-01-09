@@ -3,8 +3,6 @@ import { formatDistanceToNow } from "date-fns";
 import { DocumentStatus } from "./DocumentStatus";
 import { DocumentActions } from "./actions/DocumentActions";
 import { Document } from "@/types/documents";
-import { Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface DocumentRowProps {
   document: Document;
@@ -36,12 +34,11 @@ export const DocumentRow = ({
         })}
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="icon" onClick={() => onPreviewClick(document)}>
-            <Eye className="h-4 w-4" />
-          </Button>
-          <DocumentActions document={document} onDelete={() => onDelete(document)} />
-        </div>
+        <DocumentActions
+          document={document}
+          onPreviewClick={() => onPreviewClick(document)}
+          onDelete={() => onDelete(document)}
+        />
       </TableCell>
     </TableRow>
   );
