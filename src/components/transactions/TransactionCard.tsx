@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -54,7 +54,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   };
 
   // Fetch documents when component mounts
-  useState(() => {
+  useEffect(() => {
     fetchDocuments();
   }, [transaction.id]);
 
@@ -81,9 +81,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{doc.title}</span>
-                  <Button variant="ghost" size="sm" onClick={() => handleDownload(doc.id)}>
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  <TransactionActions
+                    transaction={transaction}
+                    onDelete={() => onDelete(transaction)}
+                    documents={[doc]}
+                  />
                 </div>
               ))}
             </div>
