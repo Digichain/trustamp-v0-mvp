@@ -30,7 +30,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       const { data, error } = await supabase
         .from('transaction_documents')
         .select(`
-          document_id,
           documents:document_id (
             id,
             user_id,
@@ -51,7 +50,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       if (error) throw error;
 
       const formattedDocs = data.map(item => item.documents) as Document[];
-
       console.log("TransactionCard - Documents fetched:", formattedDocs);
       setDocuments(formattedDocs);
     } catch (error) {
@@ -64,7 +62,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     }
   };
 
-  // Fetch documents when component mounts
   useEffect(() => {
     fetchDocuments();
   }, [transaction.id]);
