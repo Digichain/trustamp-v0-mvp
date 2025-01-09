@@ -7,6 +7,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Eye, Download } from "lucide-react";
+import { PreviewDialog } from "./previews/PreviewDialog";
+import { InvoicePreview } from "./previews/InvoicePreview";
+import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -15,6 +18,8 @@ interface TransactionCardProps {
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
   const [documents, setDocuments] = useState<Array<{ id: string; title: string; status: string }>>([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const { toast } = useToast();
 
   const fetchDocuments = async () => {
@@ -27,7 +32,9 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           documents:document_id (
             id,
             title,
-            status
+            status,
+            document_subtype,
+            raw_document
           )
         `)
         .eq('transaction_id', transaction.id);
@@ -37,7 +44,9 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       const formattedDocs = data.map(item => ({
         id: item.documents.id,
         title: item.documents.title || `Document ${item.documents.id}`,
-        status: item.documents.status
+        status: item.documents.status,
+        document_subtype: item.documents.document_subtype,
+        raw_document: item.documents.raw_document
       }));
 
       console.log("TransactionCard - Documents fetched:", formattedDocs);
@@ -49,6 +58,15 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         description: "Failed to load documents",
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePreview = async (documentId: string) => {
+    console.log("TransactionCard - Opening preview for document:", documentId);
+    const document = documents.find(doc => doc.id === documentId);
+    if (document) {
+      setSelectedDocument(document);
+      setIsPreviewOpen(true);
     }
   };
 
@@ -140,7 +158,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => console.log('Preview clicked')}
+                      onClick={() => handlePreview(doc.id)}
                       className="hover:bg-gray-100"
                     >
                       <Eye className="h-4 w-4" />
@@ -170,6 +188,20 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           documents={documents}
         />
       </CardFooter>
+
+      {selectedDocument && (
+        <PreviewDialog
+          title={selectedDocument.title}
+          isOpen={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+        >
+          {selectedDocument.document_subtype === 'verifiable' ? (
+            <InvoicePreview document={selectedDocument} />
+          ) : (
+            <BillOfLadingPreview document={selectedDocument} />
+          )}
+        </PreviewDialog>
+      )}
     </Card>
   );
 };
