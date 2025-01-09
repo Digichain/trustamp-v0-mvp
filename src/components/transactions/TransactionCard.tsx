@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Transaction } from "@/types/transactions";
+import { Document } from "@/types/documents";
 import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
 import { DocumentActions } from "./actions/DocumentActions";
@@ -13,32 +14,43 @@ interface TransactionCardProps {
 }
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
-  const [documents, setDocuments] = useState<Array<{ id: string; title: string; status: string }>>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const { toast } = useToast();
 
   // Fetch documents associated with this transaction
   const fetchDocuments = async () => {
     console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error("No authenticated session found");
+        return;
+      }
+
       const { data, error } = await supabase
         .from('transaction_documents')
         .select(`
           document_id,
           documents:document_id (
             id,
+            user_id,
+            transaction_hash,
+            network,
+            status,
+            transaction_type,
+            document_subtype,
             title,
-            status
+            created_at,
+            raw_document,
+            wrapped_document,
+            signed_document
           )
         `)
         .eq('transaction_id', transaction.id);
 
       if (error) throw error;
 
-      const formattedDocs = data.map(item => ({
-        id: item.documents.id,
-        title: item.documents.title || `Document ${item.documents.id}`,
-        status: item.documents.status
-      }));
+      const formattedDocs = data.map(item => item.documents) as Document[];
 
       console.log("TransactionCard - Documents fetched:", formattedDocs);
       setDocuments(formattedDocs);
@@ -79,12 +91,8 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
             <div className="space-y-2">
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{doc.title}</span>
-                  <DocumentActions
-                    document={doc}
-                    onPreviewClick={() => {}}
-                    onDelete={() => {}}
-                  />
+                  <span className="text-sm">{doc.title || `Document ${doc.id}`}</span>
+                  <DocumentActions document={doc} />
                 </div>
               ))}
             </div>

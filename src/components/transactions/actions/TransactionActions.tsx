@@ -1,4 +1,4 @@
-import { MoreVertical, Trash2, Plus, DollarSign } from "lucide-react";
+import { MoreVertical, Trash2, DollarSign } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,21 +7,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Transaction } from "@/types/transactions";
+import { Document } from "@/types/documents";
 import { useToast } from "@/components/ui/use-toast";
 
 interface TransactionActionsProps {
   transaction: Transaction;
   onDelete: () => void;
-  documents: Array<{
-    id: string;
-    title: string;
-    status: string;
-  }>;
+  documents: Document[];
 }
 
 export const TransactionActions = ({ 
   transaction, 
-  onDelete
+  onDelete,
+  documents
 }: TransactionActionsProps) => {
   const { toast } = useToast();
 
@@ -54,11 +52,6 @@ export const TransactionActions = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            <Plus className="mr-2 h-4 w-4" />
-            Attach Document
-          </DropdownMenuItem>
-          
           <DropdownMenuItem 
             onClick={onDelete}
             className="text-red-600 focus:text-red-600"

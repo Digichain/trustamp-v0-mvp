@@ -1,4 +1,4 @@
-import { MoreVertical, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,25 +6,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useDocumentHandlers } from "./handlers/useDocumentHandlers";
 import { Document } from "@/types/documents";
+import { useDownloadHandler } from "./handlers/useDownloadHandler";
 
 interface DocumentActionsProps {
   document: Document;
-  onPreviewClick: () => void;
-  onDelete: () => void;
 }
 
-export const DocumentActions = ({ 
-  document
-}: DocumentActionsProps) => {
-  const { handleDownloadDocument } = useDocumentHandlers();
+export const DocumentActions = ({ document }: DocumentActionsProps) => {
+  const { handleDownloadDocument } = useDownloadHandler();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
-          <MoreVertical className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+          <Download className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
