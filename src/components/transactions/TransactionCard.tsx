@@ -137,10 +137,20 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{doc.title}</span>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => console.log('Preview clicked')}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => console.log('Preview clicked')}
+                      className="hover:bg-gray-100"
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDownload(doc.id)}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDownload(doc.id)}
+                      className="hover:bg-gray-100"
+                    >
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>
