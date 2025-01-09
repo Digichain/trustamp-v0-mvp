@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,8 +15,8 @@ interface User {
 
 export const CreateTransactionDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string>();
-  const [selectedDocument, setSelectedDocument] = useState<string>("");
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [isPaymentBound, setIsPaymentBound] = useState(false);
   const { toast } = useToast();
 
@@ -41,13 +41,13 @@ export const CreateTransactionDialog = () => {
 
       if (transactionError) throw transactionError;
 
-      // Create notification recipient if a user is selected
-      if (selectedUserId) {
+      // Create notification recipients
+      for (const recipientId of selectedUserIds) {
         const { error: notificationError } = await supabase
           .from("notification_recipients")
           .insert({
             transaction_id: transaction.id,
-            recipient_user_id: selectedUserId
+            recipient_user_id: recipientId
           });
 
         if (notificationError) throw notificationError;
@@ -56,7 +56,7 @@ export const CreateTransactionDialog = () => {
         const { error: notifError } = await supabase
           .from("notifications")
           .insert({
-            recipient_user_id: selectedUserId,
+            recipient_user_id: recipientId,
             transaction_id: transaction.id,
             type: "transaction_created",
             message: "You have been added to a new transaction"
@@ -65,13 +65,13 @@ export const CreateTransactionDialog = () => {
         if (notifError) throw notifError;
       }
 
-      // Create transaction document if a document is selected
-      if (selectedDocument) {
+      // Create transaction documents
+      for (const documentId of selectedDocuments) {
         const { error: documentError } = await supabase
           .from("transaction_documents")
           .insert({
             transaction_id: transaction.id,
-            document_id: selectedDocument
+            document_id: documentId
           });
 
         if (documentError) throw documentError;
@@ -93,6 +93,26 @@ export const CreateTransactionDialog = () => {
     }
   };
 
+  const handleAddRecipient = (userId: string) => {
+    if (!selectedUserIds.includes(userId)) {
+      setSelectedUserIds([...selectedUserIds, userId]);
+    }
+  };
+
+  const handleRemoveRecipient = (userId: string) => {
+    setSelectedUserIds(selectedUserIds.filter(id => id !== userId));
+  };
+
+  const handleAddDocument = (documentId: string) => {
+    if (!selectedDocuments.includes(documentId)) {
+      setSelectedDocuments([...selectedDocuments, documentId]);
+    }
+  };
+
+  const handleRemoveDocument = (documentId: string) => {
+    setSelectedDocuments(selectedDocuments.filter(id => id !== documentId));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -107,17 +127,48 @@ export const CreateTransactionDialog = () => {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Recipient Email</label>
-            <UserSelector
-              selectedUserId={selectedUserId}
-              onSelect={setSelectedUserId}
-            />
+            <label className="text-sm font-medium">Recipients</label>
+            <div className="space-y-2">
+              {selectedUserIds.map((userId) => (
+                <div key={userId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">{userId}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveRecipient(userId)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <UserSelector
+                selectedUserId={undefined}
+                onSelect={handleAddRecipient}
+              />
+            </div>
           </div>
 
-          <DocumentSelector
-            selectedDocument={selectedDocument}
-            onDocumentSelect={setSelectedDocument}
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Documents</label>
+            <div className="space-y-2">
+              {selectedDocuments.map((docId) => (
+                <div key={docId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">{docId}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveDocument(docId)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <DocumentSelector
+                selectedDocument=""
+                onDocumentSelect={handleAddDocument}
+              />
+            </div>
+          </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -142,7 +193,7 @@ export const CreateTransactionDialog = () => {
             </Button>
             <Button
               onClick={handleCreateTransaction}
-              disabled={!selectedUserId}
+              disabled={selectedUserIds.length === 0}
             >
               Create
             </Button>

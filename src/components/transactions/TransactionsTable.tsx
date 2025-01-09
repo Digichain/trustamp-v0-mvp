@@ -1,17 +1,8 @@
-import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useToast } from "@/components/ui/use-toast";
-import { TransactionRow } from "./TransactionRow";
-import { useTransactionSubscription } from "@/hooks/useTransactionSubscription";
+import { TransactionCard } from "./TransactionCard";
 import { Transaction } from "@/types/transactions";
+import { useTransactionSubscription } from "@/hooks/useTransactionSubscription";
 import { supabase } from "@/integrations/supabase/client";
 
 export const TransactionsTable = () => {
@@ -45,39 +36,24 @@ export const TransactionsTable = () => {
     }
   };
 
+  if (isLoading) {
+    return <div className="text-center py-8">Loading transactions...</div>;
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Transaction Hash</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Payment Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions?.map((tx: Transaction) => (
-            <TransactionRow
-              key={tx.id}
-              transaction={tx}
-              onDelete={onDelete}
-            />
-          ))}
-          {(!transactions || transactions.length === 0) && (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-center py-8 text-gray-500"
-              >
-                No transactions found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+    <div className="space-y-4">
+      {transactions?.map((transaction: Transaction) => (
+        <TransactionCard
+          key={transaction.id}
+          transaction={transaction}
+          onDelete={onDelete}
+        />
+      ))}
+      {(!transactions || transactions.length === 0) && (
+        <div className="text-center py-8 text-gray-500">
+          No transactions found
+        </div>
+      )}
     </div>
   );
 };
