@@ -1,9 +1,10 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const Auth = () => {
   console.log("Auth component rendering...");
@@ -20,22 +21,14 @@ const Auth = () => {
         
         if (error) {
           console.error("Session check error:", error);
-          if (error.message.includes('refresh_token_not_found')) {
-            // Clear any stale session data
-            await supabase.auth.signOut();
-            console.log("Cleared stale session data");
-            toast({
-              title: "Session Expired",
-              description: "Please sign in again",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Authentication Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+          // Clear any stale session data
+          await supabase.auth.signOut();
+          console.log("Cleared stale session data");
+          toast({
+            title: "Session Error",
+            description: "Please sign in again",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -64,13 +57,14 @@ const Auth = () => {
 
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, staying on auth page');
+        // Clear any local storage or state related to the session
+        localStorage.removeItem('supabase.auth.token');
         toast({
           title: "Signed out",
           description: "You have been signed out of your account.",
         });
       }
 
-      // Handle token refresh errors
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       }
@@ -115,7 +109,6 @@ const Auth = () => {
           }}
           providers={[]}
           theme="light"
-          view="sign_in"
           showLinks={false}
           localization={{
             variables: {
