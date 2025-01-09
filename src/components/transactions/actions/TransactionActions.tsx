@@ -1,4 +1,4 @@
-import { MoreVertical, Trash2, Download, FileText } from "lucide-react";
+import { MoreVertical, Trash2, Download, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,6 +105,11 @@ export const TransactionActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Plus className="mr-2 h-4 w-4" />
+          Attach Document
+        </DropdownMenuItem>
+        
         {documents.map((doc) => (
           <DropdownMenuItem 
             key={doc.id}

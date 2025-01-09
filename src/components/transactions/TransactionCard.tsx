@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Download } from "lucide-react";
 import { Transaction } from "@/types/transactions";
 import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
@@ -59,7 +57,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   }, [transaction.id]);
 
   return (
-    <Card className="w-full mb-4">
+    <Card className="w-full h-full">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -90,10 +88,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               ))}
             </div>
           </div>
-          <Button variant="outline" size="sm" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Attach Document
-          </Button>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
