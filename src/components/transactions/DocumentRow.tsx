@@ -40,7 +40,7 @@ export const DocumentRow = ({
           <Button variant="ghost" size="icon" onClick={() => onPreviewClick(document)}>
             <Eye className="h-4 w-4" />
           </Button>
-          <DocumentActions document={document} />
+          <DocumentActions document={document} onDelete={() => onDelete(document)} />
         </div>
       </TableCell>
     </TableRow>

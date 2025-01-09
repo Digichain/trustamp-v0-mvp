@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { Download, MoreVertical, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,10 @@ import { useDownloadHandler } from "./handlers/useDownloadHandler";
 
 interface DocumentActionsProps {
   document: Document;
+  onDelete: () => void;
 }
 
-export const DocumentActions = ({ document }: DocumentActionsProps) => {
+export const DocumentActions = ({ document, onDelete }: DocumentActionsProps) => {
   const { handleDownloadDocument } = useDownloadHandler();
 
   return (
@@ -21,13 +22,17 @@ export const DocumentActions = ({ document }: DocumentActionsProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
           <span className="sr-only">Open menu</span>
-          <Download className="h-4 w-4" />
+          <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleDownloadDocument(document)}>
           <Download className="mr-2 h-4 w-4" />
           Download Document
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onDelete} className="text-red-600">
+          <Trash className="mr-2 h-4 w-4" />
+          Delete Document
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
