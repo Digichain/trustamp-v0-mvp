@@ -10,7 +10,10 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 
 export const NotificationIcon = () => {
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, isLoading } = useNotifications();
+
+  console.log("NotificationIcon - Current notifications:", notifications);
+  console.log("NotificationIcon - Unread count:", unreadCount);
 
   return (
     <DropdownMenu>
@@ -25,7 +28,11 @@ export const NotificationIcon = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        {notifications?.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 text-center text-sm text-gray-500">
+            Loading notifications...
+          </div>
+        ) : notifications?.length === 0 ? (
           <div className="p-4 text-center text-sm text-gray-500">
             No notifications
           </div>

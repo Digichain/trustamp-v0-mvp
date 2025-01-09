@@ -19,8 +19,12 @@ export const useNotifications = () => {
     queryFn: async () => {
       console.log("Fetching notifications...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      if (!user) {
+        console.log("No authenticated user found");
+        throw new Error("No authenticated user");
+      }
 
+      console.log("Fetching notifications for user:", user.id);
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
@@ -32,11 +36,14 @@ export const useNotifications = () => {
         throw error;
       }
 
+      console.log("Fetched notifications:", data);
       return data as Notification[];
     },
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   const markAsRead = async (notificationId: string) => {
+    console.log("Marking notification as read:", notificationId);
     const { error } = await supabase
       .from("notifications")
       .update({ read: true })
@@ -50,10 +57,13 @@ export const useNotifications = () => {
     await queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
 
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
+  console.log("Current unread count:", unreadCount);
+
   return {
     notifications: notifications || [],
     isLoading,
     markAsRead,
-    unreadCount: notifications?.filter(n => !n.read).length || 0
+    unreadCount
   };
 };
