@@ -40,33 +40,45 @@ export const useTransactions = () => {
           throw ownedError;
         }
 
-        // Then, fetch transactions where user is a recipient
-        const { data: recipientTransactions, error: recipientError } = await supabase
-          .from("transactions")
-          .select("*")
-          .neq("user_id", session.user.id) // Exclude owned transactions
-          .in("id", (
-            supabase
-              .from("notification_recipients")
-              .select("transaction_id")
-              .eq("recipient_user_id", session.user.id)
-          ))
-          .order("created_at", { ascending: false });
+        // First, get the transaction IDs where the user is a recipient
+        const { data: recipientIds, error: recipientIdsError } = await supabase
+          .from("notification_recipients")
+          .select("transaction_id")
+          .eq("recipient_user_id", session.user.id);
 
-        if (recipientError) {
-          console.error("Error fetching recipient transactions:", recipientError);
-          throw recipientError;
+        if (recipientIdsError) {
+          console.error("Error fetching recipient IDs:", recipientIdsError);
+          throw recipientIdsError;
+        }
+
+        // Then, fetch the actual transactions using those IDs
+        const transactionIds = recipientIds?.map(r => r.transaction_id) || [];
+        
+        let recipientTransactions: any[] = [];
+        if (transactionIds.length > 0) {
+          const { data: recipientTxs, error: recipientTxError } = await supabase
+            .from("transactions")
+            .select("*")
+            .in("id", transactionIds)
+            .order("created_at", { ascending: false });
+
+          if (recipientTxError) {
+            console.error("Error fetching recipient transactions:", recipientTxError);
+            throw recipientTxError;
+          }
+
+          recipientTransactions = recipientTxs || [];
         }
 
         // Combine and deduplicate transactions
-        const allTransactions = [...(ownedTransactions || []), ...(recipientTransactions || [])];
+        const allTransactions = [...(ownedTransactions || []), ...recipientTransactions];
         const uniqueTransactions = Array.from(
           new Map(allTransactions.map(tx => [tx.id, tx])).values()
         );
 
         console.log("Successfully fetched transactions:", uniqueTransactions.length, "records");
         console.log("- Owned transactions:", ownedTransactions?.length || 0);
-        console.log("- Recipient transactions:", recipientTransactions?.length || 0);
+        console.log("- Recipient transactions:", recipientTransactions.length);
 
         return uniqueTransactions;
       } catch (error: any) {
