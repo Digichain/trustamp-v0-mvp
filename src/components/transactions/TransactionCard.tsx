@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Transaction } from "@/types/transactions";
 import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
+import { DocumentActions } from "./actions/DocumentActions";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -79,10 +80,10 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{doc.title}</span>
-                  <TransactionActions
-                    transaction={transaction}
-                    onDelete={() => onDelete(transaction)}
-                    documents={[doc]}
+                  <DocumentActions
+                    document={doc}
+                    onPreviewClick={() => {}}
+                    onDelete={() => {}}
                   />
                 </div>
               ))}
