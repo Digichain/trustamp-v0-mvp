@@ -29,16 +29,43 @@ export const TransactionActions = ({
 
   const handleDownload = async (documentId: string) => {
     try {
+      console.log("TransactionActions - Starting document download for ID:", documentId);
+      
       const { data: doc, error: docError } = await supabase
         .from("documents")
         .select("*")
         .eq("id", documentId)
-        .single();
+        .maybeSingle();
 
-      if (docError) throw docError;
+      if (docError) {
+        console.error("TransactionActions - Error fetching document:", docError);
+        throw docError;
+      }
 
+      if (!doc) {
+        console.log("TransactionActions - No document found with ID:", documentId);
+        toast({
+          title: "Document Not Found",
+          description: "The requested document could not be found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("TransactionActions - Document found:", doc);
+      
       // Get the latest version of the document
       const documentData = doc.signed_document || doc.wrapped_document || doc.raw_document;
+      
+      if (!documentData) {
+        console.log("TransactionActions - No document data found");
+        toast({
+          title: "Error",
+          description: "No document data available for download",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Create a blob from the document data
       const blob = new Blob([JSON.stringify(documentData, null, 2)], { 
@@ -55,12 +82,13 @@ export const TransactionActions = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
+      console.log("TransactionActions - Document downloaded successfully");
       toast({
         title: "Success",
         description: "Document downloaded successfully",
       });
     } catch (error: any) {
-      console.error("Error downloading document:", error);
+      console.error("TransactionActions - Error downloading document:", error);
       toast({
         title: "Error",
         description: "Failed to download document",
