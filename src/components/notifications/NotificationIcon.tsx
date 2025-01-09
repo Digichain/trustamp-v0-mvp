@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,10 +11,21 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 
 export const NotificationIcon = () => {
+  const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, isLoading } = useNotifications();
 
   console.log("NotificationIcon - Current notifications:", notifications);
   console.log("NotificationIcon - Unread count:", unreadCount);
+
+  const handleNotificationClick = async (notificationId: string, transactionId: string | null) => {
+    console.log("NotificationIcon - Handling notification click:", { notificationId, transactionId });
+    await markAsRead(notificationId);
+    
+    if (transactionId) {
+      console.log("NotificationIcon - Navigating to transaction page");
+      navigate("/transaction-history");
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -41,7 +53,7 @@ export const NotificationIcon = () => {
             <DropdownMenuItem
               key={notification.id}
               className={`p-4 cursor-pointer ${!notification.read ? 'bg-gray-50' : ''}`}
-              onClick={() => markAsRead(notification.id)}
+              onClick={() => handleNotificationClick(notification.id, notification.transaction_id)}
             >
               <div className="space-y-1">
                 <p className="text-sm">{notification.message}</p>
