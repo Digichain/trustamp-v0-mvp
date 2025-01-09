@@ -28,19 +28,47 @@ export const useTransactions = () => {
       console.log("Session found, user ID:", session.user.id);
 
       try {
-        const { data, error } = await supabase
+        // First, fetch transactions where user is the owner
+        const { data: ownedTransactions, error: ownedError } = await supabase
           .from("transactions")
           .select("*")
           .eq("user_id", session.user.id)
           .order("created_at", { ascending: false });
 
-        if (error) {
-          console.error("Supabase error fetching transactions:", error);
-          throw error;
+        if (ownedError) {
+          console.error("Error fetching owned transactions:", ownedError);
+          throw ownedError;
         }
 
-        console.log("Successfully fetched transactions:", data?.length || 0, "records");
-        return data || [];
+        // Then, fetch transactions where user is a recipient
+        const { data: recipientTransactions, error: recipientError } = await supabase
+          .from("transactions")
+          .select("*")
+          .neq("user_id", session.user.id) // Exclude owned transactions
+          .in("id", (
+            supabase
+              .from("notification_recipients")
+              .select("transaction_id")
+              .eq("recipient_user_id", session.user.id)
+          ))
+          .order("created_at", { ascending: false });
+
+        if (recipientError) {
+          console.error("Error fetching recipient transactions:", recipientError);
+          throw recipientError;
+        }
+
+        // Combine and deduplicate transactions
+        const allTransactions = [...(ownedTransactions || []), ...(recipientTransactions || [])];
+        const uniqueTransactions = Array.from(
+          new Map(allTransactions.map(tx => [tx.id, tx])).values()
+        );
+
+        console.log("Successfully fetched transactions:", uniqueTransactions.length, "records");
+        console.log("- Owned transactions:", ownedTransactions?.length || 0);
+        console.log("- Recipient transactions:", recipientTransactions?.length || 0);
+
+        return uniqueTransactions;
       } catch (error: any) {
         console.error("Error in transaction fetch:", error);
         toast({
