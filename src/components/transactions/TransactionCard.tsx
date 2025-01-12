@@ -12,7 +12,13 @@ interface DocumentData {
   title: string;
   status: string;
   document_subtype: string;
-  document_data: Record<string, any>;
+  document_data: {
+    invoiceDetails?: {
+      total?: number;
+    };
+    total?: number;
+    [key: string]: any;
+  };
 }
 
 interface TransactionCardProps {
@@ -103,12 +109,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       });
       const url = window.URL.createObjectURL(blob);
       
-      const a = window.document.createElement('a');
+      const a = document.createElement('a');
       a.href = url;
       a.download = `${document.title || 'document'}.json`;
-      window.document.body.appendChild(a);
+      document.body.appendChild(a);
       a.click();
-      window.document.body.removeChild(a);
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
       toast({
