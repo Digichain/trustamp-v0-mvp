@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2, Plus, DollarSign } from "lucide-react";
+import { MoreVertical, Trash2, Plus, DollarSign, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,6 +49,16 @@ export const TransactionActions = ({
 
       if (error) throw error;
       return data.map(r => r.recipient_user_id);
+    }
+  });
+
+  // Get current user's email
+  const { data: session } = useQuery({
+    queryKey: ["user-session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
     }
   });
 
@@ -121,9 +131,35 @@ export const TransactionActions = ({
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .update({ 
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transaction.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Refresh Successful",
+        description: "Transaction has been refreshed",
+      });
+    } catch (error: any) {
+      console.error("Error refreshing transaction:", error);
+      toast({
+        title: "Refresh Failed",
+        description: error.message || "Failed to refresh transaction",
+        variant: "destructive",
+      });
+    }
+  };
+
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
   const canDelete = transaction.status === 'completed';
+  const canRefresh = session?.user?.email === 'digichaininnovations@gmail.com';
 
   return (
     <>
@@ -148,6 +184,15 @@ export const TransactionActions = ({
           <DropdownMenuItem onClick={() => setIsAttachDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Attach Document
+          </DropdownMenuItem>
+
+          <DropdownMenuItem 
+            onClick={handleRefresh}
+            disabled={!canRefresh}
+            className={`text-blue-600 focus:text-blue-600 ${!canRefresh ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh Transaction
           </DropdownMenuItem>
           
           <DropdownMenuItem 
