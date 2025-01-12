@@ -218,12 +218,8 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="text-sm text-gray-500">
-          {transaction.payment_bound ? (
-            invoiceAmount !== null ? 
-              `Payment Required: AUD ${formatAmount(invoiceAmount)}` : 
-              "Payment Required"
-          ) : (
-            "No Payment Required"
+          {transaction.payment_bound && invoiceAmount !== null && (
+            `AUD ${formatAmount(invoiceAmount)}`
           )}
         </div>
         <TransactionActions

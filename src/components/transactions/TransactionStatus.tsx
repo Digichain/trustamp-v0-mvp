@@ -32,7 +32,7 @@ const getStatusDisplay = (status: string) => {
     case "document_issued":
       return "Issued";
     case "payment_made":
-      return "Payment Made";
+      return "Escrow";
     case "failed":
       return "Failed";
     default:
