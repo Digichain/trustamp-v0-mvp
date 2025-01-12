@@ -18,12 +18,12 @@ interface DocumentData {
   title: string;
   status: string;
   document_subtype: string;
+  signed_document?: any;
   raw_document: {
     invoiceDetails?: {
       total?: number;
     };
     total?: number;
-    billOfLadingDetails?: any;
   } | null;
 }
 
@@ -54,6 +54,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
             title,
             status,
             document_subtype,
+            signed_document,
             raw_document
           )
         `)
@@ -78,7 +79,8 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           title: doc.title || `Document ${doc.id}`,
           status: doc.status,
           document_subtype: doc.document_subtype,
-          raw_document: doc.raw_document as DocumentData['raw_document']
+          signed_document: doc.signed_document,
+          raw_document: doc.raw_document
         }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
@@ -121,32 +123,17 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     try {
       console.log("TransactionCard - Starting document download for ID:", documentId);
       
-      const { data: doc, error: docError } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("id", documentId)
-        .maybeSingle();
-
-      if (docError) throw docError;
-      if (!doc) {
+      const document = documents.find(doc => doc.id === documentId);
+      if (!document || !document.signed_document) {
         toast({
           title: "Document Not Found",
-          description: "The requested document could not be found.",
+          description: "No signed document available for download",
           variant: "destructive",
         });
         return;
       }
 
-      const documentData = doc.signed_document || doc.wrapped_document || doc.raw_document;
-      if (!documentData) {
-        toast({
-          title: "Error",
-          description: "No document data available for download",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      const documentData = document.signed_document;
       const blob = new Blob([JSON.stringify(documentData, null, 2)], { 
         type: 'application/json' 
       });
@@ -154,7 +141,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${doc.title || 'document'}.json`;
+      link.download = `${document.title || 'document'}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
