@@ -26,6 +26,7 @@ interface DocumentData {
       total?: number;
     };
     total?: number;
+    billOfLadingDetails?: any;
   } | null;
 }
 
@@ -76,16 +77,16 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      // Format the documents data
-      const formattedDocs = transactionDocs
+      // Format the documents data with type safety
+      const formattedDocs: DocumentData[] = transactionDocs
         .map(td => td.documents)
-        .filter(doc => doc !== null)
+        .filter((doc): doc is NonNullable<typeof doc> => doc !== null)
         .map(doc => ({
           id: doc.id,
           title: doc.title || `Document ${doc.id}`,
           status: doc.status,
           document_subtype: doc.document_subtype,
-          raw_document: doc.raw_document
+          raw_document: doc.raw_document as DocumentData['raw_document']
         }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
@@ -94,7 +95,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
         if (!doc.raw_document) return false;
-        const rawDoc = doc.raw_document as any;
+        const rawDoc = doc.raw_document;
         return (
           (rawDoc.invoiceDetails && typeof rawDoc.invoiceDetails.total === 'number') ||
           (typeof rawDoc.total === 'number')
@@ -102,7 +103,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       });
       
       if (invoiceDoc && invoiceDoc.raw_document) {
-        const rawDoc = invoiceDoc.raw_document as any;
+        const rawDoc = invoiceDoc.raw_document;
         const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
         console.log("TransactionCard - Found invoice amount:", total);
         setInvoiceAmount(total);
