@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface DocumentData {
   id: string;
