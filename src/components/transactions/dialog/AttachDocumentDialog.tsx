@@ -27,10 +27,36 @@ export const AttachDocumentDialog = ({
     }
   };
 
+  const createNotificationForRecipient = async (recipientId: string, documentType: string) => {
+    console.log("Creating notification for recipient:", recipientId);
+    const { error: notifError } = await supabase
+      .from("notifications")
+      .insert({
+        recipient_user_id: recipientId,
+        transaction_id: transactionId,
+        type: "document_attached",
+        message: `A new ${documentType} document has been attached to the transaction`
+      });
+
+    if (notifError) {
+      console.error("Error creating notification:", notifError);
+      throw notifError;
+    }
+  };
+
   const handleAttachDocuments = async () => {
     try {
       console.log("Attaching documents to transaction:", transactionId);
       console.log("Selected documents:", selectedDocuments);
+
+      // Get document details to determine type
+      const { data: documentDetails, error: documentDetailsError } = await supabase
+        .from("documents")
+        .select("document_subtype")
+        .in("id", selectedDocuments)
+        .single();
+
+      if (documentDetailsError) throw documentDetailsError;
 
       // Create transaction documents
       for (const documentId of selectedDocuments) {
@@ -45,16 +71,7 @@ export const AttachDocumentDialog = ({
 
         // Create notifications for all recipients
         for (const recipientId of recipientIds) {
-          const { error: notifError } = await supabase
-            .from("notifications")
-            .insert({
-              recipient_user_id: recipientId,
-              transaction_id: transactionId,
-              type: "document_attached",
-              message: "New documents have been attached to a transaction"
-            });
-
-          if (notifError) throw notifError;
+          await createNotificationForRecipient(recipientId, documentDetails.document_subtype || "unknown");
         }
       }
 
