@@ -123,6 +123,7 @@ export const TransactionActions = ({
 
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
+  const canDelete = transaction.status === 'completed';
 
   return (
     <>
@@ -151,7 +152,8 @@ export const TransactionActions = ({
           
           <DropdownMenuItem 
             onClick={onDelete}
-            className="text-red-600 focus:text-red-600"
+            disabled={!canDelete}
+            className={`text-red-600 focus:text-red-600 ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Transaction
