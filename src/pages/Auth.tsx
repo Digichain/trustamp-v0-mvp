@@ -1,14 +1,16 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { AuthError, AuthApiError } from '@supabase/supabase-js';
 
 const Auth = () => {
   console.log("Auth component rendering...");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
     console.log("Auth useEffect running - checking user session...");
@@ -64,6 +66,7 @@ const Auth = () => {
 
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, staying on auth page');
+        setErrorMessage("");
         toast({
           title: "Signed out",
           description: "You have been signed out of your account.",
@@ -74,6 +77,15 @@ const Auth = () => {
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       }
+
+      // Handle authentication errors
+      if (event === 'USER_UPDATED' || event === 'SIGNED_IN') {
+        const { error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Auth error:', error);
+          setErrorMessage(getErrorMessage(error));
+        }
+      }
     });
 
     return () => {
@@ -81,6 +93,26 @@ const Auth = () => {
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
+
+  const getErrorMessage = (error: AuthError) => {
+    console.log("Processing error:", error);
+    if (error instanceof AuthApiError) {
+      switch (error.status) {
+        case 400:
+          if (error.message.includes('missing email')) {
+            return 'Please enter your email address';
+          }
+          return 'Invalid login credentials. Please check your email and password.';
+        case 401:
+          return 'Invalid credentials. Please check your email and password.';
+        case 422:
+          return 'Email verification required. Please check your inbox.';
+        default:
+          return error.message;
+      }
+    }
+    return error.message;
+  };
 
   return (
     <div className="container flex min-h-screen items-center justify-center">
@@ -100,6 +132,13 @@ const Auth = () => {
             </p>
           </div>
         </div>
+
+        {errorMessage && (
+          <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+            {errorMessage}
+          </div>
+        )}
+
         <SupabaseAuth 
           supabaseClient={supabase}
           appearance={{ 
@@ -115,7 +154,6 @@ const Auth = () => {
           }}
           providers={[]}
           theme="light"
-          view="sign_in"
           showLinks={false}
           localization={{
             variables: {
