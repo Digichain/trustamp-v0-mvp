@@ -18,13 +18,15 @@ interface DocumentData {
   title: string;
   status: string;
   document_subtype: string;
-  signed_document?: any;
   raw_document: {
     invoiceDetails?: {
       total?: number;
     };
     total?: number;
+    billOfLadingDetails?: any;
   } | null;
+  wrapped_document?: any;
+  signed_document?: any;
 }
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
@@ -41,12 +43,9 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         throw new Error("Authentication required");
       }
 
-      const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
-      const isOwner = session?.user?.id === transaction.user_id;
-      console.log("TransactionCard - User permissions:", { isAdmin, isOwner, userId: session?.user?.id });
-
+      // Fetch documents associated with the transaction
       const { data: transactionDocs, error: tdError } = await supabase
-        .from('transaction_documents')
+        .from("transaction_documents")
         .select(`
           document_id,
           documents:document_id (
@@ -54,11 +53,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
             title,
             status,
             document_subtype,
-            signed_document,
-            raw_document
+            raw_document,
+            wrapped_document,
+            signed_document
           )
         `)
-        .eq('transaction_id', transaction.id);
+        .eq("transaction_id", transaction.id);
 
       if (tdError) {
         console.error("TransactionCard - Error fetching transaction documents:", tdError);
@@ -71,6 +71,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
+      // Format the documents data with type safety
       const formattedDocs: DocumentData[] = transactionDocs
         .map(td => td.documents)
         .filter((doc): doc is NonNullable<typeof doc> => doc !== null)
@@ -79,13 +80,15 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           title: doc.title || `Document ${doc.id}`,
           status: doc.status,
           document_subtype: doc.document_subtype,
-          signed_document: doc.signed_document,
-          raw_document: doc.raw_document
+          raw_document: doc.raw_document as DocumentData['raw_document'],
+          wrapped_document: doc.wrapped_document,
+          signed_document: doc.signed_document
         }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
 
+      // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
         if (!doc.raw_document) return false;
         const rawDoc = doc.raw_document;
@@ -124,16 +127,26 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       console.log("TransactionCard - Starting document download for ID:", documentId);
       
       const document = documents.find(doc => doc.id === documentId);
-      if (!document || !document.signed_document) {
+      if (!document) {
         toast({
           title: "Document Not Found",
-          description: "No signed document available for download",
+          description: "The requested document could not be found.",
           variant: "destructive",
         });
         return;
       }
 
-      const documentData = document.signed_document;
+      // Get the most recent version of the document
+      const documentData = document.signed_document || document.wrapped_document || document.raw_document;
+      if (!documentData) {
+        toast({
+          title: "Error",
+          description: "No document data available for download",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const blob = new Blob([JSON.stringify(documentData, null, 2)], { 
         type: 'application/json' 
       });
