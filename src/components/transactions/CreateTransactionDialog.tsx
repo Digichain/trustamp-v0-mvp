@@ -81,6 +81,11 @@ export const CreateTransactionDialog = () => {
                               documentData.wrapped_document || 
                               documentData.raw_document;
 
+        if (!documentVersion) {
+          console.error("No document version available");
+          continue;
+        }
+
         const documentDataToStore = {
           ...documentVersion,
           title: doc.title

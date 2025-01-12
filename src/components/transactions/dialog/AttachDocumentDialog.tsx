@@ -64,18 +64,23 @@ export const AttachDocumentDialog = ({
                               documentData.wrapped_document || 
                               documentData.raw_document;
 
+        if (!documentVersion) {
+          console.error("No document version available");
+          continue;
+        }
+
+        const documentDataToStore = {
+          ...documentVersion,
+          title: documentData.title,
+        };
+
         // Store document in transaction_documents with complete data
         const { error: documentError } = await supabase
           .from("transaction_documents")
           .insert({
             transaction_id: transactionId,
             document_id: documentId,
-            document_data: {
-              ...documentVersion,
-              status: documentData.status,
-              title: documentData.title,
-              document_subtype: documentData.document_subtype
-            }
+            document_data: documentDataToStore
           });
 
         if (documentError) throw documentError;
