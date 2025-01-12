@@ -52,11 +52,41 @@ export const TransactionActions = ({
     }
   });
 
+  const createPaymentNotification = async (recipientId: string, amount: number) => {
+    console.log("Creating payment notification for recipient:", recipientId);
+    const { error: notifError } = await supabase
+      .from("notifications")
+      .insert({
+        recipient_user_id: recipientId,
+        transaction_id: transaction.id,
+        type: "payment_made",
+        message: `Payment of AUD ${amount.toFixed(2)} has been made and held in escrow`
+      });
+
+    if (notifError) {
+      console.error("Error creating payment notification:", notifError);
+      throw notifError;
+    }
+  };
+
   const handlePayment = async () => {
     console.log("Processing payment for transaction:", transaction.id);
     setIsProcessingPayment(true);
 
     try {
+      // Find invoice amount
+      const invoiceDoc = documents.find(doc => {
+        if (!doc.raw_document) return false;
+        return (
+          (doc.raw_document.invoiceDetails?.total !== undefined) ||
+          (doc.raw_document.total !== undefined)
+        );
+      });
+
+      const amount = invoiceDoc?.raw_document?.invoiceDetails?.total || 
+                    invoiceDoc?.raw_document?.total || 
+                    0;
+
       const { error } = await supabase
         .from('transactions')
         .update({ 
@@ -66,6 +96,14 @@ export const TransactionActions = ({
         .eq('id', transaction.id);
 
       if (error) throw error;
+
+      // Create notifications for all recipients
+      if (recipientIds?.length) {
+        console.log("Creating payment notifications for recipients:", recipientIds);
+        for (const recipientId of recipientIds) {
+          await createPaymentNotification(recipientId, amount);
+        }
+      }
 
       toast({
         title: "Payment Successful",
@@ -78,18 +116,10 @@ export const TransactionActions = ({
         description: error.message || "Failed to process payment",
         variant: "destructive",
       });
+    } finally {
       setIsProcessingPayment(false);
     }
   };
-
-  // Find invoice amount
-  const invoiceDoc = documents.find(doc => {
-    if (!doc.raw_document) return false;
-    return (
-      (doc.raw_document.invoiceDetails?.total !== undefined) ||
-      (doc.raw_document.total !== undefined)
-    );
-  });
 
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
