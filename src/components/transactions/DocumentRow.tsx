@@ -6,13 +6,11 @@ import { Document } from "@/types/documents";
 
 interface DocumentRowProps {
   document: Document;
-  onPreviewClick: (document: Document) => void;
   onDelete: (document: Document) => void;
 }
 
 export const DocumentRow = ({ 
   document, 
-  onPreviewClick, 
   onDelete 
 }: DocumentRowProps) => {
   return (
@@ -36,7 +34,6 @@ export const DocumentRow = ({
       <TableCell className="text-right">
         <DocumentActions
           document={document}
-          onPreviewClick={() => onPreviewClick(document)}
           onDelete={() => onDelete(document)}
         />
       </TableCell>

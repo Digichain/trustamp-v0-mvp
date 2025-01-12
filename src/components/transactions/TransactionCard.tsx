@@ -6,10 +6,7 @@ import { TransactionActions } from "./actions/TransactionActions";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Eye, Download } from "lucide-react";
-import { PreviewDialog } from "./previews/PreviewDialog";
-import { InvoicePreview } from "./previews/InvoicePreview";
-import { BillOfLadingPreview } from "./previews/BillOfLadingPreview";
+import { Download } from "lucide-react";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -32,15 +29,12 @@ interface DocumentData {
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
   const [documents, setDocuments] = useState<DocumentData[]>([]);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<DocumentData | null>(null);
   const [invoiceAmount, setInvoiceAmount] = useState<number | null>(null);
   const { toast } = useToast();
 
   const fetchDocuments = async () => {
     console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
     try {
-      // First check if user is admin or transaction owner
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.error("TransactionCard - No authenticated session found");
@@ -51,7 +45,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       const isOwner = session?.user?.id === transaction.user_id;
       console.log("TransactionCard - User permissions:", { isAdmin, isOwner, userId: session?.user?.id });
 
-      // Fetch documents associated with the transaction
       const { data: transactionDocs, error: tdError } = await supabase
         .from('transaction_documents')
         .select(`
@@ -77,7 +70,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      // Format the documents data with type safety
       const formattedDocs: DocumentData[] = transactionDocs
         .map(td => td.documents)
         .filter((doc): doc is NonNullable<typeof doc> => doc !== null)
@@ -92,7 +84,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
 
-      // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
         if (!doc.raw_document) return false;
         const rawDoc = doc.raw_document;
@@ -124,15 +115,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
-  };
-
-  const handlePreview = async (documentId: string) => {
-    console.log("TransactionCard - Opening preview for document:", documentId);
-    const document = documents.find(doc => doc.id === documentId);
-    if (document) {
-      setSelectedDocument(document);
-      setIsPreviewOpen(true);
-    }
   };
 
   const handleDownload = async (documentId: string) => {
@@ -219,24 +201,14 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <span className="text-sm">{doc.title}</span>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handlePreview(doc.id)}
-                      className="hover:bg-gray-100"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDownload(doc.id)}
-                      className="hover:bg-gray-100"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => handleDownload(doc.id)}
+                    className="hover:bg-gray-100"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -255,20 +227,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           documents={documents}
         />
       </CardFooter>
-
-      {selectedDocument && (
-        <PreviewDialog
-          title={selectedDocument.title}
-          isOpen={isPreviewOpen}
-          onOpenChange={setIsPreviewOpen}
-        >
-          {selectedDocument.document_subtype === 'verifiable' ? (
-            <InvoicePreview data={selectedDocument.raw_document} />
-          ) : (
-            <BillOfLadingPreview data={selectedDocument.raw_document} />
-          )}
-        </PreviewDialog>
-      )}
     </Card>
   );
 };
