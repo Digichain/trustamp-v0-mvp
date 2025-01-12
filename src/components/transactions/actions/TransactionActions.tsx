@@ -38,6 +38,18 @@ export const TransactionActions = ({
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const { toast } = useToast();
 
+  // Check if user is admin
+  const { data: session } = useQuery({
+    queryKey: ["user-session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
+    }
+  });
+
+  const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
+
   // Fetch recipient IDs for notifications
   const { data: recipientIds } = useQuery({
     queryKey: ["transaction-recipients", transaction.id],
@@ -49,16 +61,6 @@ export const TransactionActions = ({
 
       if (error) throw error;
       return data.map(r => r.recipient_user_id);
-    }
-  });
-
-  // Get current user's email
-  const { data: session } = useQuery({
-    queryKey: ["user-session"],
-    queryFn: async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      return session;
     }
   });
 
@@ -158,7 +160,7 @@ export const TransactionActions = ({
 
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
-  const canDelete = transaction.status === 'completed';
+  const canDelete = isAdmin || transaction.status === 'completed';
   const canRefresh = session?.user?.email === 'digichaininnovations@gmail.com';
 
   return (

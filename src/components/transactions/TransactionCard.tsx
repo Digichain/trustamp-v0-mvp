@@ -65,6 +65,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
 
       console.log("TransactionCard - Raw documents data:", data);
 
+      if (!data || data.length === 0) {
+        console.log("TransactionCard - No documents found for transaction:", transaction.id);
+        setDocuments([]);
+        return;
+      }
+
       const formattedDocs = data.map(item => ({
         id: item.documents.id,
         title: item.documents.title || `Document ${item.documents.id}`,
