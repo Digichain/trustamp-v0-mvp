@@ -160,8 +160,10 @@ export const TransactionActions = ({
 
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
+  
+  // Update permission checks
   const canDelete = isAdmin || transaction.status === 'completed';
-  const canRefresh = session?.user?.email === 'digichaininnovations@gmail.com';
+  const canRefresh = isAdmin; // Only admin can refresh transactions
 
   return (
     <>
