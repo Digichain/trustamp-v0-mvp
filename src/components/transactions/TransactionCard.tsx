@@ -26,6 +26,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   }>>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [invoiceAmount, setInvoiceAmount] = useState<number | null>(null);
   const { toast } = useToast();
 
   const fetchDocuments = async () => {
@@ -57,6 +58,19 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
 
       console.log("TransactionCard - Documents fetched:", formattedDocs);
       setDocuments(formattedDocs);
+
+      // Find invoice document and extract amount
+      const invoiceDoc = formattedDocs.find(doc => 
+        doc.raw_document?.invoiceDetails?.total || 
+        doc.raw_document?.total
+      );
+      
+      if (invoiceDoc) {
+        const total = invoiceDoc.raw_document?.invoiceDetails?.total || 
+                     invoiceDoc.raw_document?.total || 
+                     0;
+        setInvoiceAmount(total);
+      }
     } catch (error) {
       console.error("TransactionCard - Error fetching documents:", error);
       toast({
@@ -65,6 +79,14 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         variant: "destructive",
       });
     }
+  };
+
+  const formatAmount = (amount: number): string => {
+    return new Intl.NumberFormat('en-AU', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
   };
 
   const handlePreview = async (documentId: string) => {
@@ -186,7 +208,13 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="text-sm text-gray-500">
-          {transaction.payment_bound ? "Payment Required" : "No Payment Required"}
+          {transaction.payment_bound ? (
+            invoiceAmount !== null ? 
+              `Payment Required: AUD ${formatAmount(invoiceAmount)}` : 
+              "Payment Required"
+          ) : (
+            "No Payment Required"
+          )}
         </div>
         <TransactionActions
           transaction={transaction}
