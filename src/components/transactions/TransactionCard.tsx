@@ -39,6 +39,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   const fetchDocuments = async () => {
     console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
     try {
+      // First check if user is admin
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
+      console.log("TransactionCard - Is admin user:", isAdmin);
+
       const { data, error } = await supabase
         .from('transaction_documents')
         .select(`
@@ -53,7 +58,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         `)
         .eq('transaction_id', transaction.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("TransactionCard - Error fetching documents:", error);
+        throw error;
+      }
+
+      console.log("TransactionCard - Raw documents data:", data);
 
       const formattedDocs = data.map(item => ({
         id: item.documents.id,
@@ -79,6 +89,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       if (invoiceDoc && invoiceDoc.raw_document) {
         const rawDoc = invoiceDoc.raw_document as any;
         const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
+        console.log("TransactionCard - Found invoice amount:", total);
         setInvoiceAmount(total);
       }
     } catch (error) {
