@@ -60,7 +60,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         title: item.documents.title || `Document ${item.documents.id}`,
         status: item.documents.status,
         document_subtype: item.documents.document_subtype,
-        raw_document: item.documents.raw_document
+        raw_document: item.documents.raw_document as DocumentData['raw_document']
       }));
 
       console.log("TransactionCard - Documents fetched:", formattedDocs);
@@ -69,16 +69,16 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
         if (!doc.raw_document) return false;
+        const rawDoc = doc.raw_document as any;
         return (
-          'invoiceDetails' in doc.raw_document && 'total' in doc.raw_document.invoiceDetails ||
-          'total' in doc.raw_document
+          (rawDoc.invoiceDetails && typeof rawDoc.invoiceDetails.total === 'number') ||
+          (typeof rawDoc.total === 'number')
         );
       });
       
       if (invoiceDoc && invoiceDoc.raw_document) {
-        const total = invoiceDoc.raw_document.invoiceDetails?.total ?? 
-                     invoiceDoc.raw_document.total ?? 
-                     0;
+        const rawDoc = invoiceDoc.raw_document as any;
+        const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
         setInvoiceAmount(total);
       }
     } catch (error) {
