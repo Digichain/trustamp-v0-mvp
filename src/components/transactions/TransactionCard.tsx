@@ -53,7 +53,16 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       // Fetch documents associated with the transaction
       const { data: transactionDocs, error: tdError } = await supabase
         .from('transaction_documents')
-        .select('document_id')
+        .select(`
+          document_id,
+          documents:document_id (
+            id,
+            title,
+            status,
+            document_subtype,
+            raw_document
+          )
+        `)
         .eq('transaction_id', transaction.id);
 
       if (tdError) {
@@ -67,35 +76,17 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const documentIds = transactionDocs.map(td => td.document_id);
-      console.log("TransactionCard - Found document IDs:", documentIds);
-
-      // Fetch the actual documents
-      const { data: docs, error: docsError } = await supabase
-        .from('documents')
-        .select('id, title, status, document_subtype, raw_document')
-        .in('id', documentIds);
-
-      if (docsError) {
-        console.error("TransactionCard - Error fetching documents:", docsError);
-        throw docsError;
-      }
-
-      console.log("TransactionCard - Retrieved documents:", docs);
-
-      if (!docs || docs.length === 0) {
-        console.log("TransactionCard - No document details found");
-        setDocuments([]);
-        return;
-      }
-
-      const formattedDocs = docs.map(doc => ({
-        id: doc.id,
-        title: doc.title || `Document ${doc.id}`,
-        status: doc.status,
-        document_subtype: doc.document_subtype,
-        raw_document: doc.raw_document as DocumentData['raw_document']
-      }));
+      // Format the documents data
+      const formattedDocs = transactionDocs
+        .map(td => td.documents)
+        .filter(doc => doc !== null)
+        .map(doc => ({
+          id: doc.id,
+          title: doc.title || `Document ${doc.id}`,
+          status: doc.status,
+          document_subtype: doc.document_subtype,
+          raw_document: doc.raw_document
+        }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
