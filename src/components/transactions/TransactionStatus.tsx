@@ -12,6 +12,8 @@ const getStatusColor = (status: string) => {
       return "text-orange-600";
     case "document_issued":
       return "text-green-600";
+    case "payment_made":
+      return "text-green-600";
     case "failed":
       return "text-red-600";
     default:
@@ -29,6 +31,8 @@ const getStatusDisplay = (status: string) => {
       return "Signed";
     case "document_issued":
       return "Issued";
+    case "payment_made":
+      return "Payment Made";
     case "failed":
       return "Failed";
     default:
