@@ -49,6 +49,8 @@ export const TransactionActions = ({
   });
 
   const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
+  console.log("TransactionActions - Is admin:", isAdmin);
+  console.log("TransactionActions - User email:", session?.user?.email);
 
   // Fetch recipient IDs for notifications
   const { data: recipientIds } = useQuery({
@@ -135,6 +137,7 @@ export const TransactionActions = ({
 
   const handleRefresh = async () => {
     try {
+      console.log("TransactionActions - Refreshing transaction:", transaction.id);
       const { error } = await supabase
         .from('transactions')
         .update({ 
@@ -161,9 +164,9 @@ export const TransactionActions = ({
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
   
-  // Update permission checks
+  // Update permission checks - admin can always delete/refresh, non-admin can only delete completed transactions
   const canDelete = isAdmin || transaction.status === 'completed';
-  const canRefresh = isAdmin; // Only admin can refresh transactions
+  const canRefresh = isAdmin;
 
   return (
     <>
@@ -190,23 +193,25 @@ export const TransactionActions = ({
             Attach Document
           </DropdownMenuItem>
 
-          <DropdownMenuItem 
-            onClick={handleRefresh}
-            disabled={!canRefresh}
-            className={`text-blue-600 focus:text-blue-600 ${!canRefresh ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh Transaction
-          </DropdownMenuItem>
+          {isAdmin && (
+            <DropdownMenuItem 
+              onClick={handleRefresh}
+              className="text-blue-600 focus:text-blue-600"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh Transaction
+            </DropdownMenuItem>
+          )}
           
-          <DropdownMenuItem 
-            onClick={onDelete}
-            disabled={!canDelete}
-            className={`text-red-600 focus:text-red-600 ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Transaction
-          </DropdownMenuItem>
+          {(isAdmin || transaction.status === 'completed') && (
+            <DropdownMenuItem 
+              onClick={onDelete}
+              className="text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Transaction
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
