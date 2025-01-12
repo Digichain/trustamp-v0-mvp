@@ -39,47 +39,65 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   const fetchDocuments = async () => {
     console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
     try {
-      // First check if user is admin
+      // First check if user is admin or transaction owner
       const { data: { session } } = await supabase.auth.getSession();
-      const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
-      console.log("TransactionCard - Is admin user:", isAdmin);
-
-      const { data, error } = await supabase
-        .from('transaction_documents')
-        .select(`
-          document_id,
-          documents:document_id (
-            id,
-            title,
-            status,
-            document_subtype,
-            raw_document
-          )
-        `)
-        .eq('transaction_id', transaction.id);
-
-      if (error) {
-        console.error("TransactionCard - Error fetching documents:", error);
-        throw error;
+      if (!session) {
+        console.error("TransactionCard - No authenticated session found");
+        throw new Error("Authentication required");
       }
 
-      console.log("TransactionCard - Raw documents data:", data);
+      const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
+      const isOwner = session?.user?.id === transaction.user_id;
+      console.log("TransactionCard - User permissions:", { isAdmin, isOwner, userId: session?.user?.id });
 
-      if (!data || data.length === 0) {
+      // Fetch documents associated with the transaction
+      const { data: transactionDocs, error: tdError } = await supabase
+        .from('transaction_documents')
+        .select('document_id')
+        .eq('transaction_id', transaction.id);
+
+      if (tdError) {
+        console.error("TransactionCard - Error fetching transaction documents:", tdError);
+        throw tdError;
+      }
+
+      if (!transactionDocs || transactionDocs.length === 0) {
         console.log("TransactionCard - No documents found for transaction:", transaction.id);
         setDocuments([]);
         return;
       }
 
-      const formattedDocs = data.map(item => ({
-        id: item.documents.id,
-        title: item.documents.title || `Document ${item.documents.id}`,
-        status: item.documents.status,
-        document_subtype: item.documents.document_subtype,
-        raw_document: item.documents.raw_document as DocumentData['raw_document']
+      const documentIds = transactionDocs.map(td => td.document_id);
+      console.log("TransactionCard - Found document IDs:", documentIds);
+
+      // Fetch the actual documents
+      const { data: docs, error: docsError } = await supabase
+        .from('documents')
+        .select('id, title, status, document_subtype, raw_document')
+        .in('id', documentIds);
+
+      if (docsError) {
+        console.error("TransactionCard - Error fetching documents:", docsError);
+        throw docsError;
+      }
+
+      console.log("TransactionCard - Retrieved documents:", docs);
+
+      if (!docs || docs.length === 0) {
+        console.log("TransactionCard - No document details found");
+        setDocuments([]);
+        return;
+      }
+
+      const formattedDocs = docs.map(doc => ({
+        id: doc.id,
+        title: doc.title || `Document ${doc.id}`,
+        status: doc.status,
+        document_subtype: doc.document_subtype,
+        raw_document: doc.raw_document as DocumentData['raw_document']
       }));
 
-      console.log("TransactionCard - Documents fetched:", formattedDocs);
+      console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
 
       // Find invoice document and extract amount
