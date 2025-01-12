@@ -16,16 +16,23 @@ interface TransactionCardProps {
   onDelete: (transaction: Transaction) => void;
 }
 
+interface DocumentData {
+  id: string;
+  title: string;
+  status: string;
+  document_subtype: string;
+  raw_document: {
+    invoiceDetails?: {
+      total?: number;
+    };
+    total?: number;
+  } | null;
+}
+
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
-  const [documents, setDocuments] = useState<Array<{ 
-    id: string; 
-    title: string; 
-    status: string;
-    document_subtype: string;
-    raw_document: any;
-  }>>([]);
+  const [documents, setDocuments] = useState<DocumentData[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentData | null>(null);
   const [invoiceAmount, setInvoiceAmount] = useState<number | null>(null);
   const { toast } = useToast();
 
@@ -60,14 +67,17 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       setDocuments(formattedDocs);
 
       // Find invoice document and extract amount
-      const invoiceDoc = formattedDocs.find(doc => 
-        doc.raw_document?.invoiceDetails?.total || 
-        doc.raw_document?.total
-      );
+      const invoiceDoc = formattedDocs.find(doc => {
+        if (!doc.raw_document) return false;
+        return (
+          'invoiceDetails' in doc.raw_document && 'total' in doc.raw_document.invoiceDetails ||
+          'total' in doc.raw_document
+        );
+      });
       
-      if (invoiceDoc) {
-        const total = invoiceDoc.raw_document?.invoiceDetails?.total || 
-                     invoiceDoc.raw_document?.total || 
+      if (invoiceDoc && invoiceDoc.raw_document) {
+        const total = invoiceDoc.raw_document.invoiceDetails?.total ?? 
+                     invoiceDoc.raw_document.total ?? 
                      0;
         setInvoiceAmount(total);
       }
