@@ -10,8 +10,6 @@ import { Download } from "lucide-react";
 interface DocumentData {
   id: string;
   title: string;
-  status: string;
-  document_subtype: string;
   document_data: {
     invoiceDetails?: {
       total?: number;
@@ -62,8 +60,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       const formattedDocs = transactionDocs.map(td => ({
         id: td.document_id,
         title: td.document_data?.title || `Document ${td.document_id}`,
-        status: td.document_data?.status || 'unknown',
-        document_subtype: td.document_data?.document_subtype || 'unknown',
         document_data: td.document_data || {}
       }));
 
@@ -72,16 +68,16 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
 
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
-        const rawDoc = doc.document_data;
-        return rawDoc && (
-          (rawDoc.invoiceDetails?.total !== undefined) ||
-          (rawDoc.total !== undefined)
+        const docData = doc.document_data;
+        return docData && (
+          (docData.invoiceDetails?.total !== undefined) ||
+          (docData.total !== undefined)
         );
       });
       
       if (invoiceDoc?.document_data) {
-        const rawDoc = invoiceDoc.document_data;
-        const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
+        const docData = invoiceDoc.document_data;
+        const total = docData.invoiceDetails?.total ?? docData.total ?? 0;
         console.log("TransactionCard - Found invoice amount:", total);
         setAmount(total);
       }

@@ -81,15 +81,17 @@ export const CreateTransactionDialog = () => {
                               documentData.wrapped_document || 
                               documentData.raw_document;
 
+        const documentDataToStore = {
+          ...documentVersion,
+          title: doc.title
+        };
+
         const { error: documentError } = await supabase
           .from("transaction_documents")
           .insert({
             transaction_id: transaction.id,
             document_id: doc.id,
-            document_data: {
-              ...documentVersion,
-              title: doc.title
-            }
+            document_data: documentDataToStore
           });
 
         if (documentError) throw documentError;
