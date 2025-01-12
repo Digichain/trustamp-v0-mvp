@@ -26,8 +26,31 @@ export const useTransactions = () => {
       }
 
       console.log("Session found, user ID:", session.user.id);
+      console.log("User email:", session.user.email);
 
       try {
+        // Check if user is admin
+        const isAdmin = session.user.email === 'digichaininnovations@gmail.com';
+        console.log("Is admin user:", isAdmin);
+
+        if (isAdmin) {
+          // Admin can see all transactions
+          console.log("Fetching all transactions for admin");
+          const { data: allTransactions, error: allTxError } = await supabase
+            .from("transactions")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          if (allTxError) {
+            console.error("Error fetching all transactions:", allTxError);
+            throw allTxError;
+          }
+
+          console.log("Successfully fetched all transactions for admin:", allTransactions?.length || 0, "records");
+          return allTransactions;
+        }
+
+        // For non-admin users, fetch their owned and recipient transactions
         // First, fetch transactions where user is the owner
         const { data: ownedTransactions, error: ownedError } = await supabase
           .from("transactions")
@@ -40,7 +63,7 @@ export const useTransactions = () => {
           throw ownedError;
         }
 
-        // First, get the transaction IDs where the user is a recipient
+        // Get the transaction IDs where the user is a recipient
         const { data: recipientIds, error: recipientIdsError } = await supabase
           .from("notification_recipients")
           .select("transaction_id")
