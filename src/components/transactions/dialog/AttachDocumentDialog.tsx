@@ -70,7 +70,7 @@ export const AttachDocumentDialog = ({
         }
 
         const documentDataToStore = {
-          ...documentVersion,
+          ...JSON.parse(JSON.stringify(documentVersion)),
           title: documentData.title,
         };
 
