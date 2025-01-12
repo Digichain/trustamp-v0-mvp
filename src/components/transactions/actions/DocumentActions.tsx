@@ -19,11 +19,13 @@ import { Document } from "@/types/documents";
 interface DocumentActionsProps {
   document: Document;
   onDelete: () => void;
+  onPreviewClick?: () => void;
 }
 
 export const DocumentActions = ({ 
   document, 
   onDelete,
+  onPreviewClick,
 }: DocumentActionsProps) => {
   const {
     handleWrapDocument,
@@ -64,6 +66,13 @@ export const DocumentActions = ({
           <DropdownMenuItem onClick={() => handleDownloadDocument(document)}>
             <Download className="mr-2 h-4 w-4" />
             Download Document
+          </DropdownMenuItem>
+        )}
+
+        {onPreviewClick && (
+          <DropdownMenuItem onClick={onPreviewClick}>
+            <Package className="mr-2 h-4 w-4" />
+            Preview Document
           </DropdownMenuItem>
         )}
         

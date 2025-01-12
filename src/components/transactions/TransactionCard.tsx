@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Transaction } from "@/types/transactions";
-import { TransactionStatus } from "./TransactionStatus";
-import { TransactionActions } from "./actions/TransactionActions";
-import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
@@ -13,7 +12,7 @@ interface DocumentData {
   title: string;
   status: string;
   document_subtype: string;
-  document_data: any;
+  document_data: Record<string, any>;
 }
 
 interface TransactionCardProps {
@@ -23,15 +22,16 @@ interface TransactionCardProps {
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
   const [documents, setDocuments] = useState<DocumentData[]>([]);
-  const [invoiceAmount, setInvoiceAmount] = useState<number | null>(null);
+  const [amount, setAmount] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const fetchDocuments = async () => {
-    console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
-    try {
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      console.log("TransactionCard - Fetching documents for transaction:", transaction.id);
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        console.error("TransactionCard - No authenticated session found");
+        console.error("No authenticated session found");
         throw new Error("Authentication required");
       }
 
@@ -44,13 +44,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         .eq("transaction_id", transaction.id);
 
       if (tdError) {
-        console.error("TransactionCard - Error fetching transaction documents:", tdError);
-        throw tdError;
-      }
-
-      if (!transactionDocs || transactionDocs.length === 0) {
-        console.log("TransactionCard - No documents found for transaction:", transaction.id);
-        setDocuments([]);
+        console.error("Error fetching transaction documents:", tdError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch transaction documents",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -68,9 +67,9 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
         const rawDoc = doc.document_data;
-        return (
-          (rawDoc.invoiceDetails && typeof rawDoc.invoiceDetails.total === 'number') ||
-          (typeof rawDoc.total === 'number')
+        return rawDoc && (
+          (rawDoc.invoiceDetails?.total !== undefined) ||
+          (rawDoc.total !== undefined)
         );
       });
       
@@ -78,31 +77,19 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         const rawDoc = invoiceDoc.document_data;
         const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
         console.log("TransactionCard - Found invoice amount:", total);
-        setInvoiceAmount(total);
+        setAmount(total);
       }
-    } catch (error) {
-      console.error("TransactionCard - Error fetching documents:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load documents",
-        variant: "destructive",
-      });
-    }
-  };
+    };
 
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+    fetchDocuments();
+  }, [transaction.id, toast]);
 
   const handleDownload = async (document: DocumentData) => {
+    console.log("TransactionCard - Handling document download:", document);
     try {
-      console.log("TransactionCard - Starting document download:", document);
-      
-      if (!document.document_data) {
+      const documentData = document.document_data;
+      if (!documentData) {
+        console.error("No document data available for download");
         toast({
           title: "Error",
           description: "No document data available for download",
@@ -111,25 +98,25 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const blob = new Blob([JSON.stringify(document.document_data, null, 2)], { 
-        type: 'application/json' 
+      const blob = new Blob([JSON.stringify(documentData, null, 2)], {
+        type: "application/json",
       });
       const url = window.URL.createObjectURL(blob);
       
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = url;
       a.download = `${document.title || 'document'}.json`;
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      window.document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
       toast({
         title: "Success",
         description: "Document downloaded successfully",
       });
-    } catch (error: any) {
-      console.error("TransactionCard - Error downloading document:", error);
+    } catch (error) {
+      console.error("Error downloading document:", error);
       toast({
         title: "Error",
         description: "Failed to download document",
@@ -138,59 +125,38 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     }
   };
 
-  useEffect(() => {
-    fetchDocuments();
-  }, [transaction.id]);
-
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-medium">
-              {transaction.title || `Transaction ${transaction.transaction_hash}`}
-            </CardTitle>
-            <p className="text-sm text-gray-500 mt-1">
-              {new Date(transaction.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <TransactionStatus status={transaction.status} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-2">Documents</h4>
-            <div className="space-y-2">
-              {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{doc.title}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleDownload(doc)}
-                    className="hover:bg-gray-100"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="text-sm text-gray-500">
-          {transaction.payment_bound && invoiceAmount !== null && (
-            `AUD ${formatAmount(invoiceAmount)}`
+    <Card className="p-6 space-y-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-lg font-semibold">{transaction.title || "Untitled Transaction"}</h3>
+          <p className="text-sm text-gray-500">
+            Created {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
+          </p>
+          {amount !== null && (
+            <p className="text-sm font-medium mt-1">Amount: ${amount}</p>
           )}
         </div>
-        <TransactionActions
-          transaction={transaction}
-          onDelete={() => onDelete(transaction)}
-          documents={documents}
-        />
-      </CardFooter>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Attached Documents:</h4>
+        {documents.map((doc) => (
+          <div key={doc.id} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+            <span className="text-sm">{doc.title}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDownload(doc)}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        {documents.length === 0 && (
+          <p className="text-sm text-gray-500">No documents attached</p>
+        )}
+      </div>
     </Card>
   );
 };
