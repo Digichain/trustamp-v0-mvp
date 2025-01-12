@@ -8,17 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
-interface TransactionCardProps {
-  transaction: Transaction;
-  onDelete: (transaction: Transaction) => void;
-}
-
 interface DocumentData {
   id: string;
   title: string;
   status: string;
   document_subtype: string;
   document_data: any;
+}
+
+interface TransactionCardProps {
+  transaction: Transaction;
+  onDelete: (transaction: Transaction) => void;
 }
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
@@ -35,7 +35,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         throw new Error("Authentication required");
       }
 
-      // Fetch documents associated with the transaction
       const { data: transactionDocs, error: tdError } = await supabase
         .from("transaction_documents")
         .select(`
@@ -55,10 +54,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      // Format the documents data
       const formattedDocs = transactionDocs.map(td => ({
         id: td.document_id,
-        ...td.document_data
+        title: td.document_data?.title || `Document ${td.document_id}`,
+        status: td.document_data?.status || 'unknown',
+        document_subtype: td.document_data?.document_subtype || 'unknown',
+        document_data: td.document_data || {}
       }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
@@ -66,7 +67,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
 
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
-        if (!doc.document_data) return false;
         const rawDoc = doc.document_data;
         return (
           (rawDoc.invoiceDetails && typeof rawDoc.invoiceDetails.total === 'number') ||
@@ -74,7 +74,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         );
       });
       
-      if (invoiceDoc && invoiceDoc.document_data) {
+      if (invoiceDoc?.document_data) {
         const rawDoc = invoiceDoc.document_data;
         const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
         console.log("TransactionCard - Found invoice amount:", total);
@@ -116,12 +116,12 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
       });
       const url = window.URL.createObjectURL(blob);
       
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${document.title || 'document'}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${document.title || 'document'}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
       toast({
