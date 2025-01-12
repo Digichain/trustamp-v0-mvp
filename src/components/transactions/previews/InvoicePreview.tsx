@@ -3,14 +3,19 @@ interface InvoicePreviewProps {
 }
 
 export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
+  console.log("InvoicePreview - Rendering with data:", data);
+
   if (!data) {
+    console.log("InvoicePreview - No data provided");
     return <div>No invoice data available</div>;
   }
 
+  // Safely access nested objects with default empty objects
   const invoiceDetails = data.invoiceDetails || {};
   const billFrom = invoiceDetails.billFrom || {};
   const billTo = invoiceDetails.billTo || {};
-  const billableItems = data.billableItems || [];
+  const company = billTo.company || {};
+  const billableItems = Array.isArray(data.billableItems) ? data.billableItems : [];
 
   return (
     <div className="space-y-6 p-4">
@@ -29,11 +34,11 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
           <div className="text-sm">
             <p>{billTo.name || 'N/A'}</p>
             <p>{billTo.email || 'N/A'}</p>
-            {billTo.company && (
+            {company && (
               <>
-                <p>{billTo.company.name || 'N/A'}</p>
-                <p>{billTo.company.streetAddress || 'N/A'}</p>
-                <p>{billTo.company.city || 'N/A'}</p>
+                <p>{company.name || 'N/A'}</p>
+                <p>{company.streetAddress || 'N/A'}</p>
+                <p>{company.city || 'N/A'}</p>
               </>
             )}
           </div>
@@ -53,14 +58,17 @@ export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
         <div className="space-y-2">
           {billableItems.map((item: any, index: number) => (
             <div key={index} className="border p-2 rounded">
-              <p className="font-medium">{item.description || 'N/A'}</p>
+              <p className="font-medium">{item?.description || 'N/A'}</p>
               <div className="text-sm">
-                <p>Quantity: {item.quantity || 0}</p>
-                <p>Unit Price: ${item.unitPrice || 0}</p>
-                <p>Amount: ${item.amount || 0}</p>
+                <p>Quantity: {item?.quantity || 0}</p>
+                <p>Unit Price: ${item?.unitPrice || 0}</p>
+                <p>Amount: ${item?.amount || 0}</p>
               </div>
             </div>
           ))}
+          {billableItems.length === 0 && (
+            <p className="text-gray-500">No items found</p>
+          )}
         </div>
       </div>
 

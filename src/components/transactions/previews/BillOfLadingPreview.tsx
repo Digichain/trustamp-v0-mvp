@@ -3,15 +3,19 @@ interface BillOfLadingPreviewProps {
 }
 
 export const BillOfLadingPreview = ({ data }: BillOfLadingPreviewProps) => {
+  console.log("BillOfLadingPreview - Rendering with data:", data);
+
   if (!data) {
+    console.log("BillOfLadingPreview - No data provided");
     return <div>No bill of lading data available</div>;
   }
 
+  // Safely access nested objects with default empty objects
   const details = data.billOfLadingDetails || {};
   const shipper = details.shipper || {};
   const consignee = details.consignee || {};
   const notifyParty = details.notifyParty || {};
-  const packages = details.packages || [];
+  const packages = Array.isArray(details.packages) ? details.packages : [];
 
   return (
     <div className="space-y-6 p-4">
@@ -75,12 +79,15 @@ export const BillOfLadingPreview = ({ data }: BillOfLadingPreviewProps) => {
           {packages.map((pkg: any, index: number) => (
             <div key={index} className="border p-2 rounded">
               <div className="text-sm">
-                <p>Description: {pkg.description || 'N/A'}</p>
-                <p>Weight: {pkg.weight || 'N/A'}</p>
-                <p>Measurement: {pkg.measurement || 'N/A'}</p>
+                <p>Description: {pkg?.description || 'N/A'}</p>
+                <p>Weight: {pkg?.weight || 'N/A'}</p>
+                <p>Measurement: {pkg?.measurement || 'N/A'}</p>
               </div>
             </div>
           ))}
+          {packages.length === 0 && (
+            <p className="text-gray-500">No packages found</p>
+          )}
         </div>
       </div>
     </div>
