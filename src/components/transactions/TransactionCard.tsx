@@ -11,11 +11,12 @@ interface DocumentData {
   id: string;
   title: string;
   document_data: {
+    [key: string]: any;
+    title?: string;
     invoiceDetails?: {
       total?: number;
     };
     total?: number;
-    [key: string]: any;
   };
 }
 
