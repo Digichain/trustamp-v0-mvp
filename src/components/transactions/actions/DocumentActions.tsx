@@ -2,6 +2,7 @@ import {
   MoreVertical,
   Package,
   Trash2,
+  Eye,
   FileSignature,
   Download,
 } from "lucide-react";
@@ -18,11 +19,13 @@ import { Document } from "@/types/documents";
 
 interface DocumentActionsProps {
   document: Document;
+  onPreviewClick: () => void;
   onDelete: () => void;
 }
 
 export const DocumentActions = ({ 
   document, 
+  onPreviewClick,
   onDelete,
 }: DocumentActionsProps) => {
   const {
@@ -44,6 +47,11 @@ export const DocumentActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onPreviewClick}>
+          <Eye className="mr-2 h-4 w-4" />
+          Preview Document
+        </DropdownMenuItem>
+        
         {canWrap && (
           <DropdownMenuItem onClick={() => handleWrapDocument(document)}>
             <Package className="mr-2 h-4 w-4" />
