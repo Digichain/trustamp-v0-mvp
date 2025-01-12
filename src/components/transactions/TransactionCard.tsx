@@ -18,15 +18,7 @@ interface DocumentData {
   title: string;
   status: string;
   document_subtype: string;
-  raw_document: {
-    invoiceDetails?: {
-      total?: number;
-    };
-    total?: number;
-    billOfLadingDetails?: any;
-  } | null;
-  wrapped_document?: any;
-  signed_document?: any;
+  document_data: any;
 }
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
@@ -48,15 +40,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         .from("transaction_documents")
         .select(`
           document_id,
-          documents:document_id (
-            id,
-            title,
-            status,
-            document_subtype,
-            raw_document,
-            wrapped_document,
-            signed_document
-          )
+          document_data
         `)
         .eq("transaction_id", transaction.id);
 
@@ -71,35 +55,27 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      // Format the documents data with type safety
-      const formattedDocs: DocumentData[] = transactionDocs
-        .map(td => td.documents)
-        .filter((doc): doc is NonNullable<typeof doc> => doc !== null)
-        .map(doc => ({
-          id: doc.id,
-          title: doc.title || `Document ${doc.id}`,
-          status: doc.status,
-          document_subtype: doc.document_subtype,
-          raw_document: doc.raw_document as DocumentData['raw_document'],
-          wrapped_document: doc.wrapped_document,
-          signed_document: doc.signed_document
-        }));
+      // Format the documents data
+      const formattedDocs = transactionDocs.map(td => ({
+        id: td.document_id,
+        ...td.document_data
+      }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
 
       // Find invoice document and extract amount
       const invoiceDoc = formattedDocs.find(doc => {
-        if (!doc.raw_document) return false;
-        const rawDoc = doc.raw_document;
+        if (!doc.document_data) return false;
+        const rawDoc = doc.document_data;
         return (
           (rawDoc.invoiceDetails && typeof rawDoc.invoiceDetails.total === 'number') ||
           (typeof rawDoc.total === 'number')
         );
       });
       
-      if (invoiceDoc && invoiceDoc.raw_document) {
-        const rawDoc = invoiceDoc.raw_document;
+      if (invoiceDoc && invoiceDoc.document_data) {
+        const rawDoc = invoiceDoc.document_data;
         const total = rawDoc.invoiceDetails?.total ?? rawDoc.total ?? 0;
         console.log("TransactionCard - Found invoice amount:", total);
         setInvoiceAmount(total);
@@ -122,23 +98,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     }).format(amount);
   };
 
-  const handleDownload = async (documentId: string) => {
+  const handleDownload = async (document: DocumentData) => {
     try {
-      console.log("TransactionCard - Starting document download for ID:", documentId);
+      console.log("TransactionCard - Starting document download:", document);
       
-      const document = documents.find(doc => doc.id === documentId);
-      if (!document) {
-        toast({
-          title: "Document Not Found",
-          description: "The requested document could not be found.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Get the most recent version of the document
-      const documentData = document.signed_document || document.wrapped_document || document.raw_document;
-      if (!documentData) {
+      if (!document.document_data) {
         toast({
           title: "Error",
           description: "No document data available for download",
@@ -147,7 +111,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const blob = new Blob([JSON.stringify(documentData, null, 2)], { 
+      const blob = new Blob([JSON.stringify(document.document_data, null, 2)], { 
         type: 'application/json' 
       });
       const url = window.URL.createObjectURL(blob);
@@ -204,7 +168,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => handleDownload(doc.id)}
+                    onClick={() => handleDownload(doc)}
                     className="hover:bg-gray-100"
                   >
                     <Download className="h-4 w-4" />

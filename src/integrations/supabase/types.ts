@@ -311,18 +311,21 @@ export type Database = {
       transaction_documents: {
         Row: {
           created_at: string | null
+          document_data: Json | null
           document_id: string | null
           id: string
           transaction_id: string | null
         }
         Insert: {
           created_at?: string | null
+          document_data?: Json | null
           document_id?: string | null
           id?: string
           transaction_id?: string | null
         }
         Update: {
           created_at?: string | null
+          document_data?: Json | null
           document_id?: string | null
           id?: string
           transaction_id?: string | null

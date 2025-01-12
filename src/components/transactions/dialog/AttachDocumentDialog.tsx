@@ -49,29 +49,43 @@ export const AttachDocumentDialog = ({
       console.log("Attaching documents to transaction:", transactionId);
       console.log("Selected documents:", selectedDocuments);
 
-      // Get document details to determine type
-      const { data: documentDetails, error: documentDetailsError } = await supabase
-        .from("documents")
-        .select("document_subtype")
-        .in("id", selectedDocuments)
-        .single();
-
-      if (documentDetailsError) throw documentDetailsError;
-
-      // Create transaction documents
       for (const documentId of selectedDocuments) {
+        // Fetch the complete document data
+        const { data: documentData, error: docError } = await supabase
+          .from("documents")
+          .select("*, raw_document, wrapped_document, signed_document")
+          .eq("id", documentId)
+          .single();
+
+        if (docError) throw docError;
+
+        // Get the most recent version of the document
+        const documentVersion = documentData.signed_document || 
+                              documentData.wrapped_document || 
+                              documentData.raw_document;
+
+        // Store document in transaction_documents with complete data
         const { error: documentError } = await supabase
           .from("transaction_documents")
           .insert({
             transaction_id: transactionId,
-            document_id: documentId
+            document_id: documentId,
+            document_data: {
+              ...documentVersion,
+              status: documentData.status,
+              title: documentData.title,
+              document_subtype: documentData.document_subtype
+            }
           });
 
         if (documentError) throw documentError;
 
         // Create notifications for all recipients
         for (const recipientId of recipientIds) {
-          await createNotificationForRecipient(recipientId, documentDetails.document_subtype || "unknown");
+          await createNotificationForRecipient(
+            recipientId, 
+            documentData.document_subtype || "unknown"
+          );
         }
       }
 
