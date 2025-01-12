@@ -1,98 +1,76 @@
-import { FC } from "react";
-import { DocumentWrapper } from "./templates/DocumentWrapper";
-import { unwrapValue } from "@/utils/document-wrapper";
-
 interface InvoicePreviewProps {
   data: any;
 }
 
-export const InvoicePreview: FC<InvoicePreviewProps> = ({ data }) => {
-  console.log("Rendering invoice preview with data:", data);
+export const InvoicePreview = ({ data }: InvoicePreviewProps) => {
+  if (!data) {
+    return <div>No invoice data available</div>;
+  }
 
-  // Extract data from the correct location in the document
-  const invoiceNumber = unwrapValue(data?.invoiceDetails?.invoiceNumber) || unwrapValue(data?.invoice_number) || 'N/A';
-  const billFrom = data?.invoiceDetails?.billFrom || data?.bill_from || {};
-  const billTo = data?.invoiceDetails?.billTo || data?.bill_to || {};
-  const billableItems = data?.billableItems || data?.billable_items || [];
-  const subtotal = unwrapValue(data?.subtotal);
-  const tax = unwrapValue(data?.tax);
-  const taxTotal = unwrapValue(data?.taxTotal) || unwrapValue(data?.tax_total);
-  const total = unwrapValue(data?.total);
+  const invoiceDetails = data.invoiceDetails || {};
+  const billFrom = invoiceDetails.billFrom || {};
+  const billTo = invoiceDetails.billTo || {};
+  const billableItems = data.billableItems || [];
 
   return (
-    <DocumentWrapper title={`Invoice #${invoiceNumber}`}>
-      <div className="grid grid-cols-2 gap-8 mb-8">
+    <div className="space-y-6 p-4">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <h2 className="text-lg font-semibold mb-4">Bill From</h2>
-          <div className="space-y-2">
-            <p className="font-medium">Contact Person</p>
-            <p>{unwrapValue(billFrom?.name)}</p>
-            <p>{unwrapValue(billFrom?.email)}</p>
-            <p className="font-medium mt-4">Company Details</p>
-            <p>{unwrapValue(billFrom?.company?.name)}</p>
-            <p>{unwrapValue(billFrom?.company?.streetAddress) || unwrapValue(billFrom?.streetAddress)}</p>
-            <p>{unwrapValue(billFrom?.company?.city) || unwrapValue(billFrom?.city)}</p>
-            <p>{unwrapValue(billFrom?.company?.postalCode) || unwrapValue(billFrom?.postalCode)}</p>
-            <p>{unwrapValue(billFrom?.company?.phoneNumber) || unwrapValue(billFrom?.phoneNumber)}</p>
-            <p>{unwrapValue(billFrom?.company?.registration)}</p>
+          <h3 className="font-semibold mb-2">Bill From</h3>
+          <div className="text-sm">
+            <p>{billFrom.name || 'N/A'}</p>
+            <p>{billFrom.streetAddress || 'N/A'}</p>
+            <p>{billFrom.city || 'N/A'}</p>
+            <p>Phone: {billFrom.phoneNumber || 'N/A'}</p>
           </div>
         </div>
         <div>
-          <h2 className="text-lg font-semibold mb-4">Bill To</h2>
-          <div className="space-y-2">
-            <p className="font-medium">Contact Person</p>
-            <p>{unwrapValue(billTo?.name)}</p>
-            <p>{unwrapValue(billTo?.email)}</p>
-            <p className="font-medium mt-4">Company Details</p>
-            <p>{unwrapValue(billTo?.company?.name)}</p>
-            <p>{unwrapValue(billTo?.company?.streetAddress) || unwrapValue(billTo?.streetAddress)}</p>
-            <p>{unwrapValue(billTo?.company?.city) || unwrapValue(billTo?.city)}</p>
-            <p>{unwrapValue(billTo?.company?.postalCode) || unwrapValue(billTo?.postalCode)}</p>
-            <p>{unwrapValue(billTo?.company?.phoneNumber) || unwrapValue(billTo?.phoneNumber)}</p>
+          <h3 className="font-semibold mb-2">Bill To</h3>
+          <div className="text-sm">
+            <p>{billTo.name || 'N/A'}</p>
+            <p>{billTo.email || 'N/A'}</p>
+            {billTo.company && (
+              <>
+                <p>{billTo.company.name || 'N/A'}</p>
+                <p>{billTo.company.streetAddress || 'N/A'}</p>
+                <p>{billTo.company.city || 'N/A'}</p>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Items</h2>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left py-2">Description</th>
-              <th className="text-right py-2">Quantity</th>
-              <th className="text-right py-2">Unit Price</th>
-              <th className="text-right py-2">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billableItems.map((item: any, index: number) => (
-              <tr key={index} className="border-b">
-                <td className="py-2">{unwrapValue(item.description)}</td>
-                <td className="text-right py-2">{unwrapValue(item.quantity)}</td>
-                <td className="text-right py-2">${unwrapValue(item.unitPrice)}</td>
-                <td className="text-right py-2">${unwrapValue(item.amount)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-end">
-        <div className="w-64">
-          <div className="flex justify-between py-2">
-            <span>Subtotal:</span>
-            <span>${subtotal || '0.00'}</span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span>Tax ({tax || '0'}%):</span>
-            <span>${taxTotal || '0.00'}</span>
-          </div>
-          <div className="flex justify-between py-2 font-bold">
-            <span>Total:</span>
-            <span>${total || '0.00'}</span>
-          </div>
+      <div>
+        <h3 className="font-semibold mb-2">Invoice Details</h3>
+        <div className="text-sm">
+          <p>Invoice Number: {invoiceDetails.invoiceNumber || 'N/A'}</p>
+          <p>Date: {invoiceDetails.date || 'N/A'}</p>
         </div>
       </div>
-    </DocumentWrapper>
+
+      <div>
+        <h3 className="font-semibold mb-2">Items</h3>
+        <div className="space-y-2">
+          {billableItems.map((item: any, index: number) => (
+            <div key={index} className="border p-2 rounded">
+              <p className="font-medium">{item.description || 'N/A'}</p>
+              <div className="text-sm">
+                <p>Quantity: {item.quantity || 0}</p>
+                <p>Unit Price: ${item.unitPrice || 0}</p>
+                <p>Amount: ${item.amount || 0}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t pt-4">
+        <div className="text-right space-y-1">
+          <p>Subtotal: ${data.subtotal || 0}</p>
+          <p>Tax: ${data.tax || 0}</p>
+          <p className="font-semibold">Total: ${data.total || 0}</p>
+        </div>
+      </div>
+    </div>
   );
 };

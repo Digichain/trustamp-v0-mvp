@@ -1,135 +1,88 @@
-import { Card } from "@/components/ui/card";
-
-interface Party {
-  name: string;
-  address: string;
-}
-
-interface Package {
-  description: string;
-  weight: string;
-  measurement: string;
-}
-
-interface BillOfLadingData {
-  scac: string;
-  blNumber: string;
-  vessel: string;
-  voyageNo: string;
-  carrierName: string;
-  portOfLoading: string;
-  portOfDischarge: string;
-  placeOfReceipt: string;
-  placeOfDelivery: string;
-  shipper: Party;
-  consignee: Party;
-  notifyParty: Party;
-  packages: Package[];
-}
-
 interface BillOfLadingPreviewProps {
-  data: BillOfLadingData;
+  data: any;
 }
 
 export const BillOfLadingPreview = ({ data }: BillOfLadingPreviewProps) => {
-  const parties: Array<{ key: keyof BillOfLadingData; label: string }> = [
-    { key: 'shipper', label: 'Shipper' },
-    { key: 'consignee', label: 'Consignee' },
-    { key: 'notifyParty', label: 'Notify Party' }
-  ];
+  if (!data) {
+    return <div>No bill of lading data available</div>;
+  }
+
+  const details = data.billOfLadingDetails || {};
+  const shipper = details.shipper || {};
+  const consignee = details.consignee || {};
+  const notifyParty = details.notifyParty || {};
+  const packages = details.packages || [];
 
   return (
-    <Card className="p-6 space-y-6 bg-white">
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-bold">Bill of Lading</h2>
-        <p className="text-gray-600">BL Number: {data.blNumber}</p>
+    <div className="space-y-6 p-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="font-semibold mb-2">Carrier Details</h3>
+          <div className="text-sm">
+            <p>SCAC: {details.scac || 'N/A'}</p>
+            <p>Carrier Name: {details.carrierName || 'N/A'}</p>
+            <p>Vessel: {details.vessel || 'N/A'}</p>
+            <p>Voyage No: {details.voyageNo || 'N/A'}</p>
+          </div>
+        </div>
+        <div>
+          <h3 className="font-semibold mb-2">B/L Details</h3>
+          <div className="text-sm">
+            <p>B/L Number: {details.blNumber || 'N/A'}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
-          <h3 className="font-semibold mb-2">Basic Information</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">SCAC</p>
-              <p>{data.scac}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Vessel</p>
-              <p>{data.vessel}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Voyage No</p>
-              <p>{data.voyageNo}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Carrier Name</p>
-              <p>{data.carrierName}</p>
-            </div>
+          <h3 className="font-semibold mb-2">Shipper</h3>
+          <div className="text-sm">
+            <p>{shipper.name || 'N/A'}</p>
+            <p>{shipper.address || 'N/A'}</p>
           </div>
         </div>
-
         <div>
-          <h3 className="font-semibold mb-2">Locations</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Port of Loading</p>
-              <p>{data.portOfLoading}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Port of Discharge</p>
-              <p>{data.portOfDischarge}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Place of Receipt</p>
-              <p>{data.placeOfReceipt}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Place of Delivery</p>
-              <p>{data.placeOfDelivery}</p>
-            </div>
+          <h3 className="font-semibold mb-2">Consignee</h3>
+          <div className="text-sm">
+            <p>{consignee.name || 'N/A'}</p>
+            <p>{consignee.address || 'N/A'}</p>
           </div>
         </div>
-
         <div>
-          <h3 className="font-semibold mb-2">Parties</h3>
-          <div className="space-y-4">
-            {parties.map(({ key, label }) => {
-              const party = data[key] as Party;
-              return (
-                <div key={key} className="border-b pb-2">
-                  <h4 className="font-medium mb-1">{label}</h4>
-                  <p>{party.name}</p>
-                  <p className="text-sm text-gray-500">{party.address}</p>
-                </div>
-              );
-            })}
+          <h3 className="font-semibold mb-2">Notify Party</h3>
+          <div className="text-sm">
+            <p>{notifyParty.name || 'N/A'}</p>
+            <p>{notifyParty.address || 'N/A'}</p>
           </div>
         </div>
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <h3 className="font-semibold mb-2">Packages</h3>
-          <div className="space-y-2">
-            {data.packages.map((pkg, index) => (
-              <div key={index} className="border-b pb-2">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Description</p>
-                    <p>{pkg.description}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Weight</p>
-                    <p>{pkg.weight}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Measurement</p>
-                    <p>{pkg.measurement}</p>
-                  </div>
-                </div>
+          <h3 className="font-semibold mb-2">Port Information</h3>
+          <div className="text-sm">
+            <p>Port of Loading: {details.portOfLoading || 'N/A'}</p>
+            <p>Port of Discharge: {details.portOfDischarge || 'N/A'}</p>
+            <p>Place of Receipt: {details.placeOfReceipt || 'N/A'}</p>
+            <p>Place of Delivery: {details.placeOfDelivery || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-2">Packages</h3>
+        <div className="space-y-2">
+          {packages.map((pkg: any, index: number) => (
+            <div key={index} className="border p-2 rounded">
+              <div className="text-sm">
+                <p>Description: {pkg.description || 'N/A'}</p>
+                <p>Weight: {pkg.weight || 'N/A'}</p>
+                <p>Measurement: {pkg.measurement || 'N/A'}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
