@@ -2,21 +2,22 @@ import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserSelector } from "./dialog/UserSelector";
 import { DocumentSelector } from "./dialog/DocumentSelector";
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface User {
+interface DocumentWithTitle {
   id: string;
-  email: string;
+  title: string;
 }
 
 export const CreateTransactionDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<DocumentWithTitle[]>([]);
   const [isPaymentBound, setIsPaymentBound] = useState(false);
   const { toast } = useToast();
 
@@ -66,12 +67,29 @@ export const CreateTransactionDialog = () => {
       }
 
       // Create transaction documents
-      for (const documentId of selectedDocuments) {
+      for (const doc of selectedDocuments) {
+        const { data: documentData, error: docError } = await supabase
+          .from("documents")
+          .select("*, raw_document, wrapped_document, signed_document")
+          .eq("id", doc.id)
+          .single();
+
+        if (docError) throw docError;
+
+        // Get the most recent version of the document
+        const documentVersion = documentData.signed_document || 
+                              documentData.wrapped_document || 
+                              documentData.raw_document;
+
         const { error: documentError } = await supabase
           .from("transaction_documents")
           .insert({
             transaction_id: transaction.id,
-            document_id: documentId
+            document_id: doc.id,
+            document_data: {
+              ...documentVersion,
+              title: doc.title
+            }
           });
 
         if (documentError) throw documentError;
@@ -104,13 +122,19 @@ export const CreateTransactionDialog = () => {
   };
 
   const handleAddDocument = (documentId: string) => {
-    if (!selectedDocuments.includes(documentId)) {
-      setSelectedDocuments([...selectedDocuments, documentId]);
+    if (!selectedDocuments.some(doc => doc.id === documentId)) {
+      setSelectedDocuments([...selectedDocuments, { id: documentId, title: "" }]);
     }
   };
 
   const handleRemoveDocument = (documentId: string) => {
-    setSelectedDocuments(selectedDocuments.filter(id => id !== documentId));
+    setSelectedDocuments(selectedDocuments.filter(doc => doc.id !== documentId));
+  };
+
+  const handleDocumentTitleChange = (documentId: string, title: string) => {
+    setSelectedDocuments(selectedDocuments.map(doc => 
+      doc.id === documentId ? { ...doc, title } : doc
+    ));
   };
 
   return (
@@ -151,16 +175,24 @@ export const CreateTransactionDialog = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">Documents</label>
             <div className="space-y-2">
-              {selectedDocuments.map((docId) => (
-                <div key={docId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{docId}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveDocument(docId)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+              {selectedDocuments.map((doc) => (
+                <div key={doc.id} className="space-y-2 p-2 bg-gray-50 rounded">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">{doc.id}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveDocument(doc.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Document Title"
+                    value={doc.title}
+                    onChange={(e) => handleDocumentTitleChange(doc.id, e.target.value)}
+                    className="mt-2"
+                  />
                 </div>
               ))}
               <DocumentSelector
@@ -193,7 +225,7 @@ export const CreateTransactionDialog = () => {
             </Button>
             <Button
               onClick={handleCreateTransaction}
-              disabled={selectedUserIds.length === 0}
+              disabled={selectedUserIds.length === 0 || selectedDocuments.some(doc => !doc.title)}
             >
               Create
             </Button>
