@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileUpload, Download, Calendar } from "lucide-react";
+import { Upload, Download, Calendar } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Finance() {
@@ -42,7 +42,7 @@ export default function Finance() {
                 className="w-full flex items-center gap-2"
                 onClick={() => console.log("Upload/Update KYC form")}
               >
-                <FileUpload className="h-4 w-4" />
+                <Upload className="h-4 w-4" />
                 Upload/Update KYC Form
               </Button>
             </div>
