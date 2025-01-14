@@ -22,8 +22,14 @@ export const AttachDocumentDialog = ({
   const { toast } = useToast();
 
   const handleAddDocument = (documentId: string) => {
-    if (!selectedDocuments.includes(documentId)) {
+    if (selectedDocuments.length < 2 && !selectedDocuments.includes(documentId)) {
       setSelectedDocuments([...selectedDocuments, documentId]);
+    } else if (selectedDocuments.length >= 2) {
+      toast({
+        title: "Maximum documents reached",
+        description: "You can only attach up to 2 documents",
+        variant: "destructive",
+      });
     }
   };
 
@@ -49,7 +55,9 @@ export const AttachDocumentDialog = ({
       console.log("Attaching documents to transaction:", transactionId);
       console.log("Selected documents:", selectedDocuments);
 
-      for (const documentId of selectedDocuments) {
+      for (let i = 0; i < selectedDocuments.length; i++) {
+        const documentId = selectedDocuments[i];
+        
         // Fetch the complete document data
         const { data: documentData, error: docError } = await supabase
           .from("documents")
@@ -72,18 +80,18 @@ export const AttachDocumentDialog = ({
         const documentDataToStore = {
           ...JSON.parse(JSON.stringify(documentVersion)),
           title: documentData.title,
+          id: documentId
         };
 
-        // Store document in transaction_documents with complete data
-        const { error: documentError } = await supabase
-          .from("transaction_documents")
-          .insert({
-            transaction_id: transactionId,
-            document_id: documentId,
-            document_data: documentDataToStore
-          });
+        // Update the transaction with the document
+        const { error: updateError } = await supabase
+          .from("transactions")
+          .update({
+            [`document${i + 1}`]: documentDataToStore
+          })
+          .eq("id", transactionId);
 
-        if (documentError) throw documentError;
+        if (updateError) throw updateError;
 
         // Create notifications for all recipients
         for (const recipientId of recipientIds) {
@@ -115,7 +123,7 @@ export const AttachDocumentDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Attach Documents</DialogTitle>
+          <DialogTitle>Attach Documents (Max 2)</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <DocumentSelector

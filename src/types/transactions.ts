@@ -8,4 +8,10 @@ export interface Transaction {
   title: string | null;
   created_at: string;
   payment_bound: boolean;
+  document1?: any;
+  document2?: any;
+  recipient1_id?: string;
+  recipient2_id?: string;
+  payment_amount?: number;
+  deposit_status?: string;
 }

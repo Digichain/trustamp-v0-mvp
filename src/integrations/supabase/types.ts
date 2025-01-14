@@ -212,15 +212,7 @@ export type Database = {
           recipient_user_id?: string | null
           transaction_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "notification_recipients_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -253,15 +245,7 @@ export type Database = {
           type?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -308,51 +292,18 @@ export type Database = {
         }
         Relationships: []
       }
-      transaction_documents: {
-        Row: {
-          created_at: string | null
-          document_data: Json | null
-          document_id: string | null
-          id: string
-          transaction_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          document_data?: Json | null
-          document_id?: string | null
-          id?: string
-          transaction_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          document_data?: Json | null
-          document_id?: string | null
-          id?: string
-          transaction_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transaction_documents_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transaction_documents_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       transactions: {
         Row: {
           created_at: string | null
+          deposit_status: string | null
+          document1: Json | null
+          document2: Json | null
           id: string
           network: string
+          payment_amount: number | null
           payment_bound: boolean | null
+          recipient1_id: string | null
+          recipient2_id: string | null
           status: string
           title: string | null
           transaction_hash: string
@@ -362,9 +313,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deposit_status?: string | null
+          document1?: Json | null
+          document2?: Json | null
           id?: string
           network: string
+          payment_amount?: number | null
           payment_bound?: boolean | null
+          recipient1_id?: string | null
+          recipient2_id?: string | null
           status?: string
           title?: string | null
           transaction_hash: string
@@ -374,9 +331,15 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deposit_status?: string | null
+          document1?: Json | null
+          document2?: Json | null
           id?: string
           network?: string
+          payment_amount?: number | null
           payment_bound?: boolean | null
+          recipient1_id?: string | null
+          recipient2_id?: string | null
           status?: string
           title?: string | null
           transaction_hash?: string
