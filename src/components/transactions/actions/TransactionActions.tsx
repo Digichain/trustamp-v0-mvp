@@ -141,6 +141,7 @@ export const TransactionActions = ({
       const { error } = await supabase
         .from('transactions')
         .update({ 
+          status: 'payment_made',
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.id);
