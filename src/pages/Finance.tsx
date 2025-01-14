@@ -120,16 +120,16 @@ export default function Finance() {
           <CardTitle>Requests</CardTitle>
           <div className="flex items-center gap-2">
             <Button 
-              variant="outline"
-              onClick={() => console.log("View all requests")}
-            >
-              View All Requests
-            </Button>
-            <Button 
               className="bg-black hover:bg-black/90"
               onClick={() => setIsRequestFinanceOpen(true)}
             >
               Request Finance
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => console.log("Request BoL Settlement")}
+            >
+              Request BoL Settlement
             </Button>
           </div>
         </CardHeader>
