@@ -5,11 +5,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useState } from "react";
 
 export const FinanceRequestForm = () => {
   console.log("FinanceRequestForm - Rendering");
   const { transactions, isLoading } = useTransactions();
+  const [agreed, setAgreed] = useState(false);
 
   const financeTypes = [
     "Accounts Receivable (Invoice)",
@@ -18,6 +22,11 @@ export const FinanceRequestForm = () => {
     "Fixed Term Agreement (60 days)",
     "Fixed Term Agreement (90 days)",
   ];
+
+  const handleSubmit = () => {
+    console.log("Form submitted");
+    // Add submission logic here
+  };
 
   return (
     <div className="space-y-6">
@@ -61,6 +70,42 @@ export const FinanceRequestForm = () => {
           </SelectContent>
         </Select>
       </div>
+
+      <div className="space-y-4">
+        <a 
+          href="#" 
+          className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          onClick={(e) => {
+            e.preventDefault();
+            console.log("PDS link clicked");
+            // Add link to actual PDS document
+          }}
+        >
+          Finance Product Disclosure Statement
+        </a>
+
+        <div className="flex items-start space-x-2">
+          <Checkbox
+            id="terms"
+            checked={agreed}
+            onCheckedChange={(checked) => setAgreed(checked as boolean)}
+          />
+          <label
+            htmlFor="terms"
+            className="text-sm text-gray-600 leading-tight"
+          >
+            I have read and understood this agreement. I agree to all the Terms and conditions as highlighted in Annexure A of the agreement.
+          </label>
+        </div>
+      </div>
+
+      <Button 
+        className="w-full bg-black hover:bg-black/90"
+        disabled={!agreed}
+        onClick={handleSubmit}
+      >
+        Submit Request
+      </Button>
     </div>
   );
 };
