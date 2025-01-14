@@ -2,14 +2,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Download, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Finance() {
   console.log("Finance page rendered");
+  const { toast } = useToast();
 
   // Mock data for last update (replace with actual data later)
   const lastUpdate = {
     date: new Date("2024-03-20"),
     fileName: "kyc_form_v1.pdf"
+  };
+
+  const handleDownloadKYC = async () => {
+    try {
+      console.log("Initiating KYC form download");
+      const { data, error } = await supabase.storage
+        .from('kyc-documents')
+        .download('kyc_template.docx');
+
+      if (error) {
+        console.error("Error downloading KYC form:", error);
+        toast({
+          title: "Download Failed",
+          description: "Could not download the KYC form. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create a download link
+      const url = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'KYC_Form_Template.docx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "KYC form downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Error in download handler:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -18,8 +62,12 @@ export default function Finance() {
       
       {/* KYC Card */}
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Additional KYC</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500"></div>
+            <span className="text-sm text-muted-foreground">Approved</span>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -28,7 +76,7 @@ export default function Finance() {
               <Button 
                 variant="outline"
                 className="w-full flex items-center gap-2"
-                onClick={() => console.log("Download KYC form")}
+                onClick={handleDownloadKYC}
               >
                 <Download className="h-4 w-4" />
                 Download KYC Form
@@ -38,8 +86,7 @@ export default function Finance() {
             {/* Upload Button Column */}
             <div className="flex items-center justify-center">
               <Button 
-                variant="outline"
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 bg-black hover:bg-black/90"
                 onClick={() => console.log("Upload/Update KYC form")}
               >
                 <Upload className="h-4 w-4" />
