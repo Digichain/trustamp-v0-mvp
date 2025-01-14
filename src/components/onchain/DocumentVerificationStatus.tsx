@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp, Printer, User } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Printer, User, CheckCircle2, XCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
