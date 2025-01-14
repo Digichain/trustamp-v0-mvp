@@ -4,6 +4,7 @@ import { DocumentVerificationStatus } from "@/components/onchain/DocumentVerific
 import { useState } from "react";
 import { VerifierFactory } from "@/components/transactions/verification/verifierFactory";
 import { useToast } from "@/hooks/use-toast";
+import { verify } from "@govtechsg/oa-verify";
 
 const VerifyOnChain = () => {
   const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
@@ -33,21 +34,70 @@ const VerifyOnChain = () => {
         return;
       }
 
-      console.log("Starting document verification");
-      const result = await VerifierFactory.verifyDocument(document);
-      console.log("Verification result:", result);
+      // Verify using OpenAttestation's verify function
+      console.log("Starting OpenAttestation verification");
+      const fragments = await verify(document);
+      console.log("Verification fragments:", fragments);
 
-      // Get the document data, handling both wrapped and unwrapped formats
-      const documentData = document.data || document;
-      console.log("Document data for verification:", documentData);
+      // Process verification fragments
+      const details = {
+        issuanceStatus: {
+          valid: false,
+          message: "Document issuance verification failed"
+        },
+        issuerIdentity: {
+          valid: false,
+          message: "Issuer identity verification failed"
+        },
+        documentIntegrity: {
+          valid: false,
+          message: "Document integrity verification failed"
+        },
+        fragments
+      };
 
-      setVerificationResult({
-        isValid: result.isValid,
-        document: documentData,
-        details: result.details
+      // Process each fragment
+      fragments.forEach((fragment: any) => {
+        if (fragment.name === "OpenAttestationHash") {
+          details.documentIntegrity = {
+            valid: fragment.status === "VALID",
+            message: fragment.status === "VALID" 
+              ? "Document integrity verified successfully" 
+              : "Document hash verification failed"
+          };
+        }
+        else if (fragment.name === "OpenAttestationDnsTxt" || fragment.name === "OpenAttestationDnsDid") {
+          details.issuerIdentity = {
+            valid: fragment.status === "VALID",
+            message: fragment.status === "VALID"
+              ? "Issuer identity verified successfully"
+              : "Issuer identity verification failed",
+            details: fragment.data
+          };
+        }
+        else if (fragment.name === "OpenAttestationEthereumTokenRegistryStatus" || fragment.name === "OpenAttestationEthereumDocumentStoreStatus") {
+          details.issuanceStatus = {
+            valid: fragment.status === "VALID",
+            message: fragment.status === "VALID"
+              ? "Document issuance verified successfully"
+              : "Document issuance verification failed"
+          };
+        }
       });
 
-      if (result.isValid) {
+      const isValid = details.documentIntegrity.valid && 
+                     details.issuerIdentity.valid && 
+                     details.issuanceStatus.valid;
+
+      console.log("Final verification result:", { isValid, details });
+
+      setVerificationResult({
+        isValid,
+        document,
+        details
+      });
+
+      if (isValid) {
         toast({
           title: "Document Valid",
           description: "Document verified successfully"
@@ -55,7 +105,7 @@ const VerifyOnChain = () => {
       } else {
         toast({
           title: "Document Invalid",
-          description: result.error || "Verification failed",
+          description: "Document verification failed",
           variant: "destructive"
         });
       }
