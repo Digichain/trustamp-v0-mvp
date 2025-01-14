@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Upload, Download, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { PreviewDialog } from "@/components/transactions/previews/PreviewDialog";
 
 export default function Finance() {
   console.log("Finance page rendered");
   const { toast } = useToast();
+  const [isRequestFinanceOpen, setIsRequestFinanceOpen] = useState(false);
 
   // Mock data for last update (replace with actual data later)
   const lastUpdate = {
@@ -109,15 +112,41 @@ export default function Finance() {
         </CardContent>
       </Card>
 
-      {/* Original Financial Overview Card */}
+      {/* Requests Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Financial Overview</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Requests</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setIsRequestFinanceOpen(true)}
+            >
+              Request Finance
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => console.log("Request eBoL holdership clicked")}
+            >
+              Request eBoL holdership
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <p>Financial information will be displayed here.</p>
         </CardContent>
       </Card>
+
+      {/* Request Finance Dialog */}
+      <PreviewDialog
+        title="Request Finance"
+        isOpen={isRequestFinanceOpen}
+        onOpenChange={setIsRequestFinanceOpen}
+      >
+        <div>
+          {/* Dialog content will be added later */}
+          <p>Request Finance form will be added here.</p>
+        </div>
+      </PreviewDialog>
     </div>
   );
 }
