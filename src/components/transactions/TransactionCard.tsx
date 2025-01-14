@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -61,6 +62,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           <p className="text-sm text-gray-500">
             Created {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
           </p>
+          {transaction.payment_bound && transaction.payment_amount && (
+            <p className="text-sm font-medium text-green-600 mt-2">
+              Payment Amount: ${transaction.payment_amount.toFixed(2)}
+            </p>
+          )}
         </div>
       </div>
 

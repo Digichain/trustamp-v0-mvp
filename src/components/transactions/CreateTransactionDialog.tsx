@@ -19,6 +19,7 @@ export const CreateTransactionDialog = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<DocumentWithTitle[]>([]);
   const [isPaymentBound, setIsPaymentBound] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [transactionTitle, setTransactionTitle] = useState("");
   const { toast } = useToast();
 
@@ -59,6 +60,7 @@ export const CreateTransactionDialog = () => {
             transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
             network: "ethereum",
             payment_bound: isPaymentBound,
+            payment_amount: isPaymentBound ? paymentAmount : null,
             document1: document1Data,
             recipient1_id: selectedUserIds[0] || null,
             recipient2_id: selectedUserIds[1] || null,
@@ -239,18 +241,34 @@ export const CreateTransactionDialog = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="payment-bound"
-              checked={isPaymentBound}
-              onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
-            />
-            <label
-              htmlFor="payment-bound"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Payment Bound
-            </label>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="payment-bound"
+                checked={isPaymentBound}
+                onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
+              />
+              <label
+                htmlFor="payment-bound"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Payment Bound
+              </label>
+            </div>
+
+            {isPaymentBound && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Payment Amount ($)</label>
+                <Input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                  min={0}
+                  step="0.01"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end space-x-2 mt-4">
