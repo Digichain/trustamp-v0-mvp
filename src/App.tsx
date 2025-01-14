@@ -6,9 +6,9 @@ import CreateDocument from "@/pages/CreateDocument";
 import VerifyDocument from "@/pages/VerifyDocument";
 import VerifyOnChain from "@/pages/VerifyOnChain";
 import Payments from "@/pages/Payments";
-import Settings from "@/pages/Settings";
-import { PrivateRoute } from "@/components/auth/PrivateRoute";
-import { useAuth } from "@/hooks/use-auth";
+import Settings from "./pages/Settings";
+import { PrivateRoute } from "./components/auth/PrivateRoute";
+import { useAuth } from "./hooks/use-auth";
 
 function App() {
   const { isAuthenticated } = useAuth();
