@@ -9,11 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const FinanceRequestForm = () => {
   console.log("FinanceRequestForm - Rendering");
+  const { toast } = useToast();
   const { transactions, isLoading } = useTransactions();
   const [agreed, setAgreed] = useState(false);
+  const [selectedFinanceType, setSelectedFinanceType] = useState<string>("");
+  const [selectedTransaction, setSelectedTransaction] = useState<string>("");
 
   const financeTypes = [
     "Accounts Receivable (Invoice)",
@@ -23,9 +28,50 @@ export const FinanceRequestForm = () => {
     "Fixed Term Agreement (90 days)",
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("Form submitted");
-    // Add submission logic here
+    if (!selectedFinanceType || !selectedTransaction) {
+      toast({
+        title: "Error",
+        description: "Please select both finance type and transaction",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const transaction = transactions?.find(t => t.id === selectedTransaction);
+    if (!transaction) {
+      toast({
+        title: "Error",
+        description: "Selected transaction not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('finance_requests')
+        .insert({
+          finance_type: selectedFinanceType,
+          transaction_id: selectedTransaction,
+          amount: transaction.payment_amount || 0,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Finance request submitted successfully",
+      });
+    } catch (error) {
+      console.error("Error submitting finance request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit finance request",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -34,7 +80,7 @@ export const FinanceRequestForm = () => {
         <label htmlFor="financeType" className="text-sm font-medium">
           Finance Type
         </label>
-        <Select>
+        <Select onValueChange={setSelectedFinanceType} value={selectedFinanceType}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select finance type" />
           </SelectTrigger>
@@ -52,7 +98,11 @@ export const FinanceRequestForm = () => {
         <label htmlFor="transaction" className="text-sm font-medium">
           Select Transaction
         </label>
-        <Select disabled={isLoading}>
+        <Select 
+          disabled={isLoading} 
+          onValueChange={setSelectedTransaction}
+          value={selectedTransaction}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={isLoading ? "Loading transactions..." : "Select transaction"} />
           </SelectTrigger>

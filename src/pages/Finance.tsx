@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { PreviewDialog } from "@/components/transactions/previews/PreviewDialog";
 import { FinanceRequestForm } from "@/components/finance/FinanceRequestForm";
+import { FinanceRequestsTable } from "@/components/finance/FinanceRequestsTable";
 
 export default function Finance() {
   console.log("Finance page rendered");
@@ -117,23 +118,15 @@ export default function Finance() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Requests</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button 
-              className="bg-black hover:bg-black/90"
-              onClick={() => setIsRequestFinanceOpen(true)}
-            >
-              Request Finance
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => console.log("Request eBoL holdership clicked")}
-            >
-              Request eBoL holdership
-            </Button>
-          </div>
+          <Button 
+            className="bg-black hover:bg-black/90"
+            onClick={() => setIsRequestFinanceOpen(true)}
+          >
+            Request Finance
+          </Button>
         </CardHeader>
         <CardContent>
-          <p>Financial information will be displayed here.</p>
+          <FinanceRequestsTable />
         </CardContent>
       </Card>
 

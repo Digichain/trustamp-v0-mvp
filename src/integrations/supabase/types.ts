@@ -137,6 +137,47 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_requests: {
+        Row: {
+          amount: number
+          created_at: string | null
+          finance_type: string
+          id: string
+          status: string
+          transaction_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          finance_type: string
+          id?: string
+          status?: string
+          transaction_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          finance_type?: string
+          id?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_documents: {
         Row: {
           bill_from: Json | null
