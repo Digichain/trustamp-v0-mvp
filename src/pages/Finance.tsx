@@ -118,12 +118,20 @@ export default function Finance() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Requests</CardTitle>
-          <Button 
-            className="bg-black hover:bg-black/90"
-            onClick={() => setIsRequestFinanceOpen(true)}
-          >
-            Request Finance
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => console.log("View all requests")}
+            >
+              View All Requests
+            </Button>
+            <Button 
+              className="bg-black hover:bg-black/90"
+              onClick={() => setIsRequestFinanceOpen(true)}
+            >
+              Request Finance
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <FinanceRequestsTable />

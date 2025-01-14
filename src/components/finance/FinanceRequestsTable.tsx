@@ -19,6 +19,9 @@ interface FinanceRequest {
   amount: number;
   status: string;
   created_at: string;
+  transaction?: {
+    title: string;
+  };
 }
 
 export const FinanceRequestsTable = () => {
@@ -28,12 +31,20 @@ export const FinanceRequestsTable = () => {
   const { data: requests, isLoading } = useQuery({
     queryKey: ["finance-requests"],
     queryFn: async () => {
+      console.log("Fetching finance requests...");
       const { data, error } = await supabase
         .from('finance_requests')
-        .select('*')
+        .select(`
+          *,
+          transaction:transactions(title)
+        `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching finance requests:", error);
+        throw error;
+      }
+      console.log("Finance requests fetched:", data);
       return data as FinanceRequest[];
     },
   });
@@ -74,7 +85,7 @@ export const FinanceRequestsTable = () => {
         <TableRow>
           <TableHead>Date</TableHead>
           <TableHead>Type</TableHead>
-          <TableHead>Transaction ID</TableHead>
+          <TableHead>Transaction</TableHead>
           <TableHead>Amount</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -85,8 +96,8 @@ export const FinanceRequestsTable = () => {
           <TableRow key={request.id}>
             <TableCell>{format(new Date(request.created_at), 'dd MMM yyyy')}</TableCell>
             <TableCell>{request.finance_type}</TableCell>
-            <TableCell className="font-mono text-xs">
-              {request.transaction_id.slice(0, 8)}...
+            <TableCell>
+              {request.transaction?.title || 'N/A'}
             </TableCell>
             <TableCell>${request.amount.toFixed(2)}</TableCell>
             <TableCell>
