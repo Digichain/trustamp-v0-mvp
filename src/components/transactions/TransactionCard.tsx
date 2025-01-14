@@ -2,9 +2,13 @@ import { Card } from "@/components/ui/card";
 import { Transaction } from "@/types/transactions";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, MoreVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { TransactionStatus } from "./TransactionStatus";
+import { TransactionActions } from "./actions/TransactionActions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -13,6 +17,19 @@ interface TransactionCardProps {
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
   const { toast } = useToast();
+  
+  // Check if user is admin
+  const { data: session } = useQuery({
+    queryKey: ["user-session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
+    }
+  });
+
+  const isAdmin = session?.user?.email === 'digichaininnovations@gmail.com';
+  console.log("TransactionCard - Is admin:", isAdmin);
 
   const handleDownload = async (documentData: any, index: number) => {
     console.log(`TransactionCard - Handling document ${index + 1} download:`, documentData);
@@ -67,6 +84,17 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
               Payment Amount: ${transaction.payment_amount.toFixed(2)}
             </p>
           )}
+        </div>
+        <div className="flex items-center space-x-2">
+          <TransactionStatus status={transaction.status} />
+          <TransactionActions 
+            transaction={transaction}
+            onDelete={() => onDelete(transaction)}
+            documents={[
+              transaction.document1,
+              transaction.document2
+            ].filter(Boolean)}
+          />
         </div>
       </div>
 
