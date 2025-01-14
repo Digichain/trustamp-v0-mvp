@@ -81,9 +81,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           </p>
           {transaction.payment_bound && transaction.payment_amount && (
             <p className="text-sm font-medium text-green-600 mt-2">
-              {transaction.status === 'payment_made' ? 
-                `Deposit Made: $${transaction.payment_amount.toFixed(2)}` :
-                `Payment Amount: $${transaction.payment_amount.toFixed(2)}`
+              {transaction.status === 'completed' ? 
+                `Paid Out: $${transaction.payment_amount.toFixed(2)}` :
+                transaction.status === 'payment_made' ? 
+                  `Deposit Made: $${transaction.payment_amount.toFixed(2)}` :
+                  `Payment Amount: $${transaction.payment_amount.toFixed(2)}`
               }
             </p>
           )}

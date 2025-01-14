@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2, Plus, DollarSign, RefreshCw } from "lucide-react";
+import { MoreVertical, Trash2, Plus, DollarSign, RefreshCw, CheckCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -162,13 +162,36 @@ export const TransactionActions = ({
     }
   };
 
+  const handleComplete = async () => {
+    try {
+      console.log("TransactionActions - Completing transaction:", transaction.id);
+      const { error } = await supabase
+        .from('transactions')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transaction.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Transaction Completed",
+        description: "Transaction has been marked as completed",
+      });
+    } catch (error: any) {
+      console.error("Error completing transaction:", error);
+      toast({
+        title: "Completion Failed",
+        description: error.message || "Failed to complete transaction",
+        variant: "destructive",
+      });
+    }
+  };
+
   const isPaymentMade = transaction.status === 'payment_made';
   const shouldShowPayButton = transaction.payment_bound && !isPaymentMade;
   
-  // Update permission checks - admin can always delete/refresh, non-admin can only delete completed transactions
-  const canDelete = isAdmin || transaction.status === 'completed';
-  const canRefresh = isAdmin;
-
   return (
     <>
       <DropdownMenu>
@@ -195,13 +218,25 @@ export const TransactionActions = ({
           </DropdownMenuItem>
 
           {isAdmin && (
-            <DropdownMenuItem 
-              onClick={handleRefresh}
-              className="text-blue-600 focus:text-blue-600"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh Transaction
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem 
+                onClick={handleRefresh}
+                className="text-blue-600 focus:text-blue-600"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Transaction
+              </DropdownMenuItem>
+              
+              {transaction.status === 'payment_made' && (
+                <DropdownMenuItem 
+                  onClick={handleComplete}
+                  className="text-green-600 focus:text-green-600"
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Complete Transaction
+                </DropdownMenuItem>
+              )}
+            </>
           )}
           
           {(isAdmin || transaction.status === 'completed') && (
