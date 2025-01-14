@@ -1,17 +1,29 @@
 import { Navigation } from "@/components/landing/Navigation";
-import { FileUploader } from "@/components/transactions/verification/FileUploader";
-import { DocumentVerificationStatus } from "@/components/transactions/verification/DocumentVerificationStatus";
+import { FileUploader } from "@/components/onchain/FileUploader";
+import { DocumentVerificationStatus } from "@/components/onchain/DocumentVerificationStatus";
 import { useState } from "react";
+import { VerifierFactory } from "@/components/transactions/verification/verifierFactory";
 
 const VerifyOnChain = () => {
   const [file, setFile] = useState<File | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileUpload = async (uploadedFile: File) => {
-    setFile(uploadedFile);
-    setError(null);
-    setVerificationStatus(null);
+  const handleFileProcess = async (uploadedFile: File) => {
+    try {
+      setFile(uploadedFile);
+      setError(null);
+      setVerificationStatus(null);
+
+      const fileContent = await uploadedFile.text();
+      const documentData = JSON.parse(fileContent);
+
+      const verificationResult = await VerifierFactory.verifyDocument(documentData);
+      setVerificationStatus(verificationResult.details);
+    } catch (err) {
+      console.error("Error processing file:", err);
+      setError(err instanceof Error ? err.message : "Failed to process file");
+    }
   };
 
   return (
@@ -26,7 +38,7 @@ const VerifyOnChain = () => {
             </p>
 
             <div className="space-y-6">
-              <FileUploader onFileUpload={handleFileUpload} />
+              <FileUploader onFileProcess={handleFileProcess} />
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -35,7 +47,15 @@ const VerifyOnChain = () => {
               )}
 
               {verificationStatus && (
-                <DocumentVerificationStatus status={verificationStatus} />
+                <DocumentVerificationStatus 
+                  verificationDetails={verificationStatus}
+                  onReset={() => {
+                    setFile(null);
+                    setVerificationStatus(null);
+                    setError(null);
+                  }}
+                  documentPreview={null}
+                />
               )}
             </div>
           </div>
