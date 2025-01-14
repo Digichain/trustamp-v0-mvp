@@ -23,7 +23,7 @@ const getInfuraApiKey = async (): Promise<string> => {
       .from('secrets')
       .select('value')
       .eq('name', 'INFURA_API_KEY')
-      .single();
+      .maybeSingle();
     
     if (secretError) {
       console.error("Error fetching Infura API key:", secretError);
@@ -32,7 +32,7 @@ const getInfuraApiKey = async (): Promise<string> => {
 
     if (!secretData?.value) {
       console.error("No Infura API key found in secrets");
-      throw new Error("Infura API key not found");
+      throw new Error("Infura API key not found in secrets. Please ensure it is configured.");
     }
 
     console.log("Successfully retrieved Infura API key");
