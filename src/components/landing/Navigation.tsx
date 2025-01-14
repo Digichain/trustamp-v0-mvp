@@ -45,6 +45,9 @@ export const Navigation = () => {
             <Link to="/auth">
               <Button>Sign Up</Button>
             </Link>
+            <Link to="/verify-onchain">
+              <Button className="bg-black hover:bg-black/90">Verify</Button>
+            </Link>
           </div>
         </div>
       </div>
