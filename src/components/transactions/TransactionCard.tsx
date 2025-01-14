@@ -26,14 +26,14 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const blob = new Blob([JSON.stringify(documentData, null, 2)], {
+      const blob = new Blob([JSON.stringify(documentData.document, null, 2)], {
         type: "application/json",
       });
       const url = window.URL.createObjectURL(blob);
       
       const a = document.createElement('a');
       a.href = url;
-      a.download = `document_${index + 1}.json`;
+      a.download = `${documentData.title || `document_${index + 1}`}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -70,7 +70,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           <div className="space-y-2">
             {transaction.document1 && (
               <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                <span className="text-sm">Document 1</span>
+                <span className="text-sm">{transaction.document1.title}</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -82,7 +82,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
             )}
             {transaction.document2 && (
               <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                <span className="text-sm">Document 2</span>
+                <span className="text-sm">{transaction.document2.title}</span>
                 <Button
                   variant="ghost"
                   size="sm"
