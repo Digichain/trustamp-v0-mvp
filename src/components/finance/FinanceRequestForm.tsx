@@ -11,10 +11,16 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const FinanceRequestForm = () => {
+interface FinanceRequestFormProps {
+  onClose: () => void;
+}
+
+export const FinanceRequestForm = ({ onClose }: FinanceRequestFormProps) => {
   console.log("FinanceRequestForm - Rendering");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { transactions, isLoading } = useTransactions();
   const [agreed, setAgreed] = useState(false);
   const [selectedFinanceType, setSelectedFinanceType] = useState<string>("");
@@ -72,10 +78,16 @@ export const FinanceRequestForm = () => {
 
       if (error) throw error;
 
+      // Invalidate and refetch finance requests
+      await queryClient.invalidateQueries({ queryKey: ["finance-requests"] });
+
       toast({
         title: "Success",
         description: "Finance request submitted successfully",
       });
+
+      // Close the dialog
+      onClose();
     } catch (error) {
       console.error("Error submitting finance request:", error);
       toast({

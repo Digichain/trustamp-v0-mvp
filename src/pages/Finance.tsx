@@ -136,7 +136,7 @@ export default function Finance() {
         isOpen={isRequestFinanceOpen}
         onOpenChange={setIsRequestFinanceOpen}
       >
-        <FinanceRequestForm />
+        <FinanceRequestForm onClose={() => setIsRequestFinanceOpen(false)} />
       </PreviewDialog>
     </div>
   );
