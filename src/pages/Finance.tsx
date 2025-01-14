@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { PreviewDialog } from "@/components/transactions/previews/PreviewDialog";
+import { FinanceRequestForm } from "@/components/finance/FinanceRequestForm";
 
 export default function Finance() {
   console.log("Finance page rendered");
@@ -118,7 +119,7 @@ export default function Finance() {
           <CardTitle>Requests</CardTitle>
           <div className="flex items-center gap-2">
             <Button 
-              variant="outline"
+              className="bg-black hover:bg-black/90"
               onClick={() => setIsRequestFinanceOpen(true)}
             >
               Request Finance
@@ -142,10 +143,7 @@ export default function Finance() {
         isOpen={isRequestFinanceOpen}
         onOpenChange={setIsRequestFinanceOpen}
       >
-        <div>
-          {/* Dialog content will be added later */}
-          <p>Request Finance form will be added here.</p>
-        </div>
+        <FinanceRequestForm />
       </PreviewDialog>
     </div>
   );
