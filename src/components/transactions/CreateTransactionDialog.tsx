@@ -48,9 +48,9 @@ export const CreateTransactionDialog = () => {
         }
 
         const document1Data = {
-          ...documentVersion,
           id: firstDoc.id,
-          title: firstDoc.title
+          title: firstDoc.title,
+          ...documentVersion
         };
 
         // Create the transaction with the first document
@@ -88,9 +88,9 @@ export const CreateTransactionDialog = () => {
 
           if (secondDocVersion) {
             const document2Data = {
-              ...secondDocVersion,
               id: selectedDocuments[1].id,
-              title: selectedDocuments[1].title
+              title: selectedDocuments[1].title,
+              ...secondDocVersion
             };
 
             const { error: updateError } = await supabase
