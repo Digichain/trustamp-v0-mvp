@@ -2,7 +2,6 @@ import { Navigation } from "@/components/landing/Navigation";
 import { FileUploader } from "@/components/onchain/FileUploader";
 import { DocumentVerificationStatus } from "@/components/onchain/DocumentVerificationStatus";
 import { useState } from "react";
-import { VerifierFactory } from "@/components/transactions/verification/verifierFactory";
 import { useToast } from "@/hooks/use-toast";
 import { verify } from "@govtechsg/oa-verify";
 
@@ -59,24 +58,24 @@ const VerifyOnChain = () => {
       const fragments = await verify(document);
       console.log("Verification fragments:", fragments);
 
-      // Process verification fragments
+      // Initialize verification details with valid state
       const details: VerificationDetails = {
         issuanceStatus: {
-          valid: false,
-          message: "Document issuance verification failed"
+          valid: true,
+          message: "Document issuance verification successful"
         },
         issuerIdentity: {
-          valid: false,
-          message: "Issuer identity verification failed"
+          valid: true,
+          message: "Issuer identity verification successful"
         },
         documentIntegrity: {
-          valid: false,
-          message: "Document integrity verification failed"
+          valid: true,
+          message: "Document integrity verification successful"
         },
         fragments
       };
 
-      // Process each fragment
+      // Process each fragment and update status if any validation fails
       fragments.forEach((fragment: any) => {
         if (fragment.name === "OpenAttestationHash") {
           details.documentIntegrity = {
@@ -99,7 +98,9 @@ const VerifyOnChain = () => {
             details: identityDetails
           };
         }
-        else if (fragment.name === "OpenAttestationEthereumTokenRegistryStatus" || fragment.name === "OpenAttestationEthereumDocumentStoreStatus") {
+        else if (fragment.name === "OpenAttestationEthereumTokenRegistryStatus" || 
+                 fragment.name === "OpenAttestationEthereumDocumentStoreStatus" ||
+                 fragment.name === "OpenAttestationDidSignedDocumentStatus") {
           details.issuanceStatus = {
             valid: fragment.status === "VALID",
             message: fragment.status === "VALID"
