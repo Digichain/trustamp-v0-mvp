@@ -6,8 +6,28 @@ import { VerifierFactory } from "@/components/transactions/verification/verifier
 import { useToast } from "@/hooks/use-toast";
 import { verify } from "@govtechsg/oa-verify";
 
+interface VerificationDetails {
+  issuanceStatus: {
+    valid: boolean;
+    message: string;
+  };
+  issuerIdentity: {
+    valid: boolean;
+    message: string;
+    details?: {
+      name?: string;
+      domain?: string;
+    };
+  };
+  documentIntegrity: {
+    valid: boolean;
+    message: string;
+  };
+  fragments?: any[];
+}
+
 const VerifyOnChain = () => {
-  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
+  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: VerificationDetails } | null>(null);
   const { toast } = useToast();
 
   const resetVerification = () => {
@@ -40,7 +60,7 @@ const VerifyOnChain = () => {
       console.log("Verification fragments:", fragments);
 
       // Process verification fragments
-      const details = {
+      const details: VerificationDetails = {
         issuanceStatus: {
           valid: false,
           message: "Document issuance verification failed"
@@ -67,12 +87,16 @@ const VerifyOnChain = () => {
           };
         }
         else if (fragment.name === "OpenAttestationDnsTxt" || fragment.name === "OpenAttestationDnsDid") {
+          const identityDetails = fragment.data?.[0] ? {
+            domain: fragment.data[0].location
+          } : undefined;
+
           details.issuerIdentity = {
             valid: fragment.status === "VALID",
             message: fragment.status === "VALID"
               ? "Issuer identity verified successfully"
               : "Issuer identity verification failed",
-            details: fragment.data
+            details: identityDetails
           };
         }
         else if (fragment.name === "OpenAttestationEthereumTokenRegistryStatus" || fragment.name === "OpenAttestationEthereumDocumentStoreStatus") {
