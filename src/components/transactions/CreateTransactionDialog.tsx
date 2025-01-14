@@ -19,6 +19,7 @@ export const CreateTransactionDialog = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<DocumentWithTitle[]>([]);
   const [isPaymentBound, setIsPaymentBound] = useState(false);
+  const [transactionTitle, setTransactionTitle] = useState("");
   const { toast } = useToast();
 
   const handleCreateTransaction = async () => {
@@ -60,7 +61,8 @@ export const CreateTransactionDialog = () => {
             payment_bound: isPaymentBound,
             document1: document1Data,
             recipient1_id: selectedUserIds[0] || null,
-            recipient2_id: selectedUserIds[1] || null
+            recipient2_id: selectedUserIds[1] || null,
+            title: transactionTitle || "Untitled Transaction"
           })
           .select()
           .single();
@@ -176,6 +178,15 @@ export const CreateTransactionDialog = () => {
           <DialogTitle>Create New Transaction</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Transaction Name</label>
+            <Input
+              placeholder="Enter transaction name"
+              value={transactionTitle}
+              onChange={(e) => setTransactionTitle(e.target.value)}
+            />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium">Recipients</label>
             <div className="space-y-2">
