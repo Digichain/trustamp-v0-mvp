@@ -3,26 +3,70 @@ import { FileUploader } from "@/components/onchain/FileUploader";
 import { DocumentVerificationStatus } from "@/components/onchain/DocumentVerificationStatus";
 import { useState } from "react";
 import { VerifierFactory } from "@/components/transactions/verification/verifierFactory";
+import { useToast } from "@/hooks/use-toast";
 
 const VerifyOnChain = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
+  const { toast } = useToast();
 
-  const handleFileProcess = async (uploadedFile: File) => {
+  const resetVerification = () => {
+    setVerificationResult(null);
+  };
+
+  const processFile = async (file: File) => {
     try {
-      setFile(uploadedFile);
-      setError(null);
-      setVerificationStatus(null);
+      console.log("Starting file processing:", file.name);
+      const fileContent = await file.text();
+      console.log("File content read successfully");
+      
+      let document;
+      try {
+        document = JSON.parse(fileContent);
+        console.log("Document parsed successfully:", document);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        toast({
+          title: "Invalid JSON",
+          description: "The file contains invalid JSON data",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      const fileContent = await uploadedFile.text();
-      const documentData = JSON.parse(fileContent);
+      console.log("Starting document verification");
+      const result = await VerifierFactory.verifyDocument(document);
+      console.log("Verification result:", result);
 
-      const verificationResult = await VerifierFactory.verifyDocument(documentData);
-      setVerificationStatus(verificationResult.details);
-    } catch (err) {
-      console.error("Error processing file:", err);
-      setError(err instanceof Error ? err.message : "Failed to process file");
+      // Get the document data, handling both wrapped and unwrapped formats
+      const documentData = document.data || document;
+      console.log("Document data for verification:", documentData);
+
+      setVerificationResult({
+        isValid: result.isValid,
+        document: documentData,
+        details: result.details
+      });
+
+      if (result.isValid) {
+        toast({
+          title: "Document Valid",
+          description: "Document verified successfully"
+        });
+      } else {
+        toast({
+          title: "Document Invalid",
+          description: result.error || "Verification failed",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error("Error processing file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process document",
+        variant: "destructive"
+      });
     }
   };
 
@@ -38,22 +82,14 @@ const VerifyOnChain = () => {
             </p>
 
             <div className="space-y-6">
-              <FileUploader onFileProcess={handleFileProcess} />
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                  {error}
-                </div>
+              {!verificationResult && (
+                <FileUploader onFileProcess={processFile} />
               )}
 
-              {verificationStatus && (
+              {verificationResult && (
                 <DocumentVerificationStatus 
-                  verificationDetails={verificationStatus}
-                  onReset={() => {
-                    setFile(null);
-                    setVerificationStatus(null);
-                    setError(null);
-                  }}
+                  verificationDetails={verificationResult.details}
+                  onReset={resetVerification}
                   documentPreview={null}
                 />
               )}
