@@ -50,12 +50,24 @@ export const FinanceRequestForm = () => {
     }
 
     try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to submit a finance request",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('finance_requests')
         .insert({
           finance_type: selectedFinanceType,
           transaction_id: selectedTransaction,
-          amount: transaction.payment_amount || 0,
+          amount: Number(transaction.payment_amount) || 0, // Convert to number explicitly
+          user_id: session.user.id // Add the user_id from the session
         });
 
       if (error) throw error;
