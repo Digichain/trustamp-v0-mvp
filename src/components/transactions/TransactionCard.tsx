@@ -10,15 +10,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface DocumentData {
   id: string;
-  title: string;
-  document_data: {
-    [key: string]: any;
-    title?: string;
-    invoiceDetails?: {
-      total?: number;
-    };
-    total?: number;
-  };
+  document_data: any; // Generic JSON data
 }
 
 interface TransactionCardProps {
@@ -28,7 +20,6 @@ interface TransactionCardProps {
 
 export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps) => {
   const [documents, setDocuments] = useState<DocumentData[]>([]);
-  const [amount, setAmount] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,28 +52,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
 
       const formattedDocs = transactionDocs.map(td => ({
         id: td.document_id,
-        title: td.document_data?.title || `Document ${td.document_id}`,
         document_data: td.document_data || {}
       }));
 
       console.log("TransactionCard - Formatted documents:", formattedDocs);
       setDocuments(formattedDocs);
-
-      // Find invoice document and extract amount
-      const invoiceDoc = formattedDocs.find(doc => {
-        const docData = doc.document_data;
-        return docData && (
-          (docData.invoiceDetails?.total !== undefined) ||
-          (docData.total !== undefined)
-        );
-      });
-      
-      if (invoiceDoc?.document_data) {
-        const docData = invoiceDoc.document_data;
-        const total = docData.invoiceDetails?.total ?? docData.total ?? 0;
-        console.log("TransactionCard - Found invoice amount:", total);
-        setAmount(total);
-      }
     };
 
     fetchDocuments();
@@ -91,8 +65,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   const handleDownload = async (document: DocumentData) => {
     console.log("TransactionCard - Handling document download:", document);
     try {
-      const documentData = document.document_data;
-      if (!documentData) {
+      if (!document.document_data) {
         console.error("No document data available for download");
         toast({
           title: "Error",
@@ -102,14 +75,14 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const blob = new Blob([JSON.stringify(documentData, null, 2)], {
+      const blob = new Blob([JSON.stringify(document.document_data, null, 2)], {
         type: "application/json",
       });
       const url = window.URL.createObjectURL(blob);
       
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${document.title || 'document'}.json`;
+      a.download = `document_${document.id}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -137,9 +110,6 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           <p className="text-sm text-gray-500">
             Created {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
           </p>
-          {amount !== null && (
-            <p className="text-sm font-medium mt-1">Amount: ${amount}</p>
-          )}
         </div>
       </div>
 
@@ -147,7 +117,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         <h4 className="text-sm font-medium">Attached Documents:</h4>
         {documents.map((doc) => (
           <div key={doc.id} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-            <span className="text-sm">{doc.title}</span>
+            <span className="text-sm">Document {doc.id}</span>
             <Button
               variant="ghost"
               size="sm"
