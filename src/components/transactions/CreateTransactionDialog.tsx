@@ -31,26 +31,21 @@ export const CreateTransactionDialog = () => {
       if (firstDoc) {
         const { data: documentData, error: docError } = await supabase
           .from("documents")
-          .select("*, raw_document, wrapped_document, signed_document")
+          .select("signed_document")
           .eq("id", firstDoc.id)
           .single();
 
         if (docError) throw docError;
 
-        // Get the most recent version of the document
-        const documentVersion = documentData.signed_document || 
-                              documentData.wrapped_document || 
-                              documentData.raw_document;
-
-        if (!documentVersion) {
-          console.error("No document version available");
-          throw new Error("No document version available");
+        if (!documentData.signed_document) {
+          console.error("No signed document available");
+          throw new Error("Document must be signed before it can be attached to a transaction");
         }
 
         const document1Data = {
           id: firstDoc.id,
           title: firstDoc.title,
-          ...documentVersion
+          document: documentData.signed_document
         };
 
         // Create the transaction with the first document
@@ -76,30 +71,29 @@ export const CreateTransactionDialog = () => {
         if (selectedDocuments[1]) {
           const { data: secondDocData, error: secondDocError } = await supabase
             .from("documents")
-            .select("*, raw_document, wrapped_document, signed_document")
+            .select("signed_document")
             .eq("id", selectedDocuments[1].id)
             .single();
 
           if (secondDocError) throw secondDocError;
 
-          const secondDocVersion = secondDocData.signed_document || 
-                                 secondDocData.wrapped_document || 
-                                 secondDocData.raw_document;
-
-          if (secondDocVersion) {
-            const document2Data = {
-              id: selectedDocuments[1].id,
-              title: selectedDocuments[1].title,
-              ...secondDocVersion
-            };
-
-            const { error: updateError } = await supabase
-              .from("transactions")
-              .update({ document2: document2Data })
-              .eq("id", transaction.id);
-
-            if (updateError) throw updateError;
+          if (!secondDocData.signed_document) {
+            console.error("No signed document available for second document");
+            throw new Error("Second document must be signed before it can be attached");
           }
+
+          const document2Data = {
+            id: selectedDocuments[1].id,
+            title: selectedDocuments[1].title,
+            document: secondDocData.signed_document
+          };
+
+          const { error: updateError } = await supabase
+            .from("transactions")
+            .update({ document2: document2Data })
+            .eq("id", transaction.id);
+
+          if (updateError) throw updateError;
         }
 
         // Create notification recipients
