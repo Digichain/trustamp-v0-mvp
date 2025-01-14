@@ -11,11 +11,14 @@ import { cn } from "@/lib/utils";
 export default function Reports() {
   console.log("Reports page rendered");
   
-  const [date, setDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<{
+    from?: Date;
+    to?: Date;
+  }>({});
   const [selectedPeriod, setSelectedPeriod] = useState<string>();
 
   const handleCreateReport = () => {
-    console.log("Creating report with date:", date);
+    console.log("Creating report with date range:", dateRange);
     console.log("Selected period:", selectedPeriod);
     // Implementation for report generation will go here
   };
@@ -44,29 +47,54 @@ export default function Reports() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Select Date</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarRange className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <label className="text-sm font-medium mb-2 block">Select Date Range</label>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange.from && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarRange className="mr-2 h-4 w-4" />
+                        {dateRange.from ? format(dateRange.from, "PPP") : "From date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateRange.from}
+                        onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange.to && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarRange className="mr-2 h-4 w-4" />
+                        {dateRange.to ? format(dateRange.to, "PPP") : "To date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateRange.to}
+                        onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               
               <div className="flex-1">
@@ -89,7 +117,7 @@ export default function Reports() {
               className="w-full sm:w-auto"
               onClick={handleCreateReport}
             >
-              Create Report
+              Generate Report
             </Button>
           </div>
         </CardContent>
