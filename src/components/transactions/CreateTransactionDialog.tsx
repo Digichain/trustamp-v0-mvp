@@ -26,52 +26,13 @@ export const CreateTransactionDialog = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
-      // Create the transaction
-      const { data: transaction, error: transactionError } = await supabase
-        .from("transactions")
-        .insert({
-          user_id: user.id,
-          status: "pending",
-          transaction_type: "trade",
-          transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
-          network: "ethereum",
-          payment_bound: isPaymentBound
-        })
-        .select()
-        .single();
-
-      if (transactionError) throw transactionError;
-
-      // Create notification recipients
-      for (const recipientId of selectedUserIds) {
-        const { error: notificationError } = await supabase
-          .from("notification_recipients")
-          .insert({
-            transaction_id: transaction.id,
-            recipient_user_id: recipientId
-          });
-
-        if (notificationError) throw notificationError;
-
-        // Create notification
-        const { error: notifError } = await supabase
-          .from("notifications")
-          .insert({
-            recipient_user_id: recipientId,
-            transaction_id: transaction.id,
-            type: "transaction_created",
-            message: "You have been added to a new transaction"
-          });
-
-        if (notifError) throw notifError;
-      }
-
-      // Create transaction documents
-      for (const doc of selectedDocuments) {
+      // Get document data for the first document
+      const firstDoc = selectedDocuments[0];
+      if (firstDoc) {
         const { data: documentData, error: docError } = await supabase
           .from("documents")
           .select("*, raw_document, wrapped_document, signed_document")
-          .eq("id", doc.id)
+          .eq("id", firstDoc.id)
           .single();
 
         if (docError) throw docError;
@@ -83,31 +44,95 @@ export const CreateTransactionDialog = () => {
 
         if (!documentVersion) {
           console.error("No document version available");
-          continue;
+          throw new Error("No document version available");
         }
 
-        const documentDataToStore = {
+        const document1Data = {
           ...documentVersion,
-          title: doc.title
+          id: firstDoc.id,
+          title: firstDoc.title
         };
 
-        const { error: documentError } = await supabase
-          .from("transaction_documents")
+        // Create the transaction with the first document
+        const { data: transaction, error: transactionError } = await supabase
+          .from("transactions")
           .insert({
-            transaction_id: transaction.id,
-            document_id: doc.id,
-            document_data: documentDataToStore
-          });
+            user_id: user.id,
+            status: "pending",
+            transaction_type: "trade",
+            transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
+            network: "ethereum",
+            payment_bound: isPaymentBound,
+            document1: document1Data,
+            recipient1_id: selectedUserIds[0] || null,
+            recipient2_id: selectedUserIds[1] || null
+          })
+          .select()
+          .single();
 
-        if (documentError) throw documentError;
+        if (transactionError) throw transactionError;
+
+        // If there's a second document, update the transaction
+        if (selectedDocuments[1]) {
+          const { data: secondDocData, error: secondDocError } = await supabase
+            .from("documents")
+            .select("*, raw_document, wrapped_document, signed_document")
+            .eq("id", selectedDocuments[1].id)
+            .single();
+
+          if (secondDocError) throw secondDocError;
+
+          const secondDocVersion = secondDocData.signed_document || 
+                                 secondDocData.wrapped_document || 
+                                 secondDocData.raw_document;
+
+          if (secondDocVersion) {
+            const document2Data = {
+              ...secondDocVersion,
+              id: selectedDocuments[1].id,
+              title: selectedDocuments[1].title
+            };
+
+            const { error: updateError } = await supabase
+              .from("transactions")
+              .update({ document2: document2Data })
+              .eq("id", transaction.id);
+
+            if (updateError) throw updateError;
+          }
+        }
+
+        // Create notification recipients
+        for (const recipientId of selectedUserIds) {
+          const { error: notificationError } = await supabase
+            .from("notification_recipients")
+            .insert({
+              transaction_id: transaction.id,
+              recipient_user_id: recipientId
+            });
+
+          if (notificationError) throw notificationError;
+
+          // Create notification
+          const { error: notifError } = await supabase
+            .from("notifications")
+            .insert({
+              recipient_user_id: recipientId,
+              transaction_id: transaction.id,
+              type: "transaction_created",
+              message: "You have been added to a new transaction"
+            });
+
+          if (notifError) throw notifError;
+        }
+
+        console.log("Transaction created successfully:", transaction);
+        toast({
+          title: "Success",
+          description: "Transaction created successfully",
+        });
+        setIsOpen(false);
       }
-
-      console.log("Transaction created successfully:", transaction);
-      toast({
-        title: "Success",
-        description: "Transaction created successfully",
-      });
-      setIsOpen(false);
     } catch (error: any) {
       console.error("Error creating transaction:", error);
       toast({

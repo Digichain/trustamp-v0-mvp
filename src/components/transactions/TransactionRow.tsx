@@ -4,8 +4,6 @@ import { TransactionStatus } from "./TransactionStatus";
 import { TransactionActions } from "./actions/TransactionActions";
 import { Transaction } from "@/types/transactions";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 interface TransactionRowProps {
   transaction: Transaction;
@@ -16,25 +14,10 @@ export const TransactionRow = ({
   transaction, 
   onDelete 
 }: TransactionRowProps) => {
-  const { data: documents } = useQuery({
-    queryKey: ["transaction-documents", transaction.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("transaction_documents")
-        .select(`
-          document_id,
-          documents:document_id (
-            id,
-            title,
-            status
-          )
-        `)
-        .eq("transaction_id", transaction.id);
-
-      if (error) throw error;
-      return data;
-    }
-  });
+  const documents = [
+    transaction.document1,
+    transaction.document2
+  ].filter(Boolean);
 
   return (
     <TableRow>
@@ -59,9 +42,9 @@ export const TransactionRow = ({
         )}
       </TableCell>
       <TableCell>
-        {documents?.map((doc: any) => (
-          <Badge key={doc.document_id} variant="outline" className="mr-2">
-            {doc.documents.title || `Document ${doc.document_id}`}
+        {documents.map((doc: any) => (
+          <Badge key={doc.id} variant="outline" className="mr-2">
+            {doc.title || `Document ${doc.id}`}
           </Badge>
         ))}
       </TableCell>
@@ -69,7 +52,7 @@ export const TransactionRow = ({
         <TransactionActions
           transaction={transaction}
           onDelete={() => onDelete(transaction)}
-          documents={documents?.map((d: any) => d.documents) || []}
+          documents={documents}
         />
       </TableCell>
     </TableRow>
