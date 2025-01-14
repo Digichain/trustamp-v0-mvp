@@ -13,6 +13,7 @@ import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
 import VerifyDocument from '@/pages/VerifyDocument';
+import VerifyOnChain from '@/pages/VerifyOnChain';
 import Finance from '@/pages/Finance';
 import Compliance from '@/pages/Compliance';
 import Reports from '@/pages/Reports';
@@ -93,6 +94,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/verify-onchain" element={<VerifyOnChain />} />
               <Route
                 path="/dashboard"
                 element={
