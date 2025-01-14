@@ -1,125 +1,45 @@
-import { useState } from 'react';
-import { FileUploader } from '@/components/transactions/verification/FileUploader';
-import { VerifierFactory } from '@/components/transactions/verification/verifierFactory';
-import { useToast } from '@/hooks/use-toast';
-import { DocumentVerificationStatus } from '@/components/transactions/verification/DocumentVerificationStatus';
-import { registry } from '@/components/transactions/previews/TemplateRegistry';
+import { Navigation } from "@/components/landing/Navigation";
+import { FileUploader } from "@/components/transactions/verification/FileUploader";
+import { DocumentVerificationStatus } from "@/components/transactions/verification/DocumentVerificationStatus";
+import { useState } from "react";
 
 const VerifyOnChain = () => {
-  const [verificationResult, setVerificationResult] = useState<{ isValid: boolean; document: any; details?: any } | null>(null);
-  const { toast } = useToast();
+  const [file, setFile] = useState<File | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const resetVerification = () => {
-    setVerificationResult(null);
-  };
-
-  const processFile = async (file: File) => {
-    try {
-      console.log("Starting file processing:", file.name);
-      const fileContent = await file.text();
-      console.log("File content read successfully");
-      
-      let document;
-      try {
-        document = JSON.parse(fileContent);
-        console.log("Document parsed successfully:", document);
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-        toast({
-          title: "Invalid JSON",
-          description: "The file contains invalid JSON data",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log("Starting document verification");
-      const result = await VerifierFactory.verifyDocument(document);
-      console.log("Verification result:", result);
-
-      // Get the document data, handling both wrapped and unwrapped formats
-      const documentData = document.data || document;
-      console.log("Document data for preview:", documentData);
-
-      setVerificationResult({
-        isValid: result.isValid,
-        document: documentData,
-        details: result.details
-      });
-
-      if (result.isValid) {
-        toast({
-          title: "Document Valid",
-          description: "Document verified successfully"
-        });
-      } else {
-        toast({
-          title: "Document Invalid",
-          description: result.error || "Verification failed",
-          variant: "destructive"
-        });
-      }
-
-    } catch (error) {
-      console.error("Error processing file:", error);
-      toast({
-        title: "Error",
-        description: "Failed to process document",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const renderPreview = () => {
-    if (!verificationResult?.document || !verificationResult.isValid) {
-      console.log("Preview not shown - verification failed or no document");
-      return null;
-    }
-
-    const doc = verificationResult.document;
-    console.log("Processing document for template:", doc);
-
-    let templateName;
-    if (doc.invoiceDetails || doc.billFrom) {
-      templateName = "INVOICE";
-    } else if (doc.billOfLadingDetails || doc.blNumber) {
-      templateName = "BILL_OF_LADING";
-    }
-
-    console.log("Detected template name:", templateName);
-
-    if (!templateName || !registry[templateName]) {
-      console.warn("Unknown document template:", templateName);
-      return null;
-    }
-
-    const Template = registry[templateName][0].template;
-    return <Template document={{ data: doc }} />;
+  const handleFileUpload = async (uploadedFile: File) => {
+    setFile(uploadedFile);
+    setError(null);
+    setVerificationStatus(null);
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Verify Document On-chain</h1>
-          <p className="mt-2 text-gray-600">
-            Upload a JSON document to verify its authenticity and integrity on the blockchain.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      <div className="container mx-auto px-4 pt-24">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+            <h1 className="text-2xl font-bold mb-2">Verify Document On-Chain</h1>
+            <p className="text-gray-600 mb-6">
+              Upload a document to verify its authenticity and integrity on the blockchain.
+            </p>
 
-        {!verificationResult && (
-          <FileUploader onFileProcess={processFile} />
-        )}
+            <div className="space-y-6">
+              <FileUploader onFileUpload={handleFileUpload} />
 
-        {verificationResult && (
-          <div className="space-y-8">
-            <DocumentVerificationStatus
-              verificationDetails={verificationResult.details}
-              onReset={resetVerification}
-              documentPreview={verificationResult.isValid ? renderPreview() : null}
-            />
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
+              {verificationStatus && (
+                <DocumentVerificationStatus status={verificationStatus} />
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
