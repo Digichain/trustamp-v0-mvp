@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { ProviderDetails } from "@govtechsg/oa-verify";
 
 export interface ProviderConfig {
   network: "mainnet" | "sepolia" | "local";
@@ -11,28 +10,23 @@ export interface VerificationConfig {
   provider: ProviderConfig;
 }
 
-interface Secret {
-  name: string;
-  value: string;
-}
-
 const getInfuraApiKey = async (): Promise<string> => {
   try {
     console.log("Fetching Infura API key from Supabase secrets...");
-    const { data: secretData, error: secretError } = await supabase
+    const { data: secretData, error } = await supabase
       .from('secrets')
       .select('value')
       .eq('name', 'INFURA_API_KEY')
-      .single();
+      .maybeSingle();
     
-    if (secretError) {
-      console.error("Error fetching Infura API key:", secretError);
+    if (error) {
+      console.error("Error fetching Infura API key:", error);
       throw new Error("Failed to fetch Infura API key");
     }
 
-    if (!secretData?.value) {
+    if (!secretData) {
       console.error("No Infura API key found in secrets");
-      throw new Error("Infura API key not found");
+      throw new Error("Infura API key not found in secrets");
     }
 
     console.log("Successfully retrieved Infura API key");
