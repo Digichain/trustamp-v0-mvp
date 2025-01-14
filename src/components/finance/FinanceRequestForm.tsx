@@ -5,9 +5,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTransactions } from "@/hooks/useTransactions";
 
 export const FinanceRequestForm = () => {
   console.log("FinanceRequestForm - Rendering");
+  const { transactions, isLoading } = useTransactions();
 
   const financeTypes = [
     "Accounts Receivable (Invoice)",
@@ -33,6 +35,29 @@ export const FinanceRequestForm = () => {
                 {type}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="transaction" className="text-sm font-medium">
+          Select Transaction
+        </label>
+        <Select disabled={isLoading}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={isLoading ? "Loading transactions..." : "Select transaction"} />
+          </SelectTrigger>
+          <SelectContent>
+            {transactions?.map((transaction) => (
+              <SelectItem key={transaction.id} value={transaction.id}>
+                {transaction.title || `Transaction ${transaction.id.slice(0, 8)}`}
+              </SelectItem>
+            ))}
+            {!isLoading && (!transactions || transactions.length === 0) && (
+              <SelectItem value="no-transactions" disabled>
+                No transactions available
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>
