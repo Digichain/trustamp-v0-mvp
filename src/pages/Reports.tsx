@@ -19,10 +19,6 @@ export default function Reports() {
     from?: Date;
     to?: Date;
   }>({});
-  const [complianceDateRange, setComplianceDateRange] = useState<{
-    from?: Date;
-    to?: Date;
-  }>({});
   const [tradeAuditPeriod, setTradeAuditPeriod] = useState<string>();
   const [accountStatementPeriod, setAccountStatementPeriod] = useState<string>();
   const [compliancePeriod, setCompliancePeriod] = useState<string>();
@@ -38,8 +34,7 @@ export default function Reports() {
   };
 
   const handleGenerateComplianceReport = () => {
-    console.log("Creating compliance report with date range:", complianceDateRange);
-    console.log("Selected period:", compliancePeriod);
+    console.log("Creating compliance report with period:", compliancePeriod);
   };
 
   const ReportSection = ({ 
@@ -48,14 +43,18 @@ export default function Reports() {
     setDateRange, 
     period, 
     setPeriod, 
-    onGenerate 
+    onGenerate,
+    showDatePickers = true,
+    periodLabel = "Or Select Period"
   }: { 
     title: string;
-    dateRange: { from?: Date; to?: Date };
-    setDateRange: (range: { from?: Date; to?: Date }) => void;
+    dateRange?: { from?: Date; to?: Date };
+    setDateRange?: (range: { from?: Date; to?: Date }) => void;
     period?: string;
     setPeriod: (value: string) => void;
     onGenerate: () => void;
+    showDatePickers?: boolean;
+    periodLabel?: string;
   }) => (
     <Card>
       <CardHeader>
@@ -67,59 +66,61 @@ export default function Reports() {
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Select Date Range</label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dateRange.from && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarRange className="mr-2 h-4 w-4" />
-                      {dateRange.from ? format(dateRange.from, "PPP") : "From date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateRange.from}
-                      onSelect={(date) => setDateRange({ ...dateRange, from: date })}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+            {showDatePickers && (
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Select Date Range</label>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange?.from && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarRange className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? format(dateRange.from, "PPP") : "From date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateRange?.from}
+                        onSelect={(date) => setDateRange?.({ ...dateRange, from: date })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dateRange.to && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarRange className="mr-2 h-4 w-4" />
-                      {dateRange.to ? format(dateRange.to, "PPP") : "To date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateRange.to}
-                      onSelect={(date) => setDateRange({ ...dateRange, to: date })}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateRange?.to && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarRange className="mr-2 h-4 w-4" />
+                        {dateRange?.to ? format(dateRange.to, "PPP") : "To date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateRange?.to}
+                        onSelect={(date) => setDateRange?.({ ...dateRange, to: date })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-            </div>
+            )}
             
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Or Select Period</label>
+              <label className="text-sm font-medium mb-2 block">{periodLabel}</label>
               <Select onValueChange={setPeriod}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select period" />
@@ -178,11 +179,11 @@ export default function Reports() {
 
       <ReportSection 
         title="Compliance Report"
-        dateRange={complianceDateRange}
-        setDateRange={setComplianceDateRange}
         period={compliancePeriod}
         setPeriod={setCompliancePeriod}
         onGenerate={handleGenerateComplianceReport}
+        showDatePickers={false}
+        periodLabel="Financial Year"
       />
     </div>
   );
