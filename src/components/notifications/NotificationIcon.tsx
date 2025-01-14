@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -12,7 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export const NotificationIcon = () => {
   const navigate = useNavigate();
-  const { notifications, unreadCount, markAsRead, isLoading } = useNotifications();
+  const { notifications, unreadCount, markAsRead, deleteNotification, isLoading } = useNotifications();
 
   console.log("NotificationIcon - Current notifications:", notifications);
   console.log("NotificationIcon - Unread count:", unreadCount);
@@ -25,6 +25,12 @@ export const NotificationIcon = () => {
       console.log("NotificationIcon - Navigating to transaction page");
       navigate("/transaction-history");
     }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation(); // Prevent triggering the parent click handler
+    console.log("NotificationIcon - Deleting notification:", notificationId);
+    await deleteNotification(notificationId);
   };
 
   return (
@@ -52,15 +58,23 @@ export const NotificationIcon = () => {
           notifications?.map((notification) => (
             <DropdownMenuItem
               key={notification.id}
-              className={`p-4 cursor-pointer ${!notification.read ? 'bg-gray-50' : ''}`}
+              className={`p-4 cursor-pointer ${!notification.read ? 'bg-gray-50' : ''} relative group`}
               onClick={() => handleNotificationClick(notification.id, notification.transaction_id)}
             >
-              <div className="space-y-1">
+              <div className="space-y-1 pr-6">
                 <p className="text-sm">{notification.message}</p>
                 <p className="text-xs text-gray-500">
                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                 </p>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => handleDelete(e, notification.id)}
+              >
+                <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+              </Button>
             </DropdownMenuItem>
           ))
         )}

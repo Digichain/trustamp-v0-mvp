@@ -57,6 +57,21 @@ export const useNotifications = () => {
     await queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
 
+  const deleteNotification = async (notificationId: string) => {
+    console.log("Deleting notification:", notificationId);
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notificationId);
+
+    if (error) {
+      console.error("Error deleting notification:", error);
+      throw error;
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  };
+
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   console.log("Current unread count:", unreadCount);
 
@@ -64,6 +79,7 @@ export const useNotifications = () => {
     notifications: notifications || [],
     isLoading,
     markAsRead,
+    deleteNotification,
     unreadCount
   };
 };
