@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Receipt, Users, FileText, DollarSign } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserSelector } from "./dialog/UserSelector";
 import { DocumentSelector } from "./dialog/DocumentSelector";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
 
 interface DocumentWithTitle {
   id: string;
@@ -170,117 +171,144 @@ export const CreateTransactionDialog = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2 bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4" />
           Create Transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] p-6">
         <DialogHeader>
-          <DialogTitle>Create New Transaction</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold flex items-center gap-2">
+            <Receipt className="h-6 w-6" />
+            Create New Transaction
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Transaction Name</label>
-            <Input
-              placeholder="Enter transaction name"
-              value={transactionTitle}
-              onChange={(e) => setTransactionTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Recipients</label>
+        <div className="space-y-6 py-4">
+          <Card className="p-4 space-y-4 bg-muted/30">
             <div className="space-y-2">
-              {selectedUserIds.map((userId) => (
-                <div key={userId} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{userId}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveRecipient(userId)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <UserSelector
-                selectedUserId={undefined}
-                onSelect={handleAddRecipient}
+              <label className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Transaction Name
+              </label>
+              <Input
+                placeholder="Enter transaction name"
+                value={transactionTitle}
+                onChange={(e) => setTransactionTitle(e.target.value)}
+                className="bg-background"
               />
             </div>
-          </div>
+          </Card>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Documents</label>
+          <Card className="p-4 space-y-4 bg-muted/30">
             <div className="space-y-2">
-              {selectedDocuments.map((doc) => (
-                <div key={doc.id} className="space-y-2 p-2 bg-gray-50 rounded">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{doc.id}</span>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Recipients
+              </label>
+              <div className="space-y-2">
+                {selectedUserIds.map((userId) => (
+                  <div key={userId} className="flex items-center justify-between p-2 bg-background rounded-lg border border-border">
+                    <span className="text-sm">{userId}</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveDocument(doc.id)}
+                      onClick={() => handleRemoveRecipient(userId)}
+                      className="hover:bg-destructive/10 hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Input
-                    placeholder="Document Title"
-                    value={doc.title}
-                    onChange={(e) => handleDocumentTitleChange(doc.id, e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-              ))}
-              <DocumentSelector
-                selectedDocument=""
-                onDocumentSelect={handleAddDocument}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="payment-bound"
-                checked={isPaymentBound}
-                onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
-              />
-              <label
-                htmlFor="payment-bound"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Payment Bound
-              </label>
-            </div>
-
-            {isPaymentBound && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Payment Amount ($)</label>
-                <Input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                  min={0}
-                  step="0.01"
+                ))}
+                <UserSelector
+                  selectedUserId={undefined}
+                  onSelect={handleAddRecipient}
                 />
               </div>
-            )}
-          </div>
+            </div>
+          </Card>
 
-          <div className="flex justify-end space-x-2 mt-4">
+          <Card className="p-4 space-y-4 bg-muted/30">
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Documents
+              </label>
+              <div className="space-y-2">
+                {selectedDocuments.map((doc) => (
+                  <div key={doc.id} className="space-y-2 p-3 bg-background rounded-lg border border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{doc.id}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveDocument(doc.id)}
+                        className="hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="Document Title"
+                      value={doc.title}
+                      onChange={(e) => handleDocumentTitleChange(doc.id, e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                ))}
+                <DocumentSelector
+                  selectedDocument=""
+                  onDocumentSelect={handleAddDocument}
+                />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 space-y-4 bg-muted/30">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="payment-bound"
+                  checked={isPaymentBound}
+                  onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
+                />
+                <label
+                  htmlFor="payment-bound"
+                  className="text-sm font-medium leading-none flex items-center gap-2"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  Payment Bound
+                </label>
+              </div>
+
+              {isPaymentBound && (
+                <div className="space-y-2 pl-6">
+                  <label className="text-sm font-medium">Payment Amount ($)</label>
+                  <Input
+                    type="number"
+                    placeholder="Enter amount"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                    min={0}
+                    step="0.01"
+                    className="bg-background"
+                  />
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <div className="flex justify-end space-x-2 pt-4">
             <Button
               variant="outline"
               onClick={() => setIsOpen(false)}
+              className="w-24"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateTransaction}
               disabled={selectedUserIds.length === 0 || selectedDocuments.some(doc => !doc.title)}
+              className="w-24"
             >
               Create
             </Button>
