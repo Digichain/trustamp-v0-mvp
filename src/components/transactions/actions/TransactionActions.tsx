@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2, Plus, DollarSign, RefreshCw, CheckCircle } from "lucide-react";
+import { MoreVertical, Trash2, Plus, DollarSign, RefreshCw, CheckCircle, FileX } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +52,6 @@ export const TransactionActions = ({
   console.log("TransactionActions - Is admin:", isAdmin);
   console.log("TransactionActions - User email:", session?.user?.email);
 
-  // Fetch recipient IDs for notifications
   const { data: recipientIds } = useQuery({
     queryKey: ["transaction-recipients", transaction.id],
     queryFn: async () => {
@@ -80,6 +79,34 @@ export const TransactionActions = ({
     if (notifError) {
       console.error("Error creating payment notification:", notifError);
       throw notifError;
+    }
+  };
+
+  const handleClearDocuments = async () => {
+    console.log("Clearing documents for transaction:", transaction.id);
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .update({ 
+          document1: null,
+          document2: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transaction.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Documents Cleared",
+        description: "All documents have been removed from this transaction",
+      });
+    } catch (error: any) {
+      console.error("Error clearing documents:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear documents",
+        variant: "destructive",
+      });
     }
   };
 
@@ -227,6 +254,14 @@ export const TransactionActions = ({
                 Refresh Transaction
               </DropdownMenuItem>
               
+              <DropdownMenuItem 
+                onClick={handleClearDocuments}
+                className="text-orange-600 focus:text-orange-600"
+              >
+                <FileX className="mr-2 h-4 w-4" />
+                Clear Documents
+              </DropdownMenuItem>
+
               {transaction.status === 'payment_made' && (
                 <DropdownMenuItem 
                   onClick={handleComplete}
