@@ -71,6 +71,10 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
     }
   };
 
+  // Get all documents from the transaction
+  const documents = [transaction.document1, transaction.document2].filter(Boolean);
+  console.log("TransactionCard - Available documents:", documents);
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex justify-between items-start">
@@ -95,42 +99,34 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
           <TransactionActions 
             transaction={transaction}
             onDelete={() => onDelete(transaction)}
-            documents={[
-              transaction.document1,
-              transaction.document2
-            ].filter(Boolean)}
+            documents={documents}
           />
         </div>
       </div>
 
       <div className="space-y-2">
         <h4 className="text-sm font-medium">Attached Documents:</h4>
-        {(transaction.document1 || transaction.document2) ? (
+        {documents.length > 0 ? (
           <div className="space-y-2">
-            {transaction.document1 && (
-              <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                <span className="text-sm">{transaction.document1.title}</span>
+            {documents.map((doc, index) => (
+              <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{doc.title}</span>
+                  <span className="text-xs text-gray-500">
+                    {doc.document?.data?.billOfLadingDetails ? 'Bill of Lading' : 
+                     doc.document?.data?.invoiceDetails ? 'Commercial Invoice' : 
+                     'Document'}
+                  </span>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDownload(transaction.document1, 0)}
+                  onClick={() => handleDownload(doc, index)}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
               </div>
-            )}
-            {transaction.document2 && (
-              <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                <span className="text-sm">{transaction.document2.title}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDownload(transaction.document2, 1)}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+            ))}
           </div>
         ) : (
           <p className="text-sm text-gray-500">No documents attached</p>
