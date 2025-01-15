@@ -72,7 +72,11 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
   };
 
   // Get all documents from the transaction
-  const documents = [transaction.document1, transaction.document2].filter(Boolean);
+  const documents = [
+    transaction.document1,
+    transaction.document2
+  ].filter(doc => doc !== null && doc !== undefined);
+  
   console.log("TransactionCard - Available documents:", documents);
 
   return (
@@ -111,7 +115,7 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
             {documents.map((doc, index) => (
               <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">{doc.title}</span>
+                  <span className="text-sm font-medium">{doc.title || `Document ${index + 1}`}</span>
                   <span className="text-xs text-gray-500">
                     {doc.document?.data?.billOfLadingDetails ? 'Bill of Lading' : 
                      doc.document?.data?.invoiceDetails ? 'Commercial Invoice' : 
