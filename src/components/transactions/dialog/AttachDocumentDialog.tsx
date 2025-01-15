@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentSelector } from "./DocumentSelector";
@@ -18,12 +19,12 @@ export const AttachDocumentDialog = ({
   transactionId,
   recipientIds
 }: AttachDocumentDialogProps) => {
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<Array<{ id: string; title: string }>>([]);
   const { toast } = useToast();
 
   const handleAddDocument = (documentId: string) => {
     if (selectedDocuments.length < 2 && !selectedDocuments.includes(documentId)) {
-      setSelectedDocuments([...selectedDocuments, documentId]);
+      setSelectedDocuments([...selectedDocuments, { id: documentId, title: "" }]);
     } else if (selectedDocuments.length >= 2) {
       toast({
         title: "Maximum documents reached",
@@ -31,6 +32,12 @@ export const AttachDocumentDialog = ({
         variant: "destructive",
       });
     }
+  };
+
+  const handleTitleChange = (documentId: string, title: string) => {
+    setSelectedDocuments(selectedDocuments.map(doc => 
+      doc.id === documentId ? { ...doc, title } : doc
+    ));
   };
 
   const createNotificationForRecipient = async (recipientId: string, documentType: string) => {
@@ -55,8 +62,18 @@ export const AttachDocumentDialog = ({
       console.log("Attaching documents to transaction:", transactionId);
       console.log("Selected documents:", selectedDocuments);
 
+      // Validate document titles
+      if (selectedDocuments.some(doc => !doc.title)) {
+        toast({
+          title: "Missing document title",
+          description: "Please provide a title for each document",
+          variant: "destructive",
+        });
+        return;
+      }
+
       for (let i = 0; i < selectedDocuments.length; i++) {
-        const documentId = selectedDocuments[i];
+        const { id: documentId, title } = selectedDocuments[i];
         
         // Fetch the complete document data
         const { data: documentData, error: docError } = await supabase
@@ -79,7 +96,7 @@ export const AttachDocumentDialog = ({
 
         const documentDataToStore = {
           ...JSON.parse(JSON.stringify(documentVersion)),
-          title: documentData.title,
+          title,
           id: documentId
         };
 
@@ -134,9 +151,17 @@ export const AttachDocumentDialog = ({
           {selectedDocuments.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Selected Documents</h4>
-              {selectedDocuments.map((docId) => (
-                <div key={docId} className="p-2 bg-gray-50 rounded">
-                  <span className="text-sm">{docId}</span>
+              {selectedDocuments.map((doc) => (
+                <div key={doc.id} className="space-y-2 p-3 bg-gray-50 rounded">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{doc.id}</span>
+                  </div>
+                  <Input
+                    placeholder="Document Title"
+                    value={doc.title}
+                    onChange={(e) => handleTitleChange(doc.id, e.target.value)}
+                    className="mt-2"
+                  />
                 </div>
               ))}
             </div>
