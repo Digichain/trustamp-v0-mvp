@@ -176,14 +176,16 @@ export const CreateTransactionDialog = () => {
           Create Transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] p-6">
+      <DialogContent className="sm:max-w-[900px] p-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold flex items-center gap-2">
             <Receipt className="h-6 w-6" />
             Create New Transaction
           </DialogTitle>
         </DialogHeader>
+        
         <div className="space-y-6 py-4">
+          {/* Transaction Title - Full Width */}
           <Card className="p-4 space-y-4 bg-muted/30">
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
@@ -199,104 +201,117 @@ export const CreateTransactionDialog = () => {
             </div>
           </Card>
 
-          <Card className="p-4 space-y-4 bg-muted/30">
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Recipients
-              </label>
-              <div className="space-y-2">
-                {selectedUserIds.map((userId) => (
-                  <div key={userId} className="flex items-center justify-between p-2 bg-background rounded-lg border border-border">
-                    <span className="text-sm">{userId}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveRecipient(userId)}
-                      className="hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <UserSelector
-                  selectedUserId={undefined}
-                  onSelect={handleAddRecipient}
-                />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 space-y-4 bg-muted/30">
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Documents
-              </label>
-              <div className="space-y-2">
-                {selectedDocuments.map((doc) => (
-                  <div key={doc.id} className="space-y-2 p-3 bg-background rounded-lg border border-border">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{doc.id}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveDocument(doc.id)}
-                        className="hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Input
-                      placeholder="Document Title"
-                      value={doc.title}
-                      onChange={(e) => handleDocumentTitleChange(doc.id, e.target.value)}
-                      className="mt-2"
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Recipients Section */}
+              <Card className="p-4 space-y-4 bg-muted/30">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Recipients
+                  </label>
+                  <div className="space-y-2">
+                    {selectedUserIds.map((userId) => (
+                      <div key={userId} className="flex items-center justify-between p-2 bg-background rounded-lg border border-border">
+                        <span className="text-sm">{userId}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveRecipient(userId)}
+                          className="hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <UserSelector
+                      selectedUserId={undefined}
+                      onSelect={handleAddRecipient}
                     />
                   </div>
-                ))}
-                <DocumentSelector
-                  selectedDocument=""
-                  onDocumentSelect={handleAddDocument}
-                />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 space-y-4 bg-muted/30">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="payment-bound"
-                  checked={isPaymentBound}
-                  onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
-                />
-                <label
-                  htmlFor="payment-bound"
-                  className="text-sm font-medium leading-none flex items-center gap-2"
-                >
-                  <DollarSign className="h-4 w-4" />
-                  Payment Bound
-                </label>
-              </div>
-
-              {isPaymentBound && (
-                <div className="space-y-2 pl-6">
-                  <label className="text-sm font-medium">Payment Amount ($)</label>
-                  <Input
-                    type="number"
-                    placeholder="Enter amount"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                    min={0}
-                    step="0.01"
-                    className="bg-background"
-                  />
                 </div>
-              )}
-            </div>
-          </Card>
+              </Card>
 
+              {/* Payment Section */}
+              <Card className="p-4 space-y-4 bg-muted/30">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="payment-bound"
+                      checked={isPaymentBound}
+                      onCheckedChange={(checked) => setIsPaymentBound(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="payment-bound"
+                      className="text-sm font-medium leading-none flex items-center gap-2"
+                    >
+                      <DollarSign className="h-4 w-4" />
+                      Payment Bound
+                    </label>
+                  </div>
+
+                  {isPaymentBound && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Payment Amount ($)</label>
+                      <Input
+                        type="number"
+                        placeholder="Enter amount"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                        min={0}
+                        step="0.01"
+                        className="bg-background"
+                      />
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Documents Section */}
+              <Card className="p-4 space-y-4 bg-muted/30">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Documents
+                  </label>
+                  <div className="space-y-2">
+                    {selectedDocuments.map((doc) => (
+                      <div key={doc.id} className="space-y-2 p-3 bg-background rounded-lg border border-border">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{doc.id}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveDocument(doc.id)}
+                            className="hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Input
+                          placeholder="Document Title"
+                          value={doc.title}
+                          onChange={(e) => handleDocumentTitleChange(doc.id, e.target.value)}
+                          className="mt-2"
+                        />
+                      </div>
+                    ))}
+                    <DocumentSelector
+                      selectedDocument=""
+                      onDocumentSelect={handleAddDocument}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Action Buttons - Full Width */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               variant="outline"
