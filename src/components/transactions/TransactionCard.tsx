@@ -44,7 +44,13 @@ export const TransactionCard = ({ transaction, onDelete }: TransactionCardProps)
         return;
       }
 
-      const blob = new Blob([JSON.stringify(documentData.document, null, 2)], {
+      // Get the actual document content
+      const documentContent = documentData.document || documentData;
+      console.log("Document content for download:", documentContent);
+
+      // Create a formatted JSON string with proper indentation
+      const jsonString = JSON.stringify(documentContent, null, 2);
+      const blob = new Blob([jsonString], {
         type: "application/json",
       });
       const url = window.URL.createObjectURL(blob);
