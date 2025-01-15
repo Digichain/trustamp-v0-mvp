@@ -28,6 +28,7 @@ export const AttachDocumentDialog = ({
   const { toast } = useToast();
 
   const handleAddDocument = (documentId: string) => {
+    console.log("Attempting to add document:", documentId);
     if (!selectedDocuments.some(doc => doc.id === documentId)) {
       if (selectedDocuments.length < 2) {
         setSelectedDocuments([...selectedDocuments, { id: documentId, title: "" }]);
@@ -84,9 +85,24 @@ export const AttachDocumentDialog = ({
         .from("transactions")
         .select("document1, document2")
         .eq("id", transactionId)
-        .single();
+        .maybeSingle();
 
-      if (txError) throw txError;
+      if (txError) {
+        console.error("Error fetching transaction:", txError);
+        throw txError;
+      }
+
+      if (!transaction) {
+        console.error("Transaction not found");
+        toast({
+          title: "Error",
+          description: "Transaction not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Current transaction state:", transaction);
 
       // Check available document slots
       const documentSlots: { [key: string]: any } = {
@@ -97,6 +113,9 @@ export const AttachDocumentDialog = ({
       for (const selectedDoc of selectedDocuments) {
         // Find first available slot
         const availableSlot = Object.keys(documentSlots).find(slot => !documentSlots[slot]);
+        console.log("Looking for available slot. Current slots:", documentSlots);
+        console.log("Found available slot:", availableSlot);
+
         if (!availableSlot) {
           toast({
             title: "No available slots",
@@ -111,9 +130,17 @@ export const AttachDocumentDialog = ({
           .from("documents")
           .select("*, raw_document, wrapped_document, signed_document")
           .eq("id", selectedDoc.id)
-          .single();
+          .maybeSingle();
 
-        if (docError) throw docError;
+        if (docError) {
+          console.error("Error fetching document data:", docError);
+          throw docError;
+        }
+
+        if (!documentData) {
+          console.error("Document not found:", selectedDoc.id);
+          continue;
+        }
 
         // Get the most recent version of the document
         const documentVersion = documentData.signed_document || 
@@ -134,12 +161,20 @@ export const AttachDocumentDialog = ({
 
         // Update transaction with the document in the available slot
         const updateData = { [availableSlot]: documentDataToStore };
+        console.log("Updating transaction with data:", updateData);
+
         const { error: updateError } = await supabase
           .from("transactions")
           .update(updateData)
           .eq("id", transactionId);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error updating transaction:", updateError);
+          throw updateError;
+        }
+
+        // Mark the slot as used
+        documentSlots[availableSlot] = documentDataToStore;
 
         // Create notifications for all recipients
         for (const recipientId of recipientIds) {
