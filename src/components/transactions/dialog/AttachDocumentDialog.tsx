@@ -13,13 +13,18 @@ interface AttachDocumentDialogProps {
   recipientIds: string[];
 }
 
+interface SelectedDocument {
+  id: string;
+  title: string;
+}
+
 export const AttachDocumentDialog = ({ 
   isOpen, 
   onOpenChange,
   transactionId,
   recipientIds
 }: AttachDocumentDialogProps) => {
-  const [selectedDocuments, setSelectedDocuments] = useState<Array<{ id: string; title: string }>>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<SelectedDocument[]>([]);
   const { toast } = useToast();
 
   const handleAddDocument = (documentId: string) => {
@@ -74,14 +79,38 @@ export const AttachDocumentDialog = ({
         return;
       }
 
-      for (let i = 0; i < selectedDocuments.length; i++) {
-        const { id: documentId, title } = selectedDocuments[i];
-        
-        // Fetch the complete document data
+      // Get current transaction state
+      const { data: transaction, error: txError } = await supabase
+        .from("transactions")
+        .select("document1, document2")
+        .eq("id", transactionId)
+        .single();
+
+      if (txError) throw txError;
+
+      // Check available document slots
+      const documentSlots: { [key: string]: any } = {
+        document1: transaction.document1,
+        document2: transaction.document2
+      };
+
+      for (const selectedDoc of selectedDocuments) {
+        // Find first available slot
+        const availableSlot = Object.keys(documentSlots).find(slot => !documentSlots[slot]);
+        if (!availableSlot) {
+          toast({
+            title: "No available slots",
+            description: "This transaction already has the maximum number of documents",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Fetch complete document data
         const { data: documentData, error: docError } = await supabase
           .from("documents")
           .select("*, raw_document, wrapped_document, signed_document")
-          .eq("id", documentId)
+          .eq("id", selectedDoc.id)
           .single();
 
         if (docError) throw docError;
@@ -96,18 +125,18 @@ export const AttachDocumentDialog = ({
           continue;
         }
 
+        // Prepare document data for storage
         const documentDataToStore = {
           ...JSON.parse(JSON.stringify(documentVersion)),
-          title,
-          id: documentId
+          title: selectedDoc.title,
+          id: selectedDoc.id
         };
 
-        // Update the transaction with the document
+        // Update transaction with the document in the available slot
+        const updateData = { [availableSlot]: documentDataToStore };
         const { error: updateError } = await supabase
           .from("transactions")
-          .update({
-            [`document${i + 1}`]: documentDataToStore
-          })
+          .update(updateData)
           .eq("id", transactionId);
 
         if (updateError) throw updateError;
