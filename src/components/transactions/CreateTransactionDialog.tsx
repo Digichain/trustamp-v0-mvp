@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Receipt, Users, FileText, DollarSign } from "lucide-react";
+import { Plus, X, Users, FileText, DollarSign } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,8 +178,7 @@ export const CreateTransactionDialog = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[900px] p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold flex items-center gap-2">
-            <Receipt className="h-6 w-6" />
+          <DialogTitle className="text-2xl font-semibold">
             Create New Transaction
           </DialogTitle>
         </DialogHeader>
