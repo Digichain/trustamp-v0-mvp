@@ -23,14 +23,16 @@ export const AttachDocumentDialog = ({
   const { toast } = useToast();
 
   const handleAddDocument = (documentId: string) => {
-    if (selectedDocuments.length < 2 && !selectedDocuments.includes(documentId)) {
-      setSelectedDocuments([...selectedDocuments, { id: documentId, title: "" }]);
-    } else if (selectedDocuments.length >= 2) {
-      toast({
-        title: "Maximum documents reached",
-        description: "You can only attach up to 2 documents",
-        variant: "destructive",
-      });
+    if (!selectedDocuments.some(doc => doc.id === documentId)) {
+      if (selectedDocuments.length < 2) {
+        setSelectedDocuments([...selectedDocuments, { id: documentId, title: "" }]);
+      } else {
+        toast({
+          title: "Maximum documents reached",
+          description: "You can only attach up to 2 documents",
+          variant: "destructive",
+        });
+      }
     }
   };
 
