@@ -20,7 +20,7 @@ const Payments = () => {
       owner: "New Trade AU-CN JAN 2025",
       currentHolder: "Seller",
       totalValue: 3030.00,
-      status: "outstanding"
+      status: "escrow"
     },
     {
       id: "0xdbc099a0d7454",
@@ -118,7 +118,7 @@ const Payments = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Current Balance</p>
-                      <h2 className="text-3xl font-bold">$3030.00</h2>
+                      <h2 className="text-3xl font-bold">$0.00</h2>
                     </div>
                   </div>
                   
