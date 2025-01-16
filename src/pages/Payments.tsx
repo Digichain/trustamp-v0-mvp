@@ -14,31 +14,31 @@ const Payments = () => {
   // Updated contracts array with updated dates
   const contracts = [
     {
-      id: "0x1234567890123456789012345678901234567890",
-      created: new Date('2024-03-15'),
-      updated: new Date('2024-03-17'), // 2 days after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
+      id: "0xd1cedd54697aa",
+      created: new Date('2025-01-15'),
+      updated: new Date('2025-01-16'),
+      owner: "New Trade AU-CN JAN 2025",
+      currentHolder: "Seller",
       totalValue: 3030.00,
       status: "outstanding"
     },
     {
-      id: "0xabcdef0123456789abcdef0123456789abcdef01",
-      created: new Date('2024-03-16'),
-      updated: new Date('2024-03-19'), // 3 days after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
+      id: "0xdbc099a0d7454",
+      created: new Date('2024-09-04'),
+      updated: new Date('2024-09-20'),
+      owner: "AU-CN Wh4438",
+      currentHolder: "Seller",
       totalValue: 2500.00,
-      status: "paid"
+      status: "escrow"
     },
     {
-      id: "0x9876543210fedcba9876543210fedcba98765432",
-      created: new Date('2024-03-17'),
-      updated: new Date('2024-03-18'), // 1 day after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
+      id: "0xvcd089t0d1468",
+      created: new Date('2024-03-11'),
+      updated: new Date('2024-04-21'),
+      owner: "AU-AE Qk4568",
+      currentHolder: "Buyer",
       totalValue: 3000.00,
-      status: "escrow"
+      status: "paid"
     }
   ];
 
