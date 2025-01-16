@@ -19,8 +19,8 @@ const Payments = () => {
       updated: new Date('2024-03-17'), // 2 days after creation
       owner: "DigiChain",
       currentHolder: "DigiChain",
-      totalValue: 1500.00,
-      status: "escrow"
+      totalValue: 3030.00,
+      status: "outstanding"
     },
     {
       id: "0xabcdef0123456789abcdef0123456789abcdef01",
@@ -118,7 +118,7 @@ const Payments = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Current Balance</p>
-                      <h2 className="text-3xl font-bold">$3000.00</h2>
+                      <h2 className="text-3xl font-bold">$3030.00</h2>
                     </div>
                   </div>
                   
