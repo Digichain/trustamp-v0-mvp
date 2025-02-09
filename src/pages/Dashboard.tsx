@@ -9,7 +9,7 @@ import { UserProfile } from "@/components/dashboard/UserProfile";
 const mockBarChartData = [
   { name: 'Jan', transactions: 12 },
   { name: 'Feb', transactions: 19 },
-  { name: 'Mar', transactions: 15 },
+  { name: 'Mar', transactions: 20 },
   { name: 'Apr', transactions: 25 },
   { name: 'May', transactions: 22 },
   { name: 'Jun', transactions: 30 }
@@ -76,8 +76,8 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TransactionChart data={mockBarChartData} />
           <DocumentDistribution data={mockPieChartData} />
+          <TransactionChart data={mockBarChartData} />
           <div className="lg:col-span-2">
             <RecentTransactions transactions={mockRecentTransactions} />
           </div>

@@ -14,31 +14,31 @@ const Payments = () => {
   // Updated contracts array with updated dates
   const contracts = [
     {
-      id: "0x1234567890123456789012345678901234567890",
-      created: new Date('2024-03-15'),
-      updated: new Date('2024-03-17'), // 2 days after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
-      totalValue: 1500.00,
+      id: "0xd1cedd54697aa",
+      created: new Date('2025-01-15'),
+      updated: new Date('2025-01-16'),
+      owner: "New Trade AU-CN JAN 2025",
+      currentHolder: "Seller",
+      totalValue: 3030.00,
       status: "escrow"
     },
     {
-      id: "0xabcdef0123456789abcdef0123456789abcdef01",
-      created: new Date('2024-03-16'),
-      updated: new Date('2024-03-19'), // 3 days after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
+      id: "0xdbc099a0d7454",
+      created: new Date('2024-09-04'),
+      updated: new Date('2024-09-20'),
+      owner: "AU-CN Wh4438",
+      currentHolder: "Seller",
       totalValue: 2500.00,
-      status: "paid"
+      status: "escrow"
     },
     {
-      id: "0x9876543210fedcba9876543210fedcba98765432",
-      created: new Date('2024-03-17'),
-      updated: new Date('2024-03-18'), // 1 day after creation
-      owner: "DigiChain",
-      currentHolder: "DigiChain",
+      id: "0xvcd089t0d1468",
+      created: new Date('2024-03-11'),
+      updated: new Date('2024-04-21'),
+      owner: "AU-AE Qk4568",
+      currentHolder: "Buyer",
       totalValue: 3000.00,
-      status: "outstanding"
+      status: "paid"
     }
   ];
 
@@ -104,19 +104,11 @@ const Payments = () => {
           
           <div className="flex items-start gap-4">
             <div className="flex flex-col gap-4">
-              <Button className="w-full" variant="outline">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Buy Ether
-              </Button>
-              <Button className="w-full" variant="outline">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Buy USDC
-              </Button>
             </div>
             
             <Card className="w-[400px]">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Fiat Account Overview</CardTitle>
+                <CardTitle className="text-xl font-semibold">Account Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -126,12 +118,12 @@ const Payments = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Current Balance</p>
-                      <h2 className="text-3xl font-bold">$100.00</h2>
+                      <h2 className="text-3xl font-bold">$0.00</h2>
                     </div>
                   </div>
                   
                   <div className="flex gap-4">
-                    <Button className="flex-1" variant="outline">
+                    <Button className="flex-1 bg-black hover:bg-black/90 text-white">
                       <ArrowUpCircle className="mr-2 h-4 w-4" />
                       Deposit
                     </Button>

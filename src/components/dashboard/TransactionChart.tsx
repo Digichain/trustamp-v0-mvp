@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -34,7 +34,7 @@ export function TransactionChart({ data }: TransactionChartProps) {
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
+            <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="name" 
@@ -52,13 +52,16 @@ export function TransactionChart({ data }: TransactionChartProps) {
                   borderRadius: '0.5rem'
                 }}
               />
-              <Bar 
+              <Line 
+                type="monotone"
                 dataKey="transactions" 
-                fill="hsl(var(--primary))"
-                radius={[4, 4, 0, 0]}
+                stroke="#8884d8"
+                strokeWidth={2}
+                dot={{ fill: '#8884d8' }}
+                activeDot={{ r: 6 }}
                 className="hover:opacity-80 transition-opacity"
               />
-            </BarChart>
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

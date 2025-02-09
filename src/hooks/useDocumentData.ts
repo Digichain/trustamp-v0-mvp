@@ -1,49 +1,89 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Document } from "@/types/documents";
 
 export const useDocumentData = () => {
   const { toast } = useToast();
 
-  const fetchDocumentData = async (transaction: any) => {
-    console.log("Fetching document data for transaction:", transaction);
+  const fetchDocumentData = async (document: Document) => {
+    console.log("Starting document data fetch for:", document);
     
-    if (transaction.document_subtype === "verifiable") {
-      const { data, error } = await supabase
-        .from("invoice_documents")
+    try {
+      // First fetch the document to ensure it exists and get the raw_document
+      const { data: docData, error: docError } = await supabase
+        .from("documents")
         .select("*")
-        .eq("transaction_id", transaction.id)
+        .eq("id", document.id)
         .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching invoice document:", error);
+      if (docError) {
+        console.error("Error fetching document:", docError);
+        throw docError;
+      }
+
+      if (!docData) {
+        console.log("No document found with id:", document.id);
         return null;
       }
 
-      return data;
+      console.log("Found document data:", docData);
 
-    } else if (transaction.document_subtype === "transferable") {
-      const { data, error } = await supabase
-        .from("bill_of_lading_documents")
-        .select("*")
-        .eq("transaction_id", transaction.id)
-        .maybeSingle();
+      if (document.document_subtype === "verifiable") {
+        console.log("Fetching verifiable document data");
+        const { data: invoiceData, error: invoiceError } = await supabase
+          .from("invoice_documents")
+          .select("*")
+          .eq("document_id", document.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching bill of lading document:", error);
-        return null;
+        if (invoiceError) {
+          console.error("Error fetching invoice document:", invoiceError);
+          throw invoiceError;
+        }
+
+        if (!invoiceData) {
+          console.log("No invoice data found for document:", document.id);
+          return docData.raw_document;
+        }
+
+        console.log("Retrieved invoice document data:", invoiceData);
+        return invoiceData;
+
+      } else if (document.document_subtype === "transferable") {
+        console.log("Fetching transferable document data");
+        const { data: bolData, error: bolError } = await supabase
+          .from("bill_of_lading_documents")
+          .select("*")
+          .eq("document_id", document.id)
+          .maybeSingle();
+
+        if (bolError) {
+          console.error("Error fetching bill of lading document:", bolError);
+          throw bolError;
+        }
+
+        if (!bolData) {
+          console.log("No bill of lading data found for document:", document.id);
+          return docData.raw_document;
+        }
+
+        console.log("Retrieved bill of lading document data:", bolData);
+        return bolData;
       }
 
-      return data;
+      // If no specific document type data is found, return the raw document
+      console.log("Returning raw document data");
+      return docData.raw_document;
+    } catch (error) {
+      console.error("Error in fetchDocumentData:", error);
+      throw error;
     }
-
-    return null;
   };
 
-  const handleDelete = async (transaction: any) => {
+  const handleDelete = async (document: Document) => {
     try {
-      console.log("Starting deletion process for transaction:", transaction.id);
+      console.log("Starting deletion process for document:", document.id);
       
-      // First check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.error("No authenticated session found");
@@ -55,74 +95,60 @@ export const useDocumentData = () => {
         return false;
       }
 
-      // Verify user owns the transaction before proceeding
-      const { data: transactionData, error: verifyError } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("id", transaction.id)
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+      // First delete any associated bill of lading documents
+      if (document.document_subtype === "transferable") {
+        console.log("Deleting associated bill of lading document...");
+        const { error: bolError } = await supabase
+          .from("bill_of_lading_documents")
+          .delete()
+          .eq("document_id", document.id);
 
-      if (verifyError || !transactionData) {
-        console.error("Error verifying transaction ownership:", verifyError);
+        if (bolError) {
+          console.error("Error deleting bill of lading document:", bolError);
+          toast({
+            title: "Error",
+            description: "Failed to delete associated bill of lading document",
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+
+      // Then delete any associated invoice documents
+      if (document.document_subtype === "verifiable") {
+        console.log("Deleting associated invoice document...");
+        const { error: invoiceError } = await supabase
+          .from("invoice_documents")
+          .delete()
+          .eq("document_id", document.id);
+
+        if (invoiceError) {
+          console.error("Error deleting invoice document:", invoiceError);
+          toast({
+            title: "Error",
+            description: "Failed to delete associated invoice document",
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+
+      // Finally delete the main document
+      console.log("Deleting main document...");
+      const { error: mainDocError } = await supabase
+        .from("documents")
+        .delete()
+        .eq("id", document.id)
+        .eq("user_id", session.user.id);
+
+      if (mainDocError) {
+        console.error("Error deleting main document:", mainDocError);
         toast({
           title: "Error",
-          description: "You don't have permission to delete this document",
+          description: "Failed to delete main document",
           variant: "destructive",
         });
         return false;
-      }
-
-      // First delete from the appropriate document table
-      const documentTable = transaction.document_subtype === "verifiable" 
-        ? "invoice_documents" 
-        : "bill_of_lading_documents";
-      
-      console.log(`Deleting from ${documentTable}...`);
-      const { error: documentError } = await supabase
-        .from(documentTable)
-        .delete()
-        .eq("transaction_id", transaction.id);
-
-      if (documentError) {
-        console.error(`Error deleting from ${documentTable}:`, documentError);
-        throw documentError;
-      }
-
-      // Then delete from storage if it exists
-      const fileName = `${transaction.id}.json`;
-      console.log("Deleting storage file:", fileName);
-      
-      const { data: fileExists } = await supabase.storage
-        .from('raw-documents')
-        .list('', {
-          search: fileName
-        });
-
-      if (fileExists && fileExists.length > 0) {
-        const { error: storageError } = await supabase.storage
-          .from('raw-documents')
-          .remove([fileName]);
-
-        if (storageError) {
-          console.error("Error deleting from storage:", storageError);
-          throw storageError;
-        }
-      } else {
-        console.log("File not found in storage:", fileName);
-      }
-
-      // Finally delete from transactions table
-      console.log("Deleting from transactions table...");
-      const { error: transactionError } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", transaction.id)
-        .eq("user_id", session.user.id);
-
-      if (transactionError) {
-        console.error("Error deleting from transactions:", transactionError);
-        throw transactionError;
       }
 
       console.log("Deletion process completed successfully");
@@ -132,11 +158,11 @@ export const useDocumentData = () => {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in deletion process:", error);
       toast({
         title: "Error",
-        description: "Failed to delete document",
+        description: error.message || "Failed to delete document",
         variant: "destructive",
       });
       return false;

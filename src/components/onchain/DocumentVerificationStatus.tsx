@@ -1,9 +1,47 @@
-import { VerificationStatus } from "./VerificationStatus";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronDown, ChevronUp, Printer, User } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Printer, User, CheckCircle2, XCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface VerificationStatusProps {
+  title: string;
+  isValid: boolean;
+  message: string;
+  details?: {
+    name?: string;
+    domain?: string;
+  };
+}
+
+const VerificationStatus = ({
+  title,
+  isValid,
+  message,
+  details
+}: VerificationStatusProps) => {
+  return (
+    <div className="p-4 rounded-lg border">
+      <div className="flex items-center space-x-2 mb-2">
+        {isValid ? (
+          <CheckCircle2 className="w-5 h-5 text-green-500" />
+        ) : (
+          <XCircle className="w-5 h-5 text-red-500" />
+        )}
+        <h3 className="font-semibold">{title}</h3>
+      </div>
+      <p className={`text-sm ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+        {message}
+      </p>
+      {details && (
+        <div className="mt-2 text-sm text-gray-600">
+          {details.name && <p>Name: {details.name}</p>}
+          {details.domain && <p>Domain: {details.domain}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface DocumentVerificationStatusProps {
   verificationDetails: {
@@ -41,8 +79,6 @@ export const DocumentVerificationStatus = ({
     window.print();
   };
 
-  console.log("Verification details:", verificationDetails);
-
   if (!verificationDetails) {
     return (
       <div className="space-y-6">
@@ -70,7 +106,6 @@ export const DocumentVerificationStatus = ({
                   verificationDetails.issuerIdentity.valid &&
                   verificationDetails.documentIntegrity.valid;
 
-  // Find both types of identity proofs
   const dnsTxtProof = verificationDetails.fragments?.find(
     f => f.name === "OpenAttestationDnsTxtIdentityProof" && f.status === "VALID"
   );
@@ -79,12 +114,7 @@ export const DocumentVerificationStatus = ({
     f => f.name === "OpenAttestationDnsDidIdentityProof" && f.status === "VALID"
   );
   
-  // Get the owner domain from either proof type
   const ownerDomain = dnsTxtProof?.data?.[0]?.location || dnsDidProof?.data?.[0]?.location;
-  
-  console.log("DNS TXT Proof:", dnsTxtProof);
-  console.log("DNS DID Proof:", dnsDidProof);
-  console.log("Owner domain:", ownerDomain);
 
   return (
     <div className="space-y-6">

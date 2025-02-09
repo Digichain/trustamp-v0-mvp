@@ -19,24 +19,24 @@ interface Secret {
 const getInfuraApiKey = async (): Promise<string> => {
   try {
     console.log("Fetching Infura API key from Supabase secrets...");
-    const { data, error } = await supabase
+    const { data: secretData, error: secretError } = await supabase
       .from('secrets')
       .select('value')
       .eq('name', 'INFURA_API_KEY')
-      .single() as { data: Secret | null; error: any };
+      .maybeSingle();
     
-    if (error) {
-      console.error("Error fetching Infura API key:", error);
+    if (secretError) {
+      console.error("Error fetching Infura API key:", secretError);
       throw new Error("Failed to fetch Infura API key");
     }
 
-    if (!data?.value) {
+    if (!secretData?.value) {
       console.error("No Infura API key found in secrets");
-      throw new Error("Infura API key not found");
+      throw new Error("Infura API key not found in secrets. Please ensure it is configured.");
     }
 
     console.log("Successfully retrieved Infura API key");
-    return data.value;
+    return secretData.value;
   } catch (error) {
     console.error("Error in getInfuraApiKey:", error);
     throw error;
@@ -46,18 +46,23 @@ const getInfuraApiKey = async (): Promise<string> => {
 export const getVerificationConfig = async (): Promise<VerificationConfig> => {
   console.log("Getting verification configuration...");
   
-  const infuraApiKey = await getInfuraApiKey();
-  const providerUrl = `https://sepolia.infura.io/v3/${infuraApiKey}`;
-  
-  console.log("Setting up verification configuration with Sepolia network");
-  
-  return {
-    provider: {
-      network: "sepolia",
-      provider: providerUrl,
-      apiKey: infuraApiKey
-    }
-  };
+  try {
+    const infuraApiKey = await getInfuraApiKey();
+    const providerUrl = `https://sepolia.infura.io/v3/${infuraApiKey}`;
+    
+    console.log("Setting up verification configuration with Sepolia network");
+    
+    return {
+      provider: {
+        network: "sepolia",
+        provider: providerUrl,
+        apiKey: infuraApiKey
+      }
+    };
+  } catch (error) {
+    console.error("Error getting verification config:", error);
+    throw error;
+  }
 };
 
 // Helper to check if we have required configuration

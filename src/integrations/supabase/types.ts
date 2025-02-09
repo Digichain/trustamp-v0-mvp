@@ -17,6 +17,7 @@ export type Database = {
           company_name: string | null
           consignee: Json | null
           created_at: string | null
+          document_id: string
           id: string
           links: Json | null
           notifyParty: Json | null
@@ -28,7 +29,6 @@ export type Database = {
           raw_document: Json | null
           scac: string | null
           shipper: Json | null
-          transaction_id: string
           updated_at: string | null
           vessel: string | null
           voyageNo: string | null
@@ -40,6 +40,7 @@ export type Database = {
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
+          document_id: string
           id?: string
           links?: Json | null
           notifyParty?: Json | null
@@ -51,7 +52,6 @@ export type Database = {
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
-          transaction_id: string
           updated_at?: string | null
           vessel?: string | null
           voyageNo?: string | null
@@ -63,6 +63,7 @@ export type Database = {
           company_name?: string | null
           consignee?: Json | null
           created_at?: string | null
+          document_id?: string
           id?: string
           links?: Json | null
           notifyParty?: Json | null
@@ -74,102 +75,21 @@ export type Database = {
           raw_document?: Json | null
           scac?: string | null
           shipper?: Json | null
-          transaction_id?: string
           updated_at?: string | null
           vessel?: string | null
           voyageNo?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "bill_of_lading_documents_transaction_id_fkey"
-            columns: ["transaction_id"]
+            foreignKeyName: "bill_of_lading_documents_document_id_fkey"
+            columns: ["document_id"]
             isOneToOne: false
-            referencedRelation: "transactions"
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
         ]
       }
-      invoice_documents: {
-        Row: {
-          bill_from: Json | null
-          bill_to: Json | null
-          billable_items: Json | null
-          created_at: string | null
-          date: string | null
-          id: string
-          invoice_number: string | null
-          subtotal: number | null
-          tax: number | null
-          tax_total: number | null
-          total: number | null
-          transaction_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          bill_from?: Json | null
-          bill_to?: Json | null
-          billable_items?: Json | null
-          created_at?: string | null
-          date?: string | null
-          id?: string
-          invoice_number?: string | null
-          subtotal?: number | null
-          tax?: number | null
-          tax_total?: number | null
-          total?: number | null
-          transaction_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          bill_from?: Json | null
-          bill_to?: Json | null
-          billable_items?: Json | null
-          created_at?: string | null
-          date?: string | null
-          id?: string
-          invoice_number?: string | null
-          subtotal?: number | null
-          tax?: number | null
-          tax_total?: number | null
-          total?: number | null
-          transaction_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoice_documents_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      secrets: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          value: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          updated_at?: string
-          value: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          value?: string
-        }
-        Relationships: []
-      }
-      transactions: {
+      documents: {
         Row: {
           created_at: string | null
           document_subtype: string | null
@@ -217,12 +137,270 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_requests: {
+        Row: {
+          amount: number
+          created_at: string | null
+          finance_type: string
+          id: string
+          status: string
+          transaction_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          finance_type: string
+          id?: string
+          status?: string
+          transaction_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          finance_type?: string
+          id?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_documents: {
+        Row: {
+          bill_from: Json | null
+          bill_to: Json | null
+          billable_items: Json | null
+          created_at: string | null
+          date: string | null
+          document_id: string
+          id: string
+          invoice_number: string | null
+          subtotal: number | null
+          tax: number | null
+          tax_total: number | null
+          total: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          bill_from?: Json | null
+          bill_to?: Json | null
+          billable_items?: Json | null
+          created_at?: string | null
+          date?: string | null
+          document_id: string
+          id?: string
+          invoice_number?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          tax_total?: number | null
+          total?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          bill_from?: Json | null
+          bill_to?: Json | null
+          billable_items?: Json | null
+          created_at?: string | null
+          date?: string | null
+          document_id?: string
+          id?: string
+          invoice_number?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          tax_total?: number | null
+          total?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_recipients: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipient_user_id: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipient_user_id?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipient_user_id?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          recipient_user_id: string
+          transaction_id: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          recipient_user_id: string
+          transaction_id?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          recipient_user_id?: string
+          transaction_id?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      secrets: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          created_at: string | null
+          deposit_status: string | null
+          document1: Json | null
+          document2: Json | null
+          id: string
+          network: string
+          payment_amount: number | null
+          payment_bound: boolean | null
+          recipient1_id: string | null
+          recipient2_id: string | null
+          status: string
+          title: string | null
+          transaction_hash: string
+          transaction_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deposit_status?: string | null
+          document1?: Json | null
+          document2?: Json | null
+          id?: string
+          network: string
+          payment_amount?: number | null
+          payment_bound?: boolean | null
+          recipient1_id?: string | null
+          recipient2_id?: string | null
+          status?: string
+          title?: string | null
+          transaction_hash: string
+          transaction_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deposit_status?: string | null
+          document1?: Json | null
+          document2?: Json | null
+          id?: string
+          network?: string
+          payment_amount?: number | null
+          payment_bound?: boolean | null
+          recipient1_id?: string | null
+          recipient2_id?: string | null
+          status?: string
+          title?: string | null
+          transaction_hash?: string
+          transaction_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

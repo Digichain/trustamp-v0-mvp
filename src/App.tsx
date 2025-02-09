@@ -5,14 +5,17 @@ import { WalletProvider } from "@/contexts/WalletContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
-import Transactions from '@/pages/Transactions';
-import CreateTransaction from '@/pages/CreateTransaction';
-import CreateTransferableTransaction from '@/pages/CreateTransferableTransaction';
+import Documents from '@/pages/Documents';
+import TransactionHistory from '@/pages/TransactionHistory';
+import CreateDocument from '@/pages/CreateDocument';
+import CreateTransferableDocument from '@/pages/CreateTransferableDocument';
 import Account from '@/pages/Account';
 import Auth from '@/pages/Auth';
 import Payments from '@/pages/Payments';
 import VerifyDocument from '@/pages/VerifyDocument';
+import VerifyOnChain from '@/pages/VerifyOnChain';
 import Finance from '@/pages/Finance';
+import Compliance from '@/pages/Compliance';
 import Reports from '@/pages/Reports';
 import Subscription from '@/pages/Subscription';
 import { useEffect, useState } from 'react';
@@ -91,6 +94,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/verify-onchain" element={<VerifyOnChain />} />
               <Route
                 path="/dashboard"
                 element={
@@ -100,26 +104,34 @@ function App() {
                 }
               />
               <Route
-                path="/transactions"
+                path="/documents"
                 element={
                   <ProtectedRoute>
-                    <Transactions />
+                    <Documents />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/transactions/create"
+                path="/transaction-history"
                 element={
                   <ProtectedRoute>
-                    <CreateTransaction />
+                    <TransactionHistory />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/transactions/create-transferable"
+                path="/documents/create"
                 element={
                   <ProtectedRoute>
-                    <CreateTransferableTransaction />
+                    <CreateDocument />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/documents/create-transferable"
+                element={
+                  <ProtectedRoute>
+                    <CreateTransferableDocument />
                   </ProtectedRoute>
                 }
               />
@@ -152,6 +164,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Finance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/compliance"
+                element={
+                  <ProtectedRoute>
+                    <Compliance />
                   </ProtectedRoute>
                 }
               />

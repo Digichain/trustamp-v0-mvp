@@ -2,6 +2,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export const Navigation = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.querySelector(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <div className="container mx-auto px-4 py-3">
@@ -16,25 +23,18 @@ export const Navigation = () => {
           <div className="flex-grow flex justify-center">
             <div className="hidden md:flex items-center space-x-8">
               {[
-                { to: "#about", text: "ABOUT" },
-                { to: "#solution", text: "SOLUTION" },
-                { to: "#documentation", text: "DOCUMENTATION" },
-                { to: "#partners", text: "PARTNERS" }
-              ].map(({ to, text }) => (
-                <a
+                { id: "#about", text: "ABOUT" },
+                { id: "#solution", text: "SOLUTION" },
+                { id: "#documentation", text: "DOCUMENTATION" },
+                { id: "#partners", text: "PARTNERS" }
+              ].map(({ id, text }) => (
+                <button
                   key={text}
-                  href={to}
+                  onClick={() => scrollToSection(id)}
                   className="text-black hover:text-primary transition-colors duration-200 font-medium tracking-wider"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const element = document.querySelector(to);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
                 >
                   {text}
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -44,6 +44,9 @@ export const Navigation = () => {
             </Link>
             <Link to="/auth">
               <Button>Sign Up</Button>
+            </Link>
+            <Link to="/verify-onchain">
+              <Button className="bg-black hover:bg-black/90">Verify</Button>
             </Link>
           </div>
         </div>

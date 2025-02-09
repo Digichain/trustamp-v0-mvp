@@ -49,6 +49,17 @@ export const VerifiableInvoiceForm = () => {
     }
   };
 
+  const handlePreview = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    console.log("Opening preview dialog without submitting form");
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    console.log("Closing preview dialog");
+    setShowPreview(false);
+  };
+
   return (
     <form onSubmit={onSubmit} className="space-y-8">
       <InvoiceFormHeader onDIDCreated={handleDIDCreated} didDocument={didDocument} />
@@ -123,10 +134,10 @@ export const VerifiableInvoiceForm = () => {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate("/transactions")}>
+            <Button type="button" variant="outline" onClick={() => navigate("/documents")}>
               Cancel
             </Button>
-            <PreviewButton onClick={() => setShowPreview(true)} />
+            <PreviewButton onClick={handlePreview} disabled={isSubmitting} />
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Invoice"}
             </Button>
@@ -135,8 +146,7 @@ export const VerifiableInvoiceForm = () => {
           <PreviewDialog
             title="Invoice Preview"
             isOpen={showPreview}
-            onOpenChange={setShowPreview}
-            onConfirm={() => onSubmit()}
+            onOpenChange={handleClosePreview}
           >
             <InvoicePreview data={formData} />
           </PreviewDialog>

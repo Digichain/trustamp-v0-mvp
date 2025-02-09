@@ -11,12 +11,12 @@ export const useSigningHandler = () => {
   const { walletAddress } = useWallet();
   const { issueDocument } = useDocumentStoreInteraction();
 
-  const handleSignDocument = async (transaction: any) => {
-    console.log("Starting document signing process for:", transaction.id);
-    const isTransferable = transaction.document_subtype === 'transferable';
+  const handleSignDocument = async (document: any) => {
+    console.log("Starting document signing process for:", document.id);
+    const isTransferable = document.document_subtype === 'transferable';
     
     try {
-      if (!transaction.wrapped_document) {
+      if (!document.wrapped_document) {
         throw new Error("No wrapped document found");
       }
 
@@ -28,9 +28,9 @@ export const useSigningHandler = () => {
         console.log("Handling transferable document issuance");
         
         // Get document store address from wrapped document
-        const documentStoreAddress = transaction.wrapped_document.data.issuers[0]?.documentStore;
+        const documentStoreAddress = document.wrapped_document.data.issuers[0]?.documentStore;
         if (!documentStoreAddress) {
-          console.error("Document store address missing from wrapped document:", transaction.wrapped_document);
+          console.error("Document store address missing from wrapped document:", document.wrapped_document);
           throw new Error("Document store address not found in wrapped document");
         }
 
@@ -44,7 +44,7 @@ export const useSigningHandler = () => {
         console.log("Prefixed address:", prefixedAddress);
 
         // Get merkle root from wrapped document and ensure it has 0x prefix
-        const rawMerkleRoot = transaction.wrapped_document.signature.merkleRoot;
+        const rawMerkleRoot = document.wrapped_document.signature.merkleRoot;
         if (!rawMerkleRoot) {
           throw new Error("Merkle root not found in wrapped document");
         }
@@ -61,19 +61,19 @@ export const useSigningHandler = () => {
 
         console.log("Document issued successfully:", receipt);
 
-        // Update transaction status
+        // Update document status
         const { error: updateError } = await supabase
-          .from("transactions")
+          .from("documents")  // Changed from 'transactions' to 'documents'
           .update({ 
             status: "document_issued",
-            signed_document: transaction.wrapped_document,
+            signed_document: document.wrapped_document,
             updated_at: new Date().toISOString()
           })
-          .eq("id", transaction.id);
+          .eq("id", document.id);
 
         if (updateError) throw updateError;
 
-        await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        await queryClient.invalidateQueries({ queryKey: ["documents"] }); // Changed from 'transactions' to 'documents'
         
         toast({
           title: "Success",
@@ -85,30 +85,30 @@ export const useSigningHandler = () => {
         // Handle verifiable documents (non-transferable)
         console.log("Handling verifiable document signing");
         const result = await signAndStoreDocument(
-          transaction.wrapped_document,
+          document.wrapped_document,
           walletAddress.toLowerCase(),
-          transaction.id
+          document.id
         );
         
         console.log("Document signed and stored:", result);
 
-        // Update transaction status for verifiable documents
+        // Update document status for verifiable documents
         const { error: updateError } = await supabase
-          .from("transactions")
+          .from("documents")  // Changed from 'transactions' to 'documents'
           .update({ 
             status: "document_signed",
             signed_document: result.signedDocument,
             updated_at: new Date().toISOString()
           })
-          .eq("id", transaction.id);
+          .eq("id", document.id);
 
         if (updateError) {
-          console.error("Error updating transaction status:", updateError);
+          console.error("Error updating document status:", updateError);
           throw updateError;
         }
 
-        console.log("Transaction status updated to document_signed");
-        await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        console.log("Document status updated to document_signed");
+        await queryClient.invalidateQueries({ queryKey: ["documents"] }); // Changed from 'transactions' to 'documents'
         
         toast({
           title: "Success",

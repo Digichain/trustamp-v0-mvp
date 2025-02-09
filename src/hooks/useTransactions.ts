@@ -26,21 +26,84 @@ export const useTransactions = () => {
       }
 
       console.log("Session found, user ID:", session.user.id);
+      console.log("User email:", session.user.email);
 
       try {
-        const { data, error } = await supabase
+        // Check if user is admin
+        const isAdmin = session.user.email === 'digichaininnovations@gmail.com';
+        console.log("Is admin user:", isAdmin);
+
+        if (isAdmin) {
+          // Admin can see all transactions
+          console.log("Fetching all transactions for admin");
+          const { data: allTransactions, error: allTxError } = await supabase
+            .from("transactions")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          if (allTxError) {
+            console.error("Error fetching all transactions:", allTxError);
+            throw allTxError;
+          }
+
+          console.log("Successfully fetched all transactions for admin:", allTransactions?.length || 0, "records");
+          return allTransactions;
+        }
+
+        // For non-admin users, fetch their owned and recipient transactions
+        // First, fetch transactions where user is the owner
+        const { data: ownedTransactions, error: ownedError } = await supabase
           .from("transactions")
           .select("*")
           .eq("user_id", session.user.id)
           .order("created_at", { ascending: false });
 
-        if (error) {
-          console.error("Supabase error fetching transactions:", error);
-          throw error;
+        if (ownedError) {
+          console.error("Error fetching owned transactions:", ownedError);
+          throw ownedError;
         }
 
-        console.log("Successfully fetched transactions:", data?.length || 0, "records");
-        return data || [];
+        // Get the transaction IDs where the user is a recipient
+        const { data: recipientIds, error: recipientIdsError } = await supabase
+          .from("notification_recipients")
+          .select("transaction_id")
+          .eq("recipient_user_id", session.user.id);
+
+        if (recipientIdsError) {
+          console.error("Error fetching recipient IDs:", recipientIdsError);
+          throw recipientIdsError;
+        }
+
+        // Then, fetch the actual transactions using those IDs
+        const transactionIds = recipientIds?.map(r => r.transaction_id) || [];
+        
+        let recipientTransactions: any[] = [];
+        if (transactionIds.length > 0) {
+          const { data: recipientTxs, error: recipientTxError } = await supabase
+            .from("transactions")
+            .select("*")
+            .in("id", transactionIds)
+            .order("created_at", { ascending: false });
+
+          if (recipientTxError) {
+            console.error("Error fetching recipient transactions:", recipientTxError);
+            throw recipientTxError;
+          }
+
+          recipientTransactions = recipientTxs || [];
+        }
+
+        // Combine and deduplicate transactions
+        const allTransactions = [...(ownedTransactions || []), ...recipientTransactions];
+        const uniqueTransactions = Array.from(
+          new Map(allTransactions.map(tx => [tx.id, tx])).values()
+        );
+
+        console.log("Successfully fetched transactions:", uniqueTransactions.length, "records");
+        console.log("- Owned transactions:", ownedTransactions?.length || 0);
+        console.log("- Recipient transactions:", recipientTransactions.length);
+
+        return uniqueTransactions;
       } catch (error: any) {
         console.error("Error in transaction fetch:", error);
         toast({

@@ -141,8 +141,8 @@ export const TransferableBillOfLadingForm = () => {
 
       console.log("Formatted document:", formattedDoc);
 
-      const { data: transactionData, error: transactionError } = await supabase
-        .from("transactions")
+      const { data: documentData, error: documentError } = await supabase
+        .from("documents")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
@@ -156,12 +156,12 @@ export const TransferableBillOfLadingForm = () => {
         .select()
         .single();
 
-      if (transactionError) throw transactionError;
+      if (documentError) throw documentError;
 
       const { error: bolError } = await supabase
         .from("bill_of_lading_documents")
         .insert({
-          transaction_id: transactionData.id,
+          document_id: documentData.id,
           ...formData,
           raw_document: formattedDoc
         });
@@ -173,9 +173,9 @@ export const TransferableBillOfLadingForm = () => {
         description: "Bill of Lading created successfully",
       });
 
-      navigate("/transactions");
+      navigate("/documents");
     } catch (error) {
-      console.error("Error creating transaction:", error);
+      console.error("Error creating document:", error);
       toast({
         title: "Error",
         description: "Failed to create Bill of Lading",
@@ -184,6 +184,16 @@ export const TransferableBillOfLadingForm = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePreview = () => {
+    console.log("Opening preview dialog");
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    console.log("Closing preview dialog");
+    setShowPreview(false);
   };
 
   return (
@@ -250,13 +260,13 @@ export const TransferableBillOfLadingForm = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => navigate("/transactions")}
+              onClick={() => navigate("/documents")}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
             <PreviewButton 
-              onClick={() => setShowPreview(true)} 
+              onClick={handlePreview}
               disabled={isSubmitting} 
             />
             <Button 
@@ -270,8 +280,7 @@ export const TransferableBillOfLadingForm = () => {
           <PreviewDialog
             title="Bill of Lading Preview"
             isOpen={showPreview}
-            onOpenChange={setShowPreview}
-            onConfirm={() => handleSubmit()}
+            onOpenChange={handleClosePreview}
           >
             <BillOfLadingPreview data={formData} />
           </PreviewDialog>

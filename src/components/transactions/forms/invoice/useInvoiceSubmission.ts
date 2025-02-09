@@ -22,7 +22,6 @@ export const useInvoiceSubmission = () => {
         throw new Error("No authenticated session found");
       }
 
-      // Ensure all required nested objects exist
       const sanitizedFormData = {
         ...formData,
         invoiceDetails: {
@@ -35,14 +34,12 @@ export const useInvoiceSubmission = () => {
         }
       };
 
-      // Format the document according to OpenAttestation schema
       const openAttestationDocument = formatInvoiceToOpenAttestation(sanitizedFormData, didDocument);
       console.log("RAW DOCUMENT STRUCTURE:", JSON.stringify(openAttestationDocument, null, 2));
       console.log("RAW DOCUMENT KEYS ORDER:", Object.keys(openAttestationDocument));
 
-      // Create transaction record first to get the ID
-      const { data: transactionData, error: transactionError } = await supabase
-        .from("transactions")
+      const { data: documentData, error: documentError } = await supabase
+        .from("documents")
         .insert({
           transaction_hash: `0x${Math.random().toString(16).slice(2)}`,
           network: "ethereum",
@@ -56,71 +53,37 @@ export const useInvoiceSubmission = () => {
         .select()
         .single();
 
-      if (transactionError) {
-        console.error("Error creating transaction:", transactionError);
-        throw new Error("Failed to create transaction");
+      if (documentError) {
+        throw new Error("Failed to create document");
       }
 
-      console.log("Created transaction:", transactionData);
-
-      // Use transaction ID for file naming
-      const fileName = `${transactionData.id}.json`;
-      console.log("Saving raw document to storage with filename:", fileName);
-      
-      const { error: uploadError } = await supabase.storage
-        .from('raw-documents')
-        .upload(fileName, JSON.stringify(openAttestationDocument, null, 2), {
-          contentType: 'application/json',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error("Error uploading raw document:", uploadError);
-        throw new Error("Failed to save raw document to storage");
-      }
-
-      // Ensure numeric values are properly formatted for invoice document
-      const subtotal = parseFloat(formData.subtotal || 0);
-      const tax = typeof formData.tax === 'object' ? 
-        parseFloat(formData.tax[""] || 0) : 
-        parseFloat(formData.tax || 0);
-      const taxTotal = typeof formData.taxTotal === 'object' ? 
-        parseFloat(formData.taxTotal[""] || 0) : 
-        parseFloat(formData.taxTotal || 0);
-      const total = typeof formData.total === 'object' ? 
-        parseFloat(formData.total[""] || 0) : 
-        parseFloat(formData.total || 0);
-
-      // Create invoice document record
       const { error: invoiceError } = await supabase
         .from("invoice_documents")
         .insert({
-          transaction_id: transactionData.id,
+          document_id: documentData.id,
           invoice_number: sanitizedFormData.invoiceDetails.invoiceNumber,
           date: sanitizedFormData.invoiceDetails.date,
           bill_from: sanitizedFormData.invoiceDetails.billFrom,
           bill_to: sanitizedFormData.invoiceDetails.billTo,
           billable_items: sanitizedFormData.billableItems,
-          subtotal: subtotal,
-          tax: tax,
-          tax_total: taxTotal,
-          total: total
+          subtotal: parseFloat(formData.subtotal || 0),
+          tax: parseFloat(formData.tax || 0),
+          tax_total: parseFloat(formData.taxTotal || 0),
+          total: parseFloat(formData.total || 0)
         });
 
       if (invoiceError) {
-        console.error("Error creating invoice document:", invoiceError);
         throw new Error("Failed to create invoice document");
       }
 
-      // Invalidate the transactions query to trigger a refresh
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["documents"] });
 
       toast({
         title: "Success",
         description: "Invoice created successfully",
       });
 
-      navigate("/transactions");
+      navigate("/documents");
     } catch (error: any) {
       console.error("Error in handleSubmit:", error);
       toast({
